@@ -8,12 +8,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+var c *canvas.Canvas
 
 func main() {
-	p := tea.NewProgram(canvas.Canvas{}, tea.WithAltScreen())
+	c = canvas.NewCanvas()
+	p := tea.NewProgram(c)
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v", err)
 		os.Exit(1)
 	}
 }
-
