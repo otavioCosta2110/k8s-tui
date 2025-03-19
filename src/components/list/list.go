@@ -1,6 +1,8 @@
 package listcomponent
 
 import (
+	"otaviocosta2110/k8s-tui/src/global"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -47,14 +49,16 @@ func (m *Model) View() string {
 
 func NewList(items []list.Item, title string, width, height int) *Model {
 	delegate := list.NewDefaultDelegate()
+
 	delegate.Styles.SelectedTitle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#f29bdc")).
+		Foreground(lipgloss.Color(global.Colors.Pink)).
 		Padding(0, 3) 
 
 	delegate.ShowDescription = false
 
 	l := list.New(items, delegate, width, height)
 	l.Title = title
-	l.Styles.Title = lipgloss.NewStyle().MarginLeft(2)
+	l.Styles.Title = lipgloss.NewStyle()
+
 	return &Model{List: l}
 }
