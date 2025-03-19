@@ -1,4 +1,4 @@
-package components
+package listcomponent
 
 import (
 	"github.com/charmbracelet/bubbles/list"
@@ -11,8 +11,6 @@ type Item struct {
 	description string
 }
 
-func (i Item) FilterValue() string { return i.title }
-
 type Model struct {
 	List list.Model
 }
@@ -21,33 +19,41 @@ func (m *Model) Init() tea.Cmd {
 	return nil
 }
 
-// TEM Q TER ISSO
-func NewItem(title, description string) Item{
-  item := Item{title:title, description:description}
-  return item
-
+func NewItem(title, description string) Item {
+	item := Item{title: title, description: description}
+	return item
 }
+
+// TEM Q TER ISSO
+func (i Item) FilterValue() string { return i.title }
+
 func (i Item) Title() string {
-    return i.title
+	return i.title
 }
 
 func (i Item) Description() string {
-    return i.description
+	return ""
 }
 
-func (m *Model)Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.List, cmd = m.List.Update(msg)
 	return m, cmd
 }
 
-func (m *Model)View() string {
+func (m *Model) View() string {
 	return m.List.View()
 }
 
-func NewList(items []list.Item, title string) *Model {
+func NewList(items []list.Item, title string, width, height int) *Model {
 	delegate := list.NewDefaultDelegate()
-	l := list.New(items, delegate, 20, 10)
+	delegate.Styles.SelectedTitle = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#f29bdc")).
+		Padding(0, 3) 
+
+	delegate.ShowDescription = false
+
+	l := list.New(items, delegate, width, height)
 	l.Title = title
 	l.Styles.Title = lipgloss.NewStyle().MarginLeft(2)
 	return &Model{List: l}

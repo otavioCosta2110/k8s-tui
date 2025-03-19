@@ -12,7 +12,7 @@ var c *canvas.Canvas
 
 func main() {
 	c = canvas.NewCanvas()
-	p := tea.NewProgram(c)
+	p := tea.NewProgram(c, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v", err)
 		os.Exit(1)
