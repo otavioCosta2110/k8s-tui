@@ -58,7 +58,7 @@ func NewList(items []list.Item, title string, width, height int) *Model {
 
 	l := list.New(items, delegate, width, height)
 	l.Title = title
-	l.Styles.Title = lipgloss.NewStyle()
+	l.Styles.Title = lipgloss.NewStyle().Bold(true)
 
 	return &Model{List: l}
 }

@@ -1,6 +1,8 @@
 package canvas
 
 import (
+	"log"
+	"os"
 	listcomponent "otaviocosta2110/k8s-tui/src/components/list"
 	"otaviocosta2110/k8s-tui/src/global"
 
@@ -9,24 +11,33 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-const(
-  padding = 2
+const (
+	padding = 2
 )
 
 type Canvas struct {
-	Width   int
-	Height  int
-	Input   string
-	List    listcomponent.Model
+	Width  int
+	Height int
+	Input  string
+	List   listcomponent.Model
 }
 
 func (c *Canvas) InitList() {
-	items := []list.Item{
-		listcomponent.NewItem("Item 1", "This is item 1"),
-		listcomponent.NewItem("Item 2", "This is item 2"),
-		listcomponent.NewItem("Item 3", "This is item 3"),
+	var listItems []list.Item
+	for _, configs := range global.GetKubeconfigsLocations() {
+		kubeconfigs, err := os.ReadDir(configs)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, file := range kubeconfigs {
+			if !file.IsDir() {
+				k := listcomponent.NewItem(file.Name(), "")
+				listItems = append(listItems, k)
+			}
+		}
 	}
-	c.List = *listcomponent.NewList(items, "Namespaces", c.Width, c.Height)
+
+	c.List = *listcomponent.NewList(listItems, "Kubeconfigs", c.Width, c.Height)
 }
 
 func NewCanvas() *Canvas {
