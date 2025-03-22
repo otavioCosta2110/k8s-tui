@@ -13,4 +13,6 @@ func newNamespace(name string, children []Resource) Namespace {
   }
 }
 
-func FetchNamespaces()
+func FetchNamespaces(){
+
+}

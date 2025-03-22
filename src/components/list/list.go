@@ -14,7 +14,8 @@ type Item struct {
 }
 
 type Model struct {
-	List list.Model
+	List       list.Model
+	OnSelected []func()
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -26,7 +27,7 @@ func NewItem(title, description string) Item {
 	return item
 }
 
-// TEM Q TER ISSO
+// MUST HAVE THIS
 func (i Item) FilterValue() string { return i.title }
 
 func (i Item) Title() string {
@@ -39,6 +40,17 @@ func (i Item) Description() string {
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.List.SetSize(msg.Width/2, msg.Height-global.Margin)
+	case tea.KeyMsg:
+		if msg.String() == "enter" {
+      for _, fn := range m.OnSelected {
+        fn()
+      }
+			return m, nil
+		}
+	}
 	m.List, cmd = m.List.Update(msg)
 	return m, cmd
 }
@@ -47,12 +59,13 @@ func (m *Model) View() string {
 	return m.List.View()
 }
 
-func NewList(items []list.Item, title string, width, height int) *Model {
+// make onSelect function on places that implement it
+func NewList(items []list.Item, title string, width, height int, onSelect ...func()) tea.Model {
 	delegate := list.NewDefaultDelegate()
 
 	delegate.Styles.SelectedTitle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(global.Colors.Pink)).
-		Padding(0, 3) 
+		Padding(0, 3)
 
 	delegate.ShowDescription = false
 
@@ -60,5 +73,9 @@ func NewList(items []list.Item, title string, width, height int) *Model {
 	l.Title = title
 	l.Styles.Title = lipgloss.NewStyle().Bold(true)
 
-	return &Model{List: l}
+	for _, fn := range onSelect {
+		fn()
+	}
+
+	return &Model{List: l, OnSelected: onSelect}
 }

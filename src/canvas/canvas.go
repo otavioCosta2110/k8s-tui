@@ -1,10 +1,9 @@
 package canvas
 
 import (
-	"log"
-	"os"
 	listcomponent "otaviocosta2110/k8s-tui/src/components/list"
 	"otaviocosta2110/k8s-tui/src/global"
+	"otaviocosta2110/k8s-tui/src/kubernetes"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -19,25 +18,21 @@ type Canvas struct {
 	Width  int
 	Height int
 	Input  string
-	List   listcomponent.Model
+	List   tea.Model
 }
 
 func (c *Canvas) InitList() {
 	var listItems []list.Item
-	for _, configs := range global.GetKubeconfigsLocations() {
-		kubeconfigs, err := os.ReadDir(configs)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, file := range kubeconfigs {
-			if !file.IsDir() {
-				k := listcomponent.NewItem(file.Name(), "")
-				listItems = append(listItems, k)
-			}
-		}
+	for _, configs := range kubernetes.InitList() {
+		k := listcomponent.NewItem(configs, "")
+		listItems = append(listItems, k)
 	}
 
-	c.List = *listcomponent.NewList(listItems, "Kubeconfigs", c.Width, c.Height)
+	onSelect := func() {
+    kubernetes.FetchNamespaces()
+	}
+
+	c.List = listcomponent.NewList(listItems, "Kubeconfigs", c.Width, c.Height, onSelect)
 }
 
 func NewCanvas() *Canvas {
@@ -55,12 +50,12 @@ func (c *Canvas) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		c.Width = msg.Width
 		c.Height = msg.Height
-		c.List.List.SetSize(msg.Width/2, msg.Height-global.Margin)
+		c.List.Update(msg)
 	case tea.KeyMsg:
 		c.isKeyPressed(msg)
 	}
 	var cmd tea.Cmd
-	c.List.List, cmd = c.List.List.Update(msg)
+	c.List, cmd = c.List.Update(msg)
 	return c, cmd
 }
 
