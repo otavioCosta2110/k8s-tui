@@ -53,9 +53,11 @@ func (k KubeConfig) InitComponent() (tea.Model){
 		}
 	}
 
-	onSelect := func(selected string) {
+	onSelect := func(selected string)(tea.Model) {
     k.Kubeconfig = selected
     k.setClientset()
+    n := NewNamespaces()
+    return n.InitComponent(k)
 	}
 
   list := listcomponent.NewList(items, "Kubeconfigs", onSelect)

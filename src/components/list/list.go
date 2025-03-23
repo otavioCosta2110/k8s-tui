@@ -15,7 +15,7 @@ type Item struct {
 
 type Model struct {
 	List       list.Model
-	OnSelected []func(selected string)
+	OnSelected []func(selected string) tea.Model
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -42,12 +42,16 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.List.SetSize(msg.Width/2, msg.Height-global.Margin)
+		m.List.SetSize(msg.Width/2, msg.Height - global.Margin)
 	case tea.KeyMsg:
 		if msg.String() == "enter" {
-      for _, fn := range m.OnSelected {
-        fn(m.List.SelectedItem().FilterValue())
-      }
+			for _, fn := range m.OnSelected {
+				selectedItem := m.List.SelectedItem().(Item).FilterValue()
+				newModel := fn(selectedItem)
+				if newModel != nil {
+					return newModel, nil
+				}
+			}
 			return m, nil
 		}
 	}
@@ -56,11 +60,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
+  m.List.SetSize(global.ScreenWidth/2, global.ScreenHeight - global.Margin)
 	return m.List.View()
 }
 
-// make onSelect function on places that implement it
-func NewList(items []string, title string, onSelect ...func(selected string)) tea.Model {
+// onSelect should return the next resource component
+func NewList(items []string, title string, onSelect ...func(selected string) tea.Model) tea.Model {
 	var listItems []list.Item
 	for _, configs := range items {
 		k := NewItem(configs, "")

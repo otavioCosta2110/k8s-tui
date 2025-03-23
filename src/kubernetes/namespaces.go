@@ -1,18 +1,47 @@
 package kubernetes
 
-type Namespace struct {
-	Name     string
-	Children []Resource
+import (
+	"context"
+	"log"
+	listcomponent "otaviocosta2110/k8s-tui/src/components/list"
+
+	tea "github.com/charmbracelet/bubbletea"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+type Namespaces struct {
+  items []string
 }
 
-// maybe change children to not initialize here, but be fetched in a function
-func newNamespace(name string, children []Resource) Namespace {
-	return Namespace{
-    Name: name,
-    Children: children,
-  }
+func NewNamespaces() (Namespaces){
+  return Namespaces{}
 }
 
-func FetchNamespaces(){
-  println("bunda")
+func fetchNamespaces(k KubeConfig) []string {
+	namespaces, err := k.clientset.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	var namespacesArray []string
+
+	for _, nm := range namespaces.Items {
+		namespacesArray = append(namespacesArray, nm.Name)
+	}
+
+	return namespacesArray
+}
+
+func (n Namespaces)InitComponent(k KubeConfig) tea.Model {
+	namespaces := fetchNamespaces(k)
+
+	onSelect := func(selected string)(tea.Model) {
+    return nil
+	}
+
+  n.items = namespaces
+
+	list := listcomponent.NewList(namespaces, "Namespaces", onSelect)
+
+	return list
 }
