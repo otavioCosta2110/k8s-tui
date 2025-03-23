@@ -15,7 +15,7 @@ type Item struct {
 
 type Model struct {
 	List       list.Model
-	OnSelected []func()
+	OnSelected []func(selected string)
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -46,7 +46,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		if msg.String() == "enter" {
       for _, fn := range m.OnSelected {
-        fn()
+        fn(m.List.SelectedItem().FilterValue())
       }
 			return m, nil
 		}
@@ -60,7 +60,13 @@ func (m *Model) View() string {
 }
 
 // make onSelect function on places that implement it
-func NewList(items []list.Item, title string, width, height int, onSelect ...func()) tea.Model {
+func NewList(items []string, title string, onSelect ...func(selected string)) tea.Model {
+	var listItems []list.Item
+	for _, configs := range items {
+		k := NewItem(configs, "")
+		listItems = append(listItems, k)
+	}
+
 	delegate := list.NewDefaultDelegate()
 
 	delegate.Styles.SelectedTitle = lipgloss.NewStyle().
@@ -69,13 +75,9 @@ func NewList(items []list.Item, title string, width, height int, onSelect ...fun
 
 	delegate.ShowDescription = false
 
-	l := list.New(items, delegate, width, height)
+	l := list.New(listItems, delegate, global.ScreenWidth, global.ScreenHeight)
 	l.Title = title
 	l.Styles.Title = lipgloss.NewStyle().Bold(true)
-
-	for _, fn := range onSelect {
-		fn()
-	}
 
 	return &Model{List: l, OnSelected: onSelect}
 }

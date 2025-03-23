@@ -14,5 +14,5 @@ func newNamespace(name string, children []Resource) Namespace {
 }
 
 func FetchNamespaces(){
-
+  println("bunda")
 }

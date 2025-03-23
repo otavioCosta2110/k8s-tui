@@ -3,8 +3,11 @@ package kubernetes
 import (
 	"log"
 	"os"
+	listcomponent "otaviocosta2110/k8s-tui/src/components/list"
 	"otaviocosta2110/k8s-tui/src/global"
+	"path/filepath"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -16,9 +19,8 @@ type KubeConfig struct {
 	Kubeconfig string
 }
 
-func NewKubeConfig(kubeconfig string) KubeConfig {
+func NewKubeConfig() KubeConfig {
 	k := KubeConfig{}
-	k.setClientset()
 	return k
 }
 
@@ -36,7 +38,7 @@ func (k *KubeConfig) setClientset() {
 	k.clientset = clientset
 }
 
-func InitList() ([]string){
+func (k KubeConfig) InitComponent() (tea.Model){
   var items []string
 	for _, configs := range global.GetKubeconfigsLocations() {
 		kubeconfigs, err := os.ReadDir(configs)
@@ -45,10 +47,18 @@ func InitList() ([]string){
 		}
 		for _, file := range kubeconfigs {
 			if !file.IsDir() {
-				items = append(items, file.Name())
+        fullPath := filepath.Join(configs, file.Name())
+				items = append(items, fullPath)
 			}
 		}
 	}
 
-  return items
+	onSelect := func(selected string) {
+    k.Kubeconfig = selected
+    k.setClientset()
+	}
+
+  list := listcomponent.NewList(items, "Kubeconfigs", onSelect)
+
+  return list
 }
