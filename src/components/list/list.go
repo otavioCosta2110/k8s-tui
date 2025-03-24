@@ -76,7 +76,9 @@ func NewList(items []string, title string, onSelect ...func(selected string) tea
 
 	delegate.Styles.SelectedTitle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(global.Colors.Pink)).
-		Padding(0, 3)
+    SetString(">").
+    Bold(true).
+		Padding(0, 0)
 
 	delegate.ShowDescription = false
 
