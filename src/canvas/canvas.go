@@ -15,8 +15,8 @@ type Canvas struct {
 	Component tea.Model
 }
 
-func NewCanvas(component kubernetes.ResourceInterface) *Canvas {
-	newComponent := component.InitComponent()
+func NewCanvas(component kubernetes.ResourceInterface, k kubernetes.KubeConfig) *Canvas {
+	newComponent := component.InitComponent(k)
 	c := &Canvas{Component: newComponent}
 	return c
 }

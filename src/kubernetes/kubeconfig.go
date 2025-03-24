@@ -38,7 +38,7 @@ func (k *KubeConfig) setClientset() {
 	k.clientset = clientset
 }
 
-func (k KubeConfig) InitComponent() (tea.Model){
+func (k KubeConfig) InitComponent(_ KubeConfig) (tea.Model){
   var items []string
 	for _, configs := range global.GetKubeconfigsLocations() {
 		kubeconfigs, err := os.ReadDir(configs)
@@ -56,8 +56,9 @@ func (k KubeConfig) InitComponent() (tea.Model){
 	onSelect := func(selected string)(tea.Model) {
     k.Kubeconfig = selected
     k.setClientset()
-    n := NewNamespaces()
-    return n.InitComponent(k)
+    // n := NewNamespaces()
+    r := NewResource(k)
+    return r.InitComponent(k)
 	}
 
   list := listcomponent.NewList(items, "Kubeconfigs", onSelect)

@@ -14,7 +14,8 @@ var c *canvas.Canvas
 func main() {
   // after implementing cli arguments, make an if to check if there is a kubeconfig already set
   k := kubernetes.NewKubeConfig()
-	c = canvas.NewCanvas(k)
+  // r := kubernetes.NewResource(k)
+	c = canvas.NewCanvas(k, k)
 	p := tea.NewProgram(c, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v", err)
