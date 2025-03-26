@@ -90,17 +90,24 @@ func NewList(items []string, title string, onSelect ...func(selected string) tea
 
 	delegate := list.NewDefaultDelegate()
 
+	delegate.Styles.NormalTitle = lipgloss.NewStyle().
+		Height(1).
+		Padding(0, 2)
+
 	delegate.Styles.SelectedTitle = lipgloss.NewStyle().
+		Margin(0, 0).
 		Foreground(lipgloss.Color(global.Colors.Pink)).
 		SetString(">").
 		Bold(true).
 		Padding(0, 0)
 
+    delegate.SetSpacing(0)
 	delegate.ShowDescription = false
 
 	l := list.New(listItems, delegate, global.ScreenWidth, global.ScreenHeight)
 	l.Title = title
 	l.Styles.Title = lipgloss.NewStyle().Bold(true)
+
 
 	return &Model{List: l, OnSelected: onSelect}
 }
