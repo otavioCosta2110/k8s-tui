@@ -2,6 +2,7 @@ package listcomponent
 
 import (
 	"otaviocosta2110/k8s-tui/src/global"
+	"time"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -13,14 +14,20 @@ type Item struct {
 	description string
 }
 
+// loading works but is not implemented anywhere
 type Model struct {
 	List       list.Model
 	OnSelected []func(selected string) tea.Model
+	loading    bool
 }
 
 func (m *Model) Init() tea.Cmd {
-	return nil
+	return tea.Tick(time.Second, func(time.Time) tea.Msg {
+		return loadedMsg{}
+	})
 }
+
+type loadedMsg struct{}
 
 func NewItem(title, description string) Item {
 	item := Item{title: title, description: description}
@@ -40,11 +47,15 @@ func (i Item) Description() string {
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+
 	switch msg := msg.(type) {
+	case loadedMsg:
+		m.loading = false
+		return m, nil
 	case tea.WindowSizeMsg:
-		m.List.SetSize(msg.Width/2, msg.Height - global.Margin)
+		m.List.SetSize(msg.Width/2, msg.Height-global.Margin)
 	case tea.KeyMsg:
-		if msg.String() == "enter" {
+		if msg.String() == "enter" && !m.loading {
 			for _, fn := range m.OnSelected {
 				selectedItem := m.List.SelectedItem().(Item).FilterValue()
 				newModel := fn(selectedItem)
@@ -60,7 +71,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
-  m.List.SetSize(global.ScreenWidth/2, global.ScreenHeight - global.Margin)
+	if m.loading {
+		loadingStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color(global.Colors.Pink))
+		return loadingStyle.Render("Loading...")
+	}
+
+	m.List.SetSize(global.ScreenWidth/2, global.ScreenHeight-global.Margin)
 	return m.List.View()
 }
 
@@ -76,8 +92,8 @@ func NewList(items []string, title string, onSelect ...func(selected string) tea
 
 	delegate.Styles.SelectedTitle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(global.Colors.Pink)).
-    SetString(">").
-    Bold(true).
+		SetString(">").
+		Bold(true).
 		Padding(0, 0)
 
 	delegate.ShowDescription = false

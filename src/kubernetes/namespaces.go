@@ -10,11 +10,11 @@ import (
 )
 
 type Namespaces struct {
-  items []string
+	items []string
 }
 
-func NewNamespaces() (Namespaces){
-  return Namespaces{}
+func NewNamespaces() Namespaces {
+	return Namespaces{}
 }
 
 func fetchNamespaces(k KubeConfig) []string {
@@ -32,16 +32,17 @@ func fetchNamespaces(k KubeConfig) []string {
 	return namespacesArray
 }
 
-func (n Namespaces)InitComponent(k KubeConfig) tea.Model {
+func (n Namespaces) InitComponent(k KubeConfig) tea.Model {
 	namespaces := fetchNamespaces(k)
 
-	onSelect := func(selected string)(tea.Model) {
-    return nil
+	onSelect := func(selected string) tea.Model {
+		r := NewResource(k)
+		return r.InitComponent(k)
 	}
 
-  n.items = namespaces
+	n.items = namespaces
 
-	list := listcomponent.NewList(namespaces, "Namespaces", onSelect)
+	list := listcomponent.NewList(n.items, "Namespaces", onSelect)
 
 	return list
 }
