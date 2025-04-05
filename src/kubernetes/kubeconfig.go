@@ -3,17 +3,19 @@ package kubernetes
 import (
 	"log"
 	"os"
-	"path/filepath"
 	"otaviocosta2110/k8s-tui/src/components/list"
+	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 type KubeConfig struct {
 	clientset  *kubernetes.Clientset
 	Kubeconfig string
+	config 		*rest.Config
 }
 
 type NavigateMsg struct {
@@ -36,6 +38,7 @@ func (k *KubeConfig) setClientset() error {
 	}
 
 	k.clientset = clientset
+	k.config = configuration
 	return nil
 }
 

@@ -67,7 +67,7 @@ func NewList(items []string, title string, onSelect func(selected string) tea.Ms
 	return &Model{
 		List:       l,
 		OnSelected: onSelect,
-		loading:    true,
+		loading:    false,
 	}
 }
 
@@ -83,7 +83,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.loading = false
 		return m, nil
 	case tea.WindowSizeMsg:
-	m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - global.Margin)
+		m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - global.Margin)
 	case tea.KeyMsg:
 		if msg.String() == "enter" && !m.loading && m.OnSelected != nil {
 			selected := m.List.SelectedItem().(Item).FilterValue()
@@ -99,11 +99,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
-	if m.loading {
-		return lipgloss.NewStyle().
-			Align(lipgloss.Center, lipgloss.Center).
-			Render("Loading...")
-	}
+	// if m.loading {
+	// 	return lipgloss.NewStyle().
+	// 		Align(lipgloss.Center, lipgloss.Center).
+	// 		Foreground(lipgloss.Color(global.Colors.Pink)).
+	// 		Width(global.ScreenWidth - global.Margin).
+	// 		Height(global.ScreenHeight - global.Margin).
+	// 		Render("Loading...")
+	// }
 	m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - len(m.List.Items()))
 
 	return m.List.View()
