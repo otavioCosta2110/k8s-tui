@@ -3,64 +3,66 @@ package kubernetes
 import (
 	"log"
 	"os"
-	listcomponent "otaviocosta2110/k8s-tui/src/components/list"
-	"otaviocosta2110/k8s-tui/src/global"
 	"path/filepath"
+	"otaviocosta2110/k8s-tui/src/components/list"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// must assign Kubeconfig value after
-// the user selects the kubeconfig file
 type KubeConfig struct {
 	clientset  *kubernetes.Clientset
 	Kubeconfig string
 }
 
-func NewKubeConfig() KubeConfig {
-	k := KubeConfig{}
-	return k
+type NavigateMsg struct {
+	NewScreen tea.Model
 }
 
-func (k *KubeConfig) setClientset() {
+func NewKubeConfig() KubeConfig {
+	return KubeConfig{}
+}
+
+func (k *KubeConfig) setClientset() error {
 	configuration, err := clientcmd.BuildConfigFromFlags("", k.Kubeconfig)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	clientset, err := kubernetes.NewForConfig(configuration)
 	if err != nil {
-		log.Fatalf("Error creating clientset: %v", err)
+		return err
 	}
 
 	k.clientset = clientset
+	return nil
 }
 
-func (k KubeConfig) InitComponent(_ KubeConfig) (tea.Model){
-  var items []string
-	for _, configs := range global.GetKubeconfigsLocations() {
+func (k KubeConfig) InitComponent(_ KubeConfig) tea.Model {
+	var items []string
+	for _, configs := range GetKubeconfigsLocations() {
 		kubeconfigs, err := os.ReadDir(configs)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("Warning:", err)
+			continue
 		}
 		for _, file := range kubeconfigs {
 			if !file.IsDir() {
-        fullPath := filepath.Join(configs, file.Name())
+				fullPath := filepath.Join(configs, file.Name())
 				items = append(items, fullPath)
 			}
 		}
 	}
 
-	onSelect := func(selected string)(tea.Model) {
-    k.Kubeconfig = selected
-    k.setClientset()
-    n := NewNamespaces()
-    return n.InitComponent(k)
+	onSelect := func(selected string) tea.Msg {
+		k.Kubeconfig = selected
+		if err := k.setClientset(); err != nil {
+			log.Println("Error creating clientset:", err)
+			return nil
+		}
+		return NavigateMsg{NewScreen: NewNamespaces().InitComponent(k)}
 	}
 
-  list := listcomponent.NewList(items, "Kubeconfigs", onSelect)
-
-  return list
+	return list.NewList(items, "Kubeconfigs", onSelect)
 }

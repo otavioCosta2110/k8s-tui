@@ -13,7 +13,7 @@ var Colors = struct {
   Pink: "#f29bdc",
 }
 
-var Margin = 2
+var Margin = 4
 
 var ScreenWidth = 0
 var ScreenHeight = 0
