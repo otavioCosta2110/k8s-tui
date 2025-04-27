@@ -3,8 +3,8 @@ package kubernetes
 import (
 	"log"
 	"os"
-	"path/filepath"
 	"otaviocosta2110/k8s-tui/src/components/list"
+	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"k8s.io/client-go/kubernetes"
@@ -18,6 +18,7 @@ type KubeConfig struct {
 
 type NavigateMsg struct {
 	NewScreen tea.Model
+	Cluster KubeConfig
 }
 
 func NewKubeConfig() KubeConfig {
@@ -39,7 +40,7 @@ func (k *KubeConfig) setClientset() error {
 	return nil
 }
 
-func (k KubeConfig) InitComponent(_ KubeConfig) tea.Model {
+func (k KubeConfig) InitComponent(_ *KubeConfig) tea.Model {
 	var items []string
 	for _, configs := range GetKubeconfigsLocations() {
 		kubeconfigs, err := os.ReadDir(configs)
@@ -57,11 +58,13 @@ func (k KubeConfig) InitComponent(_ KubeConfig) tea.Model {
 
 	onSelect := func(selected string) tea.Msg {
 		k.Kubeconfig = selected
+		os.Setenv("KUBECONFIG", selected)
+		os.Setenv("KUBERNETES_MASTER", selected)
 		if err := k.setClientset(); err != nil {
 			log.Println("Error creating clientset:", err)
 			return nil
 		}
-		return NavigateMsg{NewScreen: NewNamespaces().InitComponent(k)}
+		return	NavigateMsg{NewScreen: NewNamespaces().InitComponent(&k), Cluster: k}
 	}
 
 	return list.NewList(items, "Kubeconfigs", onSelect)

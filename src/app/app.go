@@ -10,19 +10,16 @@ import (
 )
 
 type AppModel struct {
-	stack  []tea.Model
-	kube   kubernetes.KubeConfig
-	header header.Model
+	stack          []tea.Model
+	kube           kubernetes.KubeConfig
+	header         header.Model
+	configSelected bool
 }
 
-func NewAppModel(k kubernetes.KubeConfig) *AppModel {
-	// Set header height before creating components
-	
-	initialScreen := k.InitComponent(k)
+func NewAppModel() *AppModel {
 	return &AppModel{
-		stack:  []tea.Model{initialScreen},
-		kube:   k,
-		header: header.New("K8s TUI"),
+		stack:  []tea.Model{kubernetes.NewKubeConfig().InitComponent(nil)},
+		header: header.New("K8s TUI", nil),
 	}
 }
 
@@ -30,10 +27,14 @@ func (m *AppModel) Init() tea.Cmd {
 	if len(m.stack) == 0 {
 		return nil
 	}
-	return tea.Batch(
-		m.stack[len(m.stack)-1].Init(),
-		m.header.Init(),
-	)
+
+	var cmds []tea.Cmd
+	if m.configSelected {
+		cmds = append(cmds, m.header.Init())
+	}
+	cmds = append(cmds, m.stack[len(m.stack)-1].Init())
+
+	return tea.Batch(cmds...)
 }
 
 func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -44,10 +45,16 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		global.HeaderSize = global.ScreenHeight/3 - global.Margin
 
-		newHeader, headerCmd := m.header.Update(msg)
-		m.header = newHeader.(header.Model)
-
 		var cmds []tea.Cmd
+
+		if m.configSelected {
+			newHeader, headerCmd := m.header.Update(msg)
+			m.header = newHeader.(header.Model)
+			m.header.SetKubeconfig(&m.kube)
+			m.header.SetContent(kubernetes.ViewMetrics(kubernetes.NewMetrics(m.kube)))
+			cmds = append(cmds, headerCmd)
+		}
+
 		for i := range m.stack {
 			var cmd tea.Cmd
 			m.stack[i], cmd = m.stack[i].Update(msg)
@@ -55,7 +62,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cmds = append(cmds, cmd)
 			}
 		}
-		return m, tea.Batch(append(cmds, headerCmd)...)
+		return m, tea.Batch(cmds...)
 
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -66,8 +73,19 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, tea.Quit
 		}
+
 	case kubernetes.NavigateMsg:
 		m.stack = append(m.stack, msg.NewScreen)
+		if !m.configSelected {
+			m.configSelected = true
+			m.header.SetKubeconfig(&msg.Cluster)
+			m.kube = msg.Cluster
+			m.header.SetContent(kubernetes.ViewMetrics(kubernetes.NewMetrics(m.kube)))
+			return m, tea.Batch(
+				msg.NewScreen.Init(),
+				m.header.Init(),
+			)
+		}
 		return m, msg.NewScreen.Init()
 	}
 
@@ -79,17 +97,33 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *AppModel) View() string {
 	if len(m.stack) == 0 {
-		return ""
+		return "Loading..."
 	}
 
+	currentView := m.stack[len(m.stack)-1].View()
+
+	headerView := m.header.View()
+	contentHeight := global.ScreenHeight - lipgloss.Height(headerView) + global.Margin/2
+
+	if !m.configSelected {
+		if len(m.stack) > 0 {
+			return lipgloss.NewStyle().
+				Width(global.ScreenWidth).
+				Height(contentHeight + 1).
+				Border(lipgloss.RoundedBorder()).
+				BorderForeground(lipgloss.Color(global.Colors.Blue)).
+				Render(currentView)
+		}
+		return "Loading..."
+	}
 	header := m.header.View()
 
-	bottomPanelStyle := lipgloss.NewStyle().
+	content := lipgloss.NewStyle().
 		Width(global.ScreenWidth).
-		Height(global.ScreenHeight - global.HeaderSize + global.Margin).
+		Height(contentHeight).
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color(global.Colors.Blue))
+		BorderForeground(lipgloss.Color(global.Colors.Blue)).
+		Render(currentView)
 
-	currentView := bottomPanelStyle.Render(m.stack[len(m.stack)-1].View())
-	return lipgloss.JoinVertical(lipgloss.Top, header, currentView)
+	return lipgloss.JoinVertical(lipgloss.Top, header, content)
 }

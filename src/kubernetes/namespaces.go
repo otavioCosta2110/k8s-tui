@@ -36,13 +36,13 @@ func fetchNamespaces(k KubeConfig) []string {
 	return namespacesArray
 }
 
-func (n *Namespaces) InitComponent(k KubeConfig) tea.Model {
-	n.kube = k
-	namespaces := fetchNamespaces(k)
+func (n *Namespaces) InitComponent(k *KubeConfig) tea.Model {
+	n.kube = *k
+	namespaces := fetchNamespaces(*k)
 
 	onSelect := func(selected string) tea.Msg {
 		return NavigateMsg{
-			NewScreen: NewResource(k, selected).InitComponent(k),
+			NewScreen: NewResource(*k, selected).InitComponent(*k),
 		}
 	}
 
