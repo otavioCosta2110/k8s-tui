@@ -78,12 +78,11 @@ func (m *Model) Init() tea.Cmd {
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - len(m.List.Items()) - global.Margin)
 	switch msg := msg.(type) {
 	case loadedMsg:
 		m.loading = false
 		return m, nil
-	case tea.WindowSizeMsg:
-	m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - global.Margin)
 	case tea.KeyMsg:
 		if msg.String() == "enter" && !m.loading && m.OnSelected != nil {
 			selected := m.List.SelectedItem().(Item).FilterValue()
@@ -104,7 +103,7 @@ func (m *Model) View() string {
 			Align(lipgloss.Center, lipgloss.Center).
 			Render("Loading...")
 	}
-	m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - len(m.List.Items()))
+	m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - len(m.List.Items()) - global.Margin)
 
 	return m.List.View()
 }

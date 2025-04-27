@@ -1,6 +1,7 @@
 package app
 
 import (
+	"otaviocosta2110/k8s-tui/src/components/header"
 	"otaviocosta2110/k8s-tui/src/global"
 	"otaviocosta2110/k8s-tui/src/kubernetes"
 
@@ -11,13 +12,17 @@ import (
 type AppModel struct {
 	stack  []tea.Model
 	kube   kubernetes.KubeConfig
+	header header.Model
 }
 
 func NewAppModel(k kubernetes.KubeConfig) *AppModel {
+	// Set header height before creating components
+	
 	initialScreen := k.InitComponent(k)
 	return &AppModel{
-		stack: []tea.Model{initialScreen},
-		kube:  k,
+		stack:  []tea.Model{initialScreen},
+		kube:   k,
+		header: header.New("K8s TUI"),
 	}
 }
 
@@ -25,23 +30,33 @@ func (m *AppModel) Init() tea.Cmd {
 	if len(m.stack) == 0 {
 		return nil
 	}
-	return m.stack[len(m.stack)-1].Init()
+	return tea.Batch(
+		m.stack[len(m.stack)-1].Init(),
+		m.header.Init(),
+	)
 }
 
 func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		global.ScreenWidth = msg.Width - global.Margin
-		global.ScreenHeight = msg.Height - global.Margin/2
+		global.ScreenHeight = msg.Height - global.Margin
+
+		global.HeaderSize = global.ScreenHeight/3 - global.Margin
+
+		newHeader, headerCmd := m.header.Update(msg)
+		m.header = newHeader.(header.Model)
+
+		var cmds []tea.Cmd
 		for i := range m.stack {
 			var cmd tea.Cmd
 			m.stack[i], cmd = m.stack[i].Update(msg)
 			if cmd != nil {
-				return m, cmd
+				cmds = append(cmds, cmd)
 			}
 		}
-		return m, nil
-		
+		return m, tea.Batch(append(cmds, headerCmd)...)
+
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc", "q":
@@ -67,13 +82,14 @@ func (m *AppModel) View() string {
 		return ""
 	}
 
-	leftPanelStyle := lipgloss.NewStyle().
+	header := m.header.View()
+
+	bottomPanelStyle := lipgloss.NewStyle().
 		Width(global.ScreenWidth).
-		Height(global.ScreenHeight).
+		Height(global.ScreenHeight - global.HeaderSize + global.Margin).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color(global.Colors.Blue))
 
-	currentView := leftPanelStyle.Render(m.stack[len(m.stack)-1].View())
-
-	return currentView
+	currentView := bottomPanelStyle.Render(m.stack[len(m.stack)-1].View())
+	return lipgloss.JoinVertical(lipgloss.Top, header, currentView)
 }
