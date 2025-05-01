@@ -32,7 +32,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		global.ScreenWidth = msg.Width - global.Margin
-		global.ScreenHeight = msg.Height - global.Margin/2
+		global.ScreenHeight = msg.Height - global.Margin
 		for i := range m.stack {
 			var cmd tea.Cmd
 			m.stack[i], cmd = m.stack[i].Update(msg)
