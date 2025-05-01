@@ -41,9 +41,9 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		global.ScreenWidth = msg.Width - global.Margin
-		global.ScreenHeight = msg.Height - global.Margin
+		global.ScreenHeight = msg.Height - global.Margin *2
 
-		global.HeaderSize = global.ScreenHeight/3 - global.Margin
+		global.HeaderSize = global.ScreenHeight/3 - global.Margin * 4
 
 		var cmds []tea.Cmd
 
@@ -103,7 +103,7 @@ func (m *AppModel) View() string {
 	currentView := m.stack[len(m.stack)-1].View()
 
 	headerView := m.header.View()
-	contentHeight := global.ScreenHeight - lipgloss.Height(headerView) + global.Margin/2
+	contentHeight := global.ScreenHeight - lipgloss.Height(headerView) + global.Margin
 
 	if !m.configSelected {
 		if len(m.stack) > 0 {

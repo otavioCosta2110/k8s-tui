@@ -22,7 +22,7 @@ func New(headerText string, kubeconfig *kubernetes.KubeConfig) Model {
 		kubeconfig: kubeconfig,
 		headerStyle: lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
-			Height(global.HeaderSize - global.Margin).
+			Height(global.HeaderSize - global.Margin * 2).
 			BorderForeground(lipgloss.Color(global.Colors.Blue)),
 	}
 }
@@ -31,18 +31,18 @@ func (m Model) Init() tea.Cmd {
 	metrics := kubernetes.NewMetrics(*m.kubeconfig)
 	kubernetes.ViewMetrics(metrics)
 	m.headerStyle = m.headerStyle.
-		Height(global.HeaderSize - global.Margin)
+		Height(global.HeaderSize - global.Margin *2)
 	return nil
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.headerStyle = m.headerStyle.
-		Height(global.HeaderSize - global.Margin)
+		Height(global.HeaderSize - global.Margin * 2)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.headerStyle = m.headerStyle.
 			Width(msg.Width - global.Margin).
-			Height(global.HeaderSize - global.Margin)
+			Height(global.HeaderSize - global.Margin * 2)
 	}
 	return m, nil
 }
