@@ -22,27 +22,30 @@ func New(headerText string, kubeconfig *kubernetes.KubeConfig) Model {
 		kubeconfig: kubeconfig,
 		headerStyle: lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
-			Height(global.HeaderSize - global.Margin * 2).
+			Height(global.HeaderSize - global.Margin*2).
 			BorderForeground(lipgloss.Color(global.Colors.Blue)),
 	}
 }
 
 func (m Model) Init() tea.Cmd {
 	metrics := kubernetes.NewMetrics(*m.kubeconfig)
+	if metrics.Error != nil {
+		return nil
+	}
 	kubernetes.ViewMetrics(metrics)
 	m.headerStyle = m.headerStyle.
-		Height(global.HeaderSize - global.Margin *2)
+		Height(global.HeaderSize - global.Margin*2)
 	return nil
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.headerStyle = m.headerStyle.
-		Height(global.HeaderSize - global.Margin * 2)
+		Height(global.HeaderSize - global.Margin*2)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.headerStyle = m.headerStyle.
 			Width(msg.Width - global.Margin).
-			Height(global.HeaderSize - global.Margin * 2)
+			Height(global.HeaderSize - global.Margin*2)
 	}
 	return m, nil
 }
@@ -56,6 +59,10 @@ func (m Model) View() string {
 
 func (m *Model) SetContent(content string) {
 	m.content = content
+}
+
+func (m *Model) IsContentNil() bool {
+	return m.content == ""
 }
 
 func (m *Model) SetKubeconfig(kubeconfig *kubernetes.KubeConfig) {

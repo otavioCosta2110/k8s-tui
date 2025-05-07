@@ -1,6 +1,7 @@
 package app
 
 import (
+	"otaviocosta2110/k8s-tui/src/components/errorpopup"
 	"otaviocosta2110/k8s-tui/src/components/header"
 	"otaviocosta2110/k8s-tui/src/global"
 	"otaviocosta2110/k8s-tui/src/kubernetes"
@@ -14,11 +15,22 @@ type AppModel struct {
 	kube           kubernetes.KubeConfig
 	header         header.Model
 	configSelected bool
+	errorPopup     *errorpopup.Model
 }
 
 func NewAppModel() *AppModel {
+	initialModel, err := kubernetes.NewKubeConfig().InitComponent(nil)
+	if err != nil {
+		popup := errorpopup.New(err, "Failed to initialize Kubernetes config", "")
+		return &AppModel{
+			stack:      []tea.Model{initialModel},
+			header:     header.New("K8s TUI", nil),
+			errorPopup: &popup,
+		}
+	}
+
 	return &AppModel{
-		stack:  []tea.Model{kubernetes.NewKubeConfig().InitComponent(nil)},
+		stack:  []tea.Model{initialModel},
 		header: header.New("K8s TUI", nil),
 	}
 }
@@ -41,17 +53,18 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		global.ScreenWidth = msg.Width - global.Margin
-		global.ScreenHeight = msg.Height - global.Margin *2
-
-		global.HeaderSize = global.ScreenHeight/3 - global.Margin * 4
+		global.ScreenHeight = msg.Height - global.Margin*2
+		global.HeaderSize = global.ScreenHeight/3 - global.Margin*4
 
 		var cmds []tea.Cmd
-
 		if m.configSelected {
 			newHeader, headerCmd := m.header.Update(msg)
 			m.header = newHeader.(header.Model)
 			m.header.SetKubeconfig(&m.kube)
-			m.header.SetContent(kubernetes.ViewMetrics(kubernetes.NewMetrics(m.kube)))
+			metrics := kubernetes.NewMetrics(m.kube)
+			if metrics.Error == nil {
+				m.header.SetContent(kubernetes.ViewMetrics(metrics))
+			}
 			cmds = append(cmds, headerCmd)
 		}
 
@@ -67,6 +80,10 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc", "q":
+			if m.errorPopup != nil {
+				m.errorPopup = nil
+				return m, nil
+			}
 			if len(m.stack) > 1 {
 				m.stack = m.stack[:len(m.stack)-1]
 				return m, nil
@@ -75,12 +92,31 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case kubernetes.NavigateMsg:
+		if msg.Error != nil {
+			popup := errorpopup.New(
+				msg.Error,
+				"Kubernetes Connection Error",
+				"Failed to connect to the Kubernetes cluster",
+			)
+			popup.SetDimensions(global.ScreenWidth, global.ScreenHeight)
+			return &AppModel{
+				stack:      m.stack,
+				header:     m.header,
+				kube:       msg.Cluster,
+				errorPopup: &popup,
+			}, nil
+		}
+
 		m.stack = append(m.stack, msg.NewScreen)
 		if !m.configSelected {
 			m.configSelected = true
 			m.header.SetKubeconfig(&msg.Cluster)
 			m.kube = msg.Cluster
-			m.header.SetContent(kubernetes.ViewMetrics(kubernetes.NewMetrics(m.kube)))
+			metrics := kubernetes.NewMetrics(m.kube)
+			if metrics.Error == nil {
+				m.header.SetContent(kubernetes.ViewMetrics(metrics))
+			}
+
 			return m, tea.Batch(
 				msg.NewScreen.Init(),
 				m.header.Init(),
@@ -96,34 +132,41 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *AppModel) View() string {
+	if m.errorPopup != nil {
+		return m.errorPopup.View()
+	}
+
 	if len(m.stack) == 0 {
 		return "Loading..."
 	}
 
 	currentView := m.stack[len(m.stack)-1].View()
 
-	headerView := m.header.View()
-	contentHeight := global.ScreenHeight - lipgloss.Height(headerView) + global.Margin
-
-	if !m.configSelected {
-		if len(m.stack) > 0 {
-			return lipgloss.NewStyle().
-				Width(global.ScreenWidth).
-				Height(contentHeight + 1).
-				Border(lipgloss.RoundedBorder()).
-				BorderForeground(lipgloss.Color(global.Colors.Blue)).
-				Render(currentView)
-		}
-		return "Loading..."
+	if !m.configSelected || m.header.IsContentNil() {
+		return lipgloss.NewStyle().
+			Width(global.ScreenWidth).
+			Height(global.ScreenHeight + global.Margin).
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color(global.Colors.Blue)).
+			Render(currentView)
 	}
-	header := m.header.View()
+
+	headerView := m.header.View()
+	contentHeight := max(global.ScreenHeight-lipgloss.Height(headerView), 1)
 
 	content := lipgloss.NewStyle().
 		Width(global.ScreenWidth).
-		Height(contentHeight).
+		Height(contentHeight + global.Margin).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color(global.Colors.Blue)).
 		Render(currentView)
 
-	return lipgloss.JoinVertical(lipgloss.Top, header, content)
+	return lipgloss.JoinVertical(lipgloss.Top, headerView, content)
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
