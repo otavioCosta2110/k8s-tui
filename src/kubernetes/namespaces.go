@@ -2,7 +2,7 @@ package kubernetes
 
 import (
 	"context"
-	"log"
+	"errors"
 	"otaviocosta2110/k8s-tui/src/components/list"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -17,34 +17,35 @@ func NewNamespaces() *Namespaces {
 	return &Namespaces{}
 }
 
-func fetchNamespaces(k KubeConfig) []string {
+func fetchNamespaces(k KubeConfig)  ([]string, error) {
 	if k.clientset == nil {
-		log.Println("Error: clientset is nil")
-		return []string{}
+		return []string{}, errors.New("clientset is nil")
 	}
 
 	namespaces, err := k.clientset.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
 	if err != nil {
-		log.Println("Error fetching namespaces:", err)
-		return []string{}
+		return []string{}, err
 	}
 
 	namespacesArray := make([]string, 0, len(namespaces.Items))
 	for _, nm := range namespaces.Items {
 		namespacesArray = append(namespacesArray, nm.Name)
 	}
-	return namespacesArray
+	return namespacesArray, nil
 }
 
-func (n *Namespaces) InitComponent(k KubeConfig) tea.Model {
-	n.kube = k
-	namespaces := fetchNamespaces(k)
+func (n *Namespaces) InitComponent(k *KubeConfig) (tea.Model, error) {
+	n.kube = *k
+	namespaces, err := fetchNamespaces(*k)
+	if err!=nil{
+		return nil, err
+	}
 
 	onSelect := func(selected string) tea.Msg {
 		return NavigateMsg{
-			NewScreen: NewResource(k, selected).InitComponent(k),
+			NewScreen: NewResource(*k, selected).InitComponent(*k),
 		}
 	}
 
-	return list.NewList(namespaces, "Namespaces", onSelect)
+	return list.NewList(namespaces, "Namespaces", onSelect), nil
 }

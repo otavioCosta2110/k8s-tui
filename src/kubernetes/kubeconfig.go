@@ -16,10 +16,13 @@ type KubeConfig struct {
 	clientset  *kubernetes.Clientset
 	Kubeconfig string
 	config 		*rest.Config
+	error      error
 }
 
 type NavigateMsg struct {
 	NewScreen tea.Model
+	Cluster   KubeConfig
+	Error     error
 }
 
 func NewKubeConfig() KubeConfig {
@@ -29,11 +32,13 @@ func NewKubeConfig() KubeConfig {
 func (k *KubeConfig) setClientset() error {
 	configuration, err := clientcmd.BuildConfigFromFlags("", k.Kubeconfig)
 	if err != nil {
+		k.error = err 
 		return err
 	}
 
 	clientset, err := kubernetes.NewForConfig(configuration)
 	if err != nil {
+		k.error = err 
 		return err
 	}
 
@@ -42,7 +47,7 @@ func (k *KubeConfig) setClientset() error {
 	return nil
 }
 
-func (k KubeConfig) InitComponent(_ KubeConfig) tea.Model {
+func (k KubeConfig) InitComponent(_ *KubeConfig) (tea.Model, error) {
 	var items []string
 	for _, configs := range GetKubeconfigsLocations() {
 		kubeconfigs, err := os.ReadDir(configs)
@@ -60,12 +65,28 @@ func (k KubeConfig) InitComponent(_ KubeConfig) tea.Model {
 
 	onSelect := func(selected string) tea.Msg {
 		k.Kubeconfig = selected
+		os.Setenv("KUBECONFIG", selected)
+		os.Setenv("KUBERNETES_MASTER", selected)
 		if err := k.setClientset(); err != nil {
 			log.Println("Error creating clientset:", err)
-			return nil
+			return NavigateMsg{
+				Error: err,
+				Cluster: k,
+			}
 		}
-		return NavigateMsg{NewScreen: NewNamespaces().InitComponent(k)}
+
+		namespaces, err := NewNamespaces().InitComponent(&k)
+		if err != nil {
+			return NavigateMsg{
+				Error: err,
+				Cluster: k,
+			}
+		}
+		return NavigateMsg{
+			NewScreen: namespaces,
+			Cluster: k,
+		}
 	}
 
-	return list.NewList(items, "Kubeconfigs", onSelect)
+	return list.NewList(items, "Kubeconfigs", onSelect), nil
 }

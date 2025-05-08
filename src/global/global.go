@@ -13,10 +13,12 @@ var Colors = struct {
   Pink: "#f29bdc",
 }
 
-var Margin = 4
+var Margin = 2
 
 var ScreenWidth = 0
 var ScreenHeight = 0
+
+var HeaderSize = 0
 
 var kubeconfigsDefaultLocation = func() string {
 	home, err := os.UserHomeDir()

@@ -78,6 +78,7 @@ func (m *Model) Init() tea.Cmd {
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - len(m.List.Items()) - global.Margin * 5)
 	switch msg := msg.(type) {
 	case loadedMsg:
 		m.loading = false
@@ -107,7 +108,12 @@ func (m *Model) View() string {
 	// 		Height(global.ScreenHeight - global.Margin).
 	// 		Render("Loading...")
 	// }
-	m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - len(m.List.Items()))
-
+	// m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - len(m.List.Items()))
+	if m.loading {
+		return lipgloss.NewStyle().
+			Align(lipgloss.Center, lipgloss.Center).
+			Render("Loading...")
+	}
+	m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - len(m.List.Items()) - global.Margin * 2)
 	return m.List.View()
 }
