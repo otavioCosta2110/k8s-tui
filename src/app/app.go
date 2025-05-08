@@ -152,7 +152,8 @@ func (m *AppModel) View() string {
 	}
 
 	headerView := m.header.View()
-	contentHeight := max(global.ScreenHeight-lipgloss.Height(headerView), 1)
+	// contentHeight := max(global.ScreenHeight-lipgloss.Height(headerView), 1)
+	contentHeight := global.ScreenHeight-lipgloss.Height(headerView)
 
 	content := lipgloss.NewStyle().
 		Width(global.ScreenWidth).
@@ -162,11 +163,4 @@ func (m *AppModel) View() string {
 		Render(currentView)
 
 	return lipgloss.JoinVertical(lipgloss.Top, headerView, content)
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }

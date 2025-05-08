@@ -2,6 +2,7 @@ package yaml
 
 import (
 	"otaviocosta2110/k8s-tui/src/global"
+	"time"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -27,11 +28,9 @@ var DefaultYAMLViewerStyles = &YAMLViewerStyles{
 	TitleBar: lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.Color("#FAFAFA")).
-		Background(lipgloss.Color("#7D56F4")).
-		Padding(0, 1),
+		Background(lipgloss.Color("#7D56F4")),
 	BorderColor:    "#7D56F4",
 	HelpTextColor:  "#757575",
-	ContentPadding: 2,
 }
 
 func NewYAMLViewer(title, content string) *YAMLViewer {
@@ -42,13 +41,18 @@ func NewYAMLViewer(title, content string) *YAMLViewer {
 	}
 }
 
+type loadedMsg struct{}
+
 func (m *YAMLViewer) Init() tea.Cmd {
-	return tea.Batch(
-		tea.ClearScreen,
-		func() tea.Msg {
-			return tea.WindowSizeMsg{Width: global.ScreenWidth + global.Margin, Height: global.ScreenHeight + global.Margin / 2} 
-		},
-	)
+	return tea.Tick(time.Second, func(time.Time) tea.Msg {
+		return loadedMsg{}
+	})
+	// return tea.Batch(
+	// 	tea.ClearScreen,
+	// 	func() tea.Msg {
+	// 		return tea.WindowSizeMsg{Width: global.ScreenWidth - global.Margin, Height: global.ScreenHeight - global.Margin} 
+	// 	},
+	// )
 }
 
 func (m *YAMLViewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -62,8 +66,8 @@ func (m *YAMLViewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.WindowSizeMsg:
 		if !m.ready {
-			contentHeight := msg.Height - global.Margin
-			contentWidth := msg.Width - global.Margin
+			contentHeight := global.ScreenHeight - global.Margin - global.HeaderSize
+			contentWidth := global.ScreenWidth - global.Margin
 			m.viewport = viewport.New(contentWidth, contentHeight)
 			m.ready = true
 			m.viewport.SetContent(m.content)
@@ -78,10 +82,6 @@ func (m *YAMLViewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *YAMLViewer) View() string {
-	// if !m.ready {
-	// 	return "Loading..."
-	// }
-
 	header := m.headerView()
 	footer := m.footerView()
 	content := lipgloss.NewStyle().
@@ -89,7 +89,7 @@ func (m *YAMLViewer) View() string {
 		Render(m.viewport.View())
 
 	m.viewport.Width = global.ScreenWidth - global.Margin
-	m.viewport.Height = global.ScreenHeight -global.Margin/2
+	m.viewport.Height = global.ScreenHeight - global.Margin * 2 - global.HeaderSize
 	m.viewport.SetContent(m.content)
 
 	return lipgloss.JoinVertical(
