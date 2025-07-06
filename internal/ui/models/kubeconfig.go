@@ -1,0 +1,76 @@
+package models
+
+import (
+	"os"
+	global "otaviocosta2110/k8s-tui/internal"
+	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/ui/components"
+	"path/filepath"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+type kubeconfigModel struct {
+	configs    []string
+	k8sClient  *k8s.Client
+	kubeconfig string
+	loading    bool
+	err        error
+}
+
+func NewKubeconfigModel() *kubeconfigModel {
+	return &kubeconfigModel{
+		configs:    global.GetKubeconfigsLocations(),
+		k8sClient:  nil,
+		kubeconfig: "",
+		loading:    true,
+		err:        nil,
+	}
+}
+
+func (k kubeconfigModel) InitComponent(_ *k8s.Client) (tea.Model, error) {
+	var items []string
+	for _, configs := range global.GetKubeconfigsLocations() {
+		kubeconfigs, err := os.ReadDir(configs)
+		if err != nil {
+			return nil, err
+		}
+		for _, file := range kubeconfigs {
+			if !file.IsDir() {
+				fullPath := filepath.Join(configs, file.Name())
+				items = append(items, fullPath)
+			}
+		}
+	}
+
+	onSelect := func(selected string) tea.Msg {
+		k.kubeconfig = selected
+		os.Setenv("KUBECONFIG", selected)
+		os.Setenv("KUBERNETES_MASTER", selected)
+		var err error
+		k.k8sClient, err = k8s.NewClient(selected)
+		if err != nil {
+			println("Error creating clientset:", err)
+			return components.NavigateMsg{
+				Error:   err,
+				Cluster: *k.k8sClient,
+			}
+		}
+
+		namespaces, err := NewNamespaces(*k.k8sClient)
+
+		nm, err := namespaces.InitComponent(k.k8sClient)
+		if err != nil {
+			return components.NavigateMsg{
+				Error:   err,
+				Cluster: *k.k8sClient,
+			}
+		}
+		return components.NavigateMsg{
+			NewScreen: nm,
+			Cluster:   *k.k8sClient,
+		}
+	}
+
+	return components.NewList(items, "Kubeconfigs", onSelect), nil
+}
