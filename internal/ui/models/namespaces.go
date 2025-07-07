@@ -28,6 +28,7 @@ func NewNamespaces(k k8s.Client) (*namespacesModel, error) {
 		err:       nil,
 	}, nil
 }
+
 func (n *namespacesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	n.k8sClient = k
 	namespaces, err := k8s.FetchNamespaces(*k)

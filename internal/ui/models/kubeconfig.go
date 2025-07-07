@@ -50,12 +50,10 @@ func (k kubeconfigModel) InitComponent(_ *k8s.Client) (tea.Model, error) {
 		os.Setenv("KUBERNETES_MASTER", selected)
 		c, err := k8s.NewClient(selected)
 		k.k8sClient = c
-		os.WriteFile("error.log", []byte("bunda"), 0644)
 		if err != nil {
 			println("Error creating clientset:", err)
 			return components.NavigateMsg{
 				Error:   err,
-				Cluster: *k.k8sClient,
 			}
 		}
 

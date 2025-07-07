@@ -12,7 +12,7 @@ import (
 func main() {
 	m := ui.NewAppModel()
 
-	p := tea.NewProgram(m)
+	p := tea.NewProgram(m, tea.WithAltScreen())
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered from panic:", r)

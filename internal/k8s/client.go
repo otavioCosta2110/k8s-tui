@@ -2,42 +2,48 @@ package k8s
 
 import (
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"os"
+	"path/filepath"
 )
 
 type Client struct {
 	Clientset *kubernetes.Clientset
+	Config    *rest.Config
 }
 
 func NewClient(kubeconfigPath string) (*Client, error) {
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	var config *rest.Config
+	var err error
+
+	if kubeconfigPath == "" {
+		config, err = rest.InClusterConfig()
+		if err == nil {
+			return createClient(config)
+		}
+	}
+
+	if kubeconfigPath == "" {
+		kubeconfigPath = filepath.Join(os.Getenv("HOME"), ".kube", "config")
+	}
+	
+	config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 	if err != nil {
 		return nil, err
 	}
 
+	return createClient(config)
+}
+
+func createClient(config *rest.Config) (*Client, error) {
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Client{Clientset: clientset}, nil
+	return &Client{
+		Clientset: clientset,
+		Config:    config,
+	}, nil
 }
-
-// func (c *Client) GetPods(ctx context.Context, namespace string) ([]Pod, error) {
-// 	pods, err := c.clientset.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	
-// 	// Convert to your own Pod type
-// 	var result []Pod
-// 	for _, p := range pods.Items {
-// 		result = append(result, Pod{
-// 			Name:      p.Name,
-// 			Namespace: p.Namespace,
-// 			Status:    string(p.Status.Phase),
-// 		})
-// 	}
-// 	
-// 	return result, nil
-// }
