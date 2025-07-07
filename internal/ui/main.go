@@ -1,6 +1,7 @@
 package ui
 
 import (
+	// "os"
 	global "otaviocosta2110/k8s-tui/internal"
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
@@ -61,9 +62,9 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			newHeader, headerCmd := m.header.Update(msg)
 			m.header = newHeader.(models.HeaderModel)
 			m.header.SetKubeconfig(&m.kube)
-			metrics := models.NewMetrics(m.kube)
-			if metrics.Error == nil {
-				m.header.SetContent(metrics.ViewMetrics(metrics))
+			metrics, err := models.NewMetrics(m.kube)
+			if err == nil {
+				m.header.SetContent(metrics.ViewMetrics())
 			}
 			cmds = append(cmds, headerCmd)
 		}
@@ -99,9 +100,9 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				"Failed to connect to the Kubernetes cluster",
 			)
 			popup.SetDimensions(global.ScreenWidth, global.ScreenHeight)
-			if termModel, ok := msg.NewScreen.(*terminal.Model); ok {
-				return m, termModel.Init()
-			}
+			// if termModel, ok := msg.NewScreen.(*terminal.Model); ok {
+			// 	return m, termModel.Init()
+			// }
 
 			return &AppModel{
 				stack:      m.stack,
@@ -116,9 +117,9 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.configSelected = true
 			m.header.SetKubeconfig(&msg.Cluster)
 			m.kube = msg.Cluster
-			metrics := k8s.NewMetrics(m.kube)
-			if metrics.Error == nil {
-				m.header.SetContent(models.ViewMetrics(metrics))
+			metrics, err := models.NewMetrics(m.kube)
+			if err == nil {
+				m.header.SetContent(metrics.ViewMetrics())
 			}
 
 			return m, tea.Batch(
@@ -168,4 +169,3 @@ func (m *AppModel) View() string {
 
 	return lipgloss.JoinVertical(lipgloss.Top, headerView, content)
 }
-

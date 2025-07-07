@@ -1,6 +1,7 @@
 package models
 
 import (
+	"os"
 	global "otaviocosta2110/k8s-tui/internal"
 
 	"github.com/charmbracelet/bubbletea"
@@ -16,6 +17,7 @@ type ErrorModel struct {
 }
 
 func NewErrorScreen(err error, title, message string) ErrorModel {
+	os.WriteFile("error.log", []byte(message), 0644)
 	return ErrorModel{
 		error:   err,
 		title:   title,

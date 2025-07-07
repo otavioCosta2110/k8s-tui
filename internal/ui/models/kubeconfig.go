@@ -33,7 +33,8 @@ func (k kubeconfigModel) InitComponent(_ *k8s.Client) (tea.Model, error) {
 	for _, configs := range global.GetKubeconfigsLocations() {
 		kubeconfigs, err := os.ReadDir(configs)
 		if err != nil {
-			return nil, err
+			println("Warning:", err)
+			continue
 		}
 		for _, file := range kubeconfigs {
 			if !file.IsDir() {
@@ -47,8 +48,9 @@ func (k kubeconfigModel) InitComponent(_ *k8s.Client) (tea.Model, error) {
 		k.kubeconfig = selected
 		os.Setenv("KUBECONFIG", selected)
 		os.Setenv("KUBERNETES_MASTER", selected)
-		var err error
-		k.k8sClient, err = k8s.NewClient(selected)
+		c, err := k8s.NewClient(selected)
+		k.k8sClient = c
+		os.WriteFile("error.log", []byte("bunda"), 0644)
 		if err != nil {
 			println("Error creating clientset:", err)
 			return components.NavigateMsg{
@@ -58,6 +60,12 @@ func (k kubeconfigModel) InitComponent(_ *k8s.Client) (tea.Model, error) {
 		}
 
 		namespaces, err := NewNamespaces(*k.k8sClient)
+		if err != nil {
+			return components.NavigateMsg{
+				Error:   err,
+				Cluster: *k.k8sClient,
+			}
+		}
 
 		nm, err := namespaces.InitComponent(k.k8sClient)
 		if err != nil {

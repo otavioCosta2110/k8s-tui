@@ -1,7 +1,7 @@
 package models
 
 import (
-	"context"
+	// "context"
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
 
@@ -41,27 +41,27 @@ func newPodsModel(client *k8s.Client) podsModel {
 	}
 }
 
-func (m podsModel) Init() tea.Cmd {
-	return m.fetchPods
-}
+// func (m podsModel) Init() tea.Cmd {
+// 	return m.fetchPods
+// }
 
-func (m podsModel) fetchPods() tea.Msg {
-	pods, err := m.k8sClient.GetPods(context.Background(), "default")
-	if err != nil {
-		return errMsg{err}
-	}
-	
-	var items []list.Item
-	for _, p := range pods {
-		items = append(items, podItem{
-			name:      p.Name,
-			namespace: p.Namespace,
-			status:    p.Status,
-		})
-	}
-	
-	return podsMsg(items)
-}
+// func (m podsModel) fetchPods() tea.Msg {
+// 	pods, err := m.k8sClient.GetPods(context.Background(), "default")
+// 	if err != nil {
+// 		return errMsg{err}
+// 	}
+// 	
+// 	var items []list.Item
+// 	for _, p := range pods {
+// 		items = append(items, podItem{
+// 			name:      p.Name,
+// 			namespace: p.Namespace,
+// 			status:    p.Status,
+// 		})
+// 	}
+// 	
+// 	return podsMsg(items)
+// }
 
 func (m podsModel) Update(msg tea.Msg) (podsModel, tea.Cmd) {
 	var cmd tea.Cmd

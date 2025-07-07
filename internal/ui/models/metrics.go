@@ -25,26 +25,29 @@ func (m Metrics) GetMetrics() Metrics {
 	return m
 }
 
-func NewMetrics(k k8s.Client) Metrics {
-	var metrics Metrics
-	nm, err := k8s.FetchNamespaces(k)
-	if err != nil {
-		metrics.Error = err
-	}
-	metrics = Metrics{
-		Error:              nil,
-		PodsNumber:         0,
-		NodesNumber:        0,
-		NamespacesNumber:   len(nm),
-		DeploymentsNumber:  0,
-		ServicesNumber:     0,
-		ReplicaSetsNumber:  0,
-		StatefulSetsNumber: 0,
-		DaemonSetsNumber:   0,
-		JobsNumber:         0,
+func NewMetrics(k k8s.Client) (Metrics, error) {
+	metrics, err := k8s.NewMetrics(k)
+
+	returnedMetrics := Metrics{
+		PodsNumber:         metrics.PodsNumber,
+		NodesNumber:        metrics.NodesNumber,
+		NamespacesNumber:   metrics.NamespacesNumber,
+		DeploymentsNumber:  metrics.DeploymentsNumber,
+		ServicesNumber:     metrics.ServicesNumber,
+		ReplicaSetsNumber:  metrics.ReplicaSetsNumber,
+		StatefulSetsNumber: metrics.StatefulSetsNumber,
+		DaemonSetsNumber:   metrics.DaemonSetsNumber,
+		JobsNumber:         metrics.JobsNumber,
+		Error:              metrics.Error,
 	}
 
-	return metrics
+
+	if err != nil {
+		metrics.Error = err
+		return returnedMetrics, err
+	}
+
+	return returnedMetrics, nil
 }
 
 var (
@@ -63,7 +66,7 @@ var (
 	sectionStyle = lipgloss.NewStyle()
 )
 
-func (m Metrics) viewMetrics() string {
+func (m Metrics) ViewMetrics() string {
 	columnWidth := (global.ScreenWidth - global.Margin) / 3
 
 	sectionStyle = sectionStyle.

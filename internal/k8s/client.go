@@ -6,7 +6,7 @@ import (
 )
 
 type Client struct {
-	clientset *kubernetes.Clientset
+	Clientset *kubernetes.Clientset
 }
 
 func NewClient(kubeconfigPath string) (*Client, error) {
@@ -20,7 +20,7 @@ func NewClient(kubeconfigPath string) (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{clientset: clientset}, nil
+	return &Client{Clientset: clientset}, nil
 }
 
 // func (c *Client) GetPods(ctx context.Context, namespace string) ([]Pod, error) {

@@ -1,20 +1,25 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"otaviocosta2110/k8s-tui/internal/ui"
+	"runtime/debug"
 
 	"github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-	// Initialize your main model
 	m := ui.NewAppModel()
 
-	p := tea.NewProgram(m, tea.WithAltScreen())
+	p := tea.NewProgram(m)
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered from panic:", r)
+			debug.PrintStack()
+		}
+	}()
 	if _, err := p.Run(); err != nil {
-		log.Fatalf("Error running program: %v", err)
 		os.Exit(1)
 	}
 }

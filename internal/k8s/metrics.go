@@ -16,15 +16,12 @@ type Metrics struct {
 	Error              error
 }
 
-func (m Metrics) GetMetrics() Metrics {
-	return m
-}
-
-func NewMetrics(k Client) Metrics {
+func NewMetrics(k Client) (Metrics, error) {
 	var metrics Metrics
 	nm, err := FetchNamespaces(k)
 	if err != nil {
 		metrics.Error = err
+		return metrics, err
 	}
 	metrics = Metrics{
 		Error:              nil,
@@ -39,5 +36,5 @@ func NewMetrics(k Client) Metrics {
 		JobsNumber:         0,
 	}
 
-	return metrics
+	return metrics, nil
 }

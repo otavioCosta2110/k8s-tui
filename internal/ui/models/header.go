@@ -28,11 +28,11 @@ func NewHeader(headerText string, kubeconfig *k8s.Client) HeaderModel {
 }
 
 func (m HeaderModel) Init() tea.Cmd {
-	metrics := NewMetrics(*m.kubeconfig)
-	if metrics.Error != nil {
+	metrics, err := NewMetrics(*m.kubeconfig)
+	if err != nil {
 		return nil
 	}
-	metrics.viewMetrics()
+	metrics.ViewMetrics()
 	m.headerStyle = m.headerStyle.
 		Height(global.HeaderSize - global.Margin*2)
 	return nil

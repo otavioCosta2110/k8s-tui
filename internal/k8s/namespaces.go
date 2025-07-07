@@ -11,16 +11,12 @@ type Namespaces struct {
 	k Client
 }
 
-func newNamespaces() *Namespaces {
-	return &Namespaces{}
-}
-
 func FetchNamespaces(k Client)  ([]string, error) {
-	if k.clientset == nil {
+	if k.Clientset == nil {
 		return []string{}, errors.New("clientset is nil")
 	}
 
-	namespaces, err := k.clientset.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
+	namespaces, err := k.Clientset.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return []string{}, err
 	}
