@@ -7,8 +7,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func FetchPods(client Client, namespace string) ([]string, error) {
-	pods, err := client.Clientset.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{})
+func FetchPods(client Client, namespace string, selector string) ([]string, error) {
+	listOptions := metav1.ListOptions{}
+	if selector != "" {
+		listOptions.LabelSelector = selector
+	}
+	pods, err := client.Clientset.CoreV1().Pods(namespace).List(context.Background(), listOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch pods: %v", err)
 	}

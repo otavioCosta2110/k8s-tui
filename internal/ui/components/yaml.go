@@ -1,7 +1,6 @@
 package components
 
 import (
-	"os"
 	global "otaviocosta2110/k8s-tui/internal"
 	"strings"
 	"time"

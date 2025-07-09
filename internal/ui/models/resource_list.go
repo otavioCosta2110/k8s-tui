@@ -1,12 +1,10 @@
 package models
 
 import (
-	"context"
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 
 	tea "github.com/charmbracelet/bubbletea"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type ResourceList struct {
@@ -23,34 +21,34 @@ func NewResourceList(k k8s.Client, namespace, resourceType string) ResourceList 
 	}
 }
 
-func (rl ResourceList) InitComponent(k k8s.Client) tea.Model {
+func (rl ResourceList) InitComponent(k k8s.Client) (tea.Model, error) {
 	var items []string
 	var onSelect func(string) tea.Msg
 
 	switch rl.resourceType {
 	case "Pods":
-		pods, _ := NewPods(rl.kube, rl.namespace)
+		pods, err := NewPods(rl.kube, rl.namespace, nil)
+		if err != nil {
+			return nil, err
+		}
 
-		c, _ := pods.InitComponent(&k)
-		return c
+		c, err := pods.InitComponent(&k)
+		if err != nil {
+			return nil, err
+		}
+		return c, nil
 
 	case "Deployments":
-		deployments, err := rl.kube.Clientset.AppsV1().Deployments(rl.namespace).List(context.Background(), metav1.ListOptions{})
-		if err == nil {
-			for _, deploy := range deployments.Items {
-				items = append(items, deploy.Name)
-			}
-			onSelect = func(selected string) tea.Msg {
-				return nil
-			}
+		deployments, err := NewDeployments(rl.kube, rl.namespace)
+		if err != nil {
+			return nil, err
 		}
+		deploymentsComponent, err := deployments.InitComponent(&k)
+		if err != nil {
+			return nil, err
+		}
+		return deploymentsComponent, nil
 	}
 
-	if onSelect == nil {
-		onSelect = func(selected string) tea.Msg {
-			return nil
-		}
-	}
-
-	return components.NewList(items, rl.resourceType, onSelect)
+	return components.NewList(items, rl.resourceType, onSelect), nil
 }

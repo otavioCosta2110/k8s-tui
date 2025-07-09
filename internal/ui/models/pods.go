@@ -16,10 +16,13 @@ type podsModel struct {
 	err       error
 }
 
-func NewPods(k k8s.Client, namespace string) (*podsModel, error) {
-	pods, err := k8s.FetchPods(k, namespace)
-	if err != nil {
-		return nil, err
+func NewPods(k k8s.Client, namespace string, pods []string) (*podsModel, error) {
+	if len(pods) == 0 {
+		var err error
+		pods, err = k8s.FetchPods(k, namespace, "")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &podsModel{
@@ -32,12 +35,6 @@ func NewPods(k k8s.Client, namespace string) (*podsModel, error) {
 }
 
 func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
-	p.k8sClient = k
-	pods, err := k8s.FetchPods(*k, p.namespace)
-	if err != nil {
-		return nil, err
-	}
-
 	onSelect := func(selected string) tea.Msg {
 		podDetails, err := NewPodDetails(*k, p.namespace, selected).InitComponent(k)
 		if err != nil {
@@ -51,5 +48,5 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		}
 	}
 
-	return ui.NewList(pods, "Pods in "+p.namespace, onSelect), nil
+	return ui.NewList(p.list, "Pods in "+p.namespace, onSelect), nil
 }

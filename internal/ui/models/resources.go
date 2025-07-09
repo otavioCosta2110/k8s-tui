@@ -31,8 +31,14 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 
 	onSelect := func(selected string) tea.Msg {
 		r.resourceType = selected
+		newResourceList, err := NewResourceList(r.kube, r.namespace, r.resourceType).InitComponent(k)
+		if err != nil {
+			return components.NavigateMsg{
+				Error:   err,
+			}
+		}
 		return components.NavigateMsg{
-			NewScreen: NewResourceList(r.kube, r.namespace, selected).InitComponent(k),
+			NewScreen: newResourceList,
 		}
 	}
 
