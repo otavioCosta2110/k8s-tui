@@ -1,8 +1,6 @@
 package models
 
 import (
-	global "otaviocosta2110/k8s-tui/internal"
-
 	"github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -34,7 +32,7 @@ func (m ErrorModel) Update(msg tea.Msg) (ErrorModel, tea.Cmd) {
 func (m ErrorModel) View() string {
 	errorStyle := lipgloss.NewStyle().
 		Width(m.width).
-		Height(m.height + global.Margin).
+		Height(m.height).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("#FF0000")).
 		Padding(1, 2)

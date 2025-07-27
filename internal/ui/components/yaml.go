@@ -60,14 +60,13 @@ func (m *YAMLViewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.WindowSizeMsg:
 		if !m.ready {
-			contentHeight := global.ScreenHeight - global.HeaderSize
-			contentWidth := global.ScreenWidth - global.Margin
-			m.viewport = viewport.New(contentWidth, contentHeight)
+			contentWidth := global.ScreenWidth
+			m.viewport = viewport.New(contentWidth, global.ScreenHeight)
 			m.ready = true
 			m.viewport.SetContent(m.content)
 		} else {
-			m.viewport.Width = global.ScreenWidth - global.Margin
-			m.viewport.Height = global.ScreenHeight - global.HeaderSize - global.Margin - 1
+			m.viewport.Width = global.ScreenWidth
+			m.viewport.Height = global.ScreenHeight
 		}
 	}
 
@@ -82,8 +81,8 @@ func (m *YAMLViewer) View() string {
 		PaddingLeft(m.styles.ContentPadding).
 		Render(m.viewport.View())
 
-	m.viewport.Width = global.ScreenWidth - global.Margin
-	m.viewport.Height = global.ScreenHeight - global.Margin - global.HeaderSize - 1
+	m.viewport.Width = global.ScreenWidth
+	m.viewport.Height = global.ScreenHeight - global.Margin
 	m.viewport.SetContent(m.content)
 
 	return lipgloss.JoinVertical(

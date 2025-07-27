@@ -1,7 +1,6 @@
 package ui
 
 import (
-	// "os"
 	global "otaviocosta2110/k8s-tui/internal"
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
@@ -54,8 +53,11 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		global.ScreenWidth = msg.Width - global.Margin
-		global.ScreenHeight = msg.Height - global.Margin*2
-		global.HeaderSize = global.ScreenHeight/3 - global.Margin*4
+		global.ScreenHeight = msg.Height - global.Margin
+		if m.header.IsContentNil() {
+			global.HeaderSize = global.ScreenHeight/4
+			global.ScreenHeight -= global.HeaderSize
+		}
 
 		var cmds []tea.Cmd
 		if m.configSelected {
@@ -150,19 +152,19 @@ func (m *AppModel) View() string {
 	if !m.configSelected || m.header.IsContentNil() {
 		return lipgloss.NewStyle().
 			Width(global.ScreenWidth).
-			Height(global.ScreenHeight + global.Margin).
+			Height(global.ScreenHeight + global.HeaderSize).
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color(global.Colors.Blue)).
 			Render(currentView)
 	}
 
 	headerView := m.header.View()
-	// contentHeight := max(global.ScreenHeight-lipgloss.Height(headerView), 1)
-	contentHeight := global.ScreenHeight - lipgloss.Height(headerView)
+	global.HeaderSize = global.ScreenHeight/4
+	contentHeight := global.ScreenHeight
 
 	content := lipgloss.NewStyle().
 		Width(global.ScreenWidth).
-		Height(contentHeight + global.Margin).
+		Height(contentHeight).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color(global.Colors.Blue)).
 		Render(currentView)

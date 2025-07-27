@@ -76,7 +76,7 @@ func (m *ListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.loading = false
 		return m, nil
 	case tea.WindowSizeMsg:
-		m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - global.Margin - global.HeaderSize)
+		m.List.SetSize(global.ScreenWidth, global.ScreenHeight)
 	case tea.KeyMsg:
 		if msg.String() == "enter" && !m.loading && m.OnSelected != nil {
 			selected := m.List.SelectedItem().(ListItem).FilterValue()
@@ -97,6 +97,6 @@ func (m *ListModel) View() string {
 			Align(lipgloss.Center, lipgloss.Center).
 			Render("Loading...")
 	}
-	m.List.SetSize(global.ScreenWidth - global.Margin, global.ScreenHeight - global.Margin - len(m.List.Items()) - global.HeaderSize)
+	m.List.SetSize(global.ScreenWidth, global.ScreenHeight - len(m.List.Items()))
 	return m.List.View()
 }

@@ -67,7 +67,7 @@ var (
 )
 
 func (m Metrics) ViewMetrics() string {
-	columnWidth := (global.ScreenWidth - global.Margin) / 3
+	columnWidth := (global.ScreenWidth) / 3
 
 	sectionStyle = sectionStyle.
 		Width(columnWidth).

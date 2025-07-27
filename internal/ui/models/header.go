@@ -22,7 +22,7 @@ func NewHeader(headerText string, kubeconfig *k8s.Client) HeaderModel {
 		kubeconfig: kubeconfig,
 		headerStyle: lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
-			Height(global.HeaderSize - global.Margin*2).
+			Height(global.HeaderSize).
 			BorderForeground(lipgloss.Color(global.Colors.Blue)),
 	}
 }
@@ -33,19 +33,20 @@ func (m HeaderModel) Init() tea.Cmd {
 		return nil
 	}
 	metrics.ViewMetrics()
+	m.height = global.HeaderSize
 	m.headerStyle = m.headerStyle.
-		Height(global.HeaderSize - global.Margin*2)
+		Height(m.height)
 	return nil
 }
 
 func (m HeaderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.headerStyle = m.headerStyle.
-		Height(global.HeaderSize - global.Margin*2)
+		Height(m.height)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.headerStyle = m.headerStyle.
 			Width(msg.Width - global.Margin).
-			Height(global.HeaderSize - global.Margin*2)
+			Height(m.height)
 	}
 	return m, nil
 }
