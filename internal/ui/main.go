@@ -55,9 +55,9 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		global.ScreenWidth = msg.Width - global.Margin
 		global.ScreenHeight = msg.Height - global.Margin
 		if m.header.IsContentNil() {
-			global.HeaderSize = global.ScreenHeight/4
-			global.ScreenHeight -= global.HeaderSize
-		}
+			global.HeaderSize = global.ScreenHeight/4 - global.Margin
+		} 	
+		global.ScreenHeight -= global.HeaderSize
 
 		var cmds []tea.Cmd
 		if m.configSelected {
