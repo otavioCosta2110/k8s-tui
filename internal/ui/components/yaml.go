@@ -45,7 +45,7 @@ func NewYAMLViewer(title, content string) *YAMLViewer {
 
 func (m *YAMLViewer) Init() tea.Cmd {
 	contentWidth := global.ScreenWidth
-	m.viewport = viewport.New(contentWidth, global.ScreenHeight)
+	m.viewport = viewport.New(contentWidth, global.ScreenHeight - global.Margin)
 	return tea.Tick(time.Second, func(time.Time) tea.Msg {
 		return loadedMsg{}
 	})

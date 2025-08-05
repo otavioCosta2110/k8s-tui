@@ -21,9 +21,7 @@ func NewHeader(headerText string, kubeconfig *k8s.Client) HeaderModel {
 		content:    "",
 		kubeconfig: kubeconfig,
 		headerStyle: lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
-			Height(global.HeaderSize).
-			BorderForeground(lipgloss.Color(global.Colors.Blue)),
+			Height(global.HeaderSize),
 	}
 }
 
@@ -45,7 +43,7 @@ func (m HeaderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.headerStyle = m.headerStyle.
-			Width(msg.Width - global.Margin).
+			Width(msg.Width).
 			Height(m.height)
 	}
 	return m, nil

@@ -2,6 +2,7 @@ package components
 
 import (
 	global "otaviocosta2110/k8s-tui/internal"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -38,22 +39,16 @@ func NewList(items []string, title string, onSelect func(selected string) tea.Ms
 	}
 
 	delegate := list.NewDefaultDelegate()
-	delegate.Styles.NormalTitle = lipgloss.NewStyle().
-		Height(2).
-		SetString(" ")
+	delegate.Styles.NormalTitle = customstyles.NormalStyle
 
-	delegate.Styles.SelectedTitle = lipgloss.NewStyle().
-		Height(2).
-		Foreground(lipgloss.Color(global.Colors.Pink)).
-		SetString("➤ ").
-		Bold(true)
+	delegate.Styles.SelectedTitle = customstyles.SelectedStyle
 
 	delegate.SetSpacing(0)
 	delegate.ShowDescription = false
 
 	l := list.New(listItems, delegate, 0, 0)
 	l.Title = title
-	l.Styles.Title = lipgloss.NewStyle().Bold(true)
+	l.Styles.Title = customstyles.TitleStyle
 
 	l.SetShowHelp(false)
 

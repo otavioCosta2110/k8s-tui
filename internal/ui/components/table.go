@@ -2,6 +2,7 @@ package components
 
 import (
 	global "otaviocosta2110/k8s-tui/internal"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -16,7 +17,7 @@ type TableModel struct {
 	loading      bool
 	initialized  bool
 	colPercent   []float64
-	checkedRows  map[int]bool 
+	checkedRows  map[int]bool
 }
 
 type loadedTableMsg struct{}
@@ -24,19 +25,15 @@ type loadedTableMsg struct{}
 func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, title string, onSelect func(selected string) tea.Msg, selectColumn int) *TableModel {
 	styles := table.DefaultStyles()
 	styles.Header = styles.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color(global.Colors.Pink)).
 		BorderBottom(true).
-		Bold(true)
+		BorderForeground(lipgloss.Color(customstyles.Purple)).
+		BorderStyle(lipgloss.NormalBorder())
 
-	styles.Selected = styles.Selected.
-		Foreground(lipgloss.Color(global.Colors.Pink)).
-		Bold(true)
-
+	styles.Selected = customstyles.SelectedStyle.Padding(0, 0).Margin(0, 0)
 	checkboxColumn := table.Column{Title: "✓", Width: 3}
 	columns = append([]table.Column{checkboxColumn}, columns...)
-	
-	checkboxPercent := 0.03 
+
+	checkboxPercent := 0.03
 	newColPercent := make([]float64, len(colPercent)+1)
 	newColPercent[0] = checkboxPercent
 	for i, p := range colPercent {
@@ -45,7 +42,7 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 
 	newRows := make([]table.Row, len(rows))
 	for i, row := range rows {
-		newRows[i] = append(table.Row{"[ ]"}, row...)
+		newRows[i] = append(table.Row{"▢"}, row...)
 	}
 
 	t := table.New(
@@ -59,7 +56,7 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 	return &TableModel{
 		Table:        t,
 		OnSelected:   onSelect,
-		selectColumn: selectColumn + 1, 
+		selectColumn: selectColumn + 1,
 		colPercent:   newColPercent,
 		loading:      false,
 		initialized:  false,
@@ -83,7 +80,7 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.updateColumnWidths(msg.Width)
 		return m, nil
 	case tea.KeyMsg:
-		if msg.String() == " " && !m.loading { 
+		if msg.String() == " " && !m.loading {
 			selectedIdx := m.Table.Cursor()
 			m.toggleCheckbox(selectedIdx)
 			return m, nil
@@ -112,9 +109,9 @@ func (m *TableModel) toggleCheckbox(rowIdx int) {
 	m.checkedRows[rowIdx] = !m.checkedRows[rowIdx]
 
 	if m.checkedRows[rowIdx] {
-		rows[rowIdx][0] = "[✓]"
+		rows[rowIdx][0] = "🗹"
 	} else {
-		rows[rowIdx][0] = "[ ]"
+		rows[rowIdx][0] = "▢"
 	}
 
 	m.Table.SetRows(rows)

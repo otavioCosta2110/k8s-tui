@@ -4,6 +4,7 @@ import (
 	global "otaviocosta2110/k8s-tui/internal"
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"otaviocosta2110/k8s-tui/internal/ui/models"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -55,7 +56,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		global.ScreenWidth = msg.Width - global.Margin
 		global.ScreenHeight = msg.Height - global.Margin
 		if m.header.IsContentNil() {
-			global.HeaderSize = global.ScreenHeight/4 - global.Margin
+			global.HeaderSize = global.ScreenHeight/4 - ((global.Margin * 2) + 1)
 		} 	
 		global.ScreenHeight -= global.HeaderSize
 
@@ -154,19 +155,18 @@ func (m *AppModel) View() string {
 			Width(global.ScreenWidth).
 			Height(global.ScreenHeight + global.HeaderSize).
 			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color(global.Colors.Blue)).
+			BorderForeground(lipgloss.Color(customstyles.Blue)).
 			Render(currentView)
 	}
 
 	headerView := m.header.View()
-	global.HeaderSize = global.ScreenHeight/4
 	contentHeight := global.ScreenHeight
 
 	content := lipgloss.NewStyle().
 		Width(global.ScreenWidth).
 		Height(contentHeight).
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color(global.Colors.Blue)).
+		BorderForeground(lipgloss.Color(customstyles.Blue)).
 		Render(currentView)
 
 	return lipgloss.JoinVertical(lipgloss.Top, headerView, content)
