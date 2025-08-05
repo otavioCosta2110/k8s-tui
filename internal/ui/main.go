@@ -103,9 +103,6 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				"Failed to connect to the Kubernetes cluster",
 			)
 			popup.SetDimensions(global.ScreenWidth, global.ScreenHeight)
-			// if termModel, ok := msg.NewScreen.(*terminal.Model); ok {
-			// 	return m, termModel.Init()
-			// }
 
 			return &AppModel{
 				stack:      m.stack,
