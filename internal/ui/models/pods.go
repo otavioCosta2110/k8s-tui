@@ -18,7 +18,7 @@ type podsModel struct {
 	err       error
 }
 
-func NewPods(k k8s.Client, namespace string, pods []string) (*podsModel, error) {
+func NewPods(k k8s.Client, namespace string, pods []k8s.PodInfo) (*podsModel, error) {
 	if len(pods) == 0 {
 		var err error
 		pods, err = k8s.FetchPods(k, namespace, "")
@@ -35,8 +35,7 @@ func NewPods(k k8s.Client, namespace string, pods []string) (*podsModel, error) 
 }
 
 func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
-	podsNames, err := k8s.FetchPods(*k, p.namespace, "")
-	podsInfo, err := k8s.GetPodsTableData(*k, p.namespace, podsNames)
+	podsInfo, err := k8s.FetchPods(*k, p.namespace, "")
 	if err != nil {
 		return nil, err
 	}

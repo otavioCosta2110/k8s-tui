@@ -34,6 +34,7 @@ func (m HeaderModel) Init() tea.Cmd {
 	m.height = global.HeaderSize
 	m.headerStyle = m.headerStyle.
 		Height(m.height)
+	global.IsHeaderActive = true
 	return nil
 }
 
@@ -51,7 +52,7 @@ func (m HeaderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m HeaderModel) View() string {
 	if m.kubeconfig == nil {
-		return "No kubeconfig selected"
+		return ""
 	}
 	return m.headerStyle.Render(m.content)
 }

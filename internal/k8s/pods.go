@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/utils"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -17,7 +18,7 @@ type PodInfo struct {
 	Age       string
 }
 
-func FetchPods(client Client, namespace string, selector string) ([]string, error) {
+func FetchPods(client Client, namespace string, selector string) ([]PodInfo, error) {
 	listOptions := metav1.ListOptions{}
 	if selector != "" {
 		listOptions.LabelSelector = selector
@@ -27,18 +28,22 @@ func FetchPods(client Client, namespace string, selector string) ([]string, erro
 		return nil, fmt.Errorf("failed to fetch pods: %v", err)
 	}
 
-	podNames := make([]string, 0, len(pods.Items))
-	for _, pod := range pods.Items {
-		podNames = append(podNames, pod.Name)
+	podsInfo := make([]PodInfo, 0, len(pods.Items))
+	for _, podCore := range pods.Items {
+		pod, err := GetPodDetails(client, namespace, &podCore)
+		if err != nil {
+			return nil, err
+		}
+		podsInfo = append(podsInfo, pod)
 	}
 
-	return podNames, nil
+	return podsInfo, nil
 }
 
-func GetPodDetails(client Client, namespace string, podName string) (PodInfo, error) {
+func GetPodDetails(client Client, namespace string, podCore *corev1.Pod) (PodInfo, error) {
 	pod, err := client.Clientset.CoreV1().Pods(namespace).Get(
 		context.Background(),
-		podName,
+		podCore.Name,
 		metav1.GetOptions{},
 	)
 	if err != nil {
@@ -71,18 +76,4 @@ func GetPodDetails(client Client, namespace string, podName string) (PodInfo, er
 		Restarts:  restarts,
 		Age:       age,
 	}, nil
-}
-
-func GetPodsTableData(client Client, namespace string, podNames []string) ([]PodInfo, error) {
-	var podsInfo []PodInfo
-
-	for _, podName := range podNames {
-		info, err := GetPodDetails(client, namespace, podName)
-		if err != nil {
-			return nil, err
-		}
-		podsInfo = append(podsInfo, info)
-	}
-
-	return podsInfo, nil
 }

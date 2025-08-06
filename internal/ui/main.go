@@ -42,9 +42,6 @@ func (m *AppModel) Init() tea.Cmd {
 	}
 
 	var cmds []tea.Cmd
-	if m.configSelected {
-		cmds = append(cmds, m.header.Init())
-	}
 	cmds = append(cmds, m.stack[len(m.stack)-1].Init())
 
 	return tea.Batch(cmds...)
@@ -55,9 +52,9 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		global.ScreenWidth = msg.Width - global.Margin
 		global.ScreenHeight = msg.Height - global.Margin
-		if m.header.IsContentNil() {
+		if !global.IsHeaderActive {
 			global.HeaderSize = global.ScreenHeight/4 - ((global.Margin * 2) + 1)
-		} 	
+		}
 		global.ScreenHeight -= global.HeaderSize
 
 		var cmds []tea.Cmd
@@ -147,24 +144,24 @@ func (m *AppModel) View() string {
 
 	currentView := m.stack[len(m.stack)-1].View()
 
-	if !m.configSelected || m.header.IsContentNil() {
-		return lipgloss.NewStyle().
-			Width(global.ScreenWidth).
-			Height(global.ScreenHeight + global.HeaderSize).
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color(customstyles.Blue)).
-			Render(currentView)
+	var height int
+	if !global.IsHeaderActive {
+		height = global.ScreenHeight + global.HeaderSize
+	} else {
+		height = global.ScreenHeight
 	}
 
 	headerView := m.header.View()
-	contentHeight := global.ScreenHeight
 
 	content := lipgloss.NewStyle().
 		Width(global.ScreenWidth).
-		Height(contentHeight).
+		Height(height).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color(customstyles.Blue)).
 		Render(currentView)
 
+	if !global.IsHeaderActive {
+		return content
+	}
 	return lipgloss.JoinVertical(lipgloss.Top, headerView, content)
 }

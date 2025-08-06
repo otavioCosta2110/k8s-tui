@@ -29,6 +29,7 @@ func NewKubeconfigModel() *kubeconfigModel {
 }
 
 func (k kubeconfigModel) InitComponent(_ *k8s.Client) (tea.Model, error) {
+	global.IsHeaderActive = false
 	var items []string
 	for _, configs := range global.GetKubeconfigsLocations() {
 		kubeconfigs, err := os.ReadDir(configs)

@@ -89,7 +89,7 @@ func GetDeploymentsTableData(client Client, namespace string) ([]DeploymentInfo,
 	return deploymentInfos, nil
 }
 
-func (d *DeploymentInfo) GetPods() ([]string, error) {
+func (d *DeploymentInfo) GetPods() ([]PodInfo, error) {
 	pods, err := FetchPods(d.Client, d.Namespace, fmt.Sprintf("app=%s", d.Name))
 	if err != nil {
 		return nil, err

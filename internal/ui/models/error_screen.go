@@ -1,6 +1,8 @@
 package models
 
 import (
+	global "otaviocosta2110/k8s-tui/internal"
+
 	"github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -31,8 +33,8 @@ func (m ErrorModel) Update(msg tea.Msg) (ErrorModel, tea.Cmd) {
 
 func (m ErrorModel) View() string {
 	errorStyle := lipgloss.NewStyle().
-		Width(m.width).
-		Height(m.height).
+		Width(global.ScreenWidth).
+		Height(global.ScreenHeight + global.HeaderSize).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("#FF0000")).
 		Padding(1, 2)
@@ -41,12 +43,12 @@ func (m ErrorModel) View() string {
 		Foreground(lipgloss.Color("#FF0000")).
 		Bold(true).
 		Align(lipgloss.Center).
-		Width(m.width) 
+		Width(global.ScreenWidth)
 
 	messageStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#FFFFFF")).
 		Align(lipgloss.Center).
-		Width(m.width)
+		Width(global.ScreenWidth)
 
 	content := titleStyle.Render(m.title) + "\n\n"
 	content += messageStyle.Render(m.message) + "\n\n"
