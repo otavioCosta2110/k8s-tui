@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func FormatTime(t time.Time) string {
+func FormatAge(t time.Time) string {
 	duration := time.Since(t)
 	seconds := int(duration.Seconds())
 

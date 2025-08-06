@@ -60,7 +60,7 @@ func GetPodDetails(client Client, namespace string, podName string) (PodInfo, er
 
 	age := "Unknown"
 	if pod.Status.StartTime != nil {
-		age = utils.FormatTime(pod.Status.StartTime.Time)
+		age = utils.FormatAge(pod.Status.StartTime.Time)
 	}
 
 	return PodInfo{

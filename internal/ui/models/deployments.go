@@ -5,6 +5,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 
+	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -12,6 +13,7 @@ type deploymentsModel struct {
 	list      []string
 	namespace string
 	k8sClient *k8s.Client
+	deploymentsInfo []k8s.DeploymentInfo
 	loading   bool
 	err       error
 }
@@ -33,7 +35,7 @@ func NewDeployments(k k8s.Client, namespace string) (*deploymentsModel, error) {
 
 func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	d.k8sClient = k
-	deployments, err := k8s.FetchDeploymentList(*k, d.namespace)
+	deploymentInfo, err := k8s.GetDeploymentsTableData(*k, d.namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -68,5 +70,28 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		}
 	}
 
-	return ui.NewList(deployments, "Deployments in "+d.namespace, onSelect), nil
+	columns := []table.Column{
+		components.NewColumn("NAMESPACE", 0),
+		components.NewColumn("NAME", 0),
+		components.NewColumn("READY", 0),
+		components.NewColumn("UP-TO-DATE", 0),
+		components.NewColumn("AVAILABLE", 0),
+		components.NewColumn("AGE", 0),
+	}
+
+	colPercent := []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.15}
+
+	rows := []table.Row{}
+	for _, deployment := range deploymentInfo {
+		rows = append(rows, table.Row{
+			deployment.Namespace,
+			deployment.Name,
+			deployment.Ready,
+			deployment.UpToDate,
+			deployment.Available,
+			deployment.Age,
+		})
+	}
+
+	return ui.NewTable(columns, colPercent, rows, "Deployments in "+d.namespace, onSelect, 1), nil
 }
