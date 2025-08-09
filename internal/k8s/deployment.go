@@ -72,8 +72,6 @@ func GetDeploymentsTableData(client Client, namespace string) ([]DeploymentInfo,
 
 		readyStr := fmt.Sprintf("%d/%d", status.ReadyReplicas, desiredReplicas)
 
-		utils.WriteString("log", fmt.Sprintf("%d", status.AvailableReplicas))
-
 		deploymentInfos = append(deploymentInfos, DeploymentInfo{
 			Namespace: freshDeployment.Namespace,
 			Name:      freshDeployment.Name,

@@ -4,28 +4,20 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"os"
-	"path/filepath"
 )
 
 type Client struct {
 	Clientset *kubernetes.Clientset
 	Config    *rest.Config
+	Namespace string
 }
 
-func NewClient(kubeconfigPath string) (*Client, error) {
+func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
 	var config *rest.Config
 	var err error
 
 	if kubeconfigPath == "" {
-		config, err = rest.InClusterConfig()
-		if err == nil {
-			return createClient(config)
-		}
-	}
-
-	if kubeconfigPath == "" {
-		kubeconfigPath = filepath.Join(os.Getenv("HOME"), ".kube", "config")
+		return nil, nil
 	}
 	
 	config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
@@ -33,7 +25,15 @@ func NewClient(kubeconfigPath string) (*Client, error) {
 		return nil, err
 	}
 
-	return createClient(config)
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Client{
+		Clientset: clientset,
+		Namespace: namespace,
+	}, nil
 }
 
 func createClient(config *rest.Config) (*Client, error) {
@@ -45,5 +45,6 @@ func createClient(config *rest.Config) (*Client, error) {
 	return &Client{
 		Clientset: clientset,
 		Config:    config,
+		Namespace: "default",
 	}, nil
 }

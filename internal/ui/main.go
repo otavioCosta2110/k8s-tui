@@ -3,6 +3,7 @@ package ui
 import (
 	global "otaviocosta2110/k8s-tui/internal"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/ui/cli"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"otaviocosta2110/k8s-tui/internal/ui/models"
@@ -20,6 +21,26 @@ type AppModel struct {
 }
 
 func NewAppModel() *AppModel {
+	cfg := cli.ParseFlags()
+	
+	kubeClient, err := k8s.NewClient(cfg.KubeconfigPath, cfg.Namespace)
+	if err == nil && kubeClient != nil {
+		mainModel, err := models.NewMainModel(*kubeClient, cfg.Namespace).InitComponent(*kubeClient)
+		if err != nil {
+			popup := models.NewErrorScreen(err, "Failed to initialize main view", "")
+			return &AppModel{
+				errorPopup: &popup,
+			}
+		}
+
+		return &AppModel{
+			stack:          []tea.Model{mainModel},
+			header:         models.NewHeader("K8s TUI", kubeClient),
+			kube:           *kubeClient,
+			configSelected: true,
+		}
+	}
+
 	initialModel, err := models.NewKubeconfigModel().InitComponent(nil)
 	if err != nil {
 		popup := models.NewErrorScreen(err, "Failed to initialize Kubernetes config", "")
@@ -54,6 +75,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		global.ScreenHeight = msg.Height - global.Margin
 		if !global.IsHeaderActive {
 			global.HeaderSize = global.ScreenHeight/4 - ((global.Margin * 2) + 1)
+			global.IsHeaderActive = true
 		}
 		global.ScreenHeight -= global.HeaderSize
 

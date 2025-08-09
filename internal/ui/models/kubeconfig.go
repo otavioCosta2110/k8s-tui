@@ -49,7 +49,7 @@ func (k kubeconfigModel) InitComponent(_ *k8s.Client) (tea.Model, error) {
 		k.kubeconfig = selected
 		os.Setenv("KUBECONFIG", selected)
 		os.Setenv("KUBERNETES_MASTER", selected)
-		c, err := k8s.NewClient(selected)
+		c, err := k8s.NewClient(selected, "")
 		k.k8sClient = c
 		if err != nil {
 			println("Error creating clientset:", err)
