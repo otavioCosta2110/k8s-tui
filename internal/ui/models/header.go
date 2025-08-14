@@ -3,7 +3,6 @@ package models
 import (
 	global "otaviocosta2110/k8s-tui/internal"
 	"otaviocosta2110/k8s-tui/internal/k8s"
-	"otaviocosta2110/k8s-tui/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -18,11 +17,6 @@ type HeaderModel struct {
 }
 
 func NewHeader(headerText string, kubeconfig *k8s.Client) HeaderModel {
-	if kubeconfig == nil {
-		utils.WriteString("log", "header nil")
-	}else {
-		utils.WriteString("log",kubeconfig.Namespace)
-	}
 	return HeaderModel{
 		content:    "",
 		kubeconfig: kubeconfig,

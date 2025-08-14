@@ -1,9 +1,11 @@
 package models
 
 import (
+	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	"time"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -16,6 +18,7 @@ type deploymentsModel struct {
 	deploymentsInfo []k8s.DeploymentInfo
 	loading   bool
 	err       error
+	refreshInterval time.Duration
 }
 
 func NewDeployments(k k8s.Client, namespace string) (*deploymentsModel, error) {
@@ -30,6 +33,7 @@ func NewDeployments(k k8s.Client, namespace string) (*deploymentsModel, error) {
 		k8sClient: &k,
 		loading:   false,
 		err:       nil,
+		refreshInterval: 5 * time.Second,
 	}, nil
 }
 
@@ -81,6 +85,36 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	colPercent := []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.15}
 
+	rows := d.deploymentsToRows(deploymentInfo)
+
+	fetchFunc := func() ([]table.Row, error) {
+		deps, err := d.fetchDeps(d.k8sClient)
+		if err != nil {
+			return nil, err
+		}
+
+		newRows := d.deploymentsToRows(deps)
+		return newRows, nil
+	}
+
+	tableModel := ui.NewTable(columns, colPercent, rows, "Deployments in "+d.namespace, onSelect, 1, fetchFunc)
+
+	return &autoRefreshModel{
+		inner:           tableModel,
+		refreshInterval: d.refreshInterval,
+		k8sClient:       d.k8sClient,
+	}, nil
+}
+
+func (d *deploymentsModel) fetchDeps(client *k8s.Client) ([]k8s.DeploymentInfo, error) {
+	deployments, err := k8s.GetDeploymentsTableData(*client, d.namespace)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch deployments: %v", err)
+	}
+	return deployments, nil
+}
+
+func (d *deploymentsModel) deploymentsToRows(deploymentInfo []k8s.DeploymentInfo) []table.Row {
 	rows := []table.Row{}
 	for _, deployment := range deploymentInfo {
 		rows = append(rows, table.Row{
@@ -92,6 +126,5 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 			deployment.Age,
 		})
 	}
-
-	return ui.NewTable(columns, colPercent, rows, "Deployments in "+d.namespace, onSelect, 1), nil
+	return rows
 }

@@ -3,6 +3,7 @@ package components
 import (
 	global "otaviocosta2110/k8s-tui/internal"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
+	"otaviocosta2110/k8s-tui/utils"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -11,18 +12,21 @@ import (
 )
 
 type TableModel struct {
-	Table        table.Model
-	OnSelected   func(selected string) tea.Msg
-	selectColumn int
-	loading      bool
-	initialized  bool
-	colPercent   []float64
-	checkedRows  map[int]bool
+	Table           table.Model
+	OnSelected      func(selected string) tea.Msg
+	selectColumn    int
+	loading         bool
+	initialized     bool
+	colPercent      []float64
+	checkedRows     map[int]bool
+	refreshInterval time.Duration
+	lastRefresh     time.Time
+	refreshFunc       func() ([]table.Row, error)
 }
 
 type loadedTableMsg struct{}
 
-func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, title string, onSelect func(selected string) tea.Msg, selectColumn int) *TableModel {
+func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, title string, onSelect func(selected string) tea.Msg, selectColumn int, refreshFunc func() ([]table.Row, error)) *TableModel {
 	styles := table.DefaultStyles()
 	styles.Header = styles.Header.
 		BorderBottom(true).
@@ -54,13 +58,16 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 	t.SetStyles(styles)
 
 	return &TableModel{
-		Table:        t,
-		OnSelected:   onSelect,
-		selectColumn: selectColumn + 1,
-		colPercent:   newColPercent,
-		loading:      false,
-		initialized:  false,
-		checkedRows:  make(map[int]bool),
+		Table:           t,
+		OnSelected:      onSelect,
+		selectColumn:    selectColumn + 1,
+		colPercent:      newColPercent,
+		loading:         false,
+		initialized:     false,
+		checkedRows:     make(map[int]bool),
+		refreshInterval: 5 * time.Second,
+		refreshFunc:       refreshFunc,
+		lastRefresh:     time.Now(),
 	}
 }
 
@@ -79,11 +86,23 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.updateColumnWidths(msg.Width)
 		return m, nil
+	case RefreshMsg:
+		rows, err := m.refreshFunc()
+		if err != nil {
+			utils.WriteString("err", err.Error())
+			return m, m.refreshTick()
+		}
+		m.UpdateRows(rows)
+		return m, m.refreshTick()
+
 	case tea.KeyMsg:
 		if msg.String() == " " && !m.loading {
 			selectedIdx := m.Table.Cursor()
 			m.toggleCheckbox(selectedIdx)
 			return m, nil
+		}
+		if msg.String() == "r" { 
+			return m, m.refreshData()
 		}
 		if msg.String() == "enter" && !m.loading && m.OnSelected != nil {
 			if len(m.Table.SelectedRow()) > 0 {
@@ -164,9 +183,9 @@ func (m *TableModel) UpdateRows(rows []table.Row) {
 	newRows := make([]table.Row, len(rows))
 	for i, row := range rows {
 		if m.checkedRows[i] {
-			newRows[i] = append(table.Row{"[✓]"}, row...)
+			newRows[i] = append(table.Row{"🗹"}, row...)
 		} else {
-			newRows[i] = append(table.Row{"[ ]"}, row...)
+			newRows[i] = append(table.Row{"▢"}, row...)
 		}
 	}
 	m.Table.SetRows(newRows)
@@ -175,4 +194,36 @@ func (m *TableModel) UpdateRows(rows []table.Row) {
 func (m *TableModel) UpdateColumns(columns []table.Column) {
 	columns = append([]table.Column{{Title: "✓", Width: 3}}, columns...)
 	m.Table.SetColumns(columns)
+}
+
+func (m *TableModel) refreshTick() tea.Cmd {
+	return tea.Tick(m.refreshInterval, func(t time.Time) tea.Msg {
+		return RefreshMsg{}
+	})
+}
+
+func (m *TableModel) refreshData() tea.Cmd {
+	return func() tea.Msg {
+		rows, err := m.refreshFunc()
+		if err != nil {
+			utils.WriteString("err", err.Error())
+			return err
+		}
+		m.UpdateRows(rows)
+		return nil
+	}
+}
+
+func (t *TableModel) Refresh() (tea.Model, tea.Cmd) {
+    if t.refreshFunc == nil {
+        return t, nil
+    }
+    
+    rows, err := t.refreshFunc()
+    if err != nil {
+        return t, nil
+    }
+    
+    t.UpdateRows(rows)
+    return t, nil
 }

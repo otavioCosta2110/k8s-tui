@@ -5,17 +5,19 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	"time"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type podsModel struct {
-	namespace string
-	k8sClient *k8s.Client
-	podsInfo  []k8s.PodInfo
-	loading   bool
-	err       error
+	namespace       string
+	k8sClient       *k8s.Client
+	podsInfo        []k8s.PodInfo
+	loading         bool
+	err             error
+	refreshInterval time.Duration
 }
 
 func NewPods(k k8s.Client, namespace string, pods []k8s.PodInfo) (*podsModel, error) {
@@ -27,10 +29,11 @@ func NewPods(k k8s.Client, namespace string, pods []k8s.PodInfo) (*podsModel, er
 		}
 	}
 	return &podsModel{
-		namespace: namespace,
-		k8sClient: &k,
-		loading:   false,
-		err:       nil,
+		namespace:       namespace,
+		k8sClient:       &k,
+		loading:         false,
+		err:             nil,
+		refreshInterval: 5 * time.Second,
 	}, nil
 }
 
@@ -77,5 +80,35 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		})
 	}
 
-	return ui.NewTable(columns, colPercent, rows, "Pods in "+p.namespace, onSelect, 1), nil
+	fetchFunc := func() ([]table.Row, error) {
+		pods, err := p.fetchPods(p.k8sClient)
+		if err != nil {
+			return nil, err
+		}
+
+		newRows := make([]table.Row, len(pods))
+		for i, pod := range pods {
+			newRows[i] = table.Row{
+				pod.Namespace,
+				pod.Name,
+				pod.Ready,
+				pod.Status,
+				fmt.Sprintf("%d", pod.Restarts),
+				pod.Age,
+			}
+		}
+		return newRows, nil
+	}
+
+	tableModel := ui.NewTable(columns, colPercent, rows, "Pods in "+p.namespace, onSelect, 1, fetchFunc)
+
+	return &autoRefreshModel{
+		inner:           tableModel,
+		refreshInterval: p.refreshInterval,
+		k8sClient:       p.k8sClient,
+	}, nil
+}
+
+func (p *podsModel) fetchPods(k *k8s.Client) ([]k8s.PodInfo, error) {
+	return k8s.FetchPods(*k, p.namespace, "")
 }
