@@ -9,7 +9,13 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"fmt"
 )
+
+type UpdateActionsMsg struct {
+	key    string
+	action func() tea.Cmd
+}
 
 type TableModel struct {
 	Table           table.Model
@@ -21,12 +27,13 @@ type TableModel struct {
 	checkedRows     map[int]bool
 	refreshInterval time.Duration
 	lastRefresh     time.Time
-	refreshFunc       func() ([]table.Row, error)
+	refreshFunc     func() ([]table.Row, error)
+	updateActions   map[string]func() tea.Cmd
 }
 
 type loadedTableMsg struct{}
 
-func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, title string, onSelect func(selected string) tea.Msg, selectColumn int, refreshFunc func() ([]table.Row, error)) *TableModel {
+func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, title string, onSelect func(selected string) tea.Msg, selectColumn int, refreshFunc func() ([]table.Row, error), updateActions map[string]func() tea.Cmd) *TableModel {
 	styles := table.DefaultStyles()
 	styles.Header = styles.Header.
 		BorderBottom(true).
@@ -66,8 +73,9 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 		initialized:     false,
 		checkedRows:     make(map[int]bool),
 		refreshInterval: 5 * time.Second,
-		refreshFunc:       refreshFunc,
+		refreshFunc:     refreshFunc,
 		lastRefresh:     time.Now(),
+		updateActions:   updateActions,
 	}
 }
 
@@ -101,7 +109,12 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.toggleCheckbox(selectedIdx)
 			return m, nil
 		}
-		if msg.String() == "r" { 
+		if action, exists := m.updateActions[msg.String()]; exists {
+			action()
+			m.refreshData()
+			return m, nil
+		}
+		if msg.String() == "r" {
 			return m, m.refreshData()
 		}
 		if msg.String() == "enter" && !m.loading && m.OnSelected != nil {
@@ -117,6 +130,10 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.Table, cmd = m.Table.Update(msg)
 	return m, cmd
+}
+
+func (m *TableModel) SetUpdateActions(actions map[string]func() tea.Cmd) {
+	m.updateActions = actions
 }
 
 func (m *TableModel) toggleCheckbox(rowIdx int) {
@@ -159,6 +176,10 @@ func (m *TableModel) updateColumnWidths(totalWidth int) {
 }
 
 func (m *TableModel) GetCheckedItems() []int {
+	if len(m.checkedRows) == 0 {
+		return []int{m.Table.Cursor()}
+		utils.WriteString("info", fmt.Sprint(m.Table.Cursor()))
+	}
 	var checked []int
 	for idx, isChecked := range m.checkedRows {
 		if isChecked {
@@ -215,15 +236,15 @@ func (m *TableModel) refreshData() tea.Cmd {
 }
 
 func (t *TableModel) Refresh() (tea.Model, tea.Cmd) {
-    if t.refreshFunc == nil {
-        return t, nil
-    }
-    
-    rows, err := t.refreshFunc()
-    if err != nil {
-        return t, nil
-    }
-    
-    t.UpdateRows(rows)
-    return t, nil
+	if t.refreshFunc == nil {
+		return t, nil
+	}
+
+	rows, err := t.refreshFunc()
+	if err != nil {
+		return t, nil
+	}
+
+	t.UpdateRows(rows)
+	return t, nil
 }

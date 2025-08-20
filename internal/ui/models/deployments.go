@@ -97,7 +97,7 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return newRows, nil
 	}
 
-	tableModel := ui.NewTable(columns, colPercent, rows, "Deployments in "+d.namespace, onSelect, 1, fetchFunc)
+	tableModel := ui.NewTable(columns, colPercent, rows, "Deployments in "+d.namespace, onSelect, 1, fetchFunc, nil)
 
 	return &autoRefreshModel{
 		inner:           tableModel,

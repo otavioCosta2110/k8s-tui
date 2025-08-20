@@ -100,7 +100,25 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return newRows, nil
 	}
 
-	tableModel := ui.NewTable(columns, colPercent, rows, "Pods in "+p.namespace, onSelect, 1, fetchFunc)
+	tableModel := ui.NewTable(columns, colPercent, rows, "Pods in "+p.namespace, onSelect, 1, fetchFunc, nil)
+
+	actions := map[string]func() tea.Cmd{
+		"d": func() tea.Cmd {
+			checked := tableModel.GetCheckedItems()
+			for _, idx := range checked {
+				if idx < len(p.podsInfo) {
+					pod := p.podsInfo[idx]
+					err := k8s.DeletePod(*p.k8sClient, pod.Namespace, pod.Name)
+					return func() tea.Msg {
+						return ErrorModel{error: err}
+					}
+				}
+			}
+			tableModel.Refresh()
+			return nil
+		},
+	}
+	tableModel.SetUpdateActions(actions)
 
 	return &autoRefreshModel{
 		inner:           tableModel,

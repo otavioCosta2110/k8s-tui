@@ -35,16 +35,3 @@ func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
 		Namespace: namespace,
 	}, nil
 }
-
-func createClient(config *rest.Config) (*Client, error) {
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Client{
-		Clientset: clientset,
-		Config:    config,
-		Namespace: "default",
-	}, nil
-}

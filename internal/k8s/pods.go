@@ -77,3 +77,11 @@ func GetPodDetails(client Client, namespace string, podCore *corev1.Pod) (PodInf
 		Age:       age,
 	}, nil
 }
+
+func DeletePod(client Client, namespace string, podName string) error {
+	err := client.Clientset.CoreV1().Pods(namespace).Delete(context.Background(), podName, metav1.DeleteOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to delete pod %s: %v", podName, err)
+	}
+	return nil
+}
