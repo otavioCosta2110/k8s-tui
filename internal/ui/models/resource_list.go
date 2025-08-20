@@ -48,6 +48,17 @@ func (rl ResourceList) InitComponent(k k8s.Client) (tea.Model, error) {
 			return nil, err
 		}
 		return deploymentsComponent, nil
+	
+	case "ConfigMaps":
+		configMaps, err := NewConfigmaps(rl.kube, rl.namespace, nil)
+		if err != nil {
+			return nil, err
+		}
+		configMapsComponent, err := configMaps.InitComponent(&k)
+		if err != nil {
+			return nil, err
+		}
+		return configMapsComponent, nil
 	}
 
 	return components.NewList(items, rl.resourceType, onSelect), nil

@@ -9,7 +9,6 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"fmt"
 )
 
 type UpdateActionsMsg struct {
@@ -178,7 +177,6 @@ func (m *TableModel) updateColumnWidths(totalWidth int) {
 func (m *TableModel) GetCheckedItems() []int {
 	if len(m.checkedRows) == 0 {
 		return []int{m.Table.Cursor()}
-		utils.WriteString("info", fmt.Sprint(m.Table.Cursor()))
 	}
 	var checked []int
 	for idx, isChecked := range m.checkedRows {

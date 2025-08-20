@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: default
+data:
+  # Simple key-value pairs
+  APP_NAME: "my-application"
+  DATABASE_URL: "postgresql://localhost:5432/mydb"
+  
+  # Multi-line configuration
+  nginx.conf: |
+    server {
+        listen 80;
+        server_name localhost;
+        
+        location / {
+            proxy_pass http://localhost:3000;
+        }
+    }
+  
+  # File-like content
+  application.properties: |
+    server.port=8080
+    spring.datasource.url=jdbc:postgresql://localhost:5432/mydb
+    logging.level.com.example=DEBUG
