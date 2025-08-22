@@ -12,35 +12,39 @@ import (
 )
 
 type replicasetsModel struct {
-	list            []string
-	namespace       string
-	k8sClient       *k8s.Client
+	*GenericResourceModel
 	replicasetsInfo []k8s.ReplicaSetInfo
-	loading         bool
-	err             error
-	refreshInterval time.Duration
 }
 
 func NewReplicaSets(k k8s.Client, namespace string) (*replicasetsModel, error) {
-	replicasets, err := k8s.FetchReplicaSetList(k, namespace)
-	if err != nil {
-		return nil, err
+	config := ResourceConfig{
+		ResourceType:    k8s.ResourceTypeReplicaSet,
+		Title:           "ReplicaSets in " + namespace,
+		ColumnWidths:    []float64{0.15, 0.25, 0.12, 0.12, 0.15, 0.15},
+		RefreshInterval: 5 * time.Second,
+		Columns: []table.Column{
+			components.NewColumn("NAMESPACE", 0),
+			components.NewColumn("NAME", 0),
+			components.NewColumn("DESIRED", 0),
+			components.NewColumn("CURRENT", 0),
+			components.NewColumn("READY", 0),
+			components.NewColumn("AGE", 0),
+		},
 	}
 
-	return &replicasetsModel{
-		list:            replicasets,
-		namespace:       namespace,
-		k8sClient:       &k,
-		loading:         false,
-		err:             nil,
-		refreshInterval: 5 * time.Second,
-	}, nil
+	genericModel := NewGenericResourceModel(k, namespace, config)
+
+	model := &replicasetsModel{
+		GenericResourceModel: genericModel,
+	}
+
+	return model, nil
 }
 
 func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	r.k8sClient = k
-	replicasetInfo, err := k8s.GetReplicaSetsTableData(*k, r.namespace)
-	if err != nil {
+
+	if err := r.fetchData(); err != nil {
 		return nil, err
 	}
 
@@ -74,52 +78,17 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		}
 	}
 
-	columns := []table.Column{
-		components.NewColumn("NAMESPACE", 0),
-		components.NewColumn("NAME", 0),
-		components.NewColumn("DESIRED", 0),
-		components.NewColumn("CURRENT", 0),
-		components.NewColumn("READY", 0),
-		components.NewColumn("AGE", 0),
-	}
-
-	colPercent := []float64{0.15, 0.25, 0.12, 0.12, 0.15, 0.15}
-
-	rows := r.replicasetsToRows(replicasetInfo)
-
 	fetchFunc := func() ([]table.Row, error) {
-		rss, err := r.fetchReplicaSets(r.k8sClient)
-		if err != nil {
+		if err := r.fetchData(); err != nil {
 			return nil, err
 		}
-
-		newRows := r.replicasetsToRows(rss)
-		return newRows, nil
+		return r.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(columns, colPercent, rows, "ReplicaSets in "+r.namespace, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(r.config.Columns, r.config.ColumnWidths, r.dataToRows(), r.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
-		"d": func() tea.Cmd {
-			checked := tableModel.GetCheckedItems()
-			var lastError error
-			for _, idx := range checked {
-				if idx < len(r.replicasetsInfo) {
-					replicaset := r.replicasetsInfo[idx]
-					err := k8s.DeleteReplicaSet(*r.k8sClient, replicaset.Namespace, replicaset.Name)
-					if err != nil {
-						lastError = err
-					}
-				}
-			}
-			tableModel.Refresh()
-			if lastError != nil {
-				return func() tea.Msg {
-					return ErrorModel{error: lastError}
-				}
-			}
-			return nil
-		},
+		"d": r.createDeleteAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
@@ -130,26 +99,32 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	}, nil
 }
 
-func (r *replicasetsModel) fetchReplicaSets(client *k8s.Client) ([]k8s.ReplicaSetInfo, error) {
-	replicasets, err := k8s.GetReplicaSetsTableData(*client, r.namespace)
+func (r *replicasetsModel) fetchData() error {
+	replicasetInfo, err := k8s.GetReplicaSetsTableData(*r.k8sClient, r.namespace)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch replicasets: %v", err)
+		return fmt.Errorf("failed to fetch replicasets: %v", err)
 	}
-	r.replicasetsInfo = replicasets
-	return replicasets, nil
+	r.replicasetsInfo = replicasetInfo
+
+	r.resourceData = make([]ResourceData, len(replicasetInfo))
+	for i, replicaset := range replicasetInfo {
+		r.resourceData[i] = ReplicaSetData{&replicaset}
+	}
+
+	return nil
 }
 
-func (r *replicasetsModel) replicasetsToRows(replicasetInfo []k8s.ReplicaSetInfo) []table.Row {
-	rows := []table.Row{}
-	for _, replicaset := range replicasetInfo {
-		rows = append(rows, table.Row{
+func (r *replicasetsModel) dataToRows() []table.Row {
+	rows := make([]table.Row, len(r.replicasetsInfo))
+	for i, replicaset := range r.replicasetsInfo {
+		rows[i] = table.Row{
 			replicaset.Namespace,
 			replicaset.Name,
 			replicaset.Desired,
 			replicaset.Current,
 			replicaset.Ready,
 			replicaset.Age,
-		})
+		}
 	}
 	return rows
 }

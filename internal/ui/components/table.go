@@ -9,7 +9,6 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"fmt"
 )
 
 type UpdateActionsMsg struct {
@@ -109,6 +108,7 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		if action, exists := m.updateActions[msg.String()]; exists {
+			utils.WriteString("log2", "Executing action: "+msg.String())
 			action()
 			m.refreshData()
 			return m, nil

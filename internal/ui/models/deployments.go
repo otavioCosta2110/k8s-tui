@@ -12,35 +12,39 @@ import (
 )
 
 type deploymentsModel struct {
-	list            []string
-	namespace       string
-	k8sClient       *k8s.Client
+	*GenericResourceModel
 	deploymentsInfo []k8s.DeploymentInfo
-	loading         bool
-	err             error
-	refreshInterval time.Duration
 }
 
 func NewDeployments(k k8s.Client, namespace string) (*deploymentsModel, error) {
-	deployments, err := k8s.FetchDeploymentList(k, namespace)
-	if err != nil {
-		return nil, err
+	config := ResourceConfig{
+		ResourceType:    k8s.ResourceTypeDeployment,
+		Title:           "Deployments in " + namespace,
+		ColumnWidths:    []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.15},
+		RefreshInterval: 5 * time.Second,
+		Columns: []table.Column{
+			components.NewColumn("NAMESPACE", 0),
+			components.NewColumn("NAME", 0),
+			components.NewColumn("READY", 0),
+			components.NewColumn("UP-TO-DATE", 0),
+			components.NewColumn("AVAILABLE", 0),
+			components.NewColumn("AGE", 0),
+		},
 	}
 
-	return &deploymentsModel{
-		list:            deployments,
-		namespace:       namespace,
-		k8sClient:       &k,
-		loading:         false,
-		err:             nil,
-		refreshInterval: 5 * time.Second,
-	}, nil
+	genericModel := NewGenericResourceModel(k, namespace, config)
+
+	model := &deploymentsModel{
+		GenericResourceModel: genericModel,
+	}
+
+	return model, nil
 }
 
 func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	d.k8sClient = k
-	deploymentInfo, err := k8s.GetDeploymentsTableData(*k, d.namespace)
-	if err != nil {
+
+	if err := d.fetchData(); err != nil {
 		return nil, err
 	}
 
@@ -74,52 +78,17 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		}
 	}
 
-	columns := []table.Column{
-		components.NewColumn("NAMESPACE", 0),
-		components.NewColumn("NAME", 0),
-		components.NewColumn("READY", 0),
-		components.NewColumn("UP-TO-DATE", 0),
-		components.NewColumn("AVAILABLE", 0),
-		components.NewColumn("AGE", 0),
-	}
-
-	colPercent := []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.15}
-
-	rows := d.deploymentsToRows(deploymentInfo)
-
 	fetchFunc := func() ([]table.Row, error) {
-		deps, err := d.fetchDeps(d.k8sClient)
-		if err != nil {
+		if err := d.fetchData(); err != nil {
 			return nil, err
 		}
-
-		newRows := d.deploymentsToRows(deps)
-		return newRows, nil
+		return d.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(columns, colPercent, rows, "Deployments in "+d.namespace, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(d.config.Columns, d.config.ColumnWidths, d.dataToRows(), d.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
-		"d": func() tea.Cmd {
-			checked := tableModel.GetCheckedItems()
-			var lastError error
-			for _, idx := range checked {
-				if idx < len(d.deploymentsInfo) {
-					deployment := d.deploymentsInfo[idx]
-					err := k8s.DeleteDeployment(*d.k8sClient, deployment.Namespace, deployment.Name)
-					if err != nil {
-						lastError = err
-					}
-				}
-			}
-			tableModel.Refresh()
-			if lastError != nil {
-				return func() tea.Msg {
-					return ErrorModel{error: lastError}
-				}
-			}
-			return nil
-		},
+		"d": d.createDeleteAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
@@ -130,26 +99,32 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	}, nil
 }
 
-func (d *deploymentsModel) fetchDeps(client *k8s.Client) ([]k8s.DeploymentInfo, error) {
-	deployments, err := k8s.GetDeploymentsTableData(*client, d.namespace)
+func (d *deploymentsModel) fetchData() error {
+	deploymentInfo, err := k8s.GetDeploymentsTableData(*d.k8sClient, d.namespace)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch deployments: %v", err)
+		return fmt.Errorf("failed to fetch deployments: %v", err)
 	}
-	d.deploymentsInfo = deployments
-	return deployments, nil
+	d.deploymentsInfo = deploymentInfo
+
+	d.resourceData = make([]ResourceData, len(deploymentInfo))
+	for i, deployment := range deploymentInfo {
+		d.resourceData[i] = DeploymentData{&deployment}
+	}
+
+	return nil
 }
 
-func (d *deploymentsModel) deploymentsToRows(deploymentInfo []k8s.DeploymentInfo) []table.Row {
-	rows := []table.Row{}
-	for _, deployment := range deploymentInfo {
-		rows = append(rows, table.Row{
+func (d *deploymentsModel) dataToRows() []table.Row {
+	rows := make([]table.Row, len(d.deploymentsInfo))
+	for i, deployment := range d.deploymentsInfo {
+		rows[i] = table.Row{
 			deployment.Namespace,
 			deployment.Name,
 			deployment.Ready,
 			deployment.UpToDate,
 			deployment.Available,
 			deployment.Age,
-		})
+		}
 	}
 	return rows
 }

@@ -1,10 +1,38 @@
 package k8s
 
 import (
+	"time"
+
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
+
+type ResourceType string
+
+const (
+	ResourceTypePod        ResourceType = "pod"
+	ResourceTypeDeployment ResourceType = "deployment"
+	ResourceTypeReplicaSet ResourceType = "replicaset"
+	ResourceTypeConfigMap  ResourceType = "configmap"
+	ResourceTypeService    ResourceType = "service"
+)
+
+type ResourceInfo struct {
+	Name      string
+	Namespace string
+	Kind      ResourceType
+	Age       string
+	CreatedAt time.Time
+}
+
+type ResourceManager interface {
+	GetName() string
+	GetNamespace() string
+	GetKind() ResourceType
+	Delete() error
+	GetPods() ([]PodInfo, error)
+}
 
 type Client struct {
 	Clientset *kubernetes.Clientset
@@ -19,7 +47,7 @@ func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
 	if kubeconfigPath == "" {
 		return nil, nil
 	}
-	
+
 	config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 	if err != nil {
 		return nil, err
@@ -32,6 +60,7 @@ func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
 
 	return &Client{
 		Clientset: clientset,
+		Config:    config,
 		Namespace: namespace,
 	}, nil
 }
