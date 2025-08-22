@@ -11,24 +11,24 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type deploymentsModel struct {
+type replicasetsModel struct {
 	list            []string
 	namespace       string
 	k8sClient       *k8s.Client
-	deploymentsInfo []k8s.DeploymentInfo
+	replicasetsInfo []k8s.ReplicaSetInfo
 	loading         bool
 	err             error
 	refreshInterval time.Duration
 }
 
-func NewDeployments(k k8s.Client, namespace string) (*deploymentsModel, error) {
-	deployments, err := k8s.FetchDeploymentList(k, namespace)
+func NewReplicaSets(k k8s.Client, namespace string) (*replicasetsModel, error) {
+	replicasets, err := k8s.FetchReplicaSetList(k, namespace)
 	if err != nil {
 		return nil, err
 	}
 
-	return &deploymentsModel{
-		list:            deployments,
+	return &replicasetsModel{
+		list:            replicasets,
 		namespace:       namespace,
 		k8sClient:       &k,
 		loading:         false,
@@ -37,23 +37,23 @@ func NewDeployments(k k8s.Client, namespace string) (*deploymentsModel, error) {
 	}, nil
 }
 
-func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
-	d.k8sClient = k
-	deploymentInfo, err := k8s.GetDeploymentsTableData(*k, d.namespace)
+func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
+	r.k8sClient = k
+	replicasetInfo, err := k8s.GetReplicaSetsTableData(*k, r.namespace)
 	if err != nil {
 		return nil, err
 	}
 
 	onSelect := func(selected string) tea.Msg {
-		deployment := k8s.NewDeployment(selected, d.namespace, *k)
-		p, err := deployment.GetPods()
+		replicaset := k8s.NewReplicaSet(selected, r.namespace, *k)
+		p, err := replicaset.GetPods()
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
 				Cluster: *k,
 			}
 		}
-		pods, err := NewPods(*k, d.namespace, p)
+		pods, err := NewPods(*k, r.namespace, p)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -77,36 +77,36 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	columns := []table.Column{
 		components.NewColumn("NAMESPACE", 0),
 		components.NewColumn("NAME", 0),
+		components.NewColumn("DESIRED", 0),
+		components.NewColumn("CURRENT", 0),
 		components.NewColumn("READY", 0),
-		components.NewColumn("UP-TO-DATE", 0),
-		components.NewColumn("AVAILABLE", 0),
 		components.NewColumn("AGE", 0),
 	}
 
-	colPercent := []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.15}
+	colPercent := []float64{0.15, 0.25, 0.12, 0.12, 0.15, 0.15}
 
-	rows := d.deploymentsToRows(deploymentInfo)
+	rows := r.replicasetsToRows(replicasetInfo)
 
 	fetchFunc := func() ([]table.Row, error) {
-		deps, err := d.fetchDeps(d.k8sClient)
+		rss, err := r.fetchReplicaSets(r.k8sClient)
 		if err != nil {
 			return nil, err
 		}
 
-		newRows := d.deploymentsToRows(deps)
+		newRows := r.replicasetsToRows(rss)
 		return newRows, nil
 	}
 
-	tableModel := ui.NewTable(columns, colPercent, rows, "Deployments in "+d.namespace, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(columns, colPercent, rows, "ReplicaSets in "+r.namespace, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": func() tea.Cmd {
 			checked := tableModel.GetCheckedItems()
 			var lastError error
 			for _, idx := range checked {
-				if idx < len(d.deploymentsInfo) {
-					deployment := d.deploymentsInfo[idx]
-					err := k8s.DeleteDeployment(*d.k8sClient, deployment.Namespace, deployment.Name)
+				if idx < len(r.replicasetsInfo) {
+					replicaset := r.replicasetsInfo[idx]
+					err := k8s.DeleteReplicaSet(*r.k8sClient, replicaset.Namespace, replicaset.Name)
 					if err != nil {
 						lastError = err
 					}
@@ -125,30 +125,30 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	return &autoRefreshModel{
 		inner:           tableModel,
-		refreshInterval: d.refreshInterval,
-		k8sClient:       d.k8sClient,
+		refreshInterval: r.refreshInterval,
+		k8sClient:       r.k8sClient,
 	}, nil
 }
 
-func (d *deploymentsModel) fetchDeps(client *k8s.Client) ([]k8s.DeploymentInfo, error) {
-	deployments, err := k8s.GetDeploymentsTableData(*client, d.namespace)
+func (r *replicasetsModel) fetchReplicaSets(client *k8s.Client) ([]k8s.ReplicaSetInfo, error) {
+	replicasets, err := k8s.GetReplicaSetsTableData(*client, r.namespace)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch deployments: %v", err)
+		return nil, fmt.Errorf("failed to fetch replicasets: %v", err)
 	}
-	d.deploymentsInfo = deployments
-	return deployments, nil
+	r.replicasetsInfo = replicasets
+	return replicasets, nil
 }
 
-func (d *deploymentsModel) deploymentsToRows(deploymentInfo []k8s.DeploymentInfo) []table.Row {
+func (r *replicasetsModel) replicasetsToRows(replicasetInfo []k8s.ReplicaSetInfo) []table.Row {
 	rows := []table.Row{}
-	for _, deployment := range deploymentInfo {
+	for _, replicaset := range replicasetInfo {
 		rows = append(rows, table.Row{
-			deployment.Namespace,
-			deployment.Name,
-			deployment.Ready,
-			deployment.UpToDate,
-			deployment.Available,
-			deployment.Age,
+			replicaset.Namespace,
+			replicaset.Name,
+			replicaset.Desired,
+			replicaset.Current,
+			replicaset.Ready,
+			replicaset.Age,
 		})
 	}
 	return rows

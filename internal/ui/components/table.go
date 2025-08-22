@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"fmt"
 )
 
 type UpdateActionsMsg struct {
@@ -96,7 +97,6 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case RefreshMsg:
 		rows, err := m.refreshFunc()
 		if err != nil {
-			utils.WriteString("err", err.Error())
 			return m, m.refreshTick()
 		}
 		m.UpdateRows(rows)
@@ -225,7 +225,6 @@ func (m *TableModel) refreshData() tea.Cmd {
 	return func() tea.Msg {
 		rows, err := m.refreshFunc()
 		if err != nil {
-			utils.WriteString("err", err.Error())
 			return err
 		}
 		m.UpdateRows(rows)

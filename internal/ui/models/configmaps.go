@@ -36,15 +36,15 @@ func NewConfigmaps(k k8s.Client, namespace string, cms []k8s.Configmap) (*config
 	}, nil
 }
 
-func (p *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
-	cms, err := k8s.FetchConfigmaps(*k, p.namespace, "")
+func (c *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
+	cms, err := k8s.FetchConfigmaps(*k, c.namespace, "")
 	if err != nil {
 		return nil, err
 	}
-	p.cms = cms
+	c.cms = cms
 
 	onSelect := func(selected string) tea.Msg {
-		cmDetails, err := NewConfigmapDetails(*k, p.namespace, selected).InitComponent(k)
+		cmDetails, err := NewConfigmapDetails(*k, c.namespace, selected).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -66,7 +66,7 @@ func (p *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	colPercent := []float64{0.30, 0.30, 0.16, 0.20}
 
 	rows := []table.Row{}
-	for _, cm := range p.cms {
+	for _, cm := range c.cms {
 		rows = append(rows, table.Row{
 			cm.Namespace,
 			cm.Name,
@@ -76,7 +76,7 @@ func (p *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	}
 
 	fetchFunc := func() ([]table.Row, error) {
-		cms, err := p.fetchConfigmaps(p.k8sClient)
+		cms, err := c.fetchConfigmaps(c.k8sClient)
 		if err != nil {
 			return nil, err
 		}
@@ -93,15 +93,15 @@ func (p *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return newRows, nil
 	}
 
-	tableModel := ui.NewTable(columns, colPercent, rows, "ConfigMaps in "+p.namespace, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(columns, colPercent, rows, "ConfigMaps in "+c.namespace, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": func() tea.Cmd {
 			checked := tableModel.GetCheckedItems()
 			for _, idx := range checked {
-				if idx < len(p.cms) {
-					cm := p.cms[idx]
-					err := k8s.DeleteConfigmap(*p.k8sClient, cm.Namespace, cm.Name)
+				if idx < len(c.cms) {
+					cm := c.cms[idx]
+					err := k8s.DeleteConfigmap(*c.k8sClient, cm.Namespace, cm.Name)
 					return func() tea.Msg {
 						return ErrorModel{error: err}
 					}
@@ -115,8 +115,8 @@ func (p *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	return &autoRefreshModel{
 		inner:           tableModel,
-		refreshInterval: p.refreshInterval,
-		k8sClient:       p.k8sClient,
+		refreshInterval: c.refreshInterval,
+		k8sClient:       c.k8sClient,
 	}, nil
 }
 

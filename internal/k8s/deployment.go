@@ -94,3 +94,11 @@ func (d *DeploymentInfo) GetPods() ([]PodInfo, error) {
 	}
 	return pods, nil
 }
+
+func DeleteDeployment(client Client, namespace string, deploymentName string) error {
+	err := client.Clientset.AppsV1().Deployments(namespace).Delete(context.Background(), deploymentName, metav1.DeleteOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to delete deployment %s: %v", deploymentName, err)
+	}
+	return nil
+}

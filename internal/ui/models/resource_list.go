@@ -59,6 +59,16 @@ func (rl ResourceList) InitComponent(k k8s.Client) (tea.Model, error) {
 			return nil, err
 		}
 		return configMapsComponent, nil
+	case "ReplicaSets":
+		replicaSets, err := NewReplicaSets(rl.kube, rl.namespace)
+		if err != nil {
+			return nil, err
+		}
+		replicaSetsComponent, err := replicaSets.InitComponent(&k)
+		if err != nil {
+			return nil, err
+		}
+		return replicaSetsComponent, nil
 	}
 
 	return components.NewList(items, rl.resourceType, onSelect), nil
