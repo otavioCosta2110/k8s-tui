@@ -8,8 +8,6 @@ import (
 func TestNewNamespaces(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
 
-	// Since NewNamespaces calls k8s.FetchNamespaces which would connect to a cluster,
-	// we'll test the structure with mock data
 	model := &namespacesModel{
 		list:      []string{"default", "kube-system", "kube-public"},
 		k8sClient: &client,
@@ -90,7 +88,6 @@ func TestNamespacesModelWithSystemNamespaces(t *testing.T) {
 		t.Error("Expected 6 namespaces in model")
 	}
 
-	// Test that all expected namespaces are present
 	expectedNamespaces := map[string]bool{
 		"default":         true,
 		"kube-system":     true,
@@ -148,7 +145,6 @@ func TestNamespacesModelWithError(t *testing.T) {
 	}
 }
 
-// Helper type for testing errors
 type testError struct {
 	message string
 }
@@ -178,7 +174,6 @@ func TestNamespacesModelClientAssignment(t *testing.T) {
 func TestNamespacesModelNamespaceDiversity(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
 
-	// Test with various namespace patterns
 	diverseNamespaces := []string{
 		"default",
 		"production",
@@ -208,7 +203,6 @@ func TestNamespacesModelNamespaceDiversity(t *testing.T) {
 		t.Error("Expected 15 namespaces in model")
 	}
 
-	// Test that we can find specific types of namespaces
 	hasSystemNamespace := false
 	hasAppNamespace := false
 	hasTeamNamespace := false

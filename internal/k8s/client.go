@@ -16,6 +16,8 @@ const (
 	ResourceTypeReplicaSet ResourceType = "replicaset"
 	ResourceTypeConfigMap  ResourceType = "configmap"
 	ResourceTypeService    ResourceType = "service"
+	ResourceTypeIngress    ResourceType = "ingress"
+	ResourceTypeSecret     ResourceType = "secret"
 )
 
 type ResourceInfo struct {

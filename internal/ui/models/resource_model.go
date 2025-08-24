@@ -6,7 +6,6 @@ import (
 
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
-	"otaviocosta2110/k8s-tui/utils"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -61,12 +60,9 @@ func (g *GenericResourceModel) createDeleteAction(tableModel *ui.TableModel) fun
 			return nil
 		}
 
-		utils.WriteString("log", fmt.Sprintf("Deleting %d", checked[0]))
 		for _, idx := range checked {
-			utils.WriteString("log", fmt.Sprintf("Deleting %d", idx))
 			if idx < len(g.resourceData) {
 				resource := g.resourceData[idx]
-				utils.WriteString("log", fmt.Sprintf("Deleting %s: %s/%s", g.resourceType, resource.GetNamespace(), resource.GetName()))
 				_ = g.deleteResource(resource)
 			}
 
@@ -78,7 +74,6 @@ func (g *GenericResourceModel) createDeleteAction(tableModel *ui.TableModel) fun
 }
 
 func (g *GenericResourceModel) deleteResource(resource ResourceData) error {
-	utils.WriteString("log", fmt.Sprintf("%s, %s, %s", g.resourceType, resource.GetNamespace(), resource.GetName()))
 	err := k8s.DeleteResource(*g.k8sClient, g.resourceType, resource.GetNamespace(), resource.GetName())
 	if err != nil {
 		return fmt.Errorf("failed to delete resource %s/%s: %v", resource.GetNamespace(), resource.GetName(), err)

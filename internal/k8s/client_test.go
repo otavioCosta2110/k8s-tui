@@ -16,6 +16,8 @@ func TestResourceTypeConstants(t *testing.T) {
 		{"ReplicaSet", ResourceTypeReplicaSet, "replicaset"},
 		{"ConfigMap", ResourceTypeConfigMap, "configmap"},
 		{"Service", ResourceTypeService, "service"},
+		{"Ingress", ResourceTypeIngress, "ingress"},
+		{"Secret", ResourceTypeSecret, "secret"},
 	}
 
 	for _, tt := range tests {
@@ -55,15 +57,11 @@ func TestResourceInfoStruct(t *testing.T) {
 }
 
 func TestResourceManagerInterface(t *testing.T) {
-	// Test that the interface is properly defined by checking its structure
-	// We can't test Pod implements ResourceManager directly as it may not
-	// implement all required methods, but we can verify the interface exists
 	if ResourceTypePod != "pod" {
 		t.Error("ResourceManager interface constants should be accessible")
 	}
 }
 
-// Test with mock client data - no real cluster connection
 func TestClientStruct(t *testing.T) {
 	client := &Client{
 		Namespace: "test-namespace",

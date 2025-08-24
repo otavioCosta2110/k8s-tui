@@ -88,7 +88,6 @@ func TestConfigmapsModelConfig(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	// Test that the config is properly set
 	if model.config.ResourceType != k8s.ResourceTypeConfigMap {
 		t.Error("Config ResourceType not set correctly")
 	}
@@ -148,7 +147,6 @@ func TestConfigmapsModelWithMultipleItems(t *testing.T) {
 		t.Error("Expected 3 rows")
 	}
 
-	// Test that all configmaps are represented
 	expectedNames := []string{"configmap-1", "configmap-2", "configmap-3"}
 	for i, row := range rows {
 		found := false

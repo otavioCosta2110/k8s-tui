@@ -119,7 +119,6 @@ func TestGenericResourceModelStateManagement(t *testing.T) {
 
 	model := NewGenericResourceModel(client, "test-namespace", config)
 
-	// Test initial state
 	if model.loading {
 		t.Error("Expected initial loading state to be false")
 	}
@@ -130,7 +129,6 @@ func TestGenericResourceModelStateManagement(t *testing.T) {
 		t.Error("Expected initial resourceData to be empty")
 	}
 
-	// Test state changes
 	model.loading = true
 	if !model.loading {
 		t.Error("Expected loading state to be changeable")
@@ -152,7 +150,6 @@ func TestGenericResourceModelWithResourceData(t *testing.T) {
 
 	model := NewGenericResourceModel(client, "test-namespace", config)
 
-	// Create mock resource data
 	mockData := []ResourceData{
 		&mockResourceData{name: "resource1", namespace: "test-namespace"},
 		&mockResourceData{name: "resource2", namespace: "test-namespace"},
@@ -201,7 +198,6 @@ func TestGenericResourceModelNamespaceVariations(t *testing.T) {
 	}
 }
 
-// Mock implementation of ResourceData for testing
 type mockResourceData struct {
 	name      string
 	namespace string

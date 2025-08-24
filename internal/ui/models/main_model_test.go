@@ -78,11 +78,9 @@ func TestMainModelUpdate(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
 	model := NewMainModel(client, "test-namespace")
 
-	// Test with a generic message
 	msg := "test message"
 	updatedModel, cmd := model.Update(msg)
 
-	// The main model doesn't change on updates
 	if updatedModel != model {
 		t.Error("Expected model to remain unchanged")
 	}
@@ -126,7 +124,6 @@ func TestMainModelWithVariousNamespaces(t *testing.T) {
 }
 
 func TestMainModelClientIsolation(t *testing.T) {
-	// Test that different models have isolated clients
 	client1 := k8s.Client{Namespace: "client1"}
 	client2 := k8s.Client{Namespace: "client2"}
 
@@ -153,7 +150,6 @@ func TestMainModelStateConsistency(t *testing.T) {
 
 	model := NewMainModel(client, originalNamespace)
 
-	// Test that multiple calls to Init return the same result
 	cmd1 := model.Init()
 	cmd2 := model.Init()
 
@@ -161,7 +157,6 @@ func TestMainModelStateConsistency(t *testing.T) {
 		t.Error("Expected both Init calls to return nil")
 	}
 
-	// Test that multiple calls to View return the same result
 	view1 := model.View()
 	view2 := model.View()
 
@@ -169,7 +164,6 @@ func TestMainModelStateConsistency(t *testing.T) {
 		t.Error("Expected View to be consistent")
 	}
 
-	// Test that the model state remains consistent
 	if model.namespace != originalNamespace {
 		t.Error("Expected namespace to remain unchanged")
 	}

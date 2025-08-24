@@ -11,11 +11,12 @@ import (
 )
 
 type YAMLViewer struct {
-	title    string
-	content  string
-	viewport viewport.Model
-	ready    bool
-	styles   *YAMLViewerStyles
+	title      string
+	content    string
+	viewport   viewport.Model
+	ready      bool
+	styles     *YAMLViewerStyles
+	customHelp string
 }
 
 type YAMLViewerStyles struct {
@@ -43,9 +44,23 @@ func NewYAMLViewer(title, content string) *YAMLViewer {
 	}
 }
 
+func NewYAMLViewerWithHelp(title, content, helpText string) *YAMLViewer {
+	highlighted := highlightYAML(content)
+	return &YAMLViewer{
+		title:      title,
+		content:    highlighted,
+		styles:     DefaultYAMLViewerStyles,
+		customHelp: helpText,
+	}
+}
+
+func (m *YAMLViewer) SetCustomHelp(helpText string) {
+	m.customHelp = helpText
+}
+
 func (m *YAMLViewer) Init() tea.Cmd {
 	contentWidth := global.ScreenWidth
-	m.viewport = viewport.New(contentWidth, global.ScreenHeight - global.Margin)
+	m.viewport = viewport.New(contentWidth, global.ScreenHeight-global.Margin)
 	return tea.Tick(time.Second, func(time.Time) tea.Msg {
 		return loadedMsg{}
 	})
@@ -101,9 +116,14 @@ func (m *YAMLViewer) headerView() string {
 }
 
 func (m *YAMLViewer) footerView() string {
+	helpText := "↑/↓: Scroll • q: Quit"
+	if m.customHelp != "" {
+		helpText = m.customHelp
+	}
+
 	help := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.styles.HelpTextColor)).
-		Render("↑/↓: Scroll • q: Quit")
+		Render(helpText)
 
 	return help
 }
@@ -130,4 +150,3 @@ func highlightYAML(yamlStr string) string {
 	}
 	return highlighted.String()
 }
-

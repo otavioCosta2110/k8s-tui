@@ -97,3 +97,73 @@ func (c ConfigMapData) GetColumns() table.Row {
 		c.Age,
 	}
 }
+
+type IngressData struct {
+	*k8s.IngressInfo
+}
+
+func (i IngressData) GetName() string {
+	return i.Name
+}
+
+func (i IngressData) GetNamespace() string {
+	return i.Namespace
+}
+
+func (i IngressData) GetColumns() table.Row {
+	return table.Row{
+		i.Namespace,
+		i.Name,
+		i.Class,
+		i.Hosts,
+		i.Address,
+		i.Ports,
+		i.Age,
+	}
+}
+
+type ServiceData struct {
+	*k8s.ServiceInfo
+}
+
+func (s ServiceData) GetName() string {
+	return s.Name
+}
+
+func (s ServiceData) GetNamespace() string {
+	return s.Namespace
+}
+
+func (s ServiceData) GetColumns() table.Row {
+	return table.Row{
+		s.Namespace,
+		s.Name,
+		s.Type,
+		s.ClusterIP,
+		s.ExternalIP,
+		s.Ports,
+		s.Age,
+	}
+}
+
+type SecretData struct {
+	*k8s.SecretInfo
+}
+
+func (s SecretData) GetName() string {
+	return s.Name
+}
+
+func (s SecretData) GetNamespace() string {
+	return s.Namespace
+}
+
+func (s SecretData) GetColumns() table.Row {
+	return table.Row{
+		s.Namespace,
+		s.Name,
+		s.Type,
+		s.Data,
+		s.Age,
+	}
+}

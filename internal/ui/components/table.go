@@ -3,7 +3,6 @@ package components
 import (
 	global "otaviocosta2110/k8s-tui/internal"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
-	"otaviocosta2110/k8s-tui/utils"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -108,7 +107,6 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		if action, exists := m.updateActions[msg.String()]; exists {
-			utils.WriteString("log2", "Executing action: "+msg.String())
 			action()
 			m.refreshData()
 			return m, nil

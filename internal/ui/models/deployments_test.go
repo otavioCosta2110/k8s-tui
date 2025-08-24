@@ -30,7 +30,6 @@ func TestDeploymentsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	// Set mock deployment data
 	model.deploymentsInfo = []k8s.DeploymentInfo{
 		{
 			Name:      "test-deployment",
@@ -80,7 +79,6 @@ func TestDeploymentsModelConfig(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	// Test that the config is properly set
 	if model.config.ResourceType != k8s.ResourceTypeDeployment {
 		t.Error("Config ResourceType not set correctly")
 	}

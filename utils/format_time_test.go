@@ -49,7 +49,7 @@ func TestFormatAge(t *testing.T) {
 	})
 
 	t.Run("Years and months", func(t *testing.T) {
-		past := now.Add(-2*365*24*time.Hour - 60*24*time.Hour) // 2 years + 60 days
+		past := now.Add(-2*365*24*time.Hour - 60*24*time.Hour)
 		result := FormatAge(past)
 		if result != "2y2mo" {
 			t.Errorf("Expected '2y2mo', got '%s'", result)

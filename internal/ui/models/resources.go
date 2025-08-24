@@ -25,6 +25,7 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 		"Pods",
 		"Deployments",
 		"Services",
+		"Ingresses",
 		"ConfigMaps",
 		"Secrets",
 		"ReplicaSets",

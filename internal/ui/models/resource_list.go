@@ -48,7 +48,7 @@ func (rl ResourceList) InitComponent(k k8s.Client) (tea.Model, error) {
 			return nil, err
 		}
 		return deploymentsComponent, nil
-	
+
 	case "ConfigMaps":
 		configMaps, err := NewConfigmaps(rl.kube, rl.namespace, nil)
 		if err != nil {
@@ -69,6 +69,36 @@ func (rl ResourceList) InitComponent(k k8s.Client) (tea.Model, error) {
 			return nil, err
 		}
 		return replicaSetsComponent, nil
+	case "Ingresses":
+		ingresses, err := NewIngresses(rl.kube, rl.namespace)
+		if err != nil {
+			return nil, err
+		}
+		ingressesComponent, err := ingresses.InitComponent(&k)
+		if err != nil {
+			return nil, err
+		}
+		return ingressesComponent, nil
+	case "Services":
+		services, err := NewServices(rl.kube, rl.namespace)
+		if err != nil {
+			return nil, err
+		}
+		servicesComponent, err := services.InitComponent(&k)
+		if err != nil {
+			return nil, err
+		}
+		return servicesComponent, nil
+	case "Secrets":
+		secrets, err := NewSecrets(rl.kube, rl.namespace)
+		if err != nil {
+			return nil, err
+		}
+		secretsComponent, err := secrets.InitComponent(&k)
+		if err != nil {
+			return nil, err
+		}
+		return secretsComponent, nil
 	}
 
 	return components.NewList(items, rl.resourceType, onSelect), nil

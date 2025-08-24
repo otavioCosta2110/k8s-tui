@@ -4,6 +4,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"testing"
 	"time"
+	"slices"
 )
 
 func TestNewReplicaSets(t *testing.T) {
@@ -30,7 +31,6 @@ func TestReplicaSetsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	// Set mock replicaset data
 	model.replicasetsInfo = []k8s.ReplicaSetInfo{
 		{
 			Name:      "test-replicaset",
@@ -80,7 +80,6 @@ func TestReplicaSetsModelConfig(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	// Test that the config is properly set
 	if model.config.ResourceType != k8s.ResourceTypeReplicaSet {
 		t.Error("Config ResourceType not set correctly")
 	}
@@ -121,7 +120,6 @@ func TestReplicaSetsModelWithMultipleItems(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	// Set mock data with multiple replicasets
 	model.replicasetsInfo = []k8s.ReplicaSetInfo{
 		{
 			Name:      "replicaset-1",
@@ -146,16 +144,9 @@ func TestReplicaSetsModelWithMultipleItems(t *testing.T) {
 		t.Error("Expected 2 rows")
 	}
 
-	// Test that all replicasets are represented
 	expectedNames := []string{"replicaset-1", "replicaset-2"}
 	for i, row := range rows {
-		found := false
-		for _, expectedName := range expectedNames {
-			if row[1] == expectedName {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(expectedNames, row[1])
 		if !found {
 			t.Errorf("ReplicaSet name %s not found in row %d", row[1], i)
 		}
@@ -169,7 +160,6 @@ func TestReplicaSetsModelWithDifferentStates(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	// Test different replica counts
 	model.replicasetsInfo = []k8s.ReplicaSetInfo{
 		{
 			Name:      "healthy-rs",
@@ -202,7 +192,6 @@ func TestReplicaSetsModelWithDifferentStates(t *testing.T) {
 		t.Error("Expected 3 rows")
 	}
 
-	// Verify the data is correctly mapped
 	for _, row := range rows {
 		switch row[1] {
 		case "healthy-rs":
