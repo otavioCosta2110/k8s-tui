@@ -4,6 +4,7 @@ import (
 	"fmt"
 	global "otaviocosta2110/k8s-tui/internal"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"time"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -19,34 +20,65 @@ type Metrics struct {
 	DaemonSetsNumber   int
 	JobsNumber         int
 	Error              error
+	Loading            bool
+	LastUpdated        time.Time
 }
+
+type MetricsManager struct {
+	loader   *k8s.MetricsLoader
+	metrics  Metrics
+	lastLoad time.Time
+}
+
+var metricsManager *MetricsManager
 
 func (m Metrics) GetMetrics() Metrics {
 	return m
 }
 
+func NewMetricsManager(k k8s.Client) *MetricsManager {
+	if metricsManager == nil {
+		metricsManager = &MetricsManager{
+			loader: k8s.NewMetricsLoader(k),
+		}
+		metricsManager.loader.Start()
+	}
+	return metricsManager
+}
+
+func (mm *MetricsManager) GetMetrics() Metrics {
+	if time.Since(mm.lastLoad) > 30*time.Second {
+		mm.loader.Start()
+		mm.lastLoad = time.Now()
+	}
+
+	k8sMetrics := mm.loader.GetMetrics()
+
+	return Metrics{
+		PodsNumber:         k8sMetrics.PodsNumber,
+		NodesNumber:        k8sMetrics.NodesNumber,
+		NamespacesNumber:   k8sMetrics.NamespacesNumber,
+		DeploymentsNumber:  k8sMetrics.DeploymentsNumber,
+		ServicesNumber:     k8sMetrics.ServicesNumber,
+		ReplicaSetsNumber:  k8sMetrics.ReplicaSetsNumber,
+		StatefulSetsNumber: k8sMetrics.StatefulSetsNumber,
+		DaemonSetsNumber:   k8sMetrics.DaemonSetsNumber,
+		JobsNumber:         k8sMetrics.JobsNumber,
+		Error:              k8sMetrics.Error,
+		Loading:            mm.loader.IsLoading(),
+		LastUpdated:        k8sMetrics.LastUpdated,
+	}
+}
+
+func (mm *MetricsManager) Stop() {
+	if mm.loader != nil {
+		mm.loader.Stop()
+	}
+}
+
 func NewMetrics(k k8s.Client) (Metrics, error) {
-	metrics, err := k8s.NewMetrics(k)
-
-	returnedMetrics := Metrics{
-		PodsNumber:         metrics.PodsNumber,
-		NodesNumber:        metrics.NodesNumber,
-		NamespacesNumber:   metrics.NamespacesNumber,
-		DeploymentsNumber:  metrics.DeploymentsNumber,
-		ServicesNumber:     metrics.ServicesNumber,
-		ReplicaSetsNumber:  metrics.ReplicaSetsNumber,
-		StatefulSetsNumber: metrics.StatefulSetsNumber,
-		DaemonSetsNumber:   metrics.DaemonSetsNumber,
-		JobsNumber:         metrics.JobsNumber,
-		Error:              metrics.Error,
-	}
-
-	if err != nil {
-		metrics.Error = err
-		return returnedMetrics, err
-	}
-
-	return returnedMetrics, nil
+	manager := NewMetricsManager(k)
+	return manager.GetMetrics(), nil
 }
 
 var (
@@ -72,6 +104,17 @@ func (m Metrics) ViewMetrics() string {
 		Width(columnWidth).
 		Padding(0, 2)
 
+	loadingStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#FFA500")).
+		Italic(true)
+
+	formatMetric := func(label string, value int, loading bool) string {
+		if loading && value == 0 {
+			return metricStyle.Render(label+":") + " " + loadingStyle.Render("Loading...")
+		}
+		return metricStyle.Render(label+":") + " " + valueStyle.Render(fmt.Sprint(value))
+	}
+
 	createSection := func(title string, metrics ...string) string {
 		content := []string{titleStyle.Render(title)}
 		for _, m := range metrics {
@@ -84,23 +127,23 @@ func (m Metrics) ViewMetrics() string {
 
 	clusterSection := createSection(
 		"Cluster Metrics",
-		metricStyle.Render("Pods:")+" "+valueStyle.Render(fmt.Sprint(m.PodsNumber)),
-		metricStyle.Render("Nodes:")+" "+valueStyle.Render(fmt.Sprint(m.NodesNumber)),
-		metricStyle.Render("Namespaces:")+" "+valueStyle.Render(fmt.Sprint(m.NamespacesNumber)),
+		formatMetric("Pods", m.PodsNumber, m.Loading),
+		formatMetric("Nodes", m.NodesNumber, m.Loading),
+		formatMetric("Namespaces", m.NamespacesNumber, m.Loading),
 	)
 
 	workloadsSection := createSection(
 		"Workloads",
-		metricStyle.Render("Deployments:")+" "+valueStyle.Render(fmt.Sprint(m.DeploymentsNumber)),
-		metricStyle.Render("ReplicaSets:")+" "+valueStyle.Render(fmt.Sprint(m.ReplicaSetsNumber)),
-		metricStyle.Render("StatefulSets:")+" "+valueStyle.Render(fmt.Sprint(m.StatefulSetsNumber)),
+		formatMetric("Deployments", m.DeploymentsNumber, m.Loading),
+		formatMetric("ReplicaSets", m.ReplicaSetsNumber, m.Loading),
+		formatMetric("StatefulSets", m.StatefulSetsNumber, m.Loading),
 	)
 
 	servicesSection := createSection(
 		"Services & Jobs",
-		metricStyle.Render("Services:")+" "+valueStyle.Render(fmt.Sprint(m.ServicesNumber)),
-		metricStyle.Render("DaemonSets:")+" "+valueStyle.Render(fmt.Sprint(m.DaemonSetsNumber)),
-		metricStyle.Render("Jobs:")+" "+valueStyle.Render(fmt.Sprint(m.JobsNumber)),
+		formatMetric("Services", m.ServicesNumber, m.Loading),
+		formatMetric("DaemonSets", m.DaemonSetsNumber, m.Loading),
+		formatMetric("Jobs", m.JobsNumber, m.Loading),
 	)
 
 	return lipgloss.PlaceHorizontal(
