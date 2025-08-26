@@ -20,6 +20,8 @@ func DeleteResource(client Client, resourceType ResourceType, namespace, name st
 		return DeleteService(client, namespace, name)
 	case ResourceTypeSecret:
 		return DeleteSecret(client, namespace, name)
+	case ResourceTypeNode:
+		return DeleteNode(client, name) 
 	default:
 		return fmt.Errorf("unsupported resource type: %s", resourceType)
 	}
@@ -57,6 +59,8 @@ func ListResources(client Client, resourceType ResourceType, namespace string) (
 		return FetchServiceList(client, namespace)
 	case ResourceTypeSecret:
 		return FetchSecretList(client, namespace)
+	case ResourceTypeNode:
+		return FetchNodeList(client) 
 	default:
 		return nil, fmt.Errorf("unsupported resource type: %s", resourceType)
 	}
@@ -166,6 +170,21 @@ func GetResourceInfo(client Client, resourceType ResourceType, namespace, name s
 					Namespace: secret.Namespace,
 					Kind:      ResourceTypeSecret,
 					Age:       secret.Age,
+				}, nil
+			}
+		}
+	case ResourceTypeNode:
+		nodes, err := GetNodesTableData(client)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			if node.Name == name {
+				return &ResourceInfo{
+					Name:      node.Name,
+					Namespace: "", 
+					Kind:      ResourceTypeNode,
+					Age:       node.Age,
 				}, nil
 			}
 		}

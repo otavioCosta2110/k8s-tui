@@ -18,6 +18,7 @@ const (
 	ResourceTypeService    ResourceType = "service"
 	ResourceTypeIngress    ResourceType = "ingress"
 	ResourceTypeSecret     ResourceType = "secret"
+	ResourceTypeNode       ResourceType = "node"
 )
 
 type ResourceInfo struct {

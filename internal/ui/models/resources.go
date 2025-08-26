@@ -8,8 +8,8 @@ import (
 )
 
 type Resource struct {
-	kube       k8s.Client
-	namespace  string
+	kube         k8s.Client
+	namespace    string
 	resourceType string
 }
 
@@ -29,6 +29,7 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 		"ConfigMaps",
 		"Secrets",
 		"ReplicaSets",
+		"Nodes",
 	}
 
 	onSelect := func(selected string) tea.Msg {
@@ -36,7 +37,7 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 		newResourceList, err := NewResourceList(r.kube, r.namespace, r.resourceType).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
-				Error:   err,
+				Error: err,
 			}
 		}
 		return components.NavigateMsg{
@@ -46,4 +47,3 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 
 	return components.NewList(resourceTypes, "Resource Types", onSelect)
 }
-

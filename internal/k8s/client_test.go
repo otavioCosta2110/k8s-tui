@@ -18,6 +18,7 @@ func TestResourceTypeConstants(t *testing.T) {
 		{"Service", ResourceTypeService, "service"},
 		{"Ingress", ResourceTypeIngress, "ingress"},
 		{"Secret", ResourceTypeSecret, "secret"},
+		{"Node", ResourceTypeNode, "node"},
 	}
 
 	for _, tt := range tests {

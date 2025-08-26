@@ -167,3 +167,28 @@ func (s SecretData) GetColumns() table.Row {
 		s.Age,
 	}
 }
+
+type NodeData struct {
+	*k8s.NodeInfo
+}
+
+func (n NodeData) GetName() string {
+	return n.Name
+}
+
+func (n NodeData) GetNamespace() string {
+	return "" 
+}
+
+func (n NodeData) GetColumns() table.Row {
+	return table.Row{
+		n.Name,
+		n.Status,
+		n.Roles,
+		n.Version,
+		n.CPU,
+		n.Memory,
+		n.Pods,
+		n.Age,
+	}
+}

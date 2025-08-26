@@ -259,7 +259,6 @@ func TestSecretDetailsModelView(t *testing.T) {
 		},
 	}
 
-	// Test DescribeWithVisibility directly
 	desc, err := model.secret.DescribeWithVisibility(false)
 	if err != nil {
 		t.Errorf("DescribeWithVisibility failed: %v", err)
@@ -278,7 +277,6 @@ func TestSecretDetailsModelView(t *testing.T) {
 		return
 	}
 
-	// Initialize the YAMLViewer
 	windowMsg := tea.WindowSizeMsg{Width: 80, Height: 24}
 	_, _ = model.yamlViewer.Update(windowMsg)
 
@@ -322,12 +320,10 @@ func TestSecretDetailsModelTitleUpdate(t *testing.T) {
 
 	t.Logf("YAMLViewer after init: %v", model.yamlViewer)
 
-	// Initially, showValues should be false
 	if model.showValues != false {
 		t.Error("Expected showValues to be false initially")
 	}
 
-	// Test that the secret description contains the expected content when showValues is false
 	desc, err := model.secret.DescribeWithVisibility(false)
 	if err != nil {
 		t.Errorf("Expected no error getting description, got %v", err)
@@ -336,7 +332,6 @@ func TestSecretDetailsModelTitleUpdate(t *testing.T) {
 		t.Error("Expected description to contain 'dataKeys' when showValues is false")
 	}
 
-	// Test that the secret description contains the expected content when showValues is true
 	desc, err = model.secret.DescribeWithVisibility(true)
 	if err != nil {
 		t.Errorf("Expected no error getting description, got %v", err)
@@ -345,11 +340,9 @@ func TestSecretDetailsModelTitleUpdate(t *testing.T) {
 		t.Error("Expected description to contain 'data:' when showValues is true")
 	}
 
-	// Toggle visibility
 	msg := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'v'}}
 	updatedModel, _ := model.Update(msg)
 
-	// Check that the model was updated correctly
 	if secretModel, ok := updatedModel.(*secretDetailsModel); ok {
 		if secretModel.showValues != true {
 			t.Error("Expected showValues to be true after pressing 'v'")
@@ -363,10 +356,8 @@ func TestSecretDetailsModelErrorHandling(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
 	model := NewSecretDetails(client, "default", "test-secret")
 
-	// Set an error
 	model.err = fmt.Errorf("test error")
 
-	// Test that View returns the error
 	view := model.View()
 	if !containsString(view, "Error: test error") {
 		t.Error("Expected view to contain error message")
@@ -377,7 +368,6 @@ func TestSecretDetailsModelQuit(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
 	model := NewSecretDetails(client, "default", "test-secret")
 
-	// Set up mock secret data
 	model.secret.Raw = &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-secret",
