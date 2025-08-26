@@ -16,6 +16,7 @@ func TestResourceTypeConstants(t *testing.T) {
 		{"ReplicaSet", ResourceTypeReplicaSet, "replicaset"},
 		{"ConfigMap", ResourceTypeConfigMap, "configmap"},
 		{"Service", ResourceTypeService, "service"},
+		{"ServiceAccount", ResourceTypeServiceAccount, "serviceaccount"},
 		{"Ingress", ResourceTypeIngress, "ingress"},
 		{"Secret", ResourceTypeSecret, "secret"},
 		{"Node", ResourceTypeNode, "node"},

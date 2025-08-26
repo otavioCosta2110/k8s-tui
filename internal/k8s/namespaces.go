@@ -11,7 +11,7 @@ type Namespaces struct {
 	k Client
 }
 
-func FetchNamespaces(k Client)  ([]string, error) {
+func FetchNamespaces(k Client) ([]string, error) {
 	if k.Clientset == nil {
 		return []string{}, errors.New("clientset is nil")
 	}

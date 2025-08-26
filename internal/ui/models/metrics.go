@@ -41,7 +41,6 @@ func NewMetrics(k k8s.Client) (Metrics, error) {
 		Error:              metrics.Error,
 	}
 
-
 	if err != nil {
 		metrics.Error = err
 		return returnedMetrics, err

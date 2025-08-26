@@ -87,6 +87,13 @@ func (rf *ResourceFactory) registerResources() {
 		HelpText:    "View and manage Kubernetes secrets securely",
 	})
 
+	rf.registerResource("ServiceAccounts", createServiceAccountsModel, ResourceMetadata{
+		Name:        "ServiceAccounts",
+		Description: "Service accounts for API access and authentication",
+		Category:    "Configuration",
+		HelpText:    "View and manage Kubernetes service accounts",
+	})
+
 	rf.registerResource("ReplicaSets", createReplicaSetsModel, ResourceMetadata{
 		Name:        "ReplicaSets",
 		Description: "Pod replication and scaling controllers",
@@ -179,6 +186,14 @@ func createConfigMapsModel(k k8s.Client, namespace string) (ResourceModel, error
 
 func createSecretsModel(k k8s.Client, namespace string) (ResourceModel, error) {
 	model, err := NewSecrets(k, namespace)
+	if err != nil {
+		return nil, err
+	}
+	return model, nil
+}
+
+func createServiceAccountsModel(k k8s.Client, namespace string) (ResourceModel, error) {
+	model, err := NewServiceAccounts(k, namespace)
 	if err != nil {
 		return nil, err
 	}

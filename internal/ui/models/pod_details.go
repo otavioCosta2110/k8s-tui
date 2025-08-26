@@ -25,7 +25,7 @@ func NewPodDetails(k k8s.Client, namespace, podName string) *podDetailsModel {
 
 func (p *podDetailsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	p.k8sClient = k
-	
+
 	desc, err := p.pod.Describe()
 	if err != nil {
 		return nil, err

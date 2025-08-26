@@ -12,4 +12,4 @@ type NavigateMsg struct {
 	Error     error
 }
 
-type RefreshMsg struct { }
+type RefreshMsg struct{}

@@ -64,7 +64,7 @@ func GetNodesTableData(client Client) ([]NodeInfo, error) {
 
 		cpu, memory := getNodeResources(&node)
 
-		pods := "N/A" 
+		pods := "N/A"
 
 		nodeInfos = append(nodeInfos, NodeInfo{
 			Name:    node.Name,

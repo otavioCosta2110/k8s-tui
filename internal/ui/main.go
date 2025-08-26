@@ -22,7 +22,7 @@ type AppModel struct {
 
 func NewAppModel() *AppModel {
 	cfg := cli.ParseFlags()
-	
+
 	kubeClient, err := k8s.NewClient(cfg.KubeconfigPath, cfg.Namespace)
 	if err == nil && kubeClient != nil {
 		mainModel, err := models.NewMainModel(*kubeClient, cfg.Namespace).InitComponent(*kubeClient)

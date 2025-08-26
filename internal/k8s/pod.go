@@ -72,7 +72,7 @@ func (p *Pod) Describe() (string, error) {
 	p.YAML = string(yamlData)
 	return p.YAML, nil
 }
-func (pod Pod)DescribePod(events *corev1.EventList) (any, error) {
+func (pod Pod) DescribePod(events *corev1.EventList) (any, error) {
 	type ContainerDescription struct {
 		Name         string            `yaml:"name"`
 		ContainerID  string            `yaml:"containerID,omitempty"`
@@ -336,7 +336,6 @@ func (p *Pod) GetContainers() ([]string, error) {
 
 	return containers, nil
 }
-
 
 func formatTime(t metav1.Time) string {
 	return t.Format(time.RFC1123)

@@ -2,9 +2,9 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"slices"
 	"testing"
 	"time"
-	"slices"
 )
 
 func TestNewReplicaSets(t *testing.T) {

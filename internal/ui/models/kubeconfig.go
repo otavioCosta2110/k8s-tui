@@ -54,7 +54,7 @@ func (k kubeconfigModel) InitComponent(_ *k8s.Client) (tea.Model, error) {
 		if err != nil {
 			println("Error creating clientset:", err)
 			return components.NavigateMsg{
-				Error:   err,
+				Error: err,
 			}
 		}
 

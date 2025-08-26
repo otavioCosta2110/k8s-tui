@@ -28,6 +28,7 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 		"Ingresses",
 		"ConfigMaps",
 		"Secrets",
+		"ServiceAccounts",
 		"ReplicaSets",
 		"Nodes",
 	}

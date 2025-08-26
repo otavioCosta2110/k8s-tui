@@ -20,7 +20,7 @@ func FormatAge(t time.Time) string {
 		hours := seconds / 3600
 		remainingMinutes := (seconds % 3600) / 60
 		return fmt.Sprintf("%dh%dm", hours, remainingMinutes)
-	case seconds < 31536000: 
+	case seconds < 31536000:
 		days := seconds / 86400
 		remainingHours := (seconds % 86400) / 3600
 		return fmt.Sprintf("%dd%dh", days, remainingHours)
@@ -34,4 +34,3 @@ func FormatAge(t time.Time) string {
 		return fmt.Sprintf("%dy", years)
 	}
 }
-

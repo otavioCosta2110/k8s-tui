@@ -168,6 +168,27 @@ func (s SecretData) GetColumns() table.Row {
 	}
 }
 
+type ServiceAccountData struct {
+	*k8s.ServiceAccountInfo
+}
+
+func (s ServiceAccountData) GetName() string {
+	return s.Name
+}
+
+func (s ServiceAccountData) GetNamespace() string {
+	return s.Namespace
+}
+
+func (s ServiceAccountData) GetColumns() table.Row {
+	return table.Row{
+		s.Namespace,
+		s.Name,
+		s.Secrets,
+		s.Age,
+	}
+}
+
 type NodeData struct {
 	*k8s.NodeInfo
 }
@@ -177,7 +198,7 @@ func (n NodeData) GetName() string {
 }
 
 func (n NodeData) GetNamespace() string {
-	return "" 
+	return ""
 }
 
 func (n NodeData) GetColumns() table.Row {

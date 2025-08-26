@@ -18,10 +18,12 @@ func DeleteResource(client Client, resourceType ResourceType, namespace, name st
 		return DeleteIngress(client, namespace, name)
 	case ResourceTypeService:
 		return DeleteService(client, namespace, name)
+	case ResourceTypeServiceAccount:
+		return DeleteServiceAccount(client, namespace, name)
 	case ResourceTypeSecret:
 		return DeleteSecret(client, namespace, name)
 	case ResourceTypeNode:
-		return DeleteNode(client, name) 
+		return DeleteNode(client, name)
 	default:
 		return fmt.Errorf("unsupported resource type: %s", resourceType)
 	}
@@ -57,10 +59,12 @@ func ListResources(client Client, resourceType ResourceType, namespace string) (
 		return FetchIngressList(client, namespace)
 	case ResourceTypeService:
 		return FetchServiceList(client, namespace)
+	case ResourceTypeServiceAccount:
+		return FetchServiceAccountList(client, namespace)
 	case ResourceTypeSecret:
 		return FetchSecretList(client, namespace)
 	case ResourceTypeNode:
-		return FetchNodeList(client) 
+		return FetchNodeList(client)
 	default:
 		return nil, fmt.Errorf("unsupported resource type: %s", resourceType)
 	}
@@ -158,6 +162,21 @@ func GetResourceInfo(client Client, resourceType ResourceType, namespace, name s
 				}, nil
 			}
 		}
+	case ResourceTypeServiceAccount:
+		serviceaccounts, err := GetServiceAccountsTableData(client, namespace)
+		if err != nil {
+			return nil, err
+		}
+		for _, sa := range serviceaccounts {
+			if sa.Name == name {
+				return &ResourceInfo{
+					Name:      sa.Name,
+					Namespace: sa.Namespace,
+					Kind:      ResourceTypeServiceAccount,
+					Age:       sa.Age,
+				}, nil
+			}
+		}
 	case ResourceTypeSecret:
 		secrets, err := GetSecretsTableData(client, namespace)
 		if err != nil {
@@ -182,7 +201,7 @@ func GetResourceInfo(client Client, resourceType ResourceType, namespace, name s
 			if node.Name == name {
 				return &ResourceInfo{
 					Name:      node.Name,
-					Namespace: "", 
+					Namespace: "",
 					Kind:      ResourceTypeNode,
 					Age:       node.Age,
 				}, nil

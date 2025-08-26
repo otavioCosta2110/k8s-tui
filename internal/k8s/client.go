@@ -11,14 +11,15 @@ import (
 type ResourceType string
 
 const (
-	ResourceTypePod        ResourceType = "pod"
-	ResourceTypeDeployment ResourceType = "deployment"
-	ResourceTypeReplicaSet ResourceType = "replicaset"
-	ResourceTypeConfigMap  ResourceType = "configmap"
-	ResourceTypeService    ResourceType = "service"
-	ResourceTypeIngress    ResourceType = "ingress"
-	ResourceTypeSecret     ResourceType = "secret"
-	ResourceTypeNode       ResourceType = "node"
+	ResourceTypePod            ResourceType = "pod"
+	ResourceTypeDeployment     ResourceType = "deployment"
+	ResourceTypeReplicaSet     ResourceType = "replicaset"
+	ResourceTypeConfigMap      ResourceType = "configmap"
+	ResourceTypeService        ResourceType = "service"
+	ResourceTypeServiceAccount ResourceType = "serviceaccount"
+	ResourceTypeIngress        ResourceType = "ingress"
+	ResourceTypeSecret         ResourceType = "secret"
+	ResourceTypeNode           ResourceType = "node"
 )
 
 type ResourceInfo struct {

@@ -1,7 +1,6 @@
 package k8s
 
-import (
-)
+import ()
 
 type Metrics struct {
 	PodsNumber         int

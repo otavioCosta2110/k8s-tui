@@ -9,54 +9,54 @@ import (
 )
 
 type RefreshableModel interface {
-    tea.Model
-    Refresh() (tea.Model, tea.Cmd)
+	tea.Model
+	Refresh() (tea.Model, tea.Cmd)
 }
 
 type autoRefreshModel struct {
-    inner           RefreshableModel
-    refreshInterval time.Duration
-    lastRefresh     time.Time
-    k8sClient       *k8s.Client
+	inner           RefreshableModel
+	refreshInterval time.Duration
+	lastRefresh     time.Time
+	k8sClient       *k8s.Client
 }
 
 func NewAutoRefreshModel(inner RefreshableModel, interval time.Duration, client *k8s.Client) *autoRefreshModel {
-    return &autoRefreshModel{
-        inner:           inner,
-        refreshInterval: interval,
-        k8sClient:       client,
-    }
+	return &autoRefreshModel{
+		inner:           inner,
+		refreshInterval: interval,
+		k8sClient:       client,
+	}
 }
 
 func (m *autoRefreshModel) Init() tea.Cmd {
-    return tea.Batch(
-        m.inner.Init(),
-        m.refreshTick(),
-    )
+	return tea.Batch(
+		m.inner.Init(),
+		m.refreshTick(),
+	)
 }
 
 func (m *autoRefreshModel) refreshTick() tea.Cmd {
-    return tea.Tick(m.refreshInterval, func(t time.Time) tea.Msg {
-        return components.RefreshMsg{}
-    })
+	return tea.Tick(m.refreshInterval, func(t time.Time) tea.Msg {
+		return components.RefreshMsg{}
+	})
 }
 
 func (m *autoRefreshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-    switch msg := msg.(type) {
-    case components.RefreshMsg:
-        var cmd tea.Cmd
-        updatedModel, cmd := m.inner.Refresh()
-        m.inner = updatedModel.(RefreshableModel)
-        return m, tea.Batch(cmd, m.refreshTick())
-        
-    default:
-        var cmd tea.Cmd
-        updatedModel, cmd := m.inner.Update(msg)
-        m.inner = updatedModel.(RefreshableModel)
-        return m, cmd
-    }
+	switch msg := msg.(type) {
+	case components.RefreshMsg:
+		var cmd tea.Cmd
+		updatedModel, cmd := m.inner.Refresh()
+		m.inner = updatedModel.(RefreshableModel)
+		return m, tea.Batch(cmd, m.refreshTick())
+
+	default:
+		var cmd tea.Cmd
+		updatedModel, cmd := m.inner.Update(msg)
+		m.inner = updatedModel.(RefreshableModel)
+		return m, cmd
+	}
 }
 
 func (m *autoRefreshModel) View() string {
-    return m.inner.View()
+	return m.inner.View()
 }

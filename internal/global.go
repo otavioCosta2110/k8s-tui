@@ -23,8 +23,7 @@ var kubeconfigsDefaultLocation = func() string {
 	return filepath.Join(home, ".kube")
 }()
 
-func GetKubeconfigsLocations() []string{
-  KubeconfigsLocations := []string{kubeconfigsDefaultLocation}
-  return KubeconfigsLocations
+func GetKubeconfigsLocations() []string {
+	KubeconfigsLocations := []string{kubeconfigsDefaultLocation}
+	return KubeconfigsLocations
 }
-
