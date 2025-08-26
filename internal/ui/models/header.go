@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	HeaderRefreshInterval = 5 * time.Second
+	HeaderRefreshInterval = 10 * time.Second
 )
 
 type HeaderRefreshMsg struct{}
