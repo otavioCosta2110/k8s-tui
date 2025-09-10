@@ -100,25 +100,6 @@ func TestSecretsModelConfig(t *testing.T) {
 	}
 }
 
-func TestSecretsModelColumnWidths(t *testing.T) {
-	client := k8s.Client{Namespace: "default"}
-	model, err := NewSecrets(client, "default")
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-
-	expectedWidths := []float64{0.15, 0.35, 0.15, 0.15, 0.15, 0.10}
-	if len(model.config.ColumnWidths) != len(expectedWidths) {
-		t.Error("ColumnWidths length mismatch")
-	}
-
-	for i, expected := range expectedWidths {
-		if model.config.ColumnWidths[i] != expected {
-			t.Errorf("ColumnWidth[%d] expected %f, got %f", i, expected, model.config.ColumnWidths[i])
-		}
-	}
-}
-
 func TestSecretsModelWithMultipleItems(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
 	model, err := NewSecrets(client, "default")

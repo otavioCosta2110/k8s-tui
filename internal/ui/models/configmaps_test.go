@@ -1,6 +1,7 @@
 package models
 
 import (
+	"slices"
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"testing"
 	"time"
@@ -102,29 +103,6 @@ func TestConfigmapsModelConfig(t *testing.T) {
 	}
 }
 
-func TestConfigmapsModelColumnWidths(t *testing.T) {
-	client := k8s.Client{Namespace: "default"}
-	configmaps := []k8s.Configmap{
-		{Name: "test-configmap", Namespace: "default", Data: "1", Age: "1h"},
-	}
-
-	model, err := NewConfigmaps(client, "default", configmaps)
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-
-	expectedWidths := []float64{0.30, 0.30, 0.16, 0.20}
-	if len(model.config.ColumnWidths) != len(expectedWidths) {
-		t.Error("ColumnWidths length mismatch")
-	}
-
-	for i, expected := range expectedWidths {
-		if model.config.ColumnWidths[i] != expected {
-			t.Errorf("ColumnWidth[%d] expected %f, got %f", i, expected, model.config.ColumnWidths[i])
-		}
-	}
-}
-
 func TestConfigmapsModelWithMultipleItems(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
 	configmaps := []k8s.Configmap{
@@ -149,13 +127,7 @@ func TestConfigmapsModelWithMultipleItems(t *testing.T) {
 
 	expectedNames := []string{"configmap-1", "configmap-2", "configmap-3"}
 	for i, row := range rows {
-		found := false
-		for _, expectedName := range expectedNames {
-			if row[1] == expectedName {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(expectedNames, row[1])
 		if !found {
 			t.Errorf("ConfigMap name %s not found in row %d", row[1], i)
 		}

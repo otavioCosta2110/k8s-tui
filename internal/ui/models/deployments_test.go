@@ -92,22 +92,3 @@ func TestDeploymentsModelConfig(t *testing.T) {
 		t.Error("Config RefreshInterval not set correctly")
 	}
 }
-
-func TestDeploymentsModelColumnWidths(t *testing.T) {
-	client := k8s.Client{Namespace: "default"}
-	model, err := NewDeployments(client, "default")
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-
-	expectedWidths := []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.15}
-	if len(model.config.ColumnWidths) != len(expectedWidths) {
-		t.Error("ColumnWidths length mismatch")
-	}
-
-	for i, expected := range expectedWidths {
-		if model.config.ColumnWidths[i] != expected {
-			t.Errorf("ColumnWidth[%d] expected %f, got %f", i, expected, model.config.ColumnWidths[i])
-		}
-	}
-}

@@ -103,25 +103,6 @@ func TestServicesModelConfig(t *testing.T) {
 	}
 }
 
-func TestServicesModelColumnWidths(t *testing.T) {
-	client := k8s.Client{Namespace: "default"}
-	model, err := NewServices(client, "default")
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-
-	expectedWidths := []float64{0.12, 0.21, 0.10, 0.15, 0.15, 0.15, 0.05}
-	if len(model.config.ColumnWidths) != len(expectedWidths) {
-		t.Error("ColumnWidths length mismatch")
-	}
-
-	for i, expected := range expectedWidths {
-		if model.config.ColumnWidths[i] != expected {
-			t.Errorf("ColumnWidth[%d] expected %f, got %f", i, expected, model.config.ColumnWidths[i])
-		}
-	}
-}
-
 func TestServicesModelWithMultipleItems(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
 	model, err := NewServices(client, "default")

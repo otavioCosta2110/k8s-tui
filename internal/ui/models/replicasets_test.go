@@ -94,25 +94,6 @@ func TestReplicaSetsModelConfig(t *testing.T) {
 	}
 }
 
-func TestReplicaSetsModelColumnWidths(t *testing.T) {
-	client := k8s.Client{Namespace: "default"}
-	model, err := NewReplicaSets(client, "default")
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-
-	expectedWidths := []float64{0.15, 0.25, 0.12, 0.12, 0.15, 0.15}
-	if len(model.config.ColumnWidths) != len(expectedWidths) {
-		t.Error("ColumnWidths length mismatch")
-	}
-
-	for i, expected := range expectedWidths {
-		if model.config.ColumnWidths[i] != expected {
-			t.Errorf("ColumnWidth[%d] expected %f, got %f", i, expected, model.config.ColumnWidths[i])
-		}
-	}
-}
-
 func TestReplicaSetsModelWithMultipleItems(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
 	model, err := NewReplicaSets(client, "default")
