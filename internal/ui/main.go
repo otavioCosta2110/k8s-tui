@@ -7,17 +7,21 @@ import (
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"otaviocosta2110/k8s-tui/internal/ui/models"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type AppModel struct {
-	stack          []tea.Model
-	kube           k8s.Client
-	header         models.HeaderModel
-	configSelected bool
-	errorPopup     *models.ErrorModel
+	stack                 []tea.Model
+	kube                  k8s.Client
+	header                models.HeaderModel
+	configSelected        bool
+	errorPopup            *models.ErrorModel
+	waitingForResourceKey bool
+	currentResourceType   string
+	breadcrumbTrail       []string
 }
 
 func NewAppModel() *AppModel {
@@ -113,10 +117,23 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			if len(m.stack) > 1 {
 				m.stack = m.stack[:len(m.stack)-1]
+				if len(m.breadcrumbTrail) > 0 {
+					m.breadcrumbTrail = m.breadcrumbTrail[:len(m.breadcrumbTrail)-1]
+				}
 				return m, nil
 			}
 			return m, tea.Quit
+		case "g":
+			m.waitingForResourceKey = true
+			return m, nil
 		default:
+			if m.waitingForResourceKey {
+				m.waitingForResourceKey = false
+				if resourceType := m.getResourceTypeFromKey(msg.String()); resourceType != "" {
+					return m, m.navigateToResource(resourceType)
+				}
+			}
+
 			var cmd tea.Cmd
 			current := len(m.stack) - 1
 			m.stack[current], cmd = m.stack[current].Update(msg)
@@ -141,6 +158,9 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		m.stack = append(m.stack, msg.NewScreen)
+
+		m.updateFooterWithBreadcrumb(msg.NewScreen)
+
 		if !m.configSelected {
 			m.configSelected = true
 			m.header.SetKubeconfig(&msg.Cluster)
@@ -210,4 +230,87 @@ func (m *AppModel) View() string {
 		return content
 	}
 	return lipgloss.JoinVertical(lipgloss.Top, headerView, content)
+}
+
+func (m *AppModel) getResourceTypeFromKey(key string) string {
+	resourceMap := map[string]string{
+		"p": "Pods",
+		"d": "Deployments",
+		"s": "Services",
+		"i": "Ingresses",
+		"c": "ConfigMaps",
+		"e": "Secrets",
+		"a": "ServiceAccounts",
+		"r": "ReplicaSets",
+		"n": "Nodes",
+	}
+
+	if resourceType, exists := resourceMap[key]; exists {
+		return resourceType
+	}
+	return ""
+}
+
+func (m *AppModel) navigateToResource(resourceType string) tea.Cmd {
+	return func() tea.Msg {
+		resourceList, err := models.NewResourceList(m.kube, m.kube.Namespace, resourceType).InitComponent(m.kube)
+		if err != nil {
+			return components.NavigateMsg{
+				Error: err,
+			}
+		}
+
+		m.currentResourceType = resourceType
+
+		for i, existingResource := range m.breadcrumbTrail {
+			if existingResource == resourceType {
+				m.breadcrumbTrail = m.breadcrumbTrail[:i+1]
+				break
+			}
+		}
+
+		if len(m.breadcrumbTrail) == 0 || m.breadcrumbTrail[len(m.breadcrumbTrail)-1] != resourceType {
+			m.breadcrumbTrail = append(m.breadcrumbTrail, resourceType)
+		}
+
+		return components.NavigateMsg{
+			NewScreen: resourceList,
+		}
+	}
+}
+
+func (m *AppModel) getBreadcrumbTrail() string {
+	if len(m.breadcrumbTrail) == 0 {
+		return ""
+	}
+
+	trail := strings.Join(m.breadcrumbTrail, " > ")
+
+	maxLength := global.ScreenWidth - 20 
+	if len(trail) > maxLength {
+		parts := m.breadcrumbTrail
+		trail = "..."
+
+		for i := len(parts) - 1; i >= 0; i-- {
+			candidate := parts[i] + " > " + trail
+			if len(candidate) <= maxLength {
+				trail = candidate
+			} else {
+				break
+			}
+		}
+
+		if strings.HasSuffix(trail, " > ...") {
+			trail = strings.TrimSuffix(trail, " > ...") + "..."
+		}
+	}
+
+	return trail
+}
+
+func (m *AppModel) updateFooterWithBreadcrumb(model tea.Model) {
+	if autoRefreshModel, ok := model.(*models.AutoRefreshModel); ok {
+		breadcrumb := m.getBreadcrumbTrail()
+		autoRefreshModel.SetFooterText(breadcrumb)
+	}
 }

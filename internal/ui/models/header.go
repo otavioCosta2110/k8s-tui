@@ -4,6 +4,7 @@ import (
 	"fmt"
 	global "otaviocosta2110/k8s-tui/internal"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -117,13 +118,11 @@ func (m HeaderModel) getClusterInfo() map[string]string {
 func (m HeaderModel) buildClusterSection(info map[string]string) string {
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("#FAFAFA")).
-		Background(lipgloss.Color("#7D56F4")).
+		Foreground(customstyles.Foreground).
 		Padding(0, 1)
 
 	labelStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#FFFFFF"))
+		Foreground(customstyles.Foreground)
 
 	valueStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#A1EFD3"))
@@ -146,13 +145,11 @@ func (m HeaderModel) buildClusterSection(info map[string]string) string {
 func (m HeaderModel) buildMetricsSection(metrics Metrics) string {
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("#FAFAFA")).
-		Background(lipgloss.Color("#7D56F4")).
+		Foreground(customstyles.Foreground).
 		Padding(0, 1)
 
 	metricStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#FFFFFF"))
+		Foreground(customstyles.Foreground)
 
 	valueStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#A1EFD3"))

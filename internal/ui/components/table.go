@@ -27,11 +27,12 @@ type TableModel struct {
 	lastRefresh     time.Time
 	refreshFunc     func() ([]table.Row, error)
 	updateActions   map[string]func() tea.Cmd
+	footerText      string
 }
 
 type loadedTableMsg struct{}
 
-func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, title string, onSelect func(selected string) tea.Msg, selectColumn int, refreshFunc func() ([]table.Row, error), updateActions map[string]func() tea.Cmd) *TableModel {
+func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, title string, onSelect func(selected string) tea.Msg, selectColumn int, refreshFunc func() ([]table.Row, error), updateActions map[string]func() tea.Cmd, footerText string) *TableModel {
 	styles := table.DefaultStyles()
 	styles.Header = styles.Header.
 		BorderBottom(true).
@@ -74,6 +75,7 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 		refreshFunc:     refreshFunc,
 		lastRefresh:     time.Now(),
 		updateActions:   updateActions,
+		footerText:      footerText,
 	}
 }
 
@@ -133,6 +135,10 @@ func (m *TableModel) SetUpdateActions(actions map[string]func() tea.Cmd) {
 	m.updateActions = actions
 }
 
+func (m *TableModel) SetFooterText(text string) {
+	m.footerText = text
+}
+
 func (m *TableModel) toggleCheckbox(rowIdx int) {
 	rows := m.Table.Rows()
 	if rowIdx < 0 || rowIdx >= len(rows) {
@@ -158,9 +164,28 @@ func (m *TableModel) View() string {
 	}
 
 	m.updateColumnWidths(global.ScreenWidth)
-	m.Table.SetHeight(global.ScreenHeight - len(m.Table.Columns()))
 
-	return m.Table.View()
+	footerHeight := 0
+	if m.footerText != "" {
+		footerHeight = 1 
+	}
+	tableHeight := global.ScreenHeight - footerHeight
+	m.Table.SetHeight(tableHeight)
+
+	tableView := m.Table.View()
+
+	if m.footerText != "" {
+		footerStyle := lipgloss.NewStyle().
+			Foreground(lipgloss.Color("240")).
+			Align(lipgloss.Left).
+			Width(global.ScreenWidth).
+			MaxWidth(global.ScreenWidth) 
+
+		footer := footerStyle.Render(m.footerText)
+		return lipgloss.JoinVertical(lipgloss.Top, tableView, footer)
+	}
+
+	return tableView
 }
 
 func (m *TableModel) updateColumnWidths(totalWidth int) {

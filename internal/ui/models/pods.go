@@ -69,18 +69,14 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return p.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(p.config.Columns, p.config.ColumnWidths, p.dataToRows(), p.config.Title, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(p.config.Columns, p.config.ColumnWidths, p.dataToRows(), p.config.Title, onSelect, 1, fetchFunc, nil, "")
 
 	actions := map[string]func() tea.Cmd{
 		"d": p.createDeleteAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
-	return &autoRefreshModel{
-		inner:           tableModel,
-		refreshInterval: p.refreshInterval,
-		k8sClient:       p.k8sClient,
-	}, nil
+	return NewAutoRefreshModel(tableModel, p.refreshInterval, p.k8sClient, "Pods"), nil
 }
 
 func (p *podsModel) fetchData() error {

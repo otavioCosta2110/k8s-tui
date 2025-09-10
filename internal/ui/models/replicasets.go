@@ -85,18 +85,14 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return r.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(r.config.Columns, r.config.ColumnWidths, r.dataToRows(), r.config.Title, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(r.config.Columns, r.config.ColumnWidths, r.dataToRows(), r.config.Title, onSelect, 1, fetchFunc, nil, "")
 
 	actions := map[string]func() tea.Cmd{
 		"d": r.createDeleteAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
-	return &autoRefreshModel{
-		inner:           tableModel,
-		refreshInterval: r.refreshInterval,
-		k8sClient:       r.k8sClient,
-	}, nil
+	return NewAutoRefreshModel(tableModel, r.refreshInterval, r.k8sClient, "ReplicaSets"), nil
 }
 
 func (r *replicasetsModel) fetchData() error {

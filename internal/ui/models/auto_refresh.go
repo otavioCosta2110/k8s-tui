@@ -14,35 +14,37 @@ type RefreshableModel interface {
 	Refresh() (tea.Model, tea.Cmd)
 }
 
-type autoRefreshModel struct {
+type AutoRefreshModel struct {
 	inner           RefreshableModel
 	refreshInterval time.Duration
 	lastRefresh     time.Time
 	k8sClient       *k8s.Client
+	footerText      string
 }
 
-func NewAutoRefreshModel(inner RefreshableModel, interval time.Duration, client *k8s.Client) *autoRefreshModel {
-	return &autoRefreshModel{
+func NewAutoRefreshModel(inner RefreshableModel, interval time.Duration, client *k8s.Client, footerText string) *AutoRefreshModel {
+	return &AutoRefreshModel{
 		inner:           inner,
 		refreshInterval: interval,
 		k8sClient:       client,
+		footerText:      footerText,
 	}
 }
 
-func (m *autoRefreshModel) Init() tea.Cmd {
+func (m *AutoRefreshModel) Init() tea.Cmd {
 	return tea.Batch(
 		m.inner.Init(),
 		m.refreshTick(),
 	)
 }
 
-func (m *autoRefreshModel) refreshTick() tea.Cmd {
+func (m *AutoRefreshModel) refreshTick() tea.Cmd {
 	return tea.Tick(m.refreshInterval, func(t time.Time) tea.Msg {
 		return components.RefreshMsg{}
 	})
 }
 
-func (m *autoRefreshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *AutoRefreshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case components.RefreshMsg:
 		var cmd tea.Cmd
@@ -58,13 +60,34 @@ func (m *autoRefreshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m *autoRefreshModel) View() string {
+func (m *AutoRefreshModel) View() string {
+	if tableModel, ok := m.inner.(*ui.TableModel); ok && m.footerText != "" {
+		tableModel.SetFooterText(m.footerText)
+	}
 	return m.inner.View()
 }
 
-func (m *autoRefreshModel) GetCheckedItems() []int {
+func (m *AutoRefreshModel) GetCheckedItems() []int {
 	if tableModel, ok := m.inner.(*ui.TableModel); ok {
 		return tableModel.GetCheckedItems()
 	}
 	return []int{}
+}
+
+func (m *AutoRefreshModel) SetFooterText(text string) {
+	m.footerText = text
+}
+
+func (m *AutoRefreshModel) Refresh() (tea.Model, tea.Cmd) {
+	if m.inner == nil {
+		return m, nil
+	}
+
+	if refreshable, ok := m.inner.(RefreshableModel); ok {
+		updatedModel, cmd := refreshable.Refresh()
+		m.inner = updatedModel.(RefreshableModel)
+		return m, cmd
+	}
+
+	return m, nil
 }

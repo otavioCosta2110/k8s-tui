@@ -70,18 +70,14 @@ func (n *nodesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return n.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(n.config.Columns, n.config.ColumnWidths, n.dataToRows(), n.config.Title, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(n.config.Columns, n.config.ColumnWidths, n.dataToRows(), n.config.Title, onSelect, 1, fetchFunc, nil, "")
 
 	actions := map[string]func() tea.Cmd{
 		"d": n.createDeleteAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
-	return &autoRefreshModel{
-		inner:           tableModel,
-		refreshInterval: n.refreshInterval,
-		k8sClient:       n.k8sClient,
-	}, nil
+	return NewAutoRefreshModel(tableModel, n.refreshInterval, n.k8sClient, "Nodes"), nil
 }
 
 func (n *nodesModel) fetchData() error {
