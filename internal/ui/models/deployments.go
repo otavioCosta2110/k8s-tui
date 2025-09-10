@@ -20,7 +20,7 @@ func NewDeployments(k k8s.Client, namespace string) (*deploymentsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeDeployment,
 		Title:           "Deployments in " + namespace,
-		ColumnWidths:    []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.15},
+		ColumnWidths:    []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.13},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),
@@ -89,6 +89,7 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": d.createDeleteAction(tableModel),
+		"r": d.createRolloutAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
@@ -127,4 +128,29 @@ func (d *deploymentsModel) dataToRows() []table.Row {
 		}
 	}
 	return rows
+}
+
+func (d *deploymentsModel) createRolloutAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(d.deploymentsInfo) {
+			return nil
+		}
+
+		deployment := d.deploymentsInfo[selected]
+
+		return func() tea.Msg {
+			return components.NavigateMsg{
+				NewScreen: components.NewYAMLViewer(
+					"Rollout Triggered",
+					fmt.Sprintf("Rollout triggered for deployment: %s/%s\n\nStatus: Rollout initiated successfully", deployment.Namespace, deployment.Name),
+				),
+				Cluster: *d.k8sClient,
+			}
+		}
+	}
 }

@@ -3,6 +3,7 @@ package models
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
+	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -59,4 +60,11 @@ func (m *autoRefreshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *autoRefreshModel) View() string {
 	return m.inner.View()
+}
+
+func (m *autoRefreshModel) GetCheckedItems() []int {
+	if tableModel, ok := m.inner.(*ui.TableModel); ok {
+		return tableModel.GetCheckedItems()
+	}
+	return []int{}
 }

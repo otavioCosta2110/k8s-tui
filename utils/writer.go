@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -22,4 +23,23 @@ func WriteStringNewLine(filePath string, data string) error {
 	prevContentStr := string(prevContent)
 	content := strings.TrimSpace(prevContentStr) + "\n" + strings.TrimSpace(data) + "\n"
 	return os.WriteFile(filePath, []byte(content), 0644)
+}
+
+func GetPreferredEditor() string {
+	if editor := os.Getenv("EDITOR"); editor != "" {
+		return editor
+	}
+
+	if editor := os.Getenv("VISUAL"); editor != "" {
+		return editor
+	}
+
+	commonEditors := []string{"vim", "nvim", "nano", "emacs", "code", "subl"}
+	for _, editor := range commonEditors {
+		if _, err := exec.LookPath(editor); err == nil {
+			return editor
+		}
+	}
+
+	return "vi"
 }

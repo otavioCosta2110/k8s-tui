@@ -20,7 +20,7 @@ func NewServiceAccounts(k k8s.Client, namespace string) (*serviceaccountsModel, 
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeServiceAccount,
 		Title:           "ServiceAccounts in " + namespace,
-		ColumnWidths:    []float64{0.15, 0.50, 0.16, 0.15, 0.20},
+		ColumnWidths:    []float64{0.15, 0.50, 0.16, 0.15, 0.18},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),

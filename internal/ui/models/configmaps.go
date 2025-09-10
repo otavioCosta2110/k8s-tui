@@ -19,7 +19,7 @@ func NewConfigmaps(k k8s.Client, namespace string, cms []k8s.Configmap) (*config
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeConfigMap,
 		Title:           "ConfigMaps in " + namespace,
-		ColumnWidths:    []float64{0.30, 0.30, 0.16, 0.20},
+		ColumnWidths:    []float64{0.30, 0.30, 0.16, 0.18},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),

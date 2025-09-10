@@ -13,3 +13,11 @@ type NavigateMsg struct {
 }
 
 type RefreshMsg struct{}
+
+type EditMsg struct {
+	Content      string
+	Title        string
+	ResourceType string
+	ResourceName string
+	Namespace    string
+}

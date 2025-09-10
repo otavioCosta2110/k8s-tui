@@ -197,7 +197,6 @@ func (m *AppModel) View() string {
 		BorderForeground(lipgloss.Color(customstyles.Blue)).
 		Render(currentView)
 
-	// If no kubeconfig is selected, show content fullscreen without header
 	if !m.configSelected {
 		return lipgloss.NewStyle().
 			Width(global.ScreenWidth).

@@ -20,7 +20,7 @@ func NewSecrets(k k8s.Client, namespace string) (*secretsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeSecret,
 		Title:           "Secrets in " + namespace,
-		ColumnWidths:    []float64{0.15, 0.35, 0.15, 0.15, 0.15, 0.10},
+		ColumnWidths:    []float64{0.13, 0.35, 0.15, 0.15, 0.15, 0.07},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),

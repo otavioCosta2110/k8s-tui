@@ -122,6 +122,55 @@ func DeleteConfigmap(client Client, namespace string, cmName string) error {
 	return nil
 }
 
+func (c *Configmap) Update(yamlContent string) error {
+	var cmData map[string]interface{}
+	if err := yaml.Unmarshal([]byte(yamlContent), &cmData); err != nil {
+		return fmt.Errorf("failed to parse YAML: %v", err)
+	}
+
+	newCM := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      c.Name,
+			Namespace: c.Namespace,
+		},
+	}
+
+	if data, ok := cmData["data"].(map[string]interface{}); ok {
+		newCM.Data = make(map[string]string)
+		for k, v := range data {
+			if strVal, ok := v.(string); ok {
+				newCM.Data[k] = strVal
+			}
+		}
+	}
+
+	if labels, ok := cmData["labels"].(map[string]interface{}); ok {
+		newCM.Labels = make(map[string]string)
+		for k, v := range labels {
+			if strVal, ok := v.(string); ok {
+				newCM.Labels[k] = strVal
+			}
+		}
+	}
+
+	if annotations, ok := cmData["annotations"].(map[string]interface{}); ok {
+		newCM.Annotations = make(map[string]string)
+		for k, v := range annotations {
+			if strVal, ok := v.(string); ok {
+				newCM.Annotations[k] = strVal
+			}
+		}
+	}
+
+	_, err := c.Client.CoreV1().ConfigMaps(c.Namespace).Update(context.Background(), newCM, metav1.UpdateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to update configmap: %v", err)
+	}
+
+	c.Raw = newCM
+	return nil
+}
+
 func (cm *Configmap) DescribeConfigMap(events *corev1.EventList) (map[string]any, error) {
 	type Event struct {
 		Type    string `yaml:"type"`

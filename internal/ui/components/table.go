@@ -107,9 +107,9 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		if action, exists := m.updateActions[msg.String()]; exists {
-			action()
+			cmd := action()
 			m.refreshData()
-			return m, nil
+			return m, cmd
 		}
 		if msg.String() == "r" {
 			return m, m.refreshData()

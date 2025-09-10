@@ -11,12 +11,13 @@ import (
 )
 
 type YAMLViewer struct {
-	title      string
-	content    string
-	viewport   viewport.Model
-	ready      bool
-	styles     *YAMLViewerStyles
-	customHelp string
+	title           string
+	content         string
+	originalContent string
+	viewport        viewport.Model
+	ready           bool
+	styles          *YAMLViewerStyles
+	customHelp      string
 }
 
 type YAMLViewerStyles struct {
@@ -38,24 +39,34 @@ var DefaultYAMLViewerStyles = &YAMLViewerStyles{
 func NewYAMLViewer(title, content string) *YAMLViewer {
 	highlighted := highlightYAML(content)
 	return &YAMLViewer{
-		title:   title,
-		content: highlighted,
-		styles:  DefaultYAMLViewerStyles,
+		title:           title,
+		content:         highlighted,
+		originalContent: content,
+		styles:          DefaultYAMLViewerStyles,
 	}
 }
 
 func NewYAMLViewerWithHelp(title, content, helpText string) *YAMLViewer {
 	highlighted := highlightYAML(content)
 	return &YAMLViewer{
-		title:      title,
-		content:    highlighted,
-		styles:     DefaultYAMLViewerStyles,
-		customHelp: helpText,
+		title:           title,
+		content:         highlighted,
+		originalContent: content,
+		styles:          DefaultYAMLViewerStyles,
+		customHelp:      helpText,
 	}
 }
 
 func (m *YAMLViewer) SetCustomHelp(helpText string) {
 	m.customHelp = helpText
+}
+
+func (m *YAMLViewer) GetContent() string {
+	return m.content
+}
+
+func (m *YAMLViewer) GetOriginalContent() string {
+	return m.originalContent
 }
 
 func (m *YAMLViewer) Init() tea.Cmd {
@@ -74,6 +85,10 @@ func (m *YAMLViewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "esc":
 			return m, tea.Quit
+		case "e":
+			return m, func() tea.Msg {
+				return EditMsg{Content: m.originalContent, Title: m.title}
+			}
 		}
 	case tea.WindowSizeMsg:
 		if !m.ready {

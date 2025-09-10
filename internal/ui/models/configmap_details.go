@@ -8,10 +8,13 @@ import (
 )
 
 type cmDetailsModel struct {
-	cm        *k8s.Configmap
-	k8sClient *k8s.Client
-	loading   bool
-	err       error
+	cm         *k8s.Configmap
+	k8sClient  *k8s.Client
+	loading    bool
+	err        error
+	yamlViewer *components.YAMLViewer
+	editor     *components.YAMLEditor
+	isEditing  bool
 }
 
 func NewConfigmapDetails(k k8s.Client, namespace, cmName string) *cmDetailsModel {
@@ -20,6 +23,7 @@ func NewConfigmapDetails(k k8s.Client, namespace, cmName string) *cmDetailsModel
 		k8sClient: &k,
 		loading:   false,
 		err:       nil,
+		isEditing: false,
 	}
 }
 
@@ -31,5 +35,102 @@ func (c *cmDetailsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return nil, err
 	}
 
-	return components.NewYAMLViewer("Configmap: "+c.cm.Name, desc), nil
+	c.yamlViewer = components.NewYAMLViewerWithHelp(
+		"Configmap: "+c.cm.Name,
+		desc,
+		"↑/↓: Scroll • e: Edit • q: Quit",
+	)
+
+	return c, nil
+}
+
+func (c *cmDetailsModel) Init() tea.Cmd {
+	if c.yamlViewer != nil {
+		return c.yamlViewer.Init()
+	}
+	if c.editor != nil {
+		return c.editor.Init()
+	}
+	return nil
+}
+
+func (c *cmDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case components.EditMsg:
+		c.isEditing = true
+		c.editor = components.NewYAMLEditorWithHelp(
+			"Configmap: "+c.cm.Name,
+			msg.Content,
+			"Esc: Cancel",
+		)
+		return c, c.editor.Init()
+
+	case components.SaveMsg:
+		err := c.cm.Update(msg.Content)
+		if err != nil {
+			c.err = err
+			c.isEditing = false
+			c.editor = nil
+			return c, nil
+		}
+
+		c.isEditing = false
+		c.editor = nil
+
+		desc, err := c.cm.Describe()
+		if err != nil {
+			c.err = err
+			return c, nil
+		}
+
+		c.yamlViewer = components.NewYAMLViewerWithHelp(
+			"Configmap: "+c.cm.Name,
+			desc,
+			"↑/↓: Scroll • e: Edit • q: Quit",
+		)
+		return c, c.yamlViewer.Init()
+
+	case components.CancelMsg:
+		c.isEditing = false
+		c.editor = nil
+		return c, nil
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q", "esc":
+			return c, tea.Quit
+		}
+	}
+
+	if c.isEditing && c.editor != nil {
+		updatedModel, cmd := c.editor.Update(msg)
+		if editor, ok := updatedModel.(*components.YAMLEditor); ok {
+			c.editor = editor
+		}
+		return c, cmd
+	} else if c.yamlViewer != nil {
+		updatedModel, cmd := c.yamlViewer.Update(msg)
+		if viewer, ok := updatedModel.(*components.YAMLViewer); ok {
+			c.yamlViewer = viewer
+		}
+		return c, cmd
+	}
+
+	return c, nil
+}
+
+func (c *cmDetailsModel) View() string {
+	if c.err != nil {
+		return "Error: " + c.err.Error()
+	}
+
+	if c.isEditing && c.editor != nil {
+		return c.editor.View()
+	}
+
+	if c.yamlViewer != nil {
+		return c.yamlViewer.View()
+	}
+
+	return "Loading..."
 }
