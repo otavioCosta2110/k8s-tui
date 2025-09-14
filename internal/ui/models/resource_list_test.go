@@ -33,6 +33,7 @@ func TestResourceFactoryGetValidResourceTypes(t *testing.T) {
 	expectedTypes := []string{
 		"Pods", "Deployments", "Services", "Ingresses",
 		"ConfigMaps", "Secrets", "ServiceAccounts", "ReplicaSets", "Nodes",
+		"Jobs", "CronJobs", "DaemonSets", "StatefulSets",
 	}
 
 	if len(validTypes) != len(expectedTypes) {
