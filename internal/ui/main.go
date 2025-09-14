@@ -243,6 +243,10 @@ func (m *AppModel) getResourceTypeFromKey(key string) string {
 		"a": "ServiceAccounts",
 		"r": "ReplicaSets",
 		"n": "Nodes",
+		"j": "Jobs",
+		"k": "CronJobs",
+		"m": "DaemonSets",
+		"t": "StatefulSets",
 	}
 
 	if resourceType, exists := resourceMap[key]; exists {
@@ -286,7 +290,7 @@ func (m *AppModel) getBreadcrumbTrail() string {
 
 	trail := strings.Join(m.breadcrumbTrail, " > ")
 
-	maxLength := global.ScreenWidth - 20 
+	maxLength := global.ScreenWidth - 20
 	if len(trail) > maxLength {
 		parts := m.breadcrumbTrail
 		trail = "..."

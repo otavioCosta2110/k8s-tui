@@ -31,6 +31,10 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 		"ServiceAccounts",
 		"ReplicaSets",
 		"Nodes",
+		"Jobs",
+		"CronJobs",
+		"DaemonSets",
+		"StatefulSets",
 	}
 
 	onSelect := func(selected string) tea.Msg {

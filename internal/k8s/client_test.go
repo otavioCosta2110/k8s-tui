@@ -20,6 +20,14 @@ func TestResourceTypeConstants(t *testing.T) {
 		{"Ingress", ResourceTypeIngress, "ingress"},
 		{"Secret", ResourceTypeSecret, "secret"},
 		{"Node", ResourceTypeNode, "node"},
+		{"Job", ResourceTypeJob, "job"},
+		{"CronJob", ResourceTypeCronJob, "cronjob"},
+		{"DaemonSet", ResourceTypeDaemonSet, "daemonset"},
+		{"StatefulSet", ResourceTypeStatefulSet, "statefulset"},
+		{"PersistentVolume", ResourceTypePersistentVolume, "persistentvolume"},
+		{"PersistentVolumeClaim", ResourceTypePersistentVolumeClaim, "persistentvolumeclaim"},
+		{"Event", ResourceTypeEvent, "event"},
+		{"NetworkPolicy", ResourceTypeNetworkPolicy, "networkpolicy"},
 	}
 
 	for _, tt := range tests {

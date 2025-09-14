@@ -107,6 +107,34 @@ func (rf *ResourceFactory) registerResources() {
 		Category:    "Infrastructure",
 		HelpText:    "View and manage Kubernetes cluster nodes",
 	})
+
+	rf.registerResource("Jobs", createJobsModel, ResourceMetadata{
+		Name:        "Jobs",
+		Description: "Batch processing jobs and scheduled tasks",
+		Category:    "Workloads",
+		HelpText:    "View and manage Kubernetes jobs",
+	})
+
+	rf.registerResource("CronJobs", createCronJobsModel, ResourceMetadata{
+		Name:        "CronJobs",
+		Description: "Scheduled jobs that run periodically",
+		Category:    "Workloads",
+		HelpText:    "View and manage Kubernetes cron jobs",
+	})
+
+	rf.registerResource("DaemonSets", createDaemonSetsModel, ResourceMetadata{
+		Name:        "DaemonSets",
+		Description: "Pods that run on all cluster nodes",
+		Category:    "Workloads",
+		HelpText:    "View and manage Kubernetes daemon sets",
+	})
+
+	rf.registerResource("StatefulSets", createStatefulSetsModel, ResourceMetadata{
+		Name:        "StatefulSets",
+		Description: "Stateful applications with persistent storage",
+		Category:    "Workloads",
+		HelpText:    "View and manage Kubernetes stateful sets",
+	})
 }
 
 func (rf *ResourceFactory) registerResource(resourceType string, creator ResourceCreator, metadata ResourceMetadata) {
@@ -210,6 +238,38 @@ func createReplicaSetsModel(k k8s.Client, namespace string) (ResourceModel, erro
 
 func createNodesModel(k k8s.Client, namespace string) (ResourceModel, error) {
 	model, err := NewNodes(k)
+	if err != nil {
+		return nil, err
+	}
+	return model, nil
+}
+
+func createJobsModel(k k8s.Client, namespace string) (ResourceModel, error) {
+	model, err := NewJobs(k, namespace)
+	if err != nil {
+		return nil, err
+	}
+	return model, nil
+}
+
+func createCronJobsModel(k k8s.Client, namespace string) (ResourceModel, error) {
+	model, err := NewCronJobs(k, namespace)
+	if err != nil {
+		return nil, err
+	}
+	return model, nil
+}
+
+func createDaemonSetsModel(k k8s.Client, namespace string) (ResourceModel, error) {
+	model, err := NewDaemonSets(k, namespace)
+	if err != nil {
+		return nil, err
+	}
+	return model, nil
+}
+
+func createStatefulSetsModel(k k8s.Client, namespace string) (ResourceModel, error) {
+	model, err := NewStatefulSets(k, namespace)
 	if err != nil {
 		return nil, err
 	}

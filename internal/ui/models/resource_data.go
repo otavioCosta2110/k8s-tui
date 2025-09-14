@@ -213,3 +213,96 @@ func (n NodeData) GetColumns() table.Row {
 		n.Age,
 	}
 }
+
+type JobData struct {
+	*k8s.JobInfo
+}
+
+func (j JobData) GetName() string {
+	return j.Name
+}
+
+func (j JobData) GetNamespace() string {
+	return j.Namespace
+}
+
+func (j JobData) GetColumns() table.Row {
+	return table.Row{
+		j.Namespace,
+		j.Name,
+		j.Completions,
+		j.Duration,
+		j.Age,
+	}
+}
+
+type CronJobData struct {
+	*k8s.CronJobInfo
+}
+
+func (cj CronJobData) GetName() string {
+	return cj.Name
+}
+
+func (cj CronJobData) GetNamespace() string {
+	return cj.Namespace
+}
+
+func (cj CronJobData) GetColumns() table.Row {
+	return table.Row{
+		cj.Namespace,
+		cj.Name,
+		cj.Schedule,
+		cj.Suspend,
+		cj.Active,
+		cj.LastSchedule,
+		cj.Age,
+	}
+}
+
+type DaemonSetData struct {
+	*k8s.DaemonSetInfo
+}
+
+func (ds DaemonSetData) GetName() string {
+	return ds.Name
+}
+
+func (ds DaemonSetData) GetNamespace() string {
+	return ds.Namespace
+}
+
+func (ds DaemonSetData) GetColumns() table.Row {
+	return table.Row{
+		ds.Namespace,
+		ds.Name,
+		ds.Desired,
+		ds.Current,
+		ds.Ready,
+		ds.UpToDate,
+		ds.Available,
+		ds.NodeSelector,
+		ds.Age,
+	}
+}
+
+type StatefulSetData struct {
+	*k8s.StatefulSetInfo
+}
+
+func (ss StatefulSetData) GetName() string {
+	return ss.Name
+}
+
+func (ss StatefulSetData) GetNamespace() string {
+	return ss.Namespace
+}
+
+func (ss StatefulSetData) GetColumns() table.Row {
+	return table.Row{
+		ss.Namespace,
+		ss.Name,
+		ss.Ready,
+		ss.Age,
+	}
+}

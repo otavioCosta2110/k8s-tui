@@ -24,6 +24,14 @@ func DeleteResource(client Client, resourceType ResourceType, namespace, name st
 		return DeleteSecret(client, namespace, name)
 	case ResourceTypeNode:
 		return DeleteNode(client, name)
+	case ResourceTypeJob:
+		return DeleteJob(client, namespace, name)
+	case ResourceTypeCronJob:
+		return DeleteCronJob(client, namespace, name)
+	case ResourceTypeDaemonSet:
+		return DeleteDaemonSet(client, namespace, name)
+	case ResourceTypeStatefulSet:
+		return DeleteStatefulSet(client, namespace, name)
 	default:
 		return fmt.Errorf("unsupported resource type: %s", resourceType)
 	}
@@ -65,6 +73,14 @@ func ListResources(client Client, resourceType ResourceType, namespace string) (
 		return FetchSecretList(client, namespace)
 	case ResourceTypeNode:
 		return FetchNodeList(client)
+	case ResourceTypeJob:
+		return FetchJobList(client, namespace)
+	case ResourceTypeCronJob:
+		return FetchCronJobList(client, namespace)
+	case ResourceTypeDaemonSet:
+		return FetchDaemonSetList(client, namespace)
+	case ResourceTypeStatefulSet:
+		return FetchStatefulSetList(client, namespace)
 	default:
 		return nil, fmt.Errorf("unsupported resource type: %s", resourceType)
 	}
@@ -204,6 +220,66 @@ func GetResourceInfo(client Client, resourceType ResourceType, namespace, name s
 					Namespace: "",
 					Kind:      ResourceTypeNode,
 					Age:       node.Age,
+				}, nil
+			}
+		}
+	case ResourceTypeJob:
+		jobs, err := GetJobsTableData(client, namespace)
+		if err != nil {
+			return nil, err
+		}
+		for _, job := range jobs {
+			if job.Name == name {
+				return &ResourceInfo{
+					Name:      job.Name,
+					Namespace: job.Namespace,
+					Kind:      ResourceTypeJob,
+					Age:       job.Age,
+				}, nil
+			}
+		}
+	case ResourceTypeCronJob:
+		cronjobs, err := GetCronJobsTableData(client, namespace)
+		if err != nil {
+			return nil, err
+		}
+		for _, cronjob := range cronjobs {
+			if cronjob.Name == name {
+				return &ResourceInfo{
+					Name:      cronjob.Name,
+					Namespace: cronjob.Namespace,
+					Kind:      ResourceTypeCronJob,
+					Age:       cronjob.Age,
+				}, nil
+			}
+		}
+	case ResourceTypeDaemonSet:
+		daemonsets, err := GetDaemonSetsTableData(client, namespace)
+		if err != nil {
+			return nil, err
+		}
+		for _, daemonset := range daemonsets {
+			if daemonset.Name == name {
+				return &ResourceInfo{
+					Name:      daemonset.Name,
+					Namespace: daemonset.Namespace,
+					Kind:      ResourceTypeDaemonSet,
+					Age:       daemonset.Age,
+				}, nil
+			}
+		}
+	case ResourceTypeStatefulSet:
+		statefulsets, err := GetStatefulSetsTableData(client, namespace)
+		if err != nil {
+			return nil, err
+		}
+		for _, statefulset := range statefulsets {
+			if statefulset.Name == name {
+				return &ResourceInfo{
+					Name:      statefulset.Name,
+					Namespace: statefulset.Namespace,
+					Kind:      ResourceTypeStatefulSet,
+					Age:       statefulset.Age,
 				}, nil
 			}
 		}
