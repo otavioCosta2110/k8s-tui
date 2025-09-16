@@ -21,21 +21,7 @@ func NewResource(k k8s.Client, namespace string) Resource {
 }
 
 func (r Resource) InitComponent(k k8s.Client) tea.Model {
-	resourceTypes := []string{
-		"Pods",
-		"Deployments",
-		"Services",
-		"Ingresses",
-		"ConfigMaps",
-		"Secrets",
-		"ServiceAccounts",
-		"ReplicaSets",
-		"Nodes",
-		"Jobs",
-		"CronJobs",
-		"DaemonSets",
-		"StatefulSets",
-	}
+	resourceTypes := resourceFactory.GetValidResourceTypes()
 
 	onSelect := func(selected string) tea.Msg {
 		r.resourceType = selected
