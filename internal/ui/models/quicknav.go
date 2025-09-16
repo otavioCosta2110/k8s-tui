@@ -38,10 +38,8 @@ func (m QuickNavModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc", "q":
-			// Return to previous screen instead of quitting
 			return m, nil
 		default:
-			// Check if the pressed key corresponds to a resource
 			resourceType := m.getResourceTypeFromKey(msg.String())
 			if resourceType != "" {
 				return m, m.navigateToResource(resourceType)
@@ -52,24 +50,11 @@ func (m QuickNavModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m QuickNavModel) getResourceTypeFromKey(key string) string {
-	resourceMap := map[string]string{
-		"p": "Pods",
-		"d": "Deployments",
-		"s": "Services",
-		"i": "Ingresses",
-		"c": "ConfigMaps",
-		"e": "Secrets",
-		"a": "ServiceAccounts",
-		"r": "ReplicaSets",
-		"n": "Nodes",
-		"j": "Jobs",
-		"k": "CronJobs",
-		"m": "DaemonSets",
-		"t": "StatefulSets",
-		"l": "ResourceList",
-	}
+	mappings := resourceFactory.GetQuickNavMappings()
 
-	if resourceType, exists := resourceMap[key]; exists {
+	mappings["l"] = "ResourceList"
+
+	if resourceType, exists := mappings[key]; exists {
 		return resourceType
 	}
 	return ""
@@ -108,36 +93,36 @@ func (m QuickNavModel) View() string {
 		Width(global.ScreenWidth).
 		Render("Quick Navigation - Press 'g' + key")
 
-	// Define the key mappings
+	sortedMappings := resourceFactory.GetSortedQuickNavMappings()
+
 	mappings := []struct {
 		key   string
 		desc  string
 		group string
-	}{
-		{"p", "Pods", "Workloads"},
-		{"d", "Deployments", "Workloads"},
-		{"r", "ReplicaSets", "Workloads"},
-		{"j", "Jobs", "Workloads"},
-		{"k", "CronJobs", "Workloads"},
-		{"m", "DaemonSets", "Workloads"},
-		{"t", "StatefulSets", "Workloads"},
-		{"s", "Services", "Networking"},
-		{"i", "Ingresses", "Networking"},
-		{"c", "ConfigMaps", "Configuration"},
-		{"e", "Secrets", "Configuration"},
-		{"a", "ServiceAccounts", "Configuration"},
-		{"n", "Nodes", "Infrastructure"},
-		{"l", "Resource List", "Navigation"},
+	}{}
+
+	mappings = append(mappings, struct {
+		key   string
+		desc  string
+		group string
+	}{"l", "Resource List", "Navigation"})
+
+	for _, mapping := range sortedMappings {
+		if metadata, exists := resourceFactory.GetResourceMetadata(mapping.ResourceType); exists {
+			mappings = append(mappings, struct {
+				key   string
+				desc  string
+				group string
+			}{mapping.Key, metadata.Name, metadata.Category})
+		}
 	}
 
-	// Group mappings by category
 	groups := make(map[string][]string)
 	for _, mapping := range mappings {
 		keyDesc := fmt.Sprintf("%s → %s", mapping.key, mapping.desc)
 		groups[mapping.group] = append(groups[mapping.group], keyDesc)
 	}
 
-	// Calculate column layout
 	screenWidth := global.ScreenWidth
 	numColumns := 3
 	columnWidth := screenWidth / numColumns
@@ -150,7 +135,6 @@ func (m QuickNavModel) View() string {
 		columnWidth = screenWidth
 	}
 
-	// Create columns
 	groupOrder := []string{"Workloads", "Networking", "Configuration", "Infrastructure", "Navigation"}
 	var columns []string
 
@@ -182,20 +166,17 @@ func (m QuickNavModel) View() string {
 		}
 	}
 
-	// Add remaining column if any
 	if currentColumn.Len() > 0 {
 		columns = append(columns, currentColumn.String())
 	}
 
-	// Pad columns to equal width
 	for i := range columns {
 		columns[i] = lipgloss.NewStyle().
 			Width(columnWidth).
-			Height(global.ScreenHeight - 4). // Leave space for title and footer
+			Height(global.ScreenHeight - 4).
 			Render(columns[i])
 	}
 
-	// Join columns horizontally
 	content := lipgloss.NewStyle().
 		Align(lipgloss.Center).
 		Width(global.ScreenWidth).
@@ -207,7 +188,6 @@ func (m QuickNavModel) View() string {
 		Width(global.ScreenWidth).
 		Render("Press a key to navigate • esc/q to cancel")
 
-	// Use full screen
 	fullContent := lipgloss.JoinVertical(
 		lipgloss.Left,
 		title,

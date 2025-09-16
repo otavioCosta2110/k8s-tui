@@ -15,6 +15,7 @@ type ResourceMetadata struct {
 	Description string
 	Category    string
 	HelpText    string
+	QuickNavKey string
 }
 
 type ResourceModel interface {
@@ -50,95 +51,96 @@ func (rf *ResourceFactory) registerResources() {
 		Description: "Container workloads running in the cluster",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes pods",
-	})
+	}, "p")
 
 	rf.registerResource("Deployments", createDeploymentsModel, ResourceMetadata{
 		Name:        "Deployments",
 		Description: "Manage application deployments and scaling",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes deployments",
-	})
+	}, "d")
 
 	rf.registerResource("Services", createServicesModel, ResourceMetadata{
 		Name:        "Services",
 		Description: "Network services and load balancing",
 		Category:    "Networking",
 		HelpText:    "View and manage Kubernetes services",
-	})
+	}, "s")
 
 	rf.registerResource("Ingresses", createIngressesModel, ResourceMetadata{
 		Name:        "Ingresses",
 		Description: "HTTP routing and ingress controllers",
 		Category:    "Networking",
 		HelpText:    "View and manage Kubernetes ingresses",
-	})
+	}, "i")
 
 	rf.registerResource("ConfigMaps", createConfigMapsModel, ResourceMetadata{
 		Name:        "ConfigMaps",
 		Description: "Configuration data and environment variables",
 		Category:    "Configuration",
 		HelpText:    "View and manage Kubernetes configmaps",
-	})
+	}, "c")
 
 	rf.registerResource("Secrets", createSecretsModel, ResourceMetadata{
 		Name:        "Secrets",
 		Description: "Sensitive configuration and credentials",
 		Category:    "Configuration",
 		HelpText:    "View and manage Kubernetes secrets securely",
-	})
+	}, "e")
 
 	rf.registerResource("ServiceAccounts", createServiceAccountsModel, ResourceMetadata{
 		Name:        "ServiceAccounts",
 		Description: "Service accounts for API access and authentication",
 		Category:    "Configuration",
 		HelpText:    "View and manage Kubernetes service accounts",
-	})
+	}, "a")
 
 	rf.registerResource("ReplicaSets", createReplicaSetsModel, ResourceMetadata{
 		Name:        "ReplicaSets",
 		Description: "Pod replication and scaling controllers",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes replica sets",
-	})
+	}, "r")
 
 	rf.registerResource("Nodes", createNodesModel, ResourceMetadata{
 		Name:        "Nodes",
 		Description: "Kubernetes cluster nodes and their resources",
 		Category:    "Infrastructure",
 		HelpText:    "View and manage Kubernetes cluster nodes",
-	})
+	}, "n")
 
 	rf.registerResource("Jobs", createJobsModel, ResourceMetadata{
 		Name:        "Jobs",
 		Description: "Batch processing jobs and scheduled tasks",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes jobs",
-	})
+	}, "j")
 
 	rf.registerResource("CronJobs", createCronJobsModel, ResourceMetadata{
 		Name:        "CronJobs",
 		Description: "Scheduled jobs that run periodically",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes cron jobs",
-	})
+	}, "k")
 
 	rf.registerResource("DaemonSets", createDaemonSetsModel, ResourceMetadata{
 		Name:        "DaemonSets",
 		Description: "Pods that run on all cluster nodes",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes daemon sets",
-	})
+	}, "m")
 
 	rf.registerResource("StatefulSets", createStatefulSetsModel, ResourceMetadata{
 		Name:        "StatefulSets",
 		Description: "Stateful applications with persistent storage",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes stateful sets",
-	})
+	}, "t")
 }
 
-func (rf *ResourceFactory) registerResource(resourceType string, creator ResourceCreator, metadata ResourceMetadata) {
+func (rf *ResourceFactory) registerResource(resourceType string, creator ResourceCreator, metadata ResourceMetadata, quickNavKey string) {
 	rf.registry[resourceType] = creator
+	metadata.QuickNavKey = quickNavKey
 	rf.metadata[resourceType] = metadata
 	rf.validTypes = append(rf.validTypes, resourceType)
 }
@@ -170,6 +172,35 @@ func (rf *ResourceFactory) GetValidResourceTypes() []string {
 func (rf *ResourceFactory) GetResourceMetadata(resourceType string) (ResourceMetadata, bool) {
 	metadata, exists := rf.metadata[resourceType]
 	return metadata, exists
+}
+
+func (rf *ResourceFactory) GetQuickNavMappings() map[string]string {
+	mappings := make(map[string]string)
+	for resourceType, metadata := range rf.metadata {
+		if metadata.QuickNavKey != "" {
+			mappings[metadata.QuickNavKey] = resourceType
+		}
+	}
+	return mappings
+}
+
+func (rf *ResourceFactory) GetSortedQuickNavMappings() []struct{ Key, ResourceType string } {
+	var mappings []struct{ Key, ResourceType string }
+	for resourceType, metadata := range rf.metadata {
+		if metadata.QuickNavKey != "" {
+			mappings = append(mappings, struct{ Key, ResourceType string }{metadata.QuickNavKey, resourceType})
+		}
+	}
+
+	for i := 0; i < len(mappings)-1; i++ {
+		for j := i + 1; j < len(mappings); j++ {
+			if mappings[i].ResourceType > mappings[j].ResourceType {
+				mappings[i], mappings[j] = mappings[j], mappings[i]
+			}
+		}
+	}
+
+	return mappings
 }
 
 func createPodsModel(k k8s.Client, namespace string) (ResourceModel, error) {

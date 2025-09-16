@@ -1,8 +1,10 @@
 package components
 
 import (
+	"fmt"
 	global "otaviocosta2110/k8s-tui/internal"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
+	"otaviocosta2110/k8s-tui/utils"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -94,33 +96,31 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.updateColumnWidths(msg.Width)
 		return m, nil
-	case RefreshMsg:
-		rows, err := m.refreshFunc()
-		if err != nil {
-			return m, m.refreshTick()
-		}
-		m.UpdateRows(rows)
-		return m, m.refreshTick()
 
 	case tea.KeyMsg:
-		if msg.String() == " " && !m.loading {
-			selectedIdx := m.Table.Cursor()
-			m.toggleCheckbox(selectedIdx)
-			return m, nil
-		}
-		if action, exists := m.updateActions[msg.String()]; exists {
-			cmd := action()
-			m.refreshData()
-			return m, cmd
-		}
-		if msg.String() == "r" {
-			return m, m.refreshData()
-		}
-		if msg.String() == "enter" && !m.loading && m.OnSelected != nil {
-			if len(m.Table.SelectedRow()) > 0 {
-				selected := m.Table.SelectedRow()[m.selectColumn]
-				return m, func() tea.Msg {
-					return m.OnSelected(selected)
+		switch msg.Type {
+		case tea.KeySpace:
+			if !m.loading {
+				selectedIdx := m.Table.Cursor()
+				m.toggleCheckbox(selectedIdx)
+				return m, nil
+			}
+		case tea.KeyRunes:
+			if action, exists := m.updateActions[string(msg.Runes)]; exists {
+				cmd := action()
+				m.refreshData()
+				return m, cmd
+			}
+			if string(msg.Runes) == "r" {
+				return m, m.refreshData()
+			}
+		case tea.KeyEnter:
+			if !m.loading && m.OnSelected != nil {
+				if len(m.Table.SelectedRow()) > 0 {
+					selected := m.Table.SelectedRow()[m.selectColumn]
+					return m, func() tea.Msg {
+						return m.OnSelected(selected)
+					}
 				}
 			}
 		}
@@ -198,8 +198,10 @@ func (m *TableModel) GetCheckedItems() []int {
 	if len(m.checkedRows) == 0 {
 		return []int{m.Table.Cursor()}
 	}
+	utils.WriteString("log3", fmt.Sprintf("Item %d \n",len(m.checkedRows)))
 	var checked []int
 	for idx, isChecked := range m.checkedRows {
+		utils.WriteStringNewLine("log2", fmt.Sprintf("Item %d %t\n", idx, isChecked))
 		if isChecked {
 			checked = append(checked, idx)
 		}
@@ -235,11 +237,7 @@ func (m *TableModel) UpdateColumns(columns []table.Column) {
 	m.Table.SetColumns(columns)
 }
 
-func (m *TableModel) refreshTick() tea.Cmd {
-	return tea.Tick(m.refreshInterval, func(t time.Time) tea.Msg {
-		return RefreshMsg{}
-	})
-}
+
 
 func (m *TableModel) refreshData() tea.Cmd {
 	return func() tea.Msg {

@@ -132,6 +132,12 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, tea.Quit
 		case "g":
+			currentIndex := len(m.stack) - 1
+			if currentIndex >= 0 {
+				if _, isQuickNav := m.stack[currentIndex].(models.QuickNavModel); isQuickNav {
+					return m, nil
+				}
+			}
 			quickNav := models.NewQuickNavModel(m.kube, m.kube.Namespace)
 			m.stack = append(m.stack, quickNav)
 			return m, quickNav.Init()
@@ -159,10 +165,27 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}, nil
 		}
 
-		m.stack = append(m.stack, msg.NewScreen)
+		currentIndex := len(m.stack) - 1
+		if currentIndex >= 0 {
+			if _, isQuickNav := m.stack[currentIndex].(models.QuickNavModel); isQuickNav {
+				if msg.Breadcrumb != "" && len(m.breadcrumbTrail) > 0 && m.breadcrumbTrail[len(m.breadcrumbTrail)-1] == msg.Breadcrumb {
+					m.stack = m.stack[:currentIndex]
+				} else {
+					m.stack[currentIndex] = msg.NewScreen
+				}
+			} else if msg.Breadcrumb != "" && len(m.breadcrumbTrail) > 0 && m.breadcrumbTrail[len(m.breadcrumbTrail)-1] == msg.Breadcrumb {
+				m.stack[currentIndex] = msg.NewScreen
+			} else {
+				m.stack = append(m.stack, msg.NewScreen)
+			}
+		} else {
+			m.stack = append(m.stack, msg.NewScreen)
+		}
 
 		if msg.Breadcrumb != "" {
-			m.breadcrumbTrail = append(m.breadcrumbTrail, msg.Breadcrumb)
+			if len(m.breadcrumbTrail) == 0 || m.breadcrumbTrail[len(m.breadcrumbTrail)-1] != msg.Breadcrumb {
+				m.breadcrumbTrail = append(m.breadcrumbTrail, msg.Breadcrumb)
+			}
 		}
 
 		m.updateFooterWithBreadcrumb(msg.NewScreen)
@@ -317,13 +340,6 @@ func (m *AppModel) navigateToResource(resourceType string) tea.Cmd {
 		}
 
 		m.currentResourceType = resourceType
-
-		for i, existingResource := range m.breadcrumbTrail {
-			if existingResource == resourceType {
-				m.breadcrumbTrail = m.breadcrumbTrail[:i+1]
-				break
-			}
-		}
 
 		if len(m.breadcrumbTrail) == 0 || m.breadcrumbTrail[len(m.breadcrumbTrail)-1] != resourceType {
 			m.breadcrumbTrail = append(m.breadcrumbTrail, resourceType)

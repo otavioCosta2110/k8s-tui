@@ -107,18 +107,11 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (p *podsModel) fetchData() error {
-	var podsInfo []k8s.PodInfo
-	var err error
-
-	if len(p.podsInfo) > 0 {
-		podsInfo = p.podsInfo
-	} else {
-		podsInfo, err = k8s.FetchPods(*p.k8sClient, p.namespace, "")
-		if err != nil {
-			return err
-		}
-		p.podsInfo = podsInfo
+	podsInfo, err := k8s.FetchPods(*p.k8sClient, p.namespace, "")
+	if err != nil {
+		return err
 	}
+	p.podsInfo = podsInfo
 
 	p.resourceData = make([]ResourceData, len(podsInfo))
 	for i, pod := range podsInfo {

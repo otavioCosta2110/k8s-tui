@@ -83,11 +83,9 @@ func (m *AutoRefreshModel) Refresh() (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	if refreshable, ok := m.inner.(RefreshableModel); ok {
-		updatedModel, cmd := refreshable.Refresh()
-		m.inner = updatedModel.(RefreshableModel)
-		return m, cmd
-	}
+	updatedModel, cmd := m.inner.Refresh()
+	m.inner = updatedModel.(RefreshableModel)
+	return m, cmd
 
 	return m, nil
 }

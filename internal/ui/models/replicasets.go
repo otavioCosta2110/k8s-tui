@@ -74,7 +74,8 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		}
 
 		return components.NavigateMsg{
-			NewScreen: podsComponent,
+			NewScreen:  podsComponent,
+			Breadcrumb: "Pods",
 		}
 	}
 

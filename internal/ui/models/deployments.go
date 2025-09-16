@@ -74,7 +74,8 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		}
 
 		return components.NavigateMsg{
-			NewScreen: podsComponent,
+			NewScreen:  podsComponent,
+			Breadcrumb: "Pods",
 		}
 	}
 
@@ -89,7 +90,6 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": d.createDeleteAction(tableModel),
-		"r": d.createRolloutAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
