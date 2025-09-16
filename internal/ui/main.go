@@ -15,14 +15,13 @@ import (
 )
 
 type AppModel struct {
-	stack                 []tea.Model
-	kube                  k8s.Client
-	header                models.HeaderModel
-	configSelected        bool
-	errorPopup            *models.ErrorModel
-	waitingForResourceKey bool
-	currentResourceType   string
-	breadcrumbTrail       []string
+	stack               []tea.Model
+	kube                k8s.Client
+	header              models.HeaderModel
+	configSelected      bool
+	errorPopup          *models.ErrorModel
+	currentResourceType string
+	breadcrumbTrail     []string
 }
 
 func NewAppModel() *AppModel {
@@ -133,16 +132,10 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, tea.Quit
 		case "g":
-			m.waitingForResourceKey = true
-			return m, nil
+			quickNav := models.NewQuickNavModel(m.kube, m.kube.Namespace)
+			m.stack = append(m.stack, quickNav)
+			return m, quickNav.Init()
 		default:
-			if m.waitingForResourceKey {
-				m.waitingForResourceKey = false
-				if resourceType := m.getResourceTypeFromKey(msg.String()); resourceType != "" {
-					return m, m.navigateToResource(resourceType)
-				}
-			}
-
 			var cmd tea.Cmd
 			current := len(m.stack) - 1
 			m.stack[current], cmd = m.stack[current].Update(msg)
