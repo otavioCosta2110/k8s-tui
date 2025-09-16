@@ -20,7 +20,7 @@ func NewJobs(k k8s.Client, namespace string) (*jobsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeJob,
 		Title:           "Jobs in " + namespace,
-		ColumnWidths:    []float64{0.15, 0.25, 0.20, 0.20, 0.15},
+		ColumnWidths:    []float64{0.15, 0.25, 0.20, 0.20, 0.13},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),

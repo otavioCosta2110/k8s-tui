@@ -166,9 +166,6 @@ func (m *TableModel) View() string {
 	m.updateColumnWidths(global.ScreenWidth)
 
 	footerHeight := 0
-	if m.footerText != "" {
-		footerHeight = 1 
-	}
 	tableHeight := global.ScreenHeight - footerHeight
 	m.Table.SetHeight(tableHeight)
 
@@ -179,7 +176,7 @@ func (m *TableModel) View() string {
 			Foreground(lipgloss.Color("240")).
 			Align(lipgloss.Left).
 			Width(global.ScreenWidth).
-			MaxWidth(global.ScreenWidth) 
+			MaxWidth(global.ScreenWidth)
 
 		footer := footerStyle.Render(m.footerText)
 		return lipgloss.JoinVertical(lipgloss.Top, tableView, footer)

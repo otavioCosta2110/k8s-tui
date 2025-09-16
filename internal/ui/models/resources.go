@@ -32,7 +32,8 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 			}
 		}
 		return components.NavigateMsg{
-			NewScreen: newResourceList,
+			NewScreen:  newResourceList,
+			Breadcrumb: selected,
 		}
 	}
 

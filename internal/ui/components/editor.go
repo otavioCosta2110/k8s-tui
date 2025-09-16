@@ -145,7 +145,7 @@ func (m *YAMLEditor) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, textarea.Blink
 	case tea.WindowSizeMsg:
 		if !m.ready {
-			m.viewport = viewport.New(msg.Width, msg.Height-4) 
+			m.viewport = viewport.New(msg.Width, msg.Height-4)
 			m.ready = true
 		} else {
 			m.viewport.Width = msg.Width

@@ -47,7 +47,7 @@ func TestGetCronJobsTableData(t *testing.T) {
 		suspendStr = "True"
 	}
 
-	active := "2" 
+	active := "2"
 
 	if suspendStr != "True" {
 		t.Error("Expected suspend to be 'True'")

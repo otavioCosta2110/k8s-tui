@@ -57,7 +57,7 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 				Cluster: *k,
 			}
 		}
-		pods, err := NewPods(*k, d.namespace, p)
+		pods, err := NewPodsFromDeployment(*k, d.namespace, selected, p)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,

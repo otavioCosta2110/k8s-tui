@@ -20,6 +20,7 @@ type ListModel struct {
 	OnSelected  func(selected string) tea.Msg
 	loading     bool
 	initialized bool
+	footerText  string
 }
 
 type loadedMsg struct{}
@@ -92,6 +93,22 @@ func (m *ListModel) View() string {
 			Align(lipgloss.Center, lipgloss.Center).
 			Render("Loading...")
 	}
-	m.List.SetSize(global.ScreenWidth, global.ScreenHeight)
-	return m.List.View()
+	m.List.SetSize(global.ScreenWidth, global.ScreenHeight - 1)
+
+	view := m.List.View()
+
+	if m.footerText != "" {
+		footerStyle := lipgloss.NewStyle().
+			Foreground(lipgloss.Color("240")).
+			Italic(true).
+			PaddingTop(1)
+
+		view = lipgloss.JoinVertical(lipgloss.Left, view, footerStyle.Render(m.footerText))
+	}
+
+	return view
+}
+
+func (m *ListModel) SetFooterText(text string) {
+	m.footerText = text
 }

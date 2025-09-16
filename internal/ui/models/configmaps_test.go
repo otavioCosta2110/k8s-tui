@@ -1,8 +1,8 @@
 package models
 
 import (
-	"slices"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"slices"
 	"testing"
 	"time"
 )

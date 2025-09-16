@@ -47,9 +47,10 @@ type ResourceManager interface {
 }
 
 type Client struct {
-	Clientset *kubernetes.Clientset
-	Config    *rest.Config
-	Namespace string
+	Clientset      *kubernetes.Clientset
+	Config         *rest.Config
+	Namespace      string
+	KubeconfigPath string
 }
 
 func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
@@ -71,8 +72,9 @@ func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
 	}
 
 	return &Client{
-		Clientset: clientset,
-		Config:    config,
-		Namespace: namespace,
+		Clientset:      clientset,
+		Config:         config,
+		Namespace:      namespace,
+		KubeconfigPath: kubeconfigPath,
 	}, nil
 }

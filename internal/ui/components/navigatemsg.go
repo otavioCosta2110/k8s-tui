@@ -7,9 +7,10 @@ import (
 )
 
 type NavigateMsg struct {
-	NewScreen tea.Model
-	Cluster   k8s.Client
-	Error     error
+	NewScreen  tea.Model
+	Cluster    k8s.Client
+	Error      error
+	Breadcrumb string
 }
 
 type RefreshMsg struct{}

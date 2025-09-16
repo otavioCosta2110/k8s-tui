@@ -42,6 +42,32 @@ func NewPods(k k8s.Client, namespace string, pods []k8s.PodInfo) (*podsModel, er
 	return model, nil
 }
 
+func NewPodsFromDeployment(k k8s.Client, namespace string, deploymentName string, pods []k8s.PodInfo) (*podsModel, error) {
+	config := ResourceConfig{
+		ResourceType:    k8s.ResourceTypePod,
+		Title:           fmt.Sprintf("Pods for deployment %s in %s (%d pods)", deploymentName, namespace, len(pods)),
+		ColumnWidths:    []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.13},
+		RefreshInterval: 5 * time.Second,
+		Columns: []table.Column{
+			components.NewColumn("NAMESPACE", 0),
+			components.NewColumn("NAME", 0),
+			components.NewColumn("READY", 0),
+			components.NewColumn("STATUS", 0),
+			components.NewColumn("RESTARTS", 0),
+			components.NewColumn("AGE", 0),
+		},
+	}
+
+	genericModel := NewGenericResourceModel(k, namespace, config)
+
+	model := &podsModel{
+		GenericResourceModel: genericModel,
+		podsInfo:             pods,
+	}
+
+	return model, nil
+}
+
 func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	p.k8sClient = k
 
@@ -58,7 +84,8 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 			}
 		}
 		return components.NavigateMsg{
-			NewScreen: podDetails,
+			NewScreen:  podDetails,
+			Breadcrumb: selected,
 		}
 	}
 
@@ -80,11 +107,18 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (p *podsModel) fetchData() error {
-	podsInfo, err := k8s.FetchPods(*p.k8sClient, p.namespace, "")
-	if err != nil {
-		return err
+	var podsInfo []k8s.PodInfo
+	var err error
+
+	if len(p.podsInfo) > 0 {
+		podsInfo = p.podsInfo
+	} else {
+		podsInfo, err = k8s.FetchPods(*p.k8sClient, p.namespace, "")
+		if err != nil {
+			return err
+		}
+		p.podsInfo = podsInfo
 	}
-	p.podsInfo = podsInfo
 
 	p.resourceData = make([]ResourceData, len(podsInfo))
 	for i, pod := range podsInfo {
