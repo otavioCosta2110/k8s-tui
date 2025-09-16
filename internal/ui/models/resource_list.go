@@ -204,7 +204,7 @@ func (rf *ResourceFactory) GetSortedQuickNavMappings() []struct{ Key, ResourceTy
 }
 
 func createPodsModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewPods(k, namespace, nil)
+	model, err := NewPods(k, namespace, "")
 	if err != nil {
 		return nil, err
 	}

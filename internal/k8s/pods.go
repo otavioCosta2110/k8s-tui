@@ -24,6 +24,7 @@ func FetchPods(client Client, namespace string, selector string) ([]PodInfo, err
 		listOptions.LabelSelector = selector
 	}
 	pods, err := client.Clientset.CoreV1().Pods(namespace).List(context.Background(), listOptions)
+	utils.WriteString("logss", pods.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch pods: %v", err)
 	}

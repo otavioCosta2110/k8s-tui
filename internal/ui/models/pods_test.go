@@ -8,12 +8,8 @@ import (
 
 func TestNewPods(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
-	podsInfo := []k8s.PodInfo{
-		{Name: "test-pod-1", Namespace: "default", Status: "Running"},
-		{Name: "test-pod-2", Namespace: "default", Status: "Pending"},
-	}
 
-	model, err := NewPods(client, "default", podsInfo)
+	model, err := NewPods(client, "default", "")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -30,18 +26,8 @@ func TestNewPods(t *testing.T) {
 
 func TestPodsModelDataToRows(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
-	podsInfo := []k8s.PodInfo{
-		{
-			Name:      "test-pod",
-			Namespace: "default",
-			Ready:     "1/1",
-			Status:    "Running",
-			Restarts:  0,
-			Age:       "1h",
-		},
-	}
 
-	model, err := NewPods(client, "default", podsInfo)
+	model, err := NewPods(client, "default", "")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -66,7 +52,7 @@ func TestPodsModelDataToRows(t *testing.T) {
 
 func TestPodsModelWithEmptyData(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
-	model, err := NewPods(client, "default", []k8s.PodInfo{})
+	model, err := NewPods(client, "default", "")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -97,11 +83,8 @@ func TestResourceConfig(t *testing.T) {
 
 func TestPodsModelConfig(t *testing.T) {
 	client := k8s.Client{Namespace: "test-namespace"}
-	podsInfo := []k8s.PodInfo{
-		{Name: "test-pod", Namespace: "test-namespace", Status: "Running"},
-	}
 
-	model, err := NewPods(client, "test-namespace", podsInfo)
+	model, err := NewPods(client, "test-namespace", "")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
