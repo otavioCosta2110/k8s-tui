@@ -16,8 +16,8 @@ func TestNewPods(t *testing.T) {
 	if model == nil {
 		t.Error("Expected model to be non-nil")
 	}
-	if len(model.podsInfo) != 2 {
-		t.Error("Expected 2 pods in model")
+	if model.podsInfo != nil {
+		t.Error("Expected podsInfo to be nil initially")
 	}
 	if model.namespace != "default" {
 		t.Error("Expected namespace to be 'default'")
@@ -32,21 +32,32 @@ func TestPodsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
+	model.podsInfo = []k8s.PodInfo{
+		{
+			Name:      "test-pod",
+			Namespace: "default",
+			Ready:     "1/1",
+			Status:    "Running",
+			Restarts:  0,
+			Age:       "5m",
+		},
+	}
+
 	rows := model.dataToRows()
 	if len(rows) != 1 {
-		t.Error("Expected 1 row")
+		t.Errorf("Expected 1 row, got %d", len(rows))
 	}
 	if len(rows[0]) != 6 {
-		t.Error("Expected 6 columns in row")
+		t.Errorf("Expected 6 columns in row, got %d", len(rows[0]))
 	}
 	if rows[0][1] != "test-pod" {
-		t.Error("Pod name mismatch in row")
+		t.Errorf("Pod name mismatch in row: expected 'test-pod', got '%s'", rows[0][1])
 	}
 	if rows[0][0] != "default" {
-		t.Error("Pod namespace mismatch in row")
+		t.Errorf("Pod namespace mismatch in row: expected 'default', got '%s'", rows[0][0])
 	}
 	if rows[0][2] != "1/1" {
-		t.Error("Pod ready status mismatch in row")
+		t.Errorf("Pod ready status mismatch in row: expected '1/1', got '%s'", rows[0][2])
 	}
 }
 
@@ -57,9 +68,11 @@ func TestPodsModelWithEmptyData(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
+	model.podsInfo = []k8s.PodInfo{}
+
 	rows := model.dataToRows()
 	if len(rows) != 0 {
-		t.Error("Expected 0 rows for empty data")
+		t.Errorf("Expected 0 rows for empty data, got %d", len(rows))
 	}
 }
 

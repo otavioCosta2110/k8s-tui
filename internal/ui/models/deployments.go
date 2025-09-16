@@ -5,7 +5,6 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
-	"otaviocosta2110/k8s-tui/utils"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -51,13 +50,6 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	onSelect := func(selected string) tea.Msg {
 		deployment := k8s.NewDeployment(selected, d.namespace, *k)
-		// p, err := deployment.GetPods()
-		// if err != nil {
-		// 	return components.NavigateMsg{
-		// 		Error:   err,
-		// 		Cluster: *k,
-		// 	}
-		// }
 		selector := fmt.Sprintf("app=%s", deployment.Name)
 		pods, err := NewPods(*k, d.namespace, selector)
 		if err != nil {
@@ -66,8 +58,6 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 				Cluster: *k,
 			}
 		}
-
-		utils.WriteString("logss2", fmt.Sprintf("Pods for deployment %s: %v", selected, pods))
 
 		podsComponent, err := pods.InitComponent(k)
 		if err != nil {

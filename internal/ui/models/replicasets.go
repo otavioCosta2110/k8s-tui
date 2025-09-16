@@ -50,13 +50,6 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	onSelect := func(selected string) tea.Msg {
 		replicaset := k8s.NewReplicaSet(selected, r.namespace, *k)
-		// p, err := replicaset.GetPods()
-		// if err != nil {
-		// 	return components.NavigateMsg{
-		// 		Error:   err,
-		// 		Cluster: *k,
-		// 	}
-		// }
 		selector := fmt.Sprintf("app=%s", replicaset.Name)
 		pods, err := NewPods(*k, r.namespace, selector)
 		if err != nil {
