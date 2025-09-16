@@ -110,7 +110,7 @@ func TestIngressesModelColumnWidths(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	expectedWidths := []float64{0.13, 0.23, 0.13, 0.13, 0.13, 0.13, 0.05}
+	expectedWidths := []float64{0.13, 0.23, 0.13, 0.13, 0.13, 0.13, 0.03}
 	if len(model.config.ColumnWidths) != len(expectedWidths) {
 		t.Error("ColumnWidths length mismatch")
 	}
