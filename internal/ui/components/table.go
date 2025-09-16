@@ -1,10 +1,8 @@
 package components
 
 import (
-	"fmt"
 	global "otaviocosta2110/k8s-tui/internal"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
-	"otaviocosta2110/k8s-tui/utils"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -198,15 +196,17 @@ func (m *TableModel) GetCheckedItems() []int {
 	if len(m.checkedRows) == 0 {
 		return []int{m.Table.Cursor()}
 	}
-	utils.WriteString("log3", fmt.Sprintf("Item %d \n",len(m.checkedRows)))
 	var checked []int
 	for idx, isChecked := range m.checkedRows {
-		utils.WriteStringNewLine("log2", fmt.Sprintf("Item %d %t\n", idx, isChecked))
 		if isChecked {
 			checked = append(checked, idx)
 		}
 	}
 	return checked
+}
+
+func (m *TableModel) ClearCheckedItems() {
+	m.checkedRows = make(map[int]bool)
 }
 
 func NewColumn(title string, percent float64) table.Column {

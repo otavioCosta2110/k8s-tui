@@ -6,7 +6,6 @@ import (
 
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
-	"otaviocosta2110/k8s-tui/utils"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -61,8 +60,6 @@ func (g *GenericResourceModel) createDeleteAction(tableModel *ui.TableModel) fun
 			checkedStr[i] = fmt.Sprintf("%d", v)
 		}
 
-		utils.WriteStringArray("log3", checkedStr)
-
 		if len(checked) == 0 {
 			return nil
 		}
@@ -72,10 +69,10 @@ func (g *GenericResourceModel) createDeleteAction(tableModel *ui.TableModel) fun
 				resource := g.resourceData[idx]
 				_ = g.deleteResource(resource)
 			}
-
-			tableModel.Refresh()
-			return nil
 		}
+
+		tableModel.ClearCheckedItems()
+		tableModel.Refresh()
 		return nil
 	}
 }
