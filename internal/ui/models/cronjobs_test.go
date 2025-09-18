@@ -40,7 +40,7 @@ func TestCronJobsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.cronjobsInfo = cronjobsInfo
+	model.resourceData = []ResourceData{CronJobData{&cronjobsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {

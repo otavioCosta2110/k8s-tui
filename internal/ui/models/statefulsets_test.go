@@ -38,7 +38,7 @@ func TestStatefulSetsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.statefulsetsInfo = statefulsetsInfo
+	model.resourceData = []ResourceData{StatefulSetData{&statefulsetsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {

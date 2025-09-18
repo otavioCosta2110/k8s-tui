@@ -30,7 +30,7 @@ func TestServicesModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.servicesInfo = []k8s.ServiceInfo{
+	servicesInfo := []k8s.ServiceInfo{
 		{
 			Name:       "test-service",
 			Namespace:  "default",
@@ -41,6 +41,8 @@ func TestServicesModelDataToRows(t *testing.T) {
 			Age:        "1h",
 		},
 	}
+
+	model.resourceData = []ResourceData{ServiceData{&servicesInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -110,7 +112,7 @@ func TestServicesModelWithMultipleItems(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.servicesInfo = []k8s.ServiceInfo{
+	servicesInfo := []k8s.ServiceInfo{
 		{
 			Name:       "test-service-1",
 			Namespace:  "default",
@@ -129,6 +131,11 @@ func TestServicesModelWithMultipleItems(t *testing.T) {
 			Ports:      "443/TCP",
 			Age:        "2h",
 		},
+	}
+
+	model.resourceData = []ResourceData{
+		ServiceData{&servicesInfo[0]},
+		ServiceData{&servicesInfo[1]},
 	}
 
 	rows := model.dataToRows()
@@ -158,7 +165,7 @@ func TestServicesModelWithDifferentStates(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.servicesInfo = []k8s.ServiceInfo{
+	servicesInfo := []k8s.ServiceInfo{
 		{
 			Name:       "headless-service",
 			Namespace:  "default",
@@ -169,6 +176,8 @@ func TestServicesModelWithDifferentStates(t *testing.T) {
 			Age:        "30m",
 		},
 	}
+
+	model.resourceData = []ResourceData{ServiceData{&servicesInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {

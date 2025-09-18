@@ -38,7 +38,7 @@ func TestJobsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.jobsInfo = jobsInfo
+	model.resourceData = []ResourceData{JobData{&jobsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {

@@ -31,7 +31,7 @@ func TestReplicaSetsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.replicasetsInfo = []k8s.ReplicaSetInfo{
+	replicasetsInfo := []k8s.ReplicaSetInfo{
 		{
 			Name:      "test-replicaset",
 			Namespace: "default",
@@ -41,6 +41,8 @@ func TestReplicaSetsModelDataToRows(t *testing.T) {
 			Age:       "2h",
 		},
 	}
+
+	model.resourceData = []ResourceData{ReplicaSetData{&replicasetsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -101,7 +103,7 @@ func TestReplicaSetsModelWithMultipleItems(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.replicasetsInfo = []k8s.ReplicaSetInfo{
+	replicasetsInfo := []k8s.ReplicaSetInfo{
 		{
 			Name:      "replicaset-1",
 			Namespace: "default",
@@ -118,6 +120,11 @@ func TestReplicaSetsModelWithMultipleItems(t *testing.T) {
 			Ready:     "4",
 			Age:       "2h",
 		},
+	}
+
+	model.resourceData = []ResourceData{
+		ReplicaSetData{&replicasetsInfo[0]},
+		ReplicaSetData{&replicasetsInfo[1]},
 	}
 
 	rows := model.dataToRows()
@@ -141,7 +148,7 @@ func TestReplicaSetsModelWithDifferentStates(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.replicasetsInfo = []k8s.ReplicaSetInfo{
+	replicasetsInfo := []k8s.ReplicaSetInfo{
 		{
 			Name:      "healthy-rs",
 			Namespace: "default",
@@ -166,6 +173,12 @@ func TestReplicaSetsModelWithDifferentStates(t *testing.T) {
 			Ready:     "0",
 			Age:       "10m",
 		},
+	}
+
+	model.resourceData = []ResourceData{
+		ReplicaSetData{&replicasetsInfo[0]},
+		ReplicaSetData{&replicasetsInfo[1]},
+		ReplicaSetData{&replicasetsInfo[2]},
 	}
 
 	rows := model.dataToRows()

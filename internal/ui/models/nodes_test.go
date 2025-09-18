@@ -27,7 +27,7 @@ func TestNodesModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.nodesInfo = []k8s.NodeInfo{
+	nodesInfo := []k8s.NodeInfo{
 		{
 			Name:    "test-node",
 			Status:  "Ready",
@@ -39,6 +39,8 @@ func TestNodesModelDataToRows(t *testing.T) {
 			Age:     "1d",
 		},
 	}
+
+	model.resourceData = []ResourceData{NodeData{&nodesInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -99,7 +101,7 @@ func TestNodesModelWithMultipleItems(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.nodesInfo = []k8s.NodeInfo{
+	nodesInfo := []k8s.NodeInfo{
 		{
 			Name:    "node-1",
 			Status:  "Ready",
@@ -120,6 +122,11 @@ func TestNodesModelWithMultipleItems(t *testing.T) {
 			Pods:    "15",
 			Age:     "3d",
 		},
+	}
+
+	model.resourceData = []ResourceData{
+		NodeData{&nodesInfo[0]},
+		NodeData{&nodesInfo[1]},
 	}
 
 	rows := model.dataToRows()
@@ -149,7 +156,7 @@ func TestNodesModelWithDifferentStates(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.nodesInfo = []k8s.NodeInfo{
+	nodesInfo := []k8s.NodeInfo{
 		{
 			Name:    "bare-node",
 			Status:  "NotReady",
@@ -161,6 +168,8 @@ func TestNodesModelWithDifferentStates(t *testing.T) {
 			Age:     "1h",
 		},
 	}
+
+	model.resourceData = []ResourceData{NodeData{&nodesInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {

@@ -30,7 +30,7 @@ func TestDeploymentsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.deploymentsInfo = []k8s.DeploymentInfo{
+	deploymentsInfo := []k8s.DeploymentInfo{
 		{
 			Name:      "test-deployment",
 			Namespace: "default",
@@ -40,6 +40,8 @@ func TestDeploymentsModelDataToRows(t *testing.T) {
 			Age:       "1h",
 		},
 	}
+
+	model.resourceData = []ResourceData{DeploymentData{&deploymentsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {

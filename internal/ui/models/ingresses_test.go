@@ -30,7 +30,7 @@ func TestIngressesModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.ingressesInfo = []k8s.IngressInfo{
+	ingressesInfo := []k8s.IngressInfo{
 		{
 			Name:      "test-ingress",
 			Namespace: "default",
@@ -41,6 +41,8 @@ func TestIngressesModelDataToRows(t *testing.T) {
 			Age:       "1h",
 		},
 	}
+
+	model.resourceData = []ResourceData{IngressData{&ingressesInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -129,7 +131,7 @@ func TestIngressesModelWithMultipleItems(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.ingressesInfo = []k8s.IngressInfo{
+	ingressesInfo := []k8s.IngressInfo{
 		{
 			Name:      "test-ingress-1",
 			Namespace: "default",
@@ -148,6 +150,11 @@ func TestIngressesModelWithMultipleItems(t *testing.T) {
 			Ports:     "443",
 			Age:       "2h",
 		},
+	}
+
+	model.resourceData = []ResourceData{
+		IngressData{&ingressesInfo[0]},
+		IngressData{&ingressesInfo[1]},
 	}
 
 	rows := model.dataToRows()
@@ -177,7 +184,7 @@ func TestIngressesModelWithDifferentStates(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.ingressesInfo = []k8s.IngressInfo{
+	ingressesInfo := []k8s.IngressInfo{
 		{
 			Name:      "no-class-ingress",
 			Namespace: "default",
@@ -188,6 +195,8 @@ func TestIngressesModelWithDifferentStates(t *testing.T) {
 			Age:       "30m",
 		},
 	}
+
+	model.resourceData = []ResourceData{IngressData{&ingressesInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {

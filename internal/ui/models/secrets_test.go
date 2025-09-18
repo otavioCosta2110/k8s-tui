@@ -35,7 +35,7 @@ func TestSecretsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.secretsInfo = []k8s.SecretInfo{
+	secretsInfo := []k8s.SecretInfo{
 		{
 			Name:      "test-secret",
 			Namespace: "default",
@@ -44,6 +44,8 @@ func TestSecretsModelDataToRows(t *testing.T) {
 			Age:       "1h",
 		},
 	}
+
+	model.resourceData = []ResourceData{SecretData{&secretsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -107,7 +109,7 @@ func TestSecretsModelWithMultipleItems(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.secretsInfo = []k8s.SecretInfo{
+	secretsInfo := []k8s.SecretInfo{
 		{
 			Name:      "test-secret-1",
 			Namespace: "default",
@@ -122,6 +124,11 @@ func TestSecretsModelWithMultipleItems(t *testing.T) {
 			Data:      "3",
 			Age:       "2h",
 		},
+	}
+
+	model.resourceData = []ResourceData{
+		SecretData{&secretsInfo[0]},
+		SecretData{&secretsInfo[1]},
 	}
 
 	rows := model.dataToRows()
@@ -151,7 +158,7 @@ func TestSecretsModelWithDifferentStates(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.secretsInfo = []k8s.SecretInfo{
+	secretsInfo := []k8s.SecretInfo{
 		{
 			Name:      "empty-secret",
 			Namespace: "default",
@@ -160,6 +167,8 @@ func TestSecretsModelWithDifferentStates(t *testing.T) {
 			Age:       "30m",
 		},
 	}
+
+	model.resourceData = []ResourceData{SecretData{&secretsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {

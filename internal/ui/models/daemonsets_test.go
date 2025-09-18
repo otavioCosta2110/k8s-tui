@@ -42,7 +42,7 @@ func TestDaemonSetsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.daemonsetsInfo = daemonsetsInfo
+	model.resourceData = []ResourceData{DaemonSetData{&daemonsetsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
