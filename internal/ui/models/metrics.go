@@ -4,6 +4,7 @@ import (
 	"fmt"
 	global "otaviocosta2110/k8s-tui/internal"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
@@ -89,12 +90,15 @@ var (
 
 	metricStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("#FFFFFF"))
+			Foreground(lipgloss.Color("#FFFFFF")).
+			Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	valueStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#A1EFD3"))
+			Foreground(lipgloss.Color("#A1EFD3")).
+			Background(lipgloss.Color(customstyles.BackgroundColor))
 
-	sectionStyle = lipgloss.NewStyle()
+	sectionStyle = lipgloss.NewStyle().
+			Background(lipgloss.Color(customstyles.BackgroundColor))
 )
 
 func (m Metrics) ViewMetrics() string {
@@ -106,7 +110,8 @@ func (m Metrics) ViewMetrics() string {
 
 	loadingStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#FFA500")).
-		Italic(true)
+		Italic(true).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	formatMetric := func(label string, value int, loading bool) string {
 		if loading && value == 0 {

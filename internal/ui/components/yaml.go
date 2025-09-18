@@ -2,6 +2,7 @@ package components
 
 import (
 	global "otaviocosta2110/k8s-tui/internal"
+	"otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"strings"
 	"time"
 
@@ -113,6 +114,7 @@ func (m *YAMLViewer) View() string {
 	footer := m.footerView()
 	content := lipgloss.NewStyle().
 		PaddingLeft(m.styles.ContentPadding).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render(m.viewport.View())
 
 	m.viewport.Width = global.ScreenWidth
@@ -140,6 +142,7 @@ func (m *YAMLViewer) footerView() string {
 
 	help := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.styles.HelpTextColor)).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render(helpText)
 
 	return help
@@ -149,8 +152,8 @@ func highlightYAML(yamlStr string) string {
 	lines := strings.Split(yamlStr, "\n")
 	var highlighted strings.Builder
 
-	keyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#5E9AFF"))
-	valueStyle := lipgloss.NewStyle().Foreground(lipgloss.NoColor{})
+	keyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#5E9AFF")).Background(lipgloss.Color(customstyles.BackgroundColor))
+	valueStyle := lipgloss.NewStyle().Foreground(lipgloss.NoColor{}).Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	for _, line := range lines {
 		if strings.Contains(line, ":") {

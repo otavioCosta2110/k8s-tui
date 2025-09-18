@@ -16,6 +16,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/remotecommand"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 )
 
 type Pod struct {
@@ -353,7 +354,9 @@ func (b *borderedWriter) Write(p []byte) (n int, err error) {
 	style := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("#874BFD")).
-		Padding(1, 2)
+		Padding(1, 2).
+		BorderBackground(lipgloss.Color(customstyles.BackgroundColor)).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	styledText := style.Render(string(p))
 	return b.innerWriter.Write([]byte(styledText))

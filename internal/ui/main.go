@@ -329,32 +329,36 @@ func (m *AppModel) View() string {
 		Height(height).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color(customstyles.BorderColor)).
+		BorderBackground(lipgloss.Color(customstyles.BackgroundColor)).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render(currentView)
 
 	var breadcrumbView string
 	if m.tabManager != nil {
 		if activeTab := m.tabManager.GetActiveTab(); activeTab != nil && len(activeTab.Breadcrumb) > 0 {
 			var breadcrumbParts []string
-			breadcrumbEnd := activeTab.CurrentIndex + 1
-			if breadcrumbEnd > len(activeTab.Breadcrumb) {
-				breadcrumbEnd = len(activeTab.Breadcrumb)
-			}
+			breadcrumbEnd := min(activeTab.CurrentIndex + 1, len(activeTab.Breadcrumb))
 			for i := 0; i < breadcrumbEnd; i++ {
 				crumb := activeTab.Breadcrumb[i]
 				if i == activeTab.CurrentIndex && activeTab.CurrentIndex < len(activeTab.Breadcrumb) {
 					breadcrumbParts = append(breadcrumbParts, lipgloss.NewStyle().
 						Foreground(lipgloss.Color(customstyles.AccentColor)).
 						Bold(true).
+						Background(lipgloss.Color(customstyles.BackgroundColor)).
 						Render(crumb))
 				} else {
 					breadcrumbParts = append(breadcrumbParts, lipgloss.NewStyle().
 						Foreground(lipgloss.Color("240")).
+						Background(lipgloss.Color(customstyles.BackgroundColor)).
 						Render(crumb))
 				}
 			}
-			breadcrumbStr := strings.Join(breadcrumbParts, " > ")
+			breadCrumbArrow := lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" > ")
+			// breadcrumbStr := lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(strings.Join(breadcrumbParts, " > "))
+			breadcrumbStr := strings.Join(breadcrumbParts, breadCrumbArrow)
 			breadcrumbView = lipgloss.NewStyle().
-				Width(global.ScreenWidth).
+				Width(global.ScreenWidth + global.Margin).
+				Background(lipgloss.Color(customstyles.BackgroundColor)).
 				Render(breadcrumbStr)
 		}
 	}
@@ -368,6 +372,8 @@ func (m *AppModel) View() string {
 					Height(global.ScreenHeight+global.HeaderSize).
 					Border(lipgloss.RoundedBorder()).
 					BorderForeground(lipgloss.Color(customstyles.BorderColor)).
+					BorderBackground(lipgloss.Color(customstyles.BackgroundColor)).
+					Background(lipgloss.Color(customstyles.BackgroundColor)).
 					Render(currentView),
 				breadcrumbView)
 		} else {
@@ -376,6 +382,8 @@ func (m *AppModel) View() string {
 				Height(global.ScreenHeight + global.HeaderSize).
 				Border(lipgloss.RoundedBorder()).
 				BorderForeground(lipgloss.Color(customstyles.BorderColor)).
+				BorderBackground(lipgloss.Color(customstyles.BackgroundColor)).
+				Background(lipgloss.Color(customstyles.BackgroundColor)).
 				Render(currentView)
 		}
 

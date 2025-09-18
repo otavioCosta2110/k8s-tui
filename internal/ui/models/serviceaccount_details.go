@@ -3,8 +3,10 @@ package models
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type serviceaccountDetailsModel struct {
@@ -61,11 +63,15 @@ func (s *serviceaccountDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (s *serviceaccountDetailsModel) View() string {
 	if s.err != nil {
-		return "Error: " + s.err.Error()
+		return lipgloss.NewStyle().
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
+			Render("Error: " + s.err.Error())
 	}
 
 	if s.yamlViewer == nil {
-		return "Loading..."
+		return lipgloss.NewStyle().
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
+			Render("Loading...")
 	}
 
 	return s.yamlViewer.View()

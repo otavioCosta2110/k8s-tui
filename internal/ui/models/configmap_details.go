@@ -3,8 +3,10 @@ package models
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type cmDetailsModel struct {
@@ -121,7 +123,9 @@ func (c *cmDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (c *cmDetailsModel) View() string {
 	if c.err != nil {
-		return "Error: " + c.err.Error()
+		return lipgloss.NewStyle().
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
+			Render("Error: " + c.err.Error())
 	}
 
 	if c.isEditing && c.editor != nil {
@@ -132,5 +136,7 @@ func (c *cmDetailsModel) View() string {
 		return c.yamlViewer.View()
 	}
 
-	return "Loading..."
+	return lipgloss.NewStyle().
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		Render("Loading...")
 }

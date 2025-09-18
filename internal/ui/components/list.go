@@ -48,6 +48,7 @@ func NewList(items []string, title string, onSelect func(selected string) tea.Ms
 	l := list.New(listItems, delegate, 0, 0)
 	l.Title = title
 	l.Styles.Title = customstyles.TitleStyle()
+	l.SetShowStatusBar(false)
 
 	l.SetShowHelp(false)
 
@@ -89,6 +90,7 @@ func (m *ListModel) View() string {
 	if m.loading {
 		return lipgloss.NewStyle().
 			Align(lipgloss.Center, lipgloss.Center).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
 			Render("Loading...")
 	}
 	m.List.SetSize(global.ScreenWidth, global.ScreenHeight+1)
@@ -99,7 +101,8 @@ func (m *ListModel) View() string {
 		footerStyle := lipgloss.NewStyle().
 			Foreground(lipgloss.Color("240")).
 			Italic(true).
-			PaddingTop(1)
+			PaddingTop(1).
+			Background(lipgloss.Color(customstyles.BackgroundColor))
 
 		view = lipgloss.JoinVertical(lipgloss.Left, view, footerStyle.Render(m.footerText))
 	}

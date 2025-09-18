@@ -13,7 +13,8 @@ type ColorScheme struct {
 	ErrorColor          string `json:"error_color"`
 	SelectionBackground string `json:"selection_background"`
 	SelectionForeground string `json:"selection_foreground"`
-	TextColor           string `json:"text_color,omitempty"` 
+	TextColor           string `json:"text_color,omitempty"`
+	BackgroundColor     string `json:"background_color,omitempty"`
 }
 
 func DefaultColorScheme() ColorScheme {
@@ -24,6 +25,7 @@ func DefaultColorScheme() ColorScheme {
 		ErrorColor:          "#FF0000",
 		SelectionBackground: "#00b8ff",
 		SelectionForeground: "#000000",
+		BackgroundColor:     "#000000",
 	}
 }
 
@@ -79,6 +81,9 @@ func LoadColorScheme() (ColorScheme, error) {
 	}
 	if loadedScheme.TextColor != "" {
 		scheme.TextColor = loadedScheme.TextColor
+	}
+	if loadedScheme.BackgroundColor != "" {
+		scheme.BackgroundColor = loadedScheme.BackgroundColor
 	}
 
 	return scheme, nil

@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"otaviocosta2110/k8s-tui/utils"
 )
 
@@ -173,12 +174,16 @@ func (m *YAMLEditor) View() string {
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color(m.styles.BorderColor)).
 			Padding(1).
+			BorderBackground(lipgloss.Color(customstyles.BackgroundColor)).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
 			Render(fmt.Sprintf("Opening %s...\n\nFile: %s\n\nPress 'esc' to cancel if editor doesn't launch", editor, m.tempFile))
 	} else {
 		content = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color(m.styles.BorderColor)).
 			Padding(1).
+			BorderBackground(lipgloss.Color(customstyles.BackgroundColor)).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
 			Render(m.textarea.View())
 	}
 
@@ -217,6 +222,7 @@ func (m *YAMLEditor) footerView() string {
 
 	help := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.styles.HelpTextColor)).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render(helpText)
 
 	return help

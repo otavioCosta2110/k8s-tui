@@ -33,7 +33,7 @@ func NewHeader(headerText string, kubeconfig *k8s.Client) HeaderModel {
 	return HeaderModel{
 		content:      "",
 		kubeconfig:   kubeconfig,
-		headerStyle:  lipgloss.NewStyle().Height(global.HeaderSize),
+		headerStyle:  lipgloss.NewStyle().Height(global.HeaderSize).Background(lipgloss.Color(customstyles.BackgroundColor)),
 		tabComponent: components.NewTabComponent(),
 	}
 }
@@ -116,7 +116,7 @@ func (m HeaderModel) buildEnhancedHeader(metrics Metrics) string {
 	return lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		clusterSection,
-		lipgloss.NewStyle().Width(4).Render(""),
+		lipgloss.NewStyle().Width(4).Background(lipgloss.Color(customstyles.BackgroundColor)).Render(""),
 		metricsSection,
 	)
 }
@@ -147,17 +147,21 @@ func (m HeaderModel) buildClusterSection(info map[string]string) string {
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(customstyles.TextColor).
-		Padding(0, 1)
+		Padding(0, 1).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	labelStyle := lipgloss.NewStyle().
-		Foreground(customstyles.TextColor)
+		Foreground(customstyles.TextColor).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	valueStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#A1EFD3"))
+		Foreground(lipgloss.Color("#A1EFD3")).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	sectionStyle := lipgloss.NewStyle().
 		Width(40).
-		Padding(0, 2)
+		Padding(0, 2).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	content := []string{
 		titleStyle.Render("Cluster Info"),
@@ -174,21 +178,26 @@ func (m HeaderModel) buildMetricsSection(metrics Metrics) string {
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(customstyles.TextColor).
-		Padding(0, 1)
+		Padding(0, 1).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	metricStyle := lipgloss.NewStyle().
-		Foreground(customstyles.TextColor)
+		Foreground(customstyles.TextColor).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	valueStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#A1EFD3"))
+		Foreground(lipgloss.Color("#A1EFD3")).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	loadingStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#FFA500")).
-		Italic(true)
+		Italic(true).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	sectionStyle := lipgloss.NewStyle().
 		Width(60).
-		Padding(0, 2)
+		Padding(0, 2).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	formatMetric := func(label string, value int, loading bool) string {
 		if loading && value == 0 {

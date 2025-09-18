@@ -16,7 +16,10 @@ var (
 
 func NormalStyle() lipgloss.Style {
 	return lipgloss.NewStyle().
-		Padding(0, 1)
+		Padding(0, 1).
+		Foreground(lipgloss.Color(TextColor)).
+		Width(AvailableWidth).
+		Background(lipgloss.Color(BackgroundColor))
 }
 
 func SelectedStyle() lipgloss.Style {
@@ -35,11 +38,15 @@ func TitleStyle() lipgloss.Style {
 		BorderBottom(true).
 		BorderStyle(lipgloss.NormalBorder()).
 		Padding(0, 1).
-		BorderForeground(lipgloss.Color(HeaderColor))
+		BorderForeground(lipgloss.Color(HeaderColor)).
+		BorderBackground(lipgloss.Color(BackgroundColor)).
+		Width(AvailableWidth-global.Margin).
+		Background(lipgloss.Color(BackgroundColor))
 }
 
 func ErrorStyle() lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(lipgloss.Color(ErrorColor)).
-		Bold(true)
+		Bold(true).
+		Background(lipgloss.Color(BackgroundColor))
 }

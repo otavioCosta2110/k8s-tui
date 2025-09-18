@@ -95,6 +95,7 @@ func (m QuickNavModel) View() string {
 		Foreground(lipgloss.Color(customstyles.BorderColor)).
 		Align(lipgloss.Center).
 		Width(global.ScreenWidth).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render("Quick Navigation - Press 'g' + key")
 
 	sortedMappings := resourceFactory.GetSortedQuickNavMappings()
@@ -150,6 +151,7 @@ func (m QuickNavModel) View() string {
 			groupTitle := lipgloss.NewStyle().
 				Bold(true).
 				Foreground(lipgloss.Color(customstyles.HeaderColor)).
+				Background(lipgloss.Color(customstyles.BackgroundColor)).
 				Render(fmt.Sprintf("%s", groupName))
 
 			currentColumn.WriteString(groupTitle)
@@ -178,18 +180,21 @@ func (m QuickNavModel) View() string {
 		columns[i] = lipgloss.NewStyle().
 			Width(columnWidth).
 			Height(global.ScreenHeight - 4).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
 			Render(columns[i])
 	}
 
 	content := lipgloss.NewStyle().
 		Align(lipgloss.Center).
 		Width(global.ScreenWidth).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render(lipgloss.JoinHorizontal(lipgloss.Top, columns...))
 
 	footer := lipgloss.NewStyle().
 		Faint(true).
 		Align(lipgloss.Center).
 		Width(global.ScreenWidth).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render("Press a key to navigate • esc/q to cancel")
 
 	fullContent := lipgloss.JoinVertical(

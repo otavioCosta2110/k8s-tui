@@ -21,6 +21,8 @@ var (
 	SelectionForeground string
 
 	TextColor lipgloss.Color
+
+	BackgroundColor string
 )
 
 func InitColors() error {
@@ -40,6 +42,12 @@ func InitColors() error {
 		TextColor = lipgloss.Color(scheme.TextColor)
 	} else {
 		TextColor = lipgloss.Color(termenv.ForegroundColor().Sequence(true))
+	}
+
+	if scheme.BackgroundColor != "" {
+		BackgroundColor = scheme.BackgroundColor
+	} else {
+		BackgroundColor = "#000000"
 	}
 
 	return nil

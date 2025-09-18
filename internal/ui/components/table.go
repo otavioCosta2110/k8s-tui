@@ -36,7 +36,9 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 	styles.Header = styles.Header.
 		BorderBottom(true).
 		BorderForeground(lipgloss.Color(customstyles.HeaderColor)).
-		BorderStyle(lipgloss.NormalBorder())
+		BorderStyle(lipgloss.NormalBorder()).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		BorderBackground(lipgloss.Color(customstyles.BackgroundColor))
 
 	styles.Selected = customstyles.SelectedStyle().Padding(0, 0).Margin(0, 0)
 	checkboxColumn := table.Column{Title: "✓", Width: 3}
@@ -152,6 +154,7 @@ func (m *TableModel) View() string {
 	if m.loading {
 		return lipgloss.NewStyle().
 			Align(lipgloss.Center, lipgloss.Center).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
 			Render("Loading...")
 	}
 

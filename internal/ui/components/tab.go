@@ -125,7 +125,9 @@ func (t *TabComponent) View() string {
 
 	totalTabsWidth := len(tabViews) * maxWidth
 	if totalTabsWidth < t.Width {
-		padding := strings.Repeat(" ", t.Width-totalTabsWidth)
+		padding := lipgloss.NewStyle().
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
+			Render(strings.Repeat(" ", t.Width-totalTabsWidth))
 		return lipgloss.JoinHorizontal(lipgloss.Top, tabViews...) + padding
 	}
 
