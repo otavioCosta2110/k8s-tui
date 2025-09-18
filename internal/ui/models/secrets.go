@@ -91,17 +91,3 @@ func (s *secretsModel) fetchData() error {
 
 	return nil
 }
-
-func (s *secretsModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(s.secretsInfo))
-	for idx, secret := range s.secretsInfo {
-		rows[idx] = table.Row{
-			secret.Namespace,
-			secret.Name,
-			secret.Type,
-			secret.Data,
-			secret.Age,
-		}
-	}
-	return rows
-}

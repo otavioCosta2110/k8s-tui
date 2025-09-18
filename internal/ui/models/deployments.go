@@ -105,21 +105,6 @@ func (d *deploymentsModel) fetchData() error {
 	return nil
 }
 
-func (d *deploymentsModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(d.deploymentsInfo))
-	for i, deployment := range d.deploymentsInfo {
-		rows[i] = table.Row{
-			deployment.Namespace,
-			deployment.Name,
-			deployment.Ready,
-			deployment.UpToDate,
-			deployment.Available,
-			deployment.Age,
-		}
-	}
-	return rows
-}
-
 func (d *deploymentsModel) createRolloutAction(tableModel *ui.TableModel) func() tea.Cmd {
 	return func() tea.Cmd {
 		if tableModel == nil {

@@ -13,13 +13,14 @@ func TestNewConfigmaps(t *testing.T) {
 		{Name: "test-configmap", Namespace: "default", Data: "2", Age: "1h"},
 	}
 
-	model, err := NewConfigmaps(client, "default", configmaps)
+	model, err := NewConfigmaps(client, "default")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
 	if model == nil {
 		t.Error("Expected model to be non-nil")
 	}
+	model.cms = configmaps
 	if len(model.cms) != 1 {
 		t.Error("Expected 1 configmap in model")
 	}
@@ -42,10 +43,12 @@ func TestConfigmapsModelDataToRows(t *testing.T) {
 		},
 	}
 
-	model, err := NewConfigmaps(client, "default", configmaps)
+	model, err := NewConfigmaps(client, "default")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
+
+	model.resourceData = []ResourceData{ConfigMapData{&configmaps[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -67,7 +70,7 @@ func TestConfigmapsModelDataToRows(t *testing.T) {
 
 func TestConfigmapsModelWithEmptyData(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
-	model, err := NewConfigmaps(client, "default", []k8s.Configmap{})
+	model, err := NewConfigmaps(client, "default")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -80,11 +83,8 @@ func TestConfigmapsModelWithEmptyData(t *testing.T) {
 
 func TestConfigmapsModelConfig(t *testing.T) {
 	client := k8s.Client{Namespace: "test-namespace"}
-	configmaps := []k8s.Configmap{
-		{Name: "test-configmap", Namespace: "test-namespace", Data: "1", Age: "30m"},
-	}
 
-	model, err := NewConfigmaps(client, "test-namespace", configmaps)
+	model, err := NewConfigmaps(client, "test-namespace")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -111,13 +111,15 @@ func TestConfigmapsModelWithMultipleItems(t *testing.T) {
 		{Name: "configmap-3", Namespace: "default", Data: "5", Age: "30m"},
 	}
 
-	model, err := NewConfigmaps(client, "default", configmaps)
+	model, err := NewConfigmaps(client, "default")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	if len(model.cms) != 3 {
-		t.Error("Expected 3 configmaps in model")
+	model.resourceData = []ResourceData{
+		ConfigMapData{&configmaps[0]},
+		ConfigMapData{&configmaps[1]},
+		ConfigMapData{&configmaps[2]},
 	}
 
 	rows := model.dataToRows()

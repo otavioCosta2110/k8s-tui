@@ -93,19 +93,3 @@ func (i *ingressesModel) fetchData() error {
 
 	return nil
 }
-
-func (i *ingressesModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(i.ingressesInfo))
-	for idx, ingress := range i.ingressesInfo {
-		rows[idx] = table.Row{
-			ingress.Namespace,
-			ingress.Name,
-			ingress.Class,
-			ingress.Hosts,
-			ingress.Address,
-			ingress.Ports,
-			ingress.Age,
-		}
-	}
-	return rows
-}

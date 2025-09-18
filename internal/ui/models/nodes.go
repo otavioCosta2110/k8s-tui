@@ -16,7 +16,7 @@ type nodesModel struct {
 	nodesInfo []k8s.NodeInfo
 }
 
-func NewNodes(k k8s.Client) (*nodesModel, error) {
+func NewNodes(k k8s.Client, namespace string) (*nodesModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeNode,
 		Title:           "Nodes in cluster",
@@ -93,21 +93,4 @@ func (n *nodesModel) fetchData() error {
 	}
 
 	return nil
-}
-
-func (n *nodesModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(n.nodesInfo))
-	for idx, node := range n.nodesInfo {
-		rows[idx] = table.Row{
-			node.Name,
-			node.Status,
-			node.Roles,
-			node.Version,
-			node.CPU,
-			node.Memory,
-			node.Pods,
-			node.Age,
-		}
-	}
-	return rows
 }

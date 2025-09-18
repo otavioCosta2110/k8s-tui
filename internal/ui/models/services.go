@@ -93,19 +93,3 @@ func (s *servicesModel) fetchData() error {
 
 	return nil
 }
-
-func (s *servicesModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(s.servicesInfo))
-	for idx, service := range s.servicesInfo {
-		rows[idx] = table.Row{
-			service.Namespace,
-			service.Name,
-			service.Type,
-			service.ClusterIP,
-			service.ExternalIP,
-			service.Ports,
-			service.Age,
-		}
-	}
-	return rows
-}

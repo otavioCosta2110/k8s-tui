@@ -15,7 +15,7 @@ type configmapsModel struct {
 	cms []k8s.Configmap
 }
 
-func NewConfigmaps(k k8s.Client, namespace string, cms []k8s.Configmap) (*configmapsModel, error) {
+func NewConfigmaps(k k8s.Client, namespace string) (*configmapsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeConfigMap,
 		Title:           "ConfigMaps in " + namespace,
@@ -33,7 +33,7 @@ func NewConfigmaps(k k8s.Client, namespace string, cms []k8s.Configmap) (*config
 
 	model := &configmapsModel{
 		GenericResourceModel: genericModel,
-		cms:                  cms,
+		cms:                  nil,
 	}
 
 	return model, nil
@@ -89,17 +89,4 @@ func (c *configmapsModel) fetchData() error {
 	}
 
 	return nil
-}
-
-func (c *configmapsModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(c.cms))
-	for i, cm := range c.cms {
-		rows[i] = table.Row{
-			cm.Namespace,
-			cm.Name,
-			cm.Data,
-			cm.Age,
-		}
-	}
-	return rows
 }

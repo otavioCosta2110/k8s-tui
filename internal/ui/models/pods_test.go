@@ -16,8 +16,8 @@ func TestNewPods(t *testing.T) {
 	if model == nil {
 		t.Error("Expected model to be non-nil")
 	}
-	if model.podsInfo != nil {
-		t.Error("Expected podsInfo to be nil initially")
+	if len(model.resourceData) != 0 {
+		t.Error("Expected resourceData to be empty initially")
 	}
 	if model.namespace != "default" {
 		t.Error("Expected namespace to be 'default'")
@@ -32,16 +32,15 @@ func TestPodsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.podsInfo = []k8s.PodInfo{
-		{
-			Name:      "test-pod",
-			Namespace: "default",
-			Ready:     "1/1",
-			Status:    "Running",
-			Restarts:  0,
-			Age:       "5m",
-		},
+	podInfo := k8s.PodInfo{
+		Name:      "test-pod",
+		Namespace: "default",
+		Ready:     "1/1",
+		Status:    "Running",
+		Restarts:  0,
+		Age:       "5m",
 	}
+	model.resourceData = []ResourceData{PodData{&podInfo}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -68,7 +67,7 @@ func TestPodsModelWithEmptyData(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.podsInfo = []k8s.PodInfo{}
+	model.resourceData = []ResourceData{}
 
 	rows := model.dataToRows()
 	if len(rows) != 0 {

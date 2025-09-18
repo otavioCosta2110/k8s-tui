@@ -93,19 +93,3 @@ func (cj *cronjobsModel) fetchData() error {
 
 	return nil
 }
-
-func (cj *cronjobsModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(cj.cronjobsInfo))
-	for idx, cronjob := range cj.cronjobsInfo {
-		rows[idx] = table.Row{
-			cronjob.Namespace,
-			cronjob.Name,
-			cronjob.Schedule,
-			cronjob.Suspend,
-			cronjob.Active,
-			cronjob.LastSchedule,
-			cronjob.Age,
-		}
-	}
-	return rows
-}

@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
@@ -14,10 +13,9 @@ import (
 type podsModel struct {
 	*GenericResourceModel
 	selector string
-	podsInfo []k8s.PodInfo
 }
 
-func NewPods(k k8s.Client, namespace string, selector string) (*podsModel, error) {
+func NewPods(k k8s.Client, namespace string, selector ...string) (*podsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypePod,
 		Title:           "Pods in " + namespace,
@@ -33,12 +31,16 @@ func NewPods(k k8s.Client, namespace string, selector string) (*podsModel, error
 		},
 	}
 
+	selectorStr := ""
+	if len(selector) > 0 {
+		selectorStr = selector[0]
+	}
+
 	genericModel := NewGenericResourceModel(k, namespace, config)
 
 	model := &podsModel{
 		GenericResourceModel: genericModel,
-		selector:             selector,
-		podsInfo:             nil,
+		selector:             selectorStr,
 	}
 
 	return model, nil
@@ -87,7 +89,6 @@ func (p *podsModel) fetchData(selector string) error {
 	if err != nil {
 		return err
 	}
-	p.podsInfo = podsInfo
 
 	p.resourceData = make([]ResourceData, len(podsInfo))
 	for i, pod := range podsInfo {
@@ -95,19 +96,4 @@ func (p *podsModel) fetchData(selector string) error {
 	}
 
 	return nil
-}
-
-func (p *podsModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(p.podsInfo))
-	for i, pod := range p.podsInfo {
-		rows[i] = table.Row{
-			pod.Namespace,
-			pod.Name,
-			pod.Ready,
-			pod.Status,
-			fmt.Sprintf("%d", pod.Restarts),
-			pod.Age,
-		}
-	}
-	return rows
 }

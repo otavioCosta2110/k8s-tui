@@ -91,17 +91,3 @@ func (j *jobsModel) fetchData() error {
 
 	return nil
 }
-
-func (j *jobsModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(j.jobsInfo))
-	for idx, job := range j.jobsInfo {
-		rows[idx] = table.Row{
-			job.Namespace,
-			job.Name,
-			job.Completions,
-			job.Duration,
-			job.Age,
-		}
-	}
-	return rows
-}

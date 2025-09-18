@@ -92,3 +92,11 @@ func (g *GenericResourceModel) GetResourceType() k8s.ResourceType {
 func (g *GenericResourceModel) GetNamespace() string {
 	return g.namespace
 }
+
+func (g *GenericResourceModel) dataToRows() []table.Row {
+	rows := make([]table.Row, len(g.resourceData))
+	for i, rd := range g.resourceData {
+		rows[i] = rd.GetColumns()
+	}
+	return rows
+}

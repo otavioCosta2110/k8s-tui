@@ -8,7 +8,7 @@ import (
 
 func TestNewNodes(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
-	model, err := NewNodes(client)
+	model, err := NewNodes(client, "")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -22,7 +22,7 @@ func TestNewNodes(t *testing.T) {
 
 func TestNodesModelDataToRows(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
-	model, err := NewNodes(client)
+	model, err := NewNodes(client, "")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -60,7 +60,7 @@ func TestNodesModelDataToRows(t *testing.T) {
 
 func TestNodesModelWithEmptyData(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
-	model, err := NewNodes(client)
+	model, err := NewNodes(client, "")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -73,7 +73,7 @@ func TestNodesModelWithEmptyData(t *testing.T) {
 
 func TestNodesModelConfig(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
-	model, err := NewNodes(client)
+	model, err := NewNodes(client, "")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -94,7 +94,7 @@ func TestNodesModelConfig(t *testing.T) {
 
 func TestNodesModelWithMultipleItems(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
-	model, err := NewNodes(client)
+	model, err := NewNodes(client, "")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -144,7 +144,7 @@ func TestNodesModelWithMultipleItems(t *testing.T) {
 
 func TestNodesModelWithDifferentStates(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
-	model, err := NewNodes(client)
+	model, err := NewNodes(client, "")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}

@@ -95,21 +95,3 @@ func (ds *daemonsetsModel) fetchData() error {
 
 	return nil
 }
-
-func (ds *daemonsetsModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(ds.daemonsetsInfo))
-	for idx, daemonset := range ds.daemonsetsInfo {
-		rows[idx] = table.Row{
-			daemonset.Namespace,
-			daemonset.Name,
-			daemonset.Desired,
-			daemonset.Current,
-			daemonset.Ready,
-			daemonset.UpToDate,
-			daemonset.Available,
-			daemonset.NodeSelector,
-			daemonset.Age,
-		}
-	}
-	return rows
-}

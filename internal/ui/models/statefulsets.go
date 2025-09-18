@@ -90,16 +90,3 @@ func (ss *statefulsetsModel) fetchData() error {
 
 	return nil
 }
-
-func (ss *statefulsetsModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(ss.statefulsetsInfo))
-	for idx, statefulset := range ss.statefulsetsInfo {
-		rows[idx] = table.Row{
-			statefulset.Namespace,
-			statefulset.Name,
-			statefulset.Ready,
-			statefulset.Age,
-		}
-	}
-	return rows
-}

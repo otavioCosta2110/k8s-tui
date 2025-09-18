@@ -46,91 +46,91 @@ func NewResourceFactory() *ResourceFactory {
 }
 
 func (rf *ResourceFactory) registerResources() {
-	rf.registerResource("Pods", createPodsModel, ResourceMetadata{
+	rf.registerResource("Pods", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewPods(k, namespace, "") }, ResourceMetadata{
 		Name:        "Pods",
 		Description: "Container workloads running in the cluster",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes pods",
 	}, "p")
 
-	rf.registerResource("Deployments", createDeploymentsModel, ResourceMetadata{
+	rf.registerResource("Deployments", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewDeployments(k, namespace) }, ResourceMetadata{
 		Name:        "Deployments",
 		Description: "Manage application deployments and scaling",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes deployments",
 	}, "d")
 
-	rf.registerResource("Services", createServicesModel, ResourceMetadata{
+	rf.registerResource("Services", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewServices(k, namespace) }, ResourceMetadata{
 		Name:        "Services",
 		Description: "Network services and load balancing",
 		Category:    "Networking",
 		HelpText:    "View and manage Kubernetes services",
 	}, "s")
 
-	rf.registerResource("Ingresses", createIngressesModel, ResourceMetadata{
+	rf.registerResource("Ingresses", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewIngresses(k, namespace) }, ResourceMetadata{
 		Name:        "Ingresses",
 		Description: "HTTP routing and ingress controllers",
 		Category:    "Networking",
 		HelpText:    "View and manage Kubernetes ingresses",
 	}, "i")
 
-	rf.registerResource("ConfigMaps", createConfigMapsModel, ResourceMetadata{
+	rf.registerResource("ConfigMaps", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewConfigmaps(k, namespace) }, ResourceMetadata{
 		Name:        "ConfigMaps",
 		Description: "Configuration data and environment variables",
 		Category:    "Configuration",
 		HelpText:    "View and manage Kubernetes configmaps",
 	}, "c")
 
-	rf.registerResource("Secrets", createSecretsModel, ResourceMetadata{
+	rf.registerResource("Secrets", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewSecrets(k, namespace) }, ResourceMetadata{
 		Name:        "Secrets",
 		Description: "Sensitive configuration and credentials",
 		Category:    "Configuration",
 		HelpText:    "View and manage Kubernetes secrets securely",
 	}, "e")
 
-	rf.registerResource("ServiceAccounts", createServiceAccountsModel, ResourceMetadata{
+	rf.registerResource("ServiceAccounts", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewServiceAccounts(k, namespace) }, ResourceMetadata{
 		Name:        "ServiceAccounts",
 		Description: "Service accounts for API access and authentication",
 		Category:    "Configuration",
 		HelpText:    "View and manage Kubernetes service accounts",
 	}, "a")
 
-	rf.registerResource("ReplicaSets", createReplicaSetsModel, ResourceMetadata{
+	rf.registerResource("ReplicaSets", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewReplicaSets(k, namespace) }, ResourceMetadata{
 		Name:        "ReplicaSets",
 		Description: "Pod replication and scaling controllers",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes replica sets",
 	}, "r")
 
-	rf.registerResource("Nodes", createNodesModel, ResourceMetadata{
+	rf.registerResource("Nodes", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewNodes(k, namespace) }, ResourceMetadata{
 		Name:        "Nodes",
 		Description: "Kubernetes cluster nodes and their resources",
 		Category:    "Infrastructure",
 		HelpText:    "View and manage Kubernetes cluster nodes",
 	}, "n")
 
-	rf.registerResource("Jobs", createJobsModel, ResourceMetadata{
+	rf.registerResource("Jobs", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewJobs(k, namespace) }, ResourceMetadata{
 		Name:        "Jobs",
 		Description: "Batch processing jobs and scheduled tasks",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes jobs",
 	}, "j")
 
-	rf.registerResource("CronJobs", createCronJobsModel, ResourceMetadata{
+	rf.registerResource("CronJobs", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewCronJobs(k, namespace) }, ResourceMetadata{
 		Name:        "CronJobs",
 		Description: "Scheduled jobs that run periodically",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes cron jobs",
 	}, "k")
 
-	rf.registerResource("DaemonSets", createDaemonSetsModel, ResourceMetadata{
+	rf.registerResource("DaemonSets", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewDaemonSets(k, namespace) }, ResourceMetadata{
 		Name:        "DaemonSets",
 		Description: "Pods that run on all cluster nodes",
 		Category:    "Workloads",
 		HelpText:    "View and manage Kubernetes daemon sets",
 	}, "m")
 
-	rf.registerResource("StatefulSets", createStatefulSetsModel, ResourceMetadata{
+	rf.registerResource("StatefulSets", func(k k8s.Client, namespace string) (ResourceModel, error) { return NewStatefulSets(k, namespace) }, ResourceMetadata{
 		Name:        "StatefulSets",
 		Description: "Stateful applications with persistent storage",
 		Category:    "Workloads",
@@ -201,110 +201,6 @@ func (rf *ResourceFactory) GetSortedQuickNavMappings() []struct{ Key, ResourceTy
 	}
 
 	return mappings
-}
-
-func createPodsModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewPods(k, namespace, "")
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createDeploymentsModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewDeployments(k, namespace)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createServicesModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewServices(k, namespace)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createIngressesModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewIngresses(k, namespace)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createConfigMapsModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewConfigmaps(k, namespace, nil)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createSecretsModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewSecrets(k, namespace)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createServiceAccountsModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewServiceAccounts(k, namespace)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createReplicaSetsModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewReplicaSets(k, namespace)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createNodesModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewNodes(k)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createJobsModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewJobs(k, namespace)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createCronJobsModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewCronJobs(k, namespace)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createDaemonSetsModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewDaemonSets(k, namespace)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
-}
-
-func createStatefulSetsModel(k k8s.Client, namespace string) (ResourceModel, error) {
-	model, err := NewStatefulSets(k, namespace)
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
 }
 
 type ResourceList struct {

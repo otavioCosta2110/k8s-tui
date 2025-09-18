@@ -104,18 +104,3 @@ func (r *replicasetsModel) fetchData() error {
 
 	return nil
 }
-
-func (r *replicasetsModel) dataToRows() []table.Row {
-	rows := make([]table.Row, len(r.replicasetsInfo))
-	for i, replicaset := range r.replicasetsInfo {
-		rows[i] = table.Row{
-			replicaset.Namespace,
-			replicaset.Name,
-			replicaset.Desired,
-			replicaset.Current,
-			replicaset.Ready,
-			replicaset.Age,
-		}
-	}
-	return rows
-}
