@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/utils"
 	"sort"
-	"strings"
 	"time"
 
 	"gopkg.in/yaml.v3"
@@ -198,12 +197,7 @@ func (cm *Configmap) DescribeConfigMap(events *corev1.EventList) (map[string]any
 
 		for _, key := range keys {
 			value := cm.Raw.Data[key]
-			lines := strings.Split(value, "\n")
-			if len(lines) == 1 {
-				dataDesc[key] = value
-			} else {
-				dataDesc[key] = fmt.Sprintf("----\n%s", value)
-			}
+			dataDesc[key] = value
 		}
 		desc["data"] = dataDesc
 	}

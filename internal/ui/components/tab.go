@@ -144,7 +144,7 @@ func (t *TabComponent) renderTab(tab Tab, isActive bool, maxWidth int) string {
 	if isActive {
 		style = lipgloss.NewStyle().
 			Background(lipgloss.Color(customstyles.Blue)).
-			Foreground(lipgloss.Color("15")).
+			Foreground(lipgloss.Color(customstyles.Black)).
 			Bold(true).
 			Padding(0, 1).
 			Width(maxWidth)
