@@ -14,6 +14,9 @@ var ScreenHeight = 0
 var HeaderSize = 0
 var IsHeaderActive = false
 
+var TabBarSize = 3
+var IsTabBarActive = false
+
 var kubeconfigsDefaultLocation = func() string {
 	home, err := os.UserHomeDir()
 	if err != nil {

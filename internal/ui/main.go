@@ -7,7 +7,6 @@ import (
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"otaviocosta2110/k8s-tui/internal/ui/models"
-	"path/filepath"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -15,11 +14,12 @@ import (
 )
 
 type AppModel struct {
-	stack               []tea.Model
+	tabManager          *models.TabManager
 	kube                k8s.Client
 	header              models.HeaderModel
 	configSelected      bool
 	errorPopup          *models.ErrorModel
+	quickNav            tea.Model
 	currentResourceType string
 	breadcrumbTrail     []string
 }
@@ -29,56 +29,55 @@ func NewAppModel() *AppModel {
 
 	kubeClient, err := k8s.NewClient(cfg.KubeconfigPath, cfg.Namespace)
 	if err == nil && kubeClient != nil {
-		mainModel, err := models.NewMainModel(*kubeClient, cfg.Namespace).InitComponent(*kubeClient)
-		if err != nil {
-			popup := models.NewErrorScreen(err, "Failed to initialize main view", "")
-			return &AppModel{
-				errorPopup: &popup,
-			}
-		}
-
 		header := models.NewHeader("K8s TUI", kubeClient)
 		header.SetNamespace(cfg.Namespace)
 
+		tabManager := models.NewTabManager(kubeClient, cfg.Namespace)
+
 		appModel := &AppModel{
-			stack:          []tea.Model{mainModel},
+			tabManager:     tabManager,
 			header:         header,
 			kube:           *kubeClient,
 			configSelected: true,
 		}
 
-		appModel.initializeInitialBreadcrumb(mainModel)
+		tabs := tabManager.GetTabsForComponent()
+		activeIndex := -1
+		for i, tab := range tabs {
+			header.AddTab(tab.ID, tab.Title, tab.ResourceType)
+			if tab.IsActive {
+				activeIndex = i
+			}
+		}
+		if activeIndex >= 0 {
+			header.SetActiveTab(activeIndex)
+		}
 
 		return appModel
 	}
 
-	initialModel, err := models.NewKubeconfigModel().InitComponent(nil)
+	_, err = models.NewKubeconfigModel().InitComponent(nil)
 	if err != nil {
 		popup := models.NewErrorScreen(err, "Failed to initialize Kubernetes config", "")
 		return &AppModel{
-			stack:      []tea.Model{initialModel},
 			header:     models.NewHeader("K8s TUI", nil),
 			errorPopup: &popup,
 		}
 	}
 
 	appModel := &AppModel{
-		stack:  []tea.Model{initialModel},
 		header: models.NewHeader("K8s TUI", nil),
 	}
-
-	appModel.initializeInitialBreadcrumb(initialModel)
 
 	return appModel
 }
 
 func (m *AppModel) Init() tea.Cmd {
-	if len(m.stack) == 0 {
-		return nil
-	}
-
 	var cmds []tea.Cmd
-	cmds = append(cmds, m.stack[len(m.stack)-1].Init())
+
+	if m.tabManager != nil {
+		cmds = append(cmds, m.tabManager.Init())
+	}
 
 	if m.configSelected {
 		cmds = append(cmds, m.header.Init())
@@ -93,10 +92,12 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		global.ScreenWidth = msg.Width - global.Margin
 		global.ScreenHeight = msg.Height - global.Margin
 		if !global.IsHeaderActive {
-			global.HeaderSize = global.ScreenHeight/4 - ((global.Margin * 2) - 1)
+			global.HeaderSize = global.ScreenHeight/4 - (global.Margin * 2)
 			global.IsHeaderActive = true
 		}
 		global.ScreenHeight -= global.HeaderSize
+		global.ScreenHeight -= global.TabBarSize 
+		global.IsTabBarActive = true
 
 		var cmds []tea.Cmd
 		if m.configSelected {
@@ -107,9 +108,20 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, headerCmd)
 		}
 
-		for i := range m.stack {
+		if m.tabManager != nil {
 			var cmd tea.Cmd
-			m.stack[i], cmd = m.stack[i].Update(msg)
+			updatedManager, cmd := m.tabManager.Update(msg)
+			if manager, ok := updatedManager.(*models.TabManager); ok {
+				m.tabManager = manager
+				if cmd != nil {
+					cmds = append(cmds, cmd)
+				}
+			}
+		}
+
+		if m.quickNav != nil {
+			var cmd tea.Cmd
+			m.quickNav, cmd = m.quickNav.Update(msg)
 			if cmd != nil {
 				cmds = append(cmds, cmd)
 			}
@@ -117,35 +129,97 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Batch(cmds...)
 
 	case tea.KeyMsg:
+		if m.quickNav != nil {
+			switch msg.String() {
+			case "esc", "g":
+				m.quickNav = nil
+				return m, nil
+			default:
+				var cmd tea.Cmd
+				m.quickNav, cmd = m.quickNav.Update(msg)
+				return m, cmd
+			}
+		}
+
 		switch msg.String() {
-		case "esc", "q":
+		case "esc":
 			if m.errorPopup != nil {
 				m.errorPopup = nil
 				return m, nil
 			}
-			if len(m.stack) > 1 {
-				m.stack = m.stack[:len(m.stack)-1]
-				if len(m.breadcrumbTrail) > 0 {
-					m.breadcrumbTrail = m.breadcrumbTrail[:len(m.breadcrumbTrail)-1]
+			return m, tea.Quit
+		case "q":
+			if m.tabManager != nil {
+				updatedManager, cmd := m.tabManager.Update(msg)
+				if manager, ok := updatedManager.(*models.TabManager); ok {
+					m.tabManager = manager
 				}
-				return m, nil
+				return m, cmd
 			}
+			return m, nil
+		case "Q":
 			return m, tea.Quit
 		case "g":
-			currentIndex := len(m.stack) - 1
-			if currentIndex >= 0 {
-				if _, isQuickNav := m.stack[currentIndex].(models.QuickNavModel); isQuickNav {
-					return m, nil
+			if m.quickNav != nil {
+				m.quickNav = nil
+				return m, nil
+			}
+			m.quickNav = models.NewQuickNavModel(m.kube, m.kube.Namespace)
+			return m, m.quickNav.Init()
+		case "ctrl+t":
+			if m.tabManager != nil {
+				updatedManager, cmd := m.tabManager.Update(msg)
+				if manager, ok := updatedManager.(*models.TabManager); ok {
+					m.tabManager = manager
+					m.updateHeaderTabs()
+				}
+				return m, cmd
+			}
+			return m, nil
+		case "left", "right":
+			if m.header.GetTabCount() > 0 {
+				newHeader, headerCmd := m.header.Update(msg)
+				if header, ok := newHeader.(models.HeaderModel); ok {
+					m.header = header
+					if m.tabManager != nil {
+						m.tabManager.SetActiveTab(m.header.GetActiveTabIndex())
+					}
+					return m, headerCmd
 				}
 			}
-			quickNav := models.NewQuickNavModel(m.kube, m.kube.Namespace)
-			m.stack = append(m.stack, quickNav)
-			return m, quickNav.Init()
+			return m, nil
+		case "1", "2", "3", "4", "5", "6", "7", "8", "9":
+			if m.header.GetTabCount() > 0 {
+				newHeader, headerCmd := m.header.Update(msg)
+				if header, ok := newHeader.(models.HeaderModel); ok {
+					m.header = header
+					if m.tabManager != nil {
+						m.tabManager.SetActiveTab(m.header.GetActiveTabIndex())
+					}
+					return m, headerCmd
+				}
+			}
+			return m, nil
+		case "ctrl+w":
+			if m.header.GetTabCount() > 1 { 
+				newHeader, headerCmd := m.header.Update(msg)
+				if header, ok := newHeader.(models.HeaderModel); ok {
+					m.header = header
+					m.updateHeaderTabs()
+					return m, headerCmd
+				}
+			}
+			return m, nil
+
 		default:
-			var cmd tea.Cmd
-			current := len(m.stack) - 1
-			m.stack[current], cmd = m.stack[current].Update(msg)
-			return m, cmd
+			if m.tabManager != nil {
+				updatedManager, cmd := m.tabManager.Update(msg)
+				if manager, ok := updatedManager.(*models.TabManager); ok {
+					m.tabManager = manager
+				}
+				return m, cmd
+			}
+			return m, nil
 		}
 
 	case components.NavigateMsg:
@@ -158,50 +232,50 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			popup.SetDimensions(global.ScreenWidth, global.ScreenHeight)
 
 			return &AppModel{
-				stack:      m.stack,
+				tabManager: m.tabManager,
 				header:     m.header,
 				kube:       msg.Cluster,
 				errorPopup: &popup,
+				quickNav:   nil, 
 			}, nil
 		}
 
-		currentIndex := len(m.stack) - 1
-		if currentIndex >= 0 {
-			if _, isQuickNav := m.stack[currentIndex].(models.QuickNavModel); isQuickNav {
-				if msg.Breadcrumb != "" && len(m.breadcrumbTrail) > 0 && m.breadcrumbTrail[len(m.breadcrumbTrail)-1] == msg.Breadcrumb {
-					m.stack = m.stack[:currentIndex]
-				} else {
-					m.stack[currentIndex] = msg.NewScreen
-				}
-			} else if msg.Breadcrumb != "" && len(m.breadcrumbTrail) > 0 && m.breadcrumbTrail[len(m.breadcrumbTrail)-1] == msg.Breadcrumb {
-				m.stack[currentIndex] = msg.NewScreen
-			} else {
-				m.stack = append(m.stack, msg.NewScreen)
+		m.quickNav = nil
+
+		if m.tabManager != nil {
+			updatedManager, cmd := m.tabManager.Update(msg)
+			if manager, ok := updatedManager.(*models.TabManager); ok {
+				m.tabManager = manager
 			}
-		} else {
-			m.stack = append(m.stack, msg.NewScreen)
-		}
 
-		if msg.Breadcrumb != "" {
-			if len(m.breadcrumbTrail) == 0 || m.breadcrumbTrail[len(m.breadcrumbTrail)-1] != msg.Breadcrumb {
-				m.breadcrumbTrail = append(m.breadcrumbTrail, msg.Breadcrumb)
+			m.updateHeaderTabs()
+
+			if !m.configSelected {
+				m.configSelected = true
+				m.header.SetKubeconfig(&msg.Cluster)
+				m.kube = msg.Cluster
+				m.header.UpdateContent()
+
+				return m, tea.Batch(
+					cmd,
+					m.header.Init(),
+				)
 			}
+			return m, cmd
 		}
 
-		m.updateFooterWithBreadcrumb(msg.NewScreen)
+		return m, nil
 
-		if !m.configSelected {
-			m.configSelected = true
-			m.header.SetKubeconfig(&msg.Cluster)
-			m.kube = msg.Cluster
-			m.header.UpdateContent()
-
-			return m, tea.Batch(
-				msg.NewScreen.Init(),
-				m.header.Init(),
-			)
+	case components.TabMsg:
+		if m.tabManager != nil {
+			updatedManager, cmd := m.tabManager.Update(msg)
+			if manager, ok := updatedManager.(*models.TabManager); ok {
+				m.tabManager = manager
+				m.updateHeaderTabs()
+			}
+			return m, cmd
 		}
-		return m, msg.NewScreen.Init()
+		return m, nil
 
 	case models.HeaderRefreshMsg:
 		if m.configSelected {
@@ -211,31 +285,38 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
+	case models.CloseQuickNavMsg:
+		m.quickNav = nil
+		return m, nil
+
 	default:
-		var cmd tea.Cmd
-		current := len(m.stack) - 1
-		m.stack[current], cmd = m.stack[current].Update(msg)
-		return m, cmd
+		if m.tabManager != nil {
+			updatedManager, cmd := m.tabManager.Update(msg)
+			if manager, ok := updatedManager.(*models.TabManager); ok {
+				m.tabManager = manager
+			}
+			return m, cmd
+		}
+		return m, nil
 	}
 }
 
 func (m *AppModel) View() string {
+	if m.quickNav != nil {
+		return m.quickNav.View()
+	}
+
 	if m.errorPopup != nil {
 		return m.errorPopup.View()
 	}
 
-	if len(m.stack) == 0 {
+	if m.tabManager == nil {
 		return "Loading..."
 	}
 
-	currentView := m.stack[len(m.stack)-1].View()
+	currentView := m.tabManager.View()
 
-	var height int
-	if !global.IsHeaderActive {
-		height = global.ScreenHeight + global.HeaderSize
-	} else {
-		height = global.ScreenHeight
-	}
+	height := global.ScreenHeight
 
 	headerView := m.header.View()
 
@@ -246,19 +327,76 @@ func (m *AppModel) View() string {
 		BorderForeground(lipgloss.Color(customstyles.Blue)).
 		Render(currentView)
 
+	var breadcrumbView string
+	if m.tabManager != nil {
+		if activeTab := m.tabManager.GetActiveTab(); activeTab != nil && len(activeTab.Breadcrumb) > 0 {
+			var breadcrumbParts []string
+			breadcrumbEnd := activeTab.CurrentIndex + 1
+			if breadcrumbEnd > len(activeTab.Breadcrumb) {
+				breadcrumbEnd = len(activeTab.Breadcrumb)
+			}
+			for i := 0; i < breadcrumbEnd; i++ {
+				crumb := activeTab.Breadcrumb[i]
+				if i == activeTab.CurrentIndex && activeTab.CurrentIndex < len(activeTab.Breadcrumb) {
+					breadcrumbParts = append(breadcrumbParts, lipgloss.NewStyle().
+						Foreground(lipgloss.Color(customstyles.Pink)).
+						Bold(true).
+						Render(crumb))
+				} else {
+					breadcrumbParts = append(breadcrumbParts, lipgloss.NewStyle().
+						Foreground(lipgloss.Color("240")).
+						Render(crumb))
+				}
+			}
+			breadcrumbStr := strings.Join(breadcrumbParts, " > ")
+			breadcrumbView = lipgloss.NewStyle().
+				Width(global.ScreenWidth).
+				Render(breadcrumbStr)
+		}
+	}
+
 	if !m.configSelected {
-		return lipgloss.NewStyle().
-			Width(global.ScreenWidth).
-			Height(global.ScreenHeight + global.HeaderSize).
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color(customstyles.Blue)).
-			Render(currentView)
+		var finalView string
+		if breadcrumbView != "" {
+			finalView = lipgloss.JoinVertical(lipgloss.Top,
+				lipgloss.NewStyle().
+					Width(global.ScreenWidth).
+					Height(global.ScreenHeight+global.HeaderSize).
+					Border(lipgloss.RoundedBorder()).
+					BorderForeground(lipgloss.Color(customstyles.Blue)).
+					Render(currentView),
+				breadcrumbView)
+		} else {
+			finalView = lipgloss.NewStyle().
+				Width(global.ScreenWidth).
+				Height(global.ScreenHeight + global.HeaderSize).
+				Border(lipgloss.RoundedBorder()).
+				BorderForeground(lipgloss.Color(customstyles.Blue)).
+				Render(currentView)
+		}
+
+		return finalView
 	}
 
 	if !global.IsHeaderActive {
-		return content
+		var finalView string
+		if breadcrumbView != "" {
+			finalView = lipgloss.JoinVertical(lipgloss.Top, content, breadcrumbView)
+		} else {
+			finalView = content
+		}
+
+		return finalView
 	}
-	return lipgloss.JoinVertical(lipgloss.Top, headerView, content)
+
+	var finalView string
+	if breadcrumbView != "" {
+		finalView = lipgloss.JoinVertical(lipgloss.Top, headerView, content, breadcrumbView)
+	} else {
+		finalView = lipgloss.JoinVertical(lipgloss.Top, headerView, content)
+	}
+
+	return finalView
 }
 
 func (m *AppModel) getResourceTypeFromKey(key string) string {
@@ -285,128 +423,64 @@ func (m *AppModel) getResourceTypeFromKey(key string) string {
 	return ""
 }
 
-func (m *AppModel) isCurrentScreenResourceType(resourceType string) bool {
-	if resourceType == "ResourceList" {
-		return len(m.breadcrumbTrail) > 0 && m.breadcrumbTrail[len(m.breadcrumbTrail)-1] == "Resource List"
-	}
-
-	if len(m.breadcrumbTrail) > 0 {
-		return m.breadcrumbTrail[len(m.breadcrumbTrail)-1] == resourceType
-	}
-	return false
-}
-
-func (m *AppModel) initializeInitialBreadcrumb(initialModel tea.Model) {
-	if listModel, ok := initialModel.(*components.ListModel); ok {
-		switch listModel.List.Title {
-		case "Resource Types":
-			m.breadcrumbTrail = []string{"Resource List"}
-		case "Kubeconfigs":
-			m.breadcrumbTrail = []string{}
-		case "Namespaces":
-			m.breadcrumbTrail = []string{}
-		default:
-			m.breadcrumbTrail = []string{}
-		}
-	} else {
-		m.breadcrumbTrail = []string{}
-	}
-
-	m.updateFooterWithBreadcrumb(initialModel)
-}
-
-func (m *AppModel) navigateToResource(resourceType string) tea.Cmd {
-	return func() tea.Msg {
-		if m.isCurrentScreenResourceType(resourceType) {
-			return nil
-		}
-
-		if resourceType == "ResourceList" {
-			resourceScreen := models.NewResource(m.kube, m.kube.Namespace)
-			resourceComponent := resourceScreen.InitComponent(m.kube)
-
-			m.breadcrumbTrail = []string{"Resource List"}
-
-			return components.NavigateMsg{
-				NewScreen: resourceComponent,
+func (m *AppModel) updateHeaderTabs() {
+	if m.tabManager != nil {
+		tabs := m.tabManager.GetTabsForComponent()
+		m.header.ClearTabs()
+		activeIndex := -1
+		for i, tab := range tabs {
+			m.header.AddTab(tab.ID, tab.Title, tab.ResourceType)
+			if tab.IsActive {
+				activeIndex = i
 			}
 		}
-
-		resourceList, err := models.NewResourceList(m.kube, m.kube.Namespace, resourceType).InitComponent(m.kube)
-		if err != nil {
-			return components.NavigateMsg{
-				Error: err,
-			}
-		}
-
-		m.currentResourceType = resourceType
-
-		if len(m.breadcrumbTrail) == 0 || m.breadcrumbTrail[len(m.breadcrumbTrail)-1] != resourceType {
-			m.breadcrumbTrail = append(m.breadcrumbTrail, resourceType)
-		}
-
-		return components.NavigateMsg{
-			NewScreen: resourceList,
+		if activeIndex >= 0 {
+			m.header.SetActiveTab(activeIndex)
 		}
 	}
 }
 
 func (m *AppModel) getBreadcrumbTrail() string {
-	if len(m.breadcrumbTrail) == 0 {
-		return ""
+	if len(m.breadcrumbTrail) > 0 {
+		prefix := []string{"config", "test-namespace"}
+		fullTrail := append(prefix, m.breadcrumbTrail...)
+		return strings.Join(fullTrail, " > ")
 	}
 
-	var parts []string
-
-	if m.kube.KubeconfigPath != "" {
-		kubeconfigName := filepath.Base(m.kube.KubeconfigPath)
-		if kubeconfigName == "" {
-			kubeconfigName = "kubeconfig"
-		}
-		parts = append(parts, kubeconfigName)
-	} else {
-		parts = append(parts, "in-cluster")
-	}
-
-	if m.kube.Namespace != "" {
-		parts = append(parts, m.kube.Namespace)
-	} else {
-		parts = append(parts, "default")
-	}
-
-	parts = append(parts, m.breadcrumbTrail...)
-
-	trail := strings.Join(parts, " > ")
-
-	maxLength := global.ScreenWidth - 20
-	if len(trail) > maxLength {
-		contextParts := parts[:2]
-		resourceParts := parts[2:]
-
-		trail = strings.Join(contextParts, " > ") + " > ..."
-
-		for i := len(resourceParts) - 1; i >= 0; i-- {
-			candidate := strings.Join(contextParts, " > ") + " > " + strings.Join(resourceParts[i:], " > ")
-			if len(candidate) <= maxLength {
-				trail = candidate
-				break
-			}
+	if m.tabManager != nil {
+		if activeTab := m.tabManager.GetActiveTab(); activeTab != nil && len(activeTab.Breadcrumb) > 0 {
+			return strings.Join(activeTab.Breadcrumb, " > ")
 		}
 	}
-
-	return trail
+	return ""
 }
 
-func (m *AppModel) updateFooterWithBreadcrumb(model tea.Model) {
-	breadcrumb := m.getBreadcrumbTrail()
-
-	if autoRefreshModel, ok := model.(*models.AutoRefreshModel); ok {
-		autoRefreshModel.SetFooterText(breadcrumb)
-		return
+func (m *AppModel) isCurrentScreenResourceType(resourceType string) bool {
+	if len(m.breadcrumbTrail) > 0 {
+		currentCrumb := m.breadcrumbTrail[len(m.breadcrumbTrail)-1]
+		if currentCrumb == "Resource List" && resourceType == "ResourceList" {
+			return true
+		}
+		return currentCrumb == resourceType
 	}
 
-	if listModel, ok := model.(*components.ListModel); ok {
-		listModel.SetFooterText(breadcrumb)
-		return
+	if m.tabManager != nil {
+		if activeTab := m.tabManager.GetActiveTab(); activeTab != nil && len(activeTab.Breadcrumb) > 0 {
+			currentCrumb := activeTab.Breadcrumb[len(activeTab.Breadcrumb)-1]
+			return currentCrumb == resourceType
+		}
+	}
+	return false
+}
+
+func (m *AppModel) initializeInitialBreadcrumb(listModel interface{}) {
+	if list, ok := listModel.(*components.ListModel); ok {
+		if list.List.Title == "Resource Types" {
+			m.breadcrumbTrail = []string{"Resource List"}
+		} else {
+			m.breadcrumbTrail = []string{}
+		}
+	} else {
+		m.breadcrumbTrail = []string{}
 	}
 }

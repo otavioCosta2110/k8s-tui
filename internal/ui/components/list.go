@@ -93,7 +93,7 @@ func (m *ListModel) View() string {
 			Align(lipgloss.Center, lipgloss.Center).
 			Render("Loading...")
 	}
-	m.List.SetSize(global.ScreenWidth, global.ScreenHeight - 1)
+	m.List.SetSize(global.ScreenWidth, global.ScreenHeight +1)
 
 	view := m.List.View()
 

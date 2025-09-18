@@ -12,6 +12,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+type CloseQuickNavMsg struct{}
+
 type QuickNavModel struct {
 	width     int
 	height    int
@@ -38,7 +40,9 @@ func (m QuickNavModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc", "q":
-			return m, nil
+			return m, func() tea.Msg {
+				return CloseQuickNavMsg{}
+			}
 		default:
 			resourceType := m.getResourceTypeFromKey(msg.String())
 			if resourceType != "" {

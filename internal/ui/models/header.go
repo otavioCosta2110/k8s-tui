@@ -4,6 +4,7 @@ import (
 	"fmt"
 	global "otaviocosta2110/k8s-tui/internal"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
@@ -25,14 +26,15 @@ type HeaderModel struct {
 	kubeconfig     *k8s.Client
 	namespace      string
 	metricsManager *MetricsManager
+	tabComponent   *components.TabComponent
 }
 
 func NewHeader(headerText string, kubeconfig *k8s.Client) HeaderModel {
 	return HeaderModel{
-		content:    "",
-		kubeconfig: kubeconfig,
-		headerStyle: lipgloss.NewStyle().
-			Height(global.HeaderSize),
+		content:      "",
+		kubeconfig:   kubeconfig,
+		headerStyle:  lipgloss.NewStyle().Height(global.HeaderSize),
+		tabComponent: components.NewTabComponent(),
 	}
 }
 
@@ -49,17 +51,32 @@ func (m HeaderModel) Init() tea.Cmd {
 	m.headerStyle = m.headerStyle.Height(m.height)
 
 	global.IsHeaderActive = true
-	return nil
+	return m.tabComponent.Init()
 }
 
 func (m HeaderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.headerStyle = m.headerStyle.
 		Height(m.height)
+
+	var tabCmd tea.Cmd
+	if m.tabComponent != nil {
+		updatedTab, cmd := m.tabComponent.Update(msg)
+		if tab, ok := updatedTab.(*components.TabComponent); ok {
+			m.tabComponent = tab
+			tabCmd = cmd
+		}
+	}
+
 	switch msg := msg.(type) {
+	case components.TabMsg:
+		return m, func() tea.Msg { return msg }
 	case tea.WindowSizeMsg:
 		m.headerStyle = m.headerStyle.
 			Width(msg.Width).
 			Height(m.height)
+		if m.tabComponent != nil {
+			m.tabComponent.Width = msg.Width
+		}
 	case HeaderRefreshMsg:
 		m.updateContentFromManager()
 		if m.kubeconfig != nil {
@@ -67,16 +84,27 @@ func (m HeaderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return HeaderRefreshMsg{}
 			})
 		}
-		return m, nil
+		return m, tabCmd
 	}
-	return m, nil
+	return m, tabCmd
 }
 
 func (m HeaderModel) View() string {
+	var headerView string
 	if m.kubeconfig == nil {
-		return m.headerStyle.Render("K8s TUI - No cluster connection")
+		headerView = m.headerStyle.Render("K8s TUI - No cluster connection")
+	} else {
+		headerView = m.headerStyle.Render(m.content)
 	}
-	return m.headerStyle.Render(m.content)
+
+	if m.tabComponent != nil && m.tabComponent.GetTabCount() > 0 {
+		tabView := m.tabComponent.View()
+		if tabView != "" {
+			return lipgloss.JoinVertical(lipgloss.Top, headerView, tabView)
+		}
+	}
+
+	return headerView
 }
 
 func (m HeaderModel) buildEnhancedHeader(metrics Metrics) string {
@@ -228,4 +256,49 @@ func (m *HeaderModel) Stop() {
 	if m.metricsManager != nil {
 		m.metricsManager.Stop()
 	}
+}
+
+func (m *HeaderModel) AddTab(id, title, resourceType string) {
+	if m.tabComponent != nil {
+		m.tabComponent.AddTab(id, title, resourceType)
+	}
+}
+
+func (m *HeaderModel) RemoveTab(id string) {
+	if m.tabComponent != nil {
+		m.tabComponent.RemoveTab(id)
+	}
+}
+
+func (m *HeaderModel) SetActiveTab(index int) {
+	if m.tabComponent != nil {
+		m.tabComponent.SetActiveTab(index)
+	}
+}
+
+func (m *HeaderModel) GetActiveTab() *components.Tab {
+	if m.tabComponent != nil {
+		return m.tabComponent.GetActiveTab()
+	}
+	return nil
+}
+
+func (m *HeaderModel) GetTabCount() int {
+	if m.tabComponent != nil {
+		return m.tabComponent.GetTabCount()
+	}
+	return 0
+}
+
+func (m *HeaderModel) ClearTabs() {
+	if m.tabComponent != nil {
+		m.tabComponent.ClearTabs()
+	}
+}
+
+func (m *HeaderModel) GetActiveTabIndex() int {
+	if m.tabComponent != nil {
+		return m.tabComponent.ActiveIndex
+	}
+	return 0
 }
