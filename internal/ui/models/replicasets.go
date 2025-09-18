@@ -80,7 +80,7 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return r.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(r.config.Columns, r.config.ColumnWidths, r.dataToRows(), r.config.Title, onSelect, 1, fetchFunc, nil, "")
+	tableModel := ui.NewTable(r.config.Columns, r.config.ColumnWidths, r.dataToRows(), r.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": r.createDeleteAction(tableModel),

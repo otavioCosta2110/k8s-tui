@@ -146,11 +146,11 @@ func (m HeaderModel) getClusterInfo() map[string]string {
 func (m HeaderModel) buildClusterSection(info map[string]string) string {
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(customstyles.Foreground).
+		Foreground(customstyles.TextColor).
 		Padding(0, 1)
 
 	labelStyle := lipgloss.NewStyle().
-		Foreground(customstyles.Foreground)
+		Foreground(customstyles.TextColor)
 
 	valueStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#A1EFD3"))
@@ -173,11 +173,11 @@ func (m HeaderModel) buildClusterSection(info map[string]string) string {
 func (m HeaderModel) buildMetricsSection(metrics Metrics) string {
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(customstyles.Foreground).
+		Foreground(customstyles.TextColor).
 		Padding(0, 1)
 
 	metricStyle := lipgloss.NewStyle().
-		Foreground(customstyles.Foreground)
+		Foreground(customstyles.TextColor)
 
 	valueStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#A1EFD3"))

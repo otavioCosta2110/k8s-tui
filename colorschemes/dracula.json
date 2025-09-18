@@ -1,0 +1,9 @@
+{
+  "border_color": "#bd93f9",
+  "accent_color": "#ff79c6",
+  "header_color": "#f1fa8c",
+  "error_color": "#ff5555",
+  "selection_background": "#bd93f9",
+  "selection_foreground": "#282a36",
+  "text_color": "#f8f8f2"
+}

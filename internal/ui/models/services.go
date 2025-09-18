@@ -69,7 +69,7 @@ func (s *servicesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return s.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(s.config.Columns, s.config.ColumnWidths, s.dataToRows(), s.config.Title, onSelect, 1, fetchFunc, nil, "")
+	tableModel := ui.NewTable(s.config.Columns, s.config.ColumnWidths, s.dataToRows(), s.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": s.createDeleteAction(tableModel),

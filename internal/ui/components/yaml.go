@@ -36,6 +36,8 @@ var DefaultYAMLViewerStyles = &YAMLViewerStyles{
 	HelpTextColor: "#757575",
 }
 
+type loadedMsg struct{}
+
 func NewYAMLViewer(title, content string) *YAMLViewer {
 	highlighted := highlightYAML(content)
 	return &YAMLViewer{
@@ -71,7 +73,7 @@ func (m *YAMLViewer) GetOriginalContent() string {
 
 func (m *YAMLViewer) Init() tea.Cmd {
 	contentWidth := global.ScreenWidth
-	m.viewport = viewport.New(contentWidth, global.ScreenHeight - 1)
+	m.viewport = viewport.New(contentWidth, global.ScreenHeight-1)
 	return tea.Tick(time.Second, func(time.Time) tea.Msg {
 		return loadedMsg{}
 	})
@@ -93,7 +95,7 @@ func (m *YAMLViewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		if !m.ready {
 			contentWidth := global.ScreenWidth
-			m.viewport = viewport.New(contentWidth, global.ScreenHeight - 1)
+			m.viewport = viewport.New(contentWidth, global.ScreenHeight-1)
 			m.ready = true
 			m.viewport.SetContent(m.content)
 		} else {

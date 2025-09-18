@@ -27,19 +27,18 @@ type TableModel struct {
 	lastRefresh     time.Time
 	refreshFunc     func() ([]table.Row, error)
 	updateActions   map[string]func() tea.Cmd
-	footerText      string
 }
 
 type loadedTableMsg struct{}
 
-func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, title string, onSelect func(selected string) tea.Msg, selectColumn int, refreshFunc func() ([]table.Row, error), updateActions map[string]func() tea.Cmd, footerText string) *TableModel {
+func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, title string, onSelect func(selected string) tea.Msg, selectColumn int, refreshFunc func() ([]table.Row, error), updateActions map[string]func() tea.Cmd) *TableModel {
 	styles := table.DefaultStyles()
 	styles.Header = styles.Header.
 		BorderBottom(true).
-		BorderForeground(lipgloss.Color(customstyles.Purple)).
+		BorderForeground(lipgloss.Color(customstyles.HeaderColor)).
 		BorderStyle(lipgloss.NormalBorder())
 
-	styles.Selected = customstyles.SelectedStyle.Padding(0, 0).Margin(0, 0)
+	styles.Selected = customstyles.SelectedStyle().Padding(0, 0).Margin(0, 0)
 	checkboxColumn := table.Column{Title: "✓", Width: 3}
 	columns = append([]table.Column{checkboxColumn}, columns...)
 
@@ -75,7 +74,6 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 		refreshFunc:     refreshFunc,
 		lastRefresh:     time.Now(),
 		updateActions:   updateActions,
-		footerText:      footerText,
 	}
 }
 
@@ -133,10 +131,6 @@ func (m *TableModel) SetUpdateActions(actions map[string]func() tea.Cmd) {
 	m.updateActions = actions
 }
 
-func (m *TableModel) SetFooterText(text string) {
-	m.footerText = text
-}
-
 func (m *TableModel) toggleCheckbox(rowIdx int) {
 	rows := m.Table.Rows()
 	if rowIdx < 0 || rowIdx >= len(rows) {
@@ -163,22 +157,10 @@ func (m *TableModel) View() string {
 
 	m.updateColumnWidths(global.ScreenWidth)
 
-	footerHeight := 0
-	tableHeight := global.ScreenHeight - footerHeight
+	tableHeight := global.ScreenHeight + 1
 	m.Table.SetHeight(tableHeight)
 
 	tableView := m.Table.View()
-
-	if m.footerText != "" {
-		footerStyle := lipgloss.NewStyle().
-			Foreground(lipgloss.Color("240")).
-			Align(lipgloss.Left).
-			Width(global.ScreenWidth).
-			MaxWidth(global.ScreenWidth)
-
-		footer := footerStyle.Render(m.footerText)
-		return lipgloss.JoinVertical(lipgloss.Top, tableView, footer)
-	}
 
 	return tableView
 }
@@ -236,8 +218,6 @@ func (m *TableModel) UpdateColumns(columns []table.Column) {
 	columns = append([]table.Column{{Title: "✓", Width: 3}}, columns...)
 	m.Table.SetColumns(columns)
 }
-
-
 
 func (m *TableModel) refreshData() tea.Cmd {
 	return func() tea.Msg {

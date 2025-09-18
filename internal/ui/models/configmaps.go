@@ -66,7 +66,7 @@ func (c *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return c.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(c.config.Columns, c.config.ColumnWidths, c.dataToRows(), c.config.Title, onSelect, 1, fetchFunc, nil, "")
+	tableModel := ui.NewTable(c.config.Columns, c.config.ColumnWidths, c.dataToRows(), c.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": c.createDeleteAction(tableModel),

@@ -23,7 +23,7 @@ func TestTableModel_Selection(t *testing.T) {
 		return nil
 	}
 
-	tableModel := NewTable(columns, []float64{0.5, 0.5}, rows, "Test", onSelect, 1, nil, nil, "")
+	tableModel := NewTable(columns, []float64{0.5, 0.5}, rows, "Test", onSelect, 1, nil, nil)
 
 	_, cmd := tableModel.Update(tea.KeyMsg{Type: tea.KeyEnter})
 	if cmd == nil {

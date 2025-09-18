@@ -71,7 +71,7 @@ func (ds *daemonsetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return ds.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(ds.config.Columns, ds.config.ColumnWidths, ds.dataToRows(), ds.config.Title, onSelect, 1, fetchFunc, nil, "")
+	tableModel := ui.NewTable(ds.config.Columns, ds.config.ColumnWidths, ds.dataToRows(), ds.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": ds.createDeleteAction(tableModel),

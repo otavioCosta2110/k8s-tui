@@ -23,8 +23,6 @@ type ListModel struct {
 	footerText  string
 }
 
-type loadedMsg struct{}
-
 func NewItem(title, description string) ListItem {
 	return ListItem{title: title, description: description}
 }
@@ -40,16 +38,16 @@ func NewList(items []string, title string, onSelect func(selected string) tea.Ms
 	}
 
 	delegate := list.NewDefaultDelegate()
-	delegate.Styles.NormalTitle = customstyles.NormalStyle
+	delegate.Styles.NormalTitle = customstyles.NormalStyle()
 
-	delegate.Styles.SelectedTitle = customstyles.SelectedStyle
+	delegate.Styles.SelectedTitle = customstyles.SelectedStyle()
 
 	delegate.SetSpacing(0)
 	delegate.ShowDescription = false
 
 	l := list.New(listItems, delegate, 0, 0)
 	l.Title = title
-	l.Styles.Title = customstyles.TitleStyle
+	l.Styles.Title = customstyles.TitleStyle()
 
 	l.SetShowHelp(false)
 
@@ -93,7 +91,7 @@ func (m *ListModel) View() string {
 			Align(lipgloss.Center, lipgloss.Center).
 			Render("Loading...")
 	}
-	m.List.SetSize(global.ScreenWidth, global.ScreenHeight +1)
+	m.List.SetSize(global.ScreenWidth, global.ScreenHeight+1)
 
 	view := m.List.View()
 

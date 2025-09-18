@@ -61,9 +61,6 @@ func (m *AutoRefreshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *AutoRefreshModel) View() string {
-	if tableModel, ok := m.inner.(*ui.TableModel); ok && m.footerText != "" {
-		tableModel.SetFooterText(m.footerText)
-	}
 	return m.inner.View()
 }
 
@@ -86,6 +83,4 @@ func (m *AutoRefreshModel) Refresh() (tea.Model, tea.Cmd) {
 	updatedModel, cmd := m.inner.Refresh()
 	m.inner = updatedModel.(RefreshableModel)
 	return m, cmd
-
-	return m, nil
 }

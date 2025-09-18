@@ -67,7 +67,7 @@ func (j *jobsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return j.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(j.config.Columns, j.config.ColumnWidths, j.dataToRows(), j.config.Title, onSelect, 1, fetchFunc, nil, "")
+	tableModel := ui.NewTable(j.config.Columns, j.config.ColumnWidths, j.dataToRows(), j.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": j.createDeleteAction(tableModel),

@@ -69,7 +69,7 @@ func (cj *cronjobsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return cj.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(cj.config.Columns, cj.config.ColumnWidths, cj.dataToRows(), cj.config.Title, onSelect, 1, fetchFunc, nil, "")
+	tableModel := ui.NewTable(cj.config.Columns, cj.config.ColumnWidths, cj.dataToRows(), cj.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": cj.createDeleteAction(tableModel),

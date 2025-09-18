@@ -213,7 +213,7 @@ func TestAutoRefreshModelWithTableModel(t *testing.T) {
 		return rows, nil
 	}
 
-	tableModel := ui.NewTable(columns, []float64{1.0}, rows, "Test Table", nil, 0, refreshFunc, nil, "")
+	tableModel := ui.NewTable(columns, []float64{1.0}, rows, "Test Table", nil, 0, refreshFunc, nil)
 
 	autoRefreshModel := NewAutoRefreshModel(tableModel, 5*time.Second, nil, "Test Footer")
 

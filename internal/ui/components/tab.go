@@ -2,7 +2,7 @@ package components
 
 import (
 	"fmt"
-	"otaviocosta2110/k8s-tui/internal/ui/custom_styles"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -15,13 +15,13 @@ type Tab struct {
 	ResourceType string
 	IsActive     bool
 	IsModified   bool
-	Breadcrumb   []string 
-	CurrentIndex int      
+	Breadcrumb   []string
+	CurrentIndex int
 }
 
 type TabMsg struct {
 	TabID        string
-	Action       string 
+	Action       string
 	ResourceType string
 }
 
@@ -30,7 +30,7 @@ type TabComponent struct {
 	ActiveIndex int
 	Width       int
 	Height      int
-	TabManager  interface{} 
+	TabManager  interface{}
 }
 
 func NewTabComponent() *TabComponent {
@@ -97,7 +97,7 @@ func (t *TabComponent) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return t, nil
 			}
 		case "x", "ctrl+w":
-			if len(t.Tabs) > 1 && t.ActiveIndex >= 0 && t.ActiveIndex < len(t.Tabs) { 
+			if len(t.Tabs) > 1 && t.ActiveIndex >= 0 && t.ActiveIndex < len(t.Tabs) {
 				closeMsg := TabMsg{
 					TabID:        t.Tabs[t.ActiveIndex].ID,
 					Action:       "close",
@@ -143,8 +143,8 @@ func (t *TabComponent) renderTab(tab Tab, isActive bool, maxWidth int) string {
 	var style lipgloss.Style
 	if isActive {
 		style = lipgloss.NewStyle().
-			Background(lipgloss.Color(customstyles.Blue)).
-			Foreground(lipgloss.Color(customstyles.Black)).
+			Background(lipgloss.Color(customstyles.SelectionBackground)).
+			Foreground(lipgloss.Color(customstyles.SelectionForeground)).
 			Bold(true).
 			Padding(0, 1).
 			Width(maxWidth)

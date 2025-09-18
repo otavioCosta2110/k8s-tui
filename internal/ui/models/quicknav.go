@@ -92,7 +92,7 @@ func (m QuickNavModel) navigateToResource(resourceType string) tea.Cmd {
 func (m QuickNavModel) View() string {
 	title := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color(customstyles.Blue)).
+		Foreground(lipgloss.Color(customstyles.BorderColor)).
 		Align(lipgloss.Center).
 		Width(global.ScreenWidth).
 		Render("Quick Navigation - Press 'g' + key")
@@ -149,7 +149,7 @@ func (m QuickNavModel) View() string {
 		if items, exists := groups[groupName]; exists {
 			groupTitle := lipgloss.NewStyle().
 				Bold(true).
-				Foreground(lipgloss.Color(customstyles.Purple)).
+				Foreground(lipgloss.Color(customstyles.HeaderColor)).
 				Render(fmt.Sprintf("%s", groupName))
 
 			currentColumn.WriteString(groupTitle)

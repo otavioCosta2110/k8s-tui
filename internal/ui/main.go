@@ -27,6 +27,10 @@ type AppModel struct {
 func NewAppModel() *AppModel {
 	cfg := cli.ParseFlags()
 
+	if err := customstyles.InitColors(); err != nil {
+		panic("Failed to initialize colors: " + err.Error())
+	}
+
 	kubeClient, err := k8s.NewClient(cfg.KubeconfigPath, cfg.Namespace)
 	if err == nil && kubeClient != nil {
 		header := models.NewHeader("K8s TUI", kubeClient)
@@ -96,7 +100,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			global.IsHeaderActive = true
 		}
 		global.ScreenHeight -= global.HeaderSize
-		global.ScreenHeight -= global.TabBarSize 
+		global.ScreenHeight -= global.TabBarSize
 		global.IsTabBarActive = true
 
 		var cmds []tea.Cmd
@@ -201,7 +205,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 		case "ctrl+w":
-			if m.header.GetTabCount() > 1 { 
+			if m.header.GetTabCount() > 1 {
 				newHeader, headerCmd := m.header.Update(msg)
 				if header, ok := newHeader.(models.HeaderModel); ok {
 					m.header = header
@@ -236,7 +240,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				header:     m.header,
 				kube:       msg.Cluster,
 				errorPopup: &popup,
-				quickNav:   nil, 
+				quickNav:   nil,
 			}, nil
 		}
 
@@ -324,7 +328,7 @@ func (m *AppModel) View() string {
 		Width(global.ScreenWidth).
 		Height(height).
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color(customstyles.Blue)).
+		BorderForeground(lipgloss.Color(customstyles.BorderColor)).
 		Render(currentView)
 
 	var breadcrumbView string
@@ -339,7 +343,7 @@ func (m *AppModel) View() string {
 				crumb := activeTab.Breadcrumb[i]
 				if i == activeTab.CurrentIndex && activeTab.CurrentIndex < len(activeTab.Breadcrumb) {
 					breadcrumbParts = append(breadcrumbParts, lipgloss.NewStyle().
-						Foreground(lipgloss.Color(customstyles.Pink)).
+						Foreground(lipgloss.Color(customstyles.AccentColor)).
 						Bold(true).
 						Render(crumb))
 				} else {
@@ -363,7 +367,7 @@ func (m *AppModel) View() string {
 					Width(global.ScreenWidth).
 					Height(global.ScreenHeight+global.HeaderSize).
 					Border(lipgloss.RoundedBorder()).
-					BorderForeground(lipgloss.Color(customstyles.Blue)).
+					BorderForeground(lipgloss.Color(customstyles.BorderColor)).
 					Render(currentView),
 				breadcrumbView)
 		} else {
@@ -371,7 +375,7 @@ func (m *AppModel) View() string {
 				Width(global.ScreenWidth).
 				Height(global.ScreenHeight + global.HeaderSize).
 				Border(lipgloss.RoundedBorder()).
-				BorderForeground(lipgloss.Color(customstyles.Blue)).
+				BorderForeground(lipgloss.Color(customstyles.BorderColor)).
 				Render(currentView)
 		}
 

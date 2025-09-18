@@ -66,7 +66,7 @@ func (ss *statefulsetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return ss.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(ss.config.Columns, ss.config.ColumnWidths, ss.dataToRows(), ss.config.Title, onSelect, 1, fetchFunc, nil, "")
+	tableModel := ui.NewTable(ss.config.Columns, ss.config.ColumnWidths, ss.dataToRows(), ss.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": ss.createDeleteAction(tableModel),
