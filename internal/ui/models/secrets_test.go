@@ -5,6 +5,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"testing"
 	"time"
@@ -46,7 +47,7 @@ func TestSecretsModelDataToRows(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{SecretData{&secretsInfo[0]}}
+	model.resourceData = []types.ResourceData{SecretData{&secretsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -128,7 +129,7 @@ func TestSecretsModelWithMultipleItems(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{
+	model.resourceData = []types.ResourceData{
 		SecretData{&secretsInfo[0]},
 		SecretData{&secretsInfo[1]},
 	}
@@ -170,7 +171,7 @@ func TestSecretsModelWithDifferentStates(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{SecretData{&secretsInfo[0]}}
+	model.resourceData = []types.ResourceData{SecretData{&secretsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {

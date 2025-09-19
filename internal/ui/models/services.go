@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -87,7 +88,7 @@ func (s *servicesModel) fetchData() error {
 	}
 	s.servicesInfo = serviceInfo
 
-	s.resourceData = make([]ResourceData, len(serviceInfo))
+	s.resourceData = make([]types.ResourceData, len(serviceInfo))
 	for idx, service := range serviceInfo {
 		s.resourceData[idx] = ServiceData{&service}
 	}

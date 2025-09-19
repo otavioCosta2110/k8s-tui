@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -85,7 +86,7 @@ func (j *jobsModel) fetchData() error {
 	}
 	j.jobsInfo = jobInfo
 
-	j.resourceData = make([]ResourceData, len(jobInfo))
+	j.resourceData = make([]types.ResourceData, len(jobInfo))
 	for idx, job := range jobInfo {
 		j.resourceData[idx] = JobData{&job}
 	}

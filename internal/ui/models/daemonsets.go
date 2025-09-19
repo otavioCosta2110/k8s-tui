@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -89,7 +90,7 @@ func (ds *daemonsetsModel) fetchData() error {
 	}
 	ds.daemonsetsInfo = daemonsetInfo
 
-	ds.resourceData = make([]ResourceData, len(daemonsetInfo))
+	ds.resourceData = make([]types.ResourceData, len(daemonsetInfo))
 	for idx, daemonset := range daemonsetInfo {
 		ds.resourceData[idx] = DaemonSetData{&daemonset}
 	}

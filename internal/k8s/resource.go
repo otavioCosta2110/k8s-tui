@@ -2,9 +2,15 @@ package k8s
 
 import (
 	"fmt"
+	"otaviocosta2110/k8s-tui/internal/types"
 )
 
 func DeleteResource(client Client, resourceType ResourceType, namespace, name string) error {
+	// Check if this is a custom resource type
+	if IsCustomResourceType(resourceType) {
+		return DeleteCustomResource(client, resourceType, namespace, name)
+	}
+
 	switch resourceType {
 	case ResourceTypePod:
 		return DeletePod(client, namespace, name)
@@ -38,6 +44,19 @@ func DeleteResource(client Client, resourceType ResourceType, namespace, name st
 }
 
 func ListResources(client Client, resourceType ResourceType, namespace string) ([]string, error) {
+	// Check if this is a custom resource type
+	if IsCustomResourceType(resourceType) {
+		data, err := GetCustomResourceData(client, resourceType, namespace)
+		if err != nil {
+			return nil, err
+		}
+		names := make([]string, len(data))
+		for i, item := range data {
+			names[i] = item.GetName()
+		}
+		return names, nil
+	}
+
 	switch resourceType {
 	case ResourceTypePod:
 		pods, err := FetchPods(client, namespace, "")
@@ -87,6 +106,11 @@ func ListResources(client Client, resourceType ResourceType, namespace string) (
 }
 
 func GetResourceInfo(client Client, resourceType ResourceType, namespace, name string) (*ResourceInfo, error) {
+	// Check if this is a custom resource type
+	if IsCustomResourceType(resourceType) {
+		return GetCustomResourceInfo(client, resourceType, namespace, name)
+	}
+
 	switch resourceType {
 	case ResourceTypePod:
 		pods, err := FetchPods(client, namespace, "")
@@ -285,4 +309,57 @@ func GetResourceInfo(client Client, resourceType ResourceType, namespace, name s
 		}
 	}
 	return nil, fmt.Errorf("resource %s of type %s not found", name, resourceType)
+}
+
+// Custom resource handler functions - these can be set by the plugin system
+var (
+	GetCustomResourceDataFunc func(client Client, resourceType string, namespace string) ([]types.ResourceData, error)
+	DeleteCustomResourceFunc  func(client Client, resourceType string, namespace string, name string) error
+	GetCustomResourceInfoFunc func(client Client, resourceType string, namespace string, name string) (*ResourceInfo, error)
+	IsCustomResourceTypeFunc  func(resourceType string) bool
+)
+
+// SetCustomResourceHandlers sets the functions for handling custom resources
+func SetCustomResourceHandlers(
+	getDataFunc func(Client, string, string) ([]types.ResourceData, error),
+	deleteFunc func(Client, string, string, string) error,
+	getInfoFunc func(Client, string, string, string) (*ResourceInfo, error),
+	isCustomFunc func(string) bool,
+) {
+	GetCustomResourceDataFunc = getDataFunc
+	DeleteCustomResourceFunc = deleteFunc
+	GetCustomResourceInfoFunc = getInfoFunc
+	IsCustomResourceTypeFunc = isCustomFunc
+}
+
+// IsCustomResourceType checks if a resource type is a custom resource
+func IsCustomResourceType(resourceType ResourceType) bool {
+	if IsCustomResourceTypeFunc != nil {
+		return IsCustomResourceTypeFunc(string(resourceType))
+	}
+	return false
+}
+
+// GetCustomResourceData gets data for a custom resource type
+func GetCustomResourceData(client Client, resourceType ResourceType, namespace string) ([]types.ResourceData, error) {
+	if GetCustomResourceDataFunc != nil {
+		return GetCustomResourceDataFunc(client, string(resourceType), namespace)
+	}
+	return nil, fmt.Errorf("custom resource handler not set")
+}
+
+// DeleteCustomResource deletes a custom resource
+func DeleteCustomResource(client Client, resourceType ResourceType, namespace string, name string) error {
+	if DeleteCustomResourceFunc != nil {
+		return DeleteCustomResourceFunc(client, string(resourceType), namespace, name)
+	}
+	return fmt.Errorf("custom resource handler not set")
+}
+
+// GetCustomResourceInfo gets information about a custom resource
+func GetCustomResourceInfo(client Client, resourceType ResourceType, namespace string, name string) (*ResourceInfo, error) {
+	if GetCustomResourceInfoFunc != nil {
+		return GetCustomResourceInfoFunc(client, string(resourceType), namespace, name)
+	}
+	return nil, fmt.Errorf("custom resource handler not set")
 }

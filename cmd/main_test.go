@@ -3,12 +3,15 @@ package main
 import (
 	"github.com/charmbracelet/bubbletea"
 	"os"
+	"otaviocosta2110/k8s-tui/internal/plugins"
 	"otaviocosta2110/k8s-tui/internal/ui"
 	"testing"
 )
 
 func TestMain(t *testing.T) {
-	m := ui.NewAppModel()
+	cfg := ui.ParseFlags()
+	pluginManager := plugins.NewPluginManager("./plugins")
+	m := ui.NewAppModel(cfg, pluginManager)
 	if m == nil {
 		t.Error("Expected NewAppModel to return a non-nil model")
 	}

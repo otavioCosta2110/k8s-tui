@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -87,7 +88,7 @@ func (cj *cronjobsModel) fetchData() error {
 	}
 	cj.cronjobsInfo = cronjobInfo
 
-	cj.resourceData = make([]ResourceData, len(cronjobInfo))
+	cj.resourceData = make([]types.ResourceData, len(cronjobInfo))
 	for idx, cronjob := range cronjobInfo {
 		cj.resourceData[idx] = CronJobData{&cronjob}
 	}

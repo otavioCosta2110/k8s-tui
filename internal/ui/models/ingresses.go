@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -87,7 +88,7 @@ func (i *ingressesModel) fetchData() error {
 	}
 	i.ingressesInfo = ingressInfo
 
-	i.resourceData = make([]ResourceData, len(ingressInfo))
+	i.resourceData = make([]types.ResourceData, len(ingressInfo))
 	for idx, ingress := range ingressInfo {
 		i.resourceData[idx] = IngressData{&ingress}
 	}

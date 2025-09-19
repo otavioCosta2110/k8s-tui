@@ -201,7 +201,7 @@ func (m QuickNavModel) View() string {
 
 	for _, groupName := range groupOrder {
 		if items, exists := groups[groupName]; exists {
-			groupIcon := "󰉋" 
+			groupIcon := "󰉋"
 			if icon, exists := customstyles.ResourceIcons[groupName]; exists {
 				groupIcon = icon
 			}

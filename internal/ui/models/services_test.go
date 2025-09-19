@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"testing"
 	"time"
@@ -43,7 +44,7 @@ func TestServicesModelDataToRows(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{ServiceData{&servicesInfo[0]}}
+	model.resourceData = []types.ResourceData{ServiceData{&servicesInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -135,7 +136,7 @@ func TestServicesModelWithMultipleItems(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{
+	model.resourceData = []types.ResourceData{
 		ServiceData{&servicesInfo[0]},
 		ServiceData{&servicesInfo[1]},
 	}
@@ -179,7 +180,7 @@ func TestServicesModelWithDifferentStates(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{ServiceData{&servicesInfo[0]}}
+	model.resourceData = []types.ResourceData{ServiceData{&servicesInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {

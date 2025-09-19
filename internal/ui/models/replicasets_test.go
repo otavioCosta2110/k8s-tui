@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"slices"
 	"testing"
@@ -43,7 +44,7 @@ func TestReplicaSetsModelDataToRows(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{ReplicaSetData{&replicasetsInfo[0]}}
+	model.resourceData = []types.ResourceData{ReplicaSetData{&replicasetsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -124,7 +125,7 @@ func TestReplicaSetsModelWithMultipleItems(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{
+	model.resourceData = []types.ResourceData{
 		ReplicaSetData{&replicasetsInfo[0]},
 		ReplicaSetData{&replicasetsInfo[1]},
 	}
@@ -177,7 +178,7 @@ func TestReplicaSetsModelWithDifferentStates(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{
+	model.resourceData = []types.ResourceData{
 		ReplicaSetData{&replicasetsInfo[0]},
 		ReplicaSetData{&replicasetsInfo[1]},
 		ReplicaSetData{&replicasetsInfo[2]},

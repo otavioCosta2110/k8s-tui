@@ -4,6 +4,7 @@ import (
 	global "otaviocosta2110/k8s-tui/internal"
 	"otaviocosta2110/k8s-tui/internal/config"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/plugins"
 	"otaviocosta2110/k8s-tui/internal/ui/cli"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -24,11 +25,10 @@ type AppModel struct {
 	quickNav            tea.Model
 	currentResourceType string
 	breadcrumbTrail     []string
+	pluginManager       *plugins.PluginManager
 }
 
-func NewAppModel() *AppModel {
-	cfg := cli.ParseFlags()
-
+func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel {
 	appConfig, err := config.LoadAppConfig()
 	if err != nil {
 		panic("Failed to load app config: " + err.Error())
@@ -51,6 +51,7 @@ func NewAppModel() *AppModel {
 			kube:           *kubeClient,
 			config:         appConfig,
 			configSelected: true,
+			pluginManager:  pluginManager,
 		}
 
 		tabs := tabManager.GetTabsForComponent()
@@ -72,18 +73,25 @@ func NewAppModel() *AppModel {
 	if err != nil {
 		popup := models.NewErrorScreen(err, "Failed to initialize Kubernetes config", "")
 		return &AppModel{
-			header:     models.NewHeader("K8s TUI", nil),
-			config:     appConfig,
-			errorPopup: &popup,
+			header:        models.NewHeader("K8s TUI", nil),
+			config:        appConfig,
+			errorPopup:    &popup,
+			pluginManager: pluginManager,
 		}
 	}
 
 	appModel := &AppModel{
-		header: models.NewHeader("K8s TUI", nil),
-		config: appConfig,
+		header:        models.NewHeader("K8s TUI", nil),
+		config:        appConfig,
+		pluginManager: pluginManager,
 	}
 
 	return appModel
+}
+
+// ParseFlags parses command line flags and returns the configuration
+func ParseFlags() cli.Config {
+	return cli.ParseFlags()
 }
 
 func (m *AppModel) Init() tea.Cmd {

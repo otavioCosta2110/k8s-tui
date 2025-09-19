@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/plugins"
+	"otaviocosta2110/k8s-tui/utils"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -148,7 +150,17 @@ func (rf *ResourceFactory) registerResource(resourceType string, creator Resourc
 func (rf *ResourceFactory) CreateResource(resourceType string, k k8s.Client, namespace string) (tea.Model, error) {
 	creator, exists := rf.registry[resourceType]
 	if !exists {
-		validTypes := strings.Join(rf.validTypes, ", ")
+		// Check if this is a custom resource type from plugins
+		if pm := plugins.GetGlobalPluginManager(); pm != nil {
+			for _, rt := range pm.GetRegistry().GetCustomResourceTypes() {
+				if rt.Name == resourceType {
+					// Create a custom resource model for plugin resources
+					return NewCustomResourceModel(k, namespace, rt.Type)
+				}
+			}
+		}
+
+		validTypes := strings.Join(rf.GetValidResourceTypes(), ", ")
 		return nil, fmt.Errorf("unsupported resource type '%s'. Supported types: %s", resourceType, validTypes)
 	}
 
@@ -166,7 +178,18 @@ func (rf *ResourceFactory) CreateResource(resourceType string, k k8s.Client, nam
 }
 
 func (rf *ResourceFactory) GetValidResourceTypes() []string {
-	return rf.validTypes
+	validTypes := make([]string, len(rf.validTypes))
+	copy(validTypes, rf.validTypes)
+
+	// Add custom resource types from plugins
+	if pm := plugins.GetGlobalPluginManager(); pm != nil {
+		for _, rt := range pm.GetRegistry().GetCustomResourceTypes() {
+			utils.WriteString("plugin.txt", rt.Name)
+			validTypes = append(validTypes, rt.Name)
+		}
+	}
+
+	return validTypes
 }
 
 func (rf *ResourceFactory) GetResourceMetadata(resourceType string) (ResourceMetadata, bool) {

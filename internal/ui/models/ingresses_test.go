@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"testing"
 	"time"
@@ -43,7 +44,7 @@ func TestIngressesModelDataToRows(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{IngressData{&ingressesInfo[0]}}
+	model.resourceData = []types.ResourceData{IngressData{&ingressesInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -154,7 +155,7 @@ func TestIngressesModelWithMultipleItems(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{
+	model.resourceData = []types.ResourceData{
 		IngressData{&ingressesInfo[0]},
 		IngressData{&ingressesInfo[1]},
 	}
@@ -198,7 +199,7 @@ func TestIngressesModelWithDifferentStates(t *testing.T) {
 		},
 	}
 
-	model.resourceData = []ResourceData{IngressData{&ingressesInfo[0]}}
+	model.resourceData = []types.ResourceData{IngressData{&ingressesInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {

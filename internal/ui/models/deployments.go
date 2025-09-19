@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -98,7 +99,7 @@ func (d *deploymentsModel) fetchData() error {
 	}
 	d.deploymentsInfo = deploymentInfo
 
-	d.resourceData = make([]ResourceData, len(deploymentInfo))
+	d.resourceData = make([]types.ResourceData, len(deploymentInfo))
 	for i, deployment := range deploymentInfo {
 		d.resourceData[i] = DeploymentData{&deployment}
 	}

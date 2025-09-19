@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"slices"
 	"testing"
@@ -49,7 +50,7 @@ func TestConfigmapsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.resourceData = []ResourceData{ConfigMapData{&configmaps[0]}}
+	model.resourceData = []types.ResourceData{ConfigMapData{&configmaps[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
@@ -118,7 +119,7 @@ func TestConfigmapsModelWithMultipleItems(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.resourceData = []ResourceData{
+	model.resourceData = []types.ResourceData{
 		ConfigMapData{&configmaps[0]},
 		ConfigMapData{&configmaps[1]},
 		ConfigMapData{&configmaps[2]},

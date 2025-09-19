@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -88,7 +89,7 @@ func (n *nodesModel) fetchData() error {
 	}
 	n.nodesInfo = nodeInfo
 
-	n.resourceData = make([]ResourceData, len(nodeInfo))
+	n.resourceData = make([]types.ResourceData, len(nodeInfo))
 	for idx, node := range nodeInfo {
 		n.resourceData[idx] = NodeData{&node}
 	}

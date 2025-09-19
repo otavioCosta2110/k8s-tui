@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"testing"
 	"time"
 
@@ -150,7 +151,7 @@ func TestGenericResourceModelWithResourceData(t *testing.T) {
 
 	model := NewGenericResourceModel(client, "test-namespace", config)
 
-	mockData := []ResourceData{
+	mockData := []types.ResourceData{
 		&mockResourceData{name: "resource1", namespace: "test-namespace"},
 		&mockResourceData{name: "resource2", namespace: "test-namespace"},
 	}

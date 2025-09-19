@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -98,7 +99,7 @@ func (r *replicasetsModel) fetchData() error {
 	}
 	r.replicasetsInfo = replicasetInfo
 
-	r.resourceData = make([]ResourceData, len(replicasetInfo))
+	r.resourceData = make([]types.ResourceData, len(replicasetInfo))
 	for i, replicaset := range replicasetInfo {
 		r.resourceData[i] = ReplicaSetData{&replicaset}
 	}

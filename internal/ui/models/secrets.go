@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -85,7 +86,7 @@ func (s *secretsModel) fetchData() error {
 	}
 	s.secretsInfo = secretInfo
 
-	s.resourceData = make([]ResourceData, len(secretInfo))
+	s.resourceData = make([]types.ResourceData, len(secretInfo))
 	for idx, secret := range secretInfo {
 		s.resourceData[idx] = SecretData{&secret}
 	}

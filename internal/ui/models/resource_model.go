@@ -5,17 +5,14 @@ import (
 	"time"
 
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type ResourceData interface {
-	GetName() string
-	GetNamespace() string
-	GetColumns() table.Row
-}
+// ResourceData interface is now defined in the types package
 
 type ResourceConfig struct {
 	ResourceType    k8s.ResourceType
@@ -29,7 +26,7 @@ type GenericResourceModel struct {
 	namespace       string
 	k8sClient       *k8s.Client
 	resourceType    k8s.ResourceType
-	resourceData    []ResourceData
+	resourceData    []types.ResourceData
 	loading         bool
 	err             error
 	refreshInterval time.Duration
@@ -77,7 +74,7 @@ func (g *GenericResourceModel) createDeleteAction(tableModel *ui.TableModel) fun
 	}
 }
 
-func (g *GenericResourceModel) deleteResource(resource ResourceData) error {
+func (g *GenericResourceModel) deleteResource(resource types.ResourceData) error {
 	err := k8s.DeleteResource(*g.k8sClient, g.resourceType, resource.GetNamespace(), resource.GetName())
 	if err != nil {
 		return fmt.Errorf("failed to delete resource %s/%s: %v", resource.GetNamespace(), resource.GetName(), err)

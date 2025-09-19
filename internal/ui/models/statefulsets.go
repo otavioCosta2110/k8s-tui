@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -84,7 +85,7 @@ func (ss *statefulsetsModel) fetchData() error {
 	}
 	ss.statefulsetsInfo = statefulsetInfo
 
-	ss.resourceData = make([]ResourceData, len(statefulsetInfo))
+	ss.resourceData = make([]types.ResourceData, len(statefulsetInfo))
 	for idx, statefulset := range statefulsetInfo {
 		ss.resourceData[idx] = StatefulSetData{&statefulset}
 	}

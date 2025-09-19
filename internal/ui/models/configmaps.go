@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -84,7 +85,7 @@ func (c *configmapsModel) fetchData() error {
 	}
 	c.cms = cms
 
-	c.resourceData = make([]ResourceData, len(cms))
+	c.resourceData = make([]types.ResourceData, len(cms))
 	for i, cm := range cms {
 		c.resourceData[i] = ConfigMapData{&cm}
 	}

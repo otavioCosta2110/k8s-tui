@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
@@ -91,7 +92,7 @@ func (p *podsModel) fetchData(selector string) error {
 		return err
 	}
 
-	p.resourceData = make([]ResourceData, len(podsInfo))
+	p.resourceData = make([]types.ResourceData, len(podsInfo))
 	for i, pod := range podsInfo {
 		p.resourceData[i] = PodData{&pod}
 	}

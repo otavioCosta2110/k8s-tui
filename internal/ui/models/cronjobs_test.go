@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	"otaviocosta2110/k8s-tui/internal/types"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"testing"
 	"time"
@@ -41,7 +42,7 @@ func TestCronJobsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	model.resourceData = []ResourceData{CronJobData{&cronjobsInfo[0]}}
+	model.resourceData = []types.ResourceData{CronJobData{&cronjobsInfo[0]}}
 
 	rows := model.dataToRows()
 	if len(rows) != 1 {
