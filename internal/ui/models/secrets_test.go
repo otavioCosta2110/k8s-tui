@@ -5,6 +5,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"testing"
 	"time"
 
@@ -91,8 +92,9 @@ func TestSecretsModelConfig(t *testing.T) {
 	if model.config.ResourceType != k8s.ResourceTypeSecret {
 		t.Error("Config ResourceType not set correctly")
 	}
-	if model.config.Title != "Secrets in test-namespace" {
-		t.Error("Config Title not set correctly")
+	expectedTitle := customstyles.ResourceIcons["Secrets"] + " Secrets in test-namespace"
+	if model.config.Title != expectedTitle {
+		t.Errorf("Config Title not set correctly, expected %s, got %s", expectedTitle, model.config.Title)
 	}
 	if len(model.config.Columns) != 5 {
 		t.Error("Expected 5 columns in config")

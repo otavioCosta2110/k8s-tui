@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"testing"
 	"time"
 )
@@ -69,8 +70,9 @@ func TestDaemonSetsModelConfig(t *testing.T) {
 		t.Error("Expected ResourceType to be ResourceTypeDaemonSet")
 	}
 
-	if model.config.Title != "DaemonSets in default" {
-		t.Error("Expected title to be 'DaemonSets in default'")
+	expectedTitle := customstyles.ResourceIcons["DaemonSets"] + " DaemonSets in default"
+	if model.config.Title != expectedTitle {
+		t.Errorf("Expected title to be '%s', got '%s'", expectedTitle, model.config.Title)
 	}
 
 	if len(model.config.Columns) != 9 {

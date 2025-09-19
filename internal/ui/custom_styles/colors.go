@@ -23,6 +23,16 @@ var (
 	TextColor lipgloss.Color
 
 	BackgroundColor string
+
+	YAMLKeyColor string
+
+	YAMLValueColor string
+
+	YAMLTitleColor string
+
+	HelpTextColor string
+
+	ResourceIcons map[string]string
 )
 
 func InitColors() error {
@@ -48,6 +58,36 @@ func InitColors() error {
 		BackgroundColor = scheme.BackgroundColor
 	} else {
 		BackgroundColor = "#000000"
+	}
+
+	YAMLKeyColor = scheme.YAMLKeyColor
+	YAMLValueColor = scheme.YAMLValueColor
+	YAMLTitleColor = scheme.YAMLTitleColor
+	HelpTextColor = scheme.HelpTextColor
+
+	ResourceIcons = map[string]string{
+		"Pods":                   "󰀵",
+		"Deployments":            "󰜴",
+		"Services":               "󰖟",
+		"Ingresses":              "󰜏",
+		"ConfigMaps":             "󰈙",
+		"Secrets":                "󰌿",
+		"ReplicaSets":            "󰑖",
+		"Jobs":                   "󰜎",
+		"CronJobs":               "󰥔",
+		"DaemonSets":             "󰜙",
+		"StatefulSets":           "󰋊",
+		"Nodes":                  "󰒍",
+		"Namespaces":             "󰉋",
+		"PersistentVolumes":      "󰋊",
+		"PersistentVolumeClaims": "󰋊",
+		"ServiceAccounts":        "󰀄",
+		"ResourceList":           "󰒋",
+		"Workloads":              "󰜄",
+		"Networking":             "󰖟",
+		"Configuration":          "󰒓",
+		"Infrastructure":         "󰒍",
+		"Navigation":             "󰍉",
 	}
 
 	return nil

@@ -5,6 +5,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -19,7 +20,7 @@ type ingressesModel struct {
 func NewIngresses(k k8s.Client, namespace string) (*ingressesModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeIngress,
-		Title:           "Ingresses in " + namespace,
+		Title:           customstyles.ResourceIcons["Ingresses"] + " Ingresses in " + namespace,
 		ColumnWidths:    []float64{0.13, 0.23, 0.13, 0.13, 0.13, 0.13, 0.03},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{

@@ -15,6 +15,10 @@ type ColorScheme struct {
 	SelectionForeground string `json:"selection_foreground"`
 	TextColor           string `json:"text_color,omitempty"`
 	BackgroundColor     string `json:"background_color,omitempty"`
+	YAMLKeyColor        string `json:"yaml_key_color,omitempty"`
+	YAMLValueColor      string `json:"yaml_value_color,omitempty"`
+	YAMLTitleColor      string `json:"yaml_title_color,omitempty"`
+	HelpTextColor       string `json:"help_text_color,omitempty"`
 }
 
 func DefaultColorScheme() ColorScheme {
@@ -26,6 +30,10 @@ func DefaultColorScheme() ColorScheme {
 		SelectionBackground: "#00b8ff",
 		SelectionForeground: "#000000",
 		BackgroundColor:     "#000000",
+		YAMLKeyColor:        "#5E9AFF",
+		YAMLValueColor:      "",
+		YAMLTitleColor:      "#FAFAFA",
+		HelpTextColor:       "#757575",
 	}
 }
 
@@ -84,6 +92,18 @@ func LoadColorScheme() (ColorScheme, error) {
 	}
 	if loadedScheme.BackgroundColor != "" {
 		scheme.BackgroundColor = loadedScheme.BackgroundColor
+	}
+	if loadedScheme.YAMLKeyColor != "" {
+		scheme.YAMLKeyColor = loadedScheme.YAMLKeyColor
+	}
+	if loadedScheme.YAMLValueColor != "" {
+		scheme.YAMLValueColor = loadedScheme.YAMLValueColor
+	}
+	if loadedScheme.YAMLTitleColor != "" {
+		scheme.YAMLTitleColor = loadedScheme.YAMLTitleColor
+	}
+	if loadedScheme.HelpTextColor != "" {
+		scheme.HelpTextColor = loadedScheme.HelpTextColor
 	}
 
 	return scheme, nil

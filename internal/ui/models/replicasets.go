@@ -5,6 +5,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -19,7 +20,7 @@ type replicasetsModel struct {
 func NewReplicaSets(k k8s.Client, namespace string) (*replicasetsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeReplicaSet,
-		Title:           "ReplicaSets in " + namespace,
+		Title:           customstyles.ResourceIcons["ReplicaSets"] + " ReplicaSets in " + namespace,
 		ColumnWidths:    []float64{0.15, 0.25, 0.12, 0.12, 0.15, 0.13},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{

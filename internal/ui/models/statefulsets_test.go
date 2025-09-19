@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"testing"
 	"time"
 )
@@ -65,8 +66,9 @@ func TestStatefulSetsModelConfig(t *testing.T) {
 		t.Error("Expected ResourceType to be ResourceTypeStatefulSet")
 	}
 
-	if model.config.Title != "StatefulSets in default" {
-		t.Error("Expected title to be 'StatefulSets in default'")
+	expectedTitle := customstyles.ResourceIcons["StatefulSets"] + " StatefulSets in default"
+	if model.config.Title != expectedTitle {
+		t.Errorf("Expected title to be '%s', got '%s'", expectedTitle, model.config.Title)
 	}
 
 	if len(model.config.Columns) != 4 {

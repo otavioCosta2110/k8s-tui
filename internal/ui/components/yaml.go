@@ -31,10 +31,10 @@ type YAMLViewerStyles struct {
 var DefaultYAMLViewerStyles = &YAMLViewerStyles{
 	TitleBar: lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("#FAFAFA")).
-		Background(lipgloss.Color("#7D56F4")),
-	BorderColor:   "#7D56F4",
-	HelpTextColor: "#757575",
+		Foreground(lipgloss.Color(customstyles.YAMLTitleColor)).
+		Background(lipgloss.Color(customstyles.BorderColor)),
+	BorderColor:   customstyles.BorderColor,
+	HelpTextColor: customstyles.HelpTextColor,
 }
 
 type loadedMsg struct{}
@@ -45,7 +45,14 @@ func NewYAMLViewer(title, content string) *YAMLViewer {
 		title:           title,
 		content:         highlighted,
 		originalContent: content,
-		styles:          DefaultYAMLViewerStyles,
+		styles: &YAMLViewerStyles{
+			TitleBar: lipgloss.NewStyle().
+				Bold(true).
+				Foreground(lipgloss.Color(customstyles.YAMLTitleColor)).
+				Background(lipgloss.Color(customstyles.BorderColor)),
+			BorderColor:   customstyles.BorderColor,
+			HelpTextColor: customstyles.HelpTextColor,
+		},
 	}
 }
 
@@ -55,8 +62,15 @@ func NewYAMLViewerWithHelp(title, content, helpText string) *YAMLViewer {
 		title:           title,
 		content:         highlighted,
 		originalContent: content,
-		styles:          DefaultYAMLViewerStyles,
-		customHelp:      helpText,
+		styles: &YAMLViewerStyles{
+			TitleBar: lipgloss.NewStyle().
+				Bold(true).
+				Foreground(lipgloss.Color(customstyles.YAMLTitleColor)).
+				Background(lipgloss.Color(customstyles.BorderColor)),
+			BorderColor:   customstyles.BorderColor,
+			HelpTextColor: customstyles.HelpTextColor,
+		},
+		customHelp: helpText,
 	}
 }
 
@@ -130,8 +144,8 @@ func (m *YAMLViewer) View() string {
 }
 
 func (m *YAMLViewer) headerView() string {
-	title := m.styles.TitleBar.Render(m.title)
-	return title
+	title := m.styles.TitleBar.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(m.title)
+	return lipgloss.PlaceHorizontal(global.ScreenWidth, lipgloss.Left, title, lipgloss.WithWhitespaceBackground(lipgloss.Color(customstyles.BackgroundColor)))
 }
 
 func (m *YAMLViewer) footerView() string {
@@ -141,32 +155,38 @@ func (m *YAMLViewer) footerView() string {
 	}
 
 	help := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(m.styles.HelpTextColor)).
+		Foreground(lipgloss.Color(customstyles.HelpTextColor)).
 		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render(helpText)
 
-	return help
+	return lipgloss.PlaceHorizontal(global.ScreenWidth, lipgloss.Left, help, lipgloss.WithWhitespaceBackground(lipgloss.Color(customstyles.BackgroundColor)))
 }
 
 func highlightYAML(yamlStr string) string {
 	lines := strings.Split(yamlStr, "\n")
 	var highlighted strings.Builder
 
-	keyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#5E9AFF")).Background(lipgloss.Color(customstyles.BackgroundColor))
-	valueStyle := lipgloss.NewStyle().Foreground(lipgloss.NoColor{}).Background(lipgloss.Color(customstyles.BackgroundColor))
+	keyStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor))
+	valueStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor))
+	plainStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor))
+
+	width := global.ScreenWidth
 
 	for _, line := range lines {
+		var renderedLine string
 		if strings.Contains(line, ":") {
 			parts := strings.SplitN(line, ":", 2)
 			if len(parts) == 2 {
-				highlighted.WriteString(
-					keyStyle.Render(parts[0]+":") +
-						valueStyle.Render(parts[1]) + "\n",
-				)
-				continue
+				renderedLine = keyStyle.Render(parts[0]+":") + valueStyle.Render(parts[1])
+			} else {
+				renderedLine = plainStyle.Render(line)
 			}
+		} else {
+			renderedLine = plainStyle.Render(line)
 		}
-		highlighted.WriteString(line + "\n")
+
+		filledLine := lipgloss.PlaceHorizontal(width, lipgloss.Left, renderedLine, lipgloss.WithWhitespaceBackground(lipgloss.Color(customstyles.BackgroundColor)))
+		highlighted.WriteString(filledLine + "\n")
 	}
 	return highlighted.String()
 }

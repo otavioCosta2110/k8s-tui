@@ -4,6 +4,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -18,7 +19,7 @@ type configmapsModel struct {
 func NewConfigmaps(k k8s.Client, namespace string) (*configmapsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeConfigMap,
-		Title:           "ConfigMaps in " + namespace,
+		Title:           customstyles.ResourceIcons["ConfigMaps"] + " ConfigMaps in " + namespace,
 		ColumnWidths:    []float64{0.30, 0.30, 0.16, 0.18},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{

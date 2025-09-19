@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"slices"
 	"testing"
 	"time"
@@ -85,8 +86,9 @@ func TestReplicaSetsModelConfig(t *testing.T) {
 	if model.config.ResourceType != k8s.ResourceTypeReplicaSet {
 		t.Error("Config ResourceType not set correctly")
 	}
-	if model.config.Title != "ReplicaSets in test-namespace" {
-		t.Error("Config Title not set correctly")
+	expectedTitle := customstyles.ResourceIcons["ReplicaSets"] + " ReplicaSets in test-namespace"
+	if model.config.Title != expectedTitle {
+		t.Errorf("Config Title not set correctly, expected %s, got %s", expectedTitle, model.config.Title)
 	}
 	if len(model.config.Columns) != 6 {
 		t.Error("Expected 6 columns in config")

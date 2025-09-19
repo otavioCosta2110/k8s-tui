@@ -62,6 +62,37 @@ func NewList(items []string, title string, onSelect func(selected string) tea.Ms
 	}
 }
 
+func NewListWithItems(items []ListItem, title string, onSelect func(selected string) tea.Msg) *ListModel {
+	var listItems []list.Item
+	for _, item := range items {
+		listItems = append(listItems, item)
+	}
+
+	delegate := list.NewDefaultDelegate()
+	delegate.Styles.NormalTitle = customstyles.NormalStyle()
+
+	delegate.Styles.SelectedTitle = customstyles.SelectedStyle()
+
+	delegate.SetSpacing(0)
+	delegate.ShowDescription = false
+
+	l := list.New(listItems, delegate, 0, 0)
+	l.Title = title
+	l.Styles.Title = customstyles.TitleStyle()
+	l.SetShowStatusBar(false)
+	l.SetFilteringEnabled(false)
+	l.SetShowPagination(false)
+	l.SetShowTitle(false)
+
+	l.SetShowHelp(false)
+
+	return &ListModel{
+		List:       l,
+		OnSelected: onSelect,
+		loading:    false,
+	}
+}
+
 func (m *ListModel) Init() tea.Cmd {
 	return tea.Tick(time.Second, func(time.Time) tea.Msg {
 		return loadedMsg{}

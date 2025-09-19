@@ -231,14 +231,19 @@ func (m HeaderModel) buildMetricsSection(metrics Metrics) string {
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	formatMetric := func(label string, value int, loading bool) string {
+		displayLabel := label
+		if icon, exists := customstyles.ResourceIcons[label]; exists {
+			displayLabel = icon + " " + label
+		}
+
 		if loading && value == 0 {
 			return lipgloss.JoinHorizontal(lipgloss.Left,
-				metricStyle.Render(label+":"),
+				metricStyle.Render(displayLabel+":"),
 				metricStyle.Render(" "),
 				loadingStyle.Render("Loading..."))
 		}
 		return lipgloss.JoinHorizontal(lipgloss.Left,
-			metricStyle.Render(label+":"),
+			metricStyle.Render(displayLabel+":"),
 			metricStyle.Render(" "),
 			valueStyle.Render(fmt.Sprint(value)))
 	}

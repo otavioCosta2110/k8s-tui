@@ -5,6 +5,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -19,7 +20,7 @@ type nodesModel struct {
 func NewNodes(k k8s.Client, namespace string) (*nodesModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeNode,
-		Title:           "Nodes in cluster",
+		Title:           customstyles.ResourceIcons["Nodes"] + " Nodes in cluster",
 		ColumnWidths:    []float64{0.25, 0.10, 0.12, 0.10, 0.05, 0.07, 0.12, 0.10},
 		RefreshInterval: 10 * time.Second,
 		Columns: []table.Column{

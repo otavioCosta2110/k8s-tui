@@ -5,6 +5,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -19,7 +20,7 @@ type daemonsetsModel struct {
 func NewDaemonSets(k k8s.Client, namespace string) (*daemonsetsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeDaemonSet,
-		Title:           "DaemonSets in " + namespace,
+		Title:           customstyles.ResourceIcons["DaemonSets"] + " DaemonSets in " + namespace,
 		ColumnWidths:    []float64{0.15, 0.20, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{

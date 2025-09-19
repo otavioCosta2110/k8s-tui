@@ -92,7 +92,7 @@ func (m QuickNavModel) navigateToResource(resourceType string) tea.Cmd {
 func (m QuickNavModel) View() string {
 	title := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color(customstyles.BorderColor)).
+		Foreground(lipgloss.Color(customstyles.AccentColor)).
 		Align(lipgloss.Center).
 		Width(global.ScreenWidth).
 		Background(lipgloss.Color(customstyles.BackgroundColor)).
@@ -106,25 +106,78 @@ func (m QuickNavModel) View() string {
 		group string
 	}{}
 
+	resourceListIcon := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(customstyles.TextColor)).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		Render(customstyles.ResourceIcons["ResourceList"])
+
+	resourceListSpace := lipgloss.NewStyle().
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		Render(" ")
+
+	resourceListText := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(customstyles.TextColor)).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		Render("Resource List")
+
+	resourceListDesc := resourceListIcon + resourceListSpace + resourceListText
+
 	mappings = append(mappings, struct {
 		key   string
 		desc  string
 		group string
-	}{"l", "Resource List", "Navigation"})
+	}{"l", resourceListDesc, "Navigation"})
+
+	resourceIcons := customstyles.ResourceIcons
 
 	for _, mapping := range sortedMappings {
 		if metadata, exists := resourceFactory.GetResourceMetadata(mapping.ResourceType); exists {
+			icon := "📦"
+			if resourceIcon, exists := resourceIcons[metadata.Name]; exists {
+				icon = resourceIcon
+			}
+
+			iconPart := lipgloss.NewStyle().
+				Foreground(lipgloss.Color(customstyles.TextColor)).
+				Background(lipgloss.Color(customstyles.BackgroundColor)).
+				Render(icon)
+
+			spacePart := lipgloss.NewStyle().
+				Background(lipgloss.Color(customstyles.BackgroundColor)).
+				Render(" ")
+
+			namePart := lipgloss.NewStyle().
+				Foreground(lipgloss.Color(customstyles.TextColor)).
+				Background(lipgloss.Color(customstyles.BackgroundColor)).
+				Render(metadata.Name)
+
+			descWithIcon := iconPart + spacePart + namePart
 			mappings = append(mappings, struct {
 				key   string
 				desc  string
 				group string
-			}{mapping.Key, metadata.Name, metadata.Category})
+			}{mapping.Key, descWithIcon, metadata.Category})
 		}
 	}
 
 	groups := make(map[string][]string)
 	for _, mapping := range mappings {
-		keyDesc := fmt.Sprintf("%s → %s", mapping.key, mapping.desc)
+		keyPart := lipgloss.NewStyle().
+			Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
+			Render(mapping.key)
+
+		arrowPart := lipgloss.NewStyle().
+			Foreground(lipgloss.Color(customstyles.TextColor)).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
+			Render(" → ")
+
+		descPart := lipgloss.NewStyle().
+			Foreground(lipgloss.Color(customstyles.TextColor)).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
+			Render(mapping.desc)
+
+		keyDesc := keyPart + arrowPart + descPart
 		groups[mapping.group] = append(groups[mapping.group], keyDesc)
 	}
 
@@ -148,19 +201,38 @@ func (m QuickNavModel) View() string {
 
 	for _, groupName := range groupOrder {
 		if items, exists := groups[groupName]; exists {
+			groupIcon := "󰉋" 
+			if icon, exists := customstyles.ResourceIcons[groupName]; exists {
+				groupIcon = icon
+			}
+
 			groupTitle := lipgloss.NewStyle().
 				Bold(true).
 				Foreground(lipgloss.Color(customstyles.HeaderColor)).
+				Width(columnWidth).
+				Underline(true).
 				Background(lipgloss.Color(customstyles.BackgroundColor)).
-				Render(fmt.Sprintf("%s", groupName))
+				Render(fmt.Sprintf("%s %s", groupIcon, groupName))
 
 			currentColumn.WriteString(groupTitle)
 			currentColumn.WriteString("\n")
 
 			for _, item := range items {
-				currentColumn.WriteString(item)
+				itemLine := lipgloss.NewStyle().
+					Width(columnWidth).
+					Background(lipgloss.Color(customstyles.BackgroundColor)).
+					PaddingLeft(2).
+					Render(item)
+				currentColumn.WriteString(itemLine)
 				currentColumn.WriteString("\n")
 			}
+
+			spacer := lipgloss.NewStyle().
+				Width(columnWidth).
+				Background(lipgloss.Color(customstyles.BackgroundColor)).
+				Render("")
+
+			currentColumn.WriteString(spacer)
 			currentColumn.WriteString("\n")
 
 			colIndex++
@@ -176,10 +248,12 @@ func (m QuickNavModel) View() string {
 		columns = append(columns, currentColumn.String())
 	}
 
+	contentHeight := global.ScreenHeight + global.HeaderSize + 1
+
 	for i := range columns {
 		columns[i] = lipgloss.NewStyle().
 			Width(columnWidth).
-			Height(global.ScreenHeight - 4).
+			Height(contentHeight).
 			Background(lipgloss.Color(customstyles.BackgroundColor)).
 			Render(columns[i])
 	}
@@ -187,28 +261,40 @@ func (m QuickNavModel) View() string {
 	content := lipgloss.NewStyle().
 		Align(lipgloss.Center).
 		Width(global.ScreenWidth).
+		Height(contentHeight).
 		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render(lipgloss.JoinHorizontal(lipgloss.Top, columns...))
 
 	footer := lipgloss.NewStyle().
-		Faint(true).
+		Foreground(lipgloss.Color(customstyles.HelpTextColor)).
 		Align(lipgloss.Center).
 		Width(global.ScreenWidth).
 		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render("Press a key to navigate • esc/q to cancel")
 
+	spacer1 := lipgloss.NewStyle().
+		Width(global.ScreenWidth).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		Render("")
+
+	spacer2 := lipgloss.NewStyle().
+		Width(global.ScreenWidth).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		Render("")
+
 	fullContent := lipgloss.JoinVertical(
 		lipgloss.Left,
 		title,
-		"",
+		spacer1,
 		content,
-		"",
+		spacer2,
 		footer,
 	)
 
 	return lipgloss.NewStyle().
-		Width(screenWidth).
-		Height(global.ScreenHeight + 1).
+		Width(global.ScreenWidth).
+		Height(global.ScreenHeight / 2).
 		Align(lipgloss.Center).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render(fullContent)
 }

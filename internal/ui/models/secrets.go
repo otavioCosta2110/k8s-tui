@@ -5,6 +5,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -19,7 +20,7 @@ type secretsModel struct {
 func NewSecrets(k k8s.Client, namespace string) (*secretsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeSecret,
-		Title:           "Secrets in " + namespace,
+		Title:           customstyles.ResourceIcons["Secrets"] + " Secrets in " + namespace,
 		ColumnWidths:    []float64{0.13, 0.35, 0.15, 0.15, 0.17, 0.10},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{

@@ -5,5 +5,9 @@
   "error_color": "#FF0000",
   "selection_background": "#00b8ff",
   "selection_foreground": "#000000",
-  "background_color": "transparent"
+   "background_color": "transparent",
+   "yaml_key_color": "#00b8ff",
+   "yaml_value_color": "#ffffff",
+   "yaml_title_color": "#7D56F4",
+   "help_text_color": "#888888"
 }

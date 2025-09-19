@@ -2,6 +2,7 @@ package models
 
 import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"testing"
 	"time"
 )
@@ -67,8 +68,9 @@ func TestCronJobsModelConfig(t *testing.T) {
 		t.Error("Expected ResourceType to be ResourceTypeCronJob")
 	}
 
-	if model.config.Title != "CronJobs in default" {
-		t.Error("Expected title to be 'CronJobs in default'")
+	expectedTitle := customstyles.ResourceIcons["CronJobs"] + " CronJobs in default"
+	if model.config.Title != expectedTitle {
+		t.Errorf("Expected title to be '%s', got '%s'", expectedTitle, model.config.Title)
 	}
 
 	if len(model.config.Columns) != 7 {

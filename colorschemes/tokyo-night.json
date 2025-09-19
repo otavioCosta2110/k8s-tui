@@ -5,5 +5,10 @@
   "error_color": "#f7768e",
   "selection_background": "#7dcfff",
   "selection_foreground": "#1a1b26",
-  "text_color": "#c0caf5"
+   "text_color": "#c0caf5",
+   "background_color": "#1a1b26",
+   "yaml_key_color": "#7dcfff",
+   "yaml_value_color": "#c0caf5",
+   "yaml_title_color": "#e0af68",
+   "help_text_color": "#565f89"
 }

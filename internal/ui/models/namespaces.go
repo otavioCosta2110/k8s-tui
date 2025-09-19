@@ -4,6 +4,8 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -36,11 +38,21 @@ func (n *namespacesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return nil, err
 	}
 
+	var listItems []ui.ListItem
+	for _, namespace := range namespaces {
+		listItems = append(listItems, ui.NewItem(customstyles.ResourceIcons["Namespaces"]+" "+namespace, ""))
+	}
+
 	onSelect := func(selected string) tea.Msg {
+		namespace := selected
+		if icon, exists := customstyles.ResourceIcons["Namespaces"]; exists && strings.HasPrefix(selected, icon+" ") {
+			namespace = strings.TrimPrefix(selected, icon+" ")
+		}
+
 		return components.NavigateMsg{
-			NewScreen: NewResource(*k, selected).InitComponent(*k),
+			NewScreen: NewResource(*k, namespace).InitComponent(*k),
 		}
 	}
 
-	return ui.NewList(namespaces, "Namespaces", onSelect), nil
+	return ui.NewListWithItems(listItems, customstyles.ResourceIcons["Namespaces"]+" Namespaces", onSelect), nil
 }

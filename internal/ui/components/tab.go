@@ -136,6 +136,11 @@ func (t *TabComponent) View() string {
 
 func (t *TabComponent) renderTab(tab Tab, isActive bool, maxWidth int) string {
 	title := tab.Title
+
+	if icon, exists := customstyles.ResourceIcons[tab.ResourceType]; exists {
+		title = icon + " " + title
+	}
+
 	if len(title) > maxWidth-4 {
 		title = title[:maxWidth-7] + "..."
 	}

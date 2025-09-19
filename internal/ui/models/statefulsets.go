@@ -5,6 +5,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -19,7 +20,7 @@ type statefulsetsModel struct {
 func NewStatefulSets(k k8s.Client, namespace string) (*statefulsetsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeStatefulSet,
-		Title:           "StatefulSets in " + namespace,
+		Title:           customstyles.ResourceIcons["StatefulSets"] + " StatefulSets in " + namespace,
 		ColumnWidths:    []float64{0.15, 0.25, 0.30, 0.26},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{

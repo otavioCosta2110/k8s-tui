@@ -5,6 +5,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -19,7 +20,7 @@ type serviceaccountsModel struct {
 func NewServiceAccounts(k k8s.Client, namespace string) (*serviceaccountsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeServiceAccount,
-		Title:           "ServiceAccounts in " + namespace,
+		Title:           customstyles.ResourceIcons["ServiceAccounts"] + " ServiceAccounts in " + namespace,
 		ColumnWidths:    []float64{0.15, 0.50, 0.16, 0.15, 0.18},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{

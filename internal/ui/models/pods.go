@@ -4,6 +4,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	ui "otaviocosta2110/k8s-tui/internal/ui/components"
+	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -18,7 +19,7 @@ type podsModel struct {
 func NewPods(k k8s.Client, namespace string, selector ...string) (*podsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypePod,
-		Title:           "Pods in " + namespace,
+		Title:           customstyles.ResourceIcons["Pods"] + " Pods in " + namespace,
 		ColumnWidths:    []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.13},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
