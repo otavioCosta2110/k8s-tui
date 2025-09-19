@@ -40,9 +40,19 @@ var (
 )
 
 func InitColors() error {
-	scheme, err := config.LoadColorScheme()
+	appConfig, err := config.LoadAppConfig()
 	if err != nil {
 		return err
+	}
+
+	var scheme config.ColorScheme
+	if appConfig.Theme != "default" {
+		scheme, err = config.LoadTheme(appConfig.Theme)
+		if err != nil {
+			return err
+		}
+	} else {
+		scheme = config.DefaultColorScheme()
 	}
 
 	BorderColor = scheme.BorderColor

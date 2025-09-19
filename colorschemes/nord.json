@@ -5,10 +5,12 @@
   "error_color": "#bf616a",
   "selection_background": "#88c0d0",
   "selection_foreground": "#2e3440",
-   "text_color": "#eceff4",
-   "background_color": "#2e3440",
-   "yaml_key_color": "#88c0d0",
-   "yaml_value_color": "#eceff4",
-   "yaml_title_color": "#ebcb8b",
-   "help_text_color": "#4c566a"
+  "text_color": "#eceff4",
+  "background_color": "#2e3440",
+  "yaml_key_color": "#88c0d0",
+  "yaml_value_color": "#eceff4",
+  "yaml_title_color": "#ebcb8b",
+  "help_text_color": "#4c566a",
+  "header_value_color": "#a3be8c",
+  "header_loading_color": "#d08770"
 }

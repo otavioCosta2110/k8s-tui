@@ -2,6 +2,7 @@ package ui
 
 import (
 	global "otaviocosta2110/k8s-tui/internal"
+	"otaviocosta2110/k8s-tui/internal/config"
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/cli"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
@@ -17,6 +18,7 @@ type AppModel struct {
 	tabManager          *models.TabManager
 	kube                k8s.Client
 	header              models.HeaderModel
+	config              config.AppConfig
 	configSelected      bool
 	errorPopup          *models.ErrorModel
 	quickNav            tea.Model
@@ -27,6 +29,11 @@ type AppModel struct {
 func NewAppModel() *AppModel {
 	cfg := cli.ParseFlags()
 
+	appConfig, err := config.LoadAppConfig()
+	if err != nil {
+		panic("Failed to load app config: " + err.Error())
+	}
+
 	if err := customstyles.InitColors(); err != nil {
 		panic("Failed to initialize colors: " + err.Error())
 	}
@@ -36,12 +43,13 @@ func NewAppModel() *AppModel {
 		header := models.NewHeader("K8s TUI", kubeClient)
 		header.SetNamespace(cfg.Namespace)
 
-		tabManager := models.NewTabManager(kubeClient, cfg.Namespace)
+		tabManager := models.NewTabManager(kubeClient, cfg.Namespace, appConfig.KeyBindings)
 
 		appModel := &AppModel{
 			tabManager:     tabManager,
 			header:         header,
 			kube:           *kubeClient,
+			config:         appConfig,
 			configSelected: true,
 		}
 
@@ -65,12 +73,14 @@ func NewAppModel() *AppModel {
 		popup := models.NewErrorScreen(err, "Failed to initialize Kubernetes config", "")
 		return &AppModel{
 			header:     models.NewHeader("K8s TUI", nil),
+			config:     appConfig,
 			errorPopup: &popup,
 		}
 	}
 
 	appModel := &AppModel{
 		header: models.NewHeader("K8s TUI", nil),
+		config: appConfig,
 	}
 
 	return appModel
@@ -88,6 +98,23 @@ func (m *AppModel) Init() tea.Cmd {
 	}
 
 	return tea.Batch(cmds...)
+}
+
+func (m *AppModel) getKeyBinding(action string) string {
+	if binding, exists := m.config.KeyBindings[action]; exists {
+		return binding
+	}
+	defaults := map[string]string{
+		"quit":      "q",
+		"help":      "?",
+		"refresh":   "r",
+		"back":      "[",
+		"forward":   "]",
+		"new_tab":   "ctrl+t",
+		"close_tab": "ctrl+w",
+		"quick_nav": "g",
+	}
+	return defaults[action]
 }
 
 func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -135,7 +162,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		if m.quickNav != nil {
 			switch msg.String() {
-			case "esc", "g":
+			case "esc", m.getKeyBinding("quick_nav"):
 				m.quickNav = nil
 				return m, nil
 			default:
@@ -152,7 +179,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 			return m, tea.Quit
-		case "q", "[", "]":
+		case m.getKeyBinding("quit"), m.getKeyBinding("back"), m.getKeyBinding("forward"):
 			if m.tabManager != nil {
 				updatedManager, cmd := m.tabManager.Update(msg)
 				if manager, ok := updatedManager.(*models.TabManager); ok {
@@ -164,14 +191,14 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case "Q":
 			return m, tea.Quit
-		case "g":
+		case m.getKeyBinding("quick_nav"):
 			if m.quickNav != nil {
 				m.quickNav = nil
 				return m, nil
 			}
 			m.quickNav = models.NewQuickNavModel(m.kube, m.kube.Namespace)
 			return m, m.quickNav.Init()
-		case "ctrl+t":
+		case m.getKeyBinding("new_tab"):
 			if m.tabManager != nil {
 				updatedManager, cmd := m.tabManager.Update(msg)
 				if manager, ok := updatedManager.(*models.TabManager); ok {
@@ -205,7 +232,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 			return m, nil
-		case "ctrl+w":
+		case m.getKeyBinding("close_tab"):
 			if m.header.GetTabCount() > 1 {
 				newHeader, headerCmd := m.header.Update(msg)
 				if header, ok := newHeader.(models.HeaderModel); ok {

@@ -23,6 +23,7 @@ type TabManager struct {
 	activeIndex int
 	kubeClient  *k8s.Client
 	namespace   string
+	keyBindings map[string]string
 }
 
 type TabManagerMsg struct {
@@ -33,17 +34,31 @@ type TabManagerMsg struct {
 	Breadcrumb   string
 }
 
-func NewTabManager(kubeClient *k8s.Client, namespace string) *TabManager {
+func NewTabManager(kubeClient *k8s.Client, namespace string, keyBindings map[string]string) *TabManager {
 	tm := &TabManager{
 		tabs:        []TabData{},
 		activeIndex: 0,
 		kubeClient:  kubeClient,
 		namespace:   namespace,
+		keyBindings: keyBindings,
 	}
 
 	tm.createInitialTab()
 
 	return tm
+}
+
+func (tm *TabManager) getKeyBinding(action string) string {
+	if binding, exists := tm.keyBindings[action]; exists {
+		return binding
+	}
+	defaults := map[string]string{
+		"quit":    "q",
+		"back":    "[",
+		"forward": "]",
+		"new_tab": "ctrl+t",
+	}
+	return defaults[action]
 }
 
 func (tm *TabManager) createInitialTab() {
@@ -126,13 +141,13 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+t":
+		case tm.getKeyBinding("new_tab"):
 			return tm.CreateNewResourceTab()
-		case "[":
+		case tm.getKeyBinding("back"):
 			return tm.navigateBack()
-		case "]":
+		case tm.getKeyBinding("forward"):
 			return tm.navigateForward()
-		case "q":
+		case tm.getKeyBinding("quit"):
 			return tm.navigateBack()
 		}
 
