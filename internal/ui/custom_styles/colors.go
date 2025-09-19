@@ -32,6 +32,10 @@ var (
 
 	HelpTextColor string
 
+	HeaderValueColor string
+
+	HeaderLoadingColor string
+
 	ResourceIcons map[string]string
 )
 
@@ -64,6 +68,8 @@ func InitColors() error {
 	YAMLValueColor = scheme.YAMLValueColor
 	YAMLTitleColor = scheme.YAMLTitleColor
 	HelpTextColor = scheme.HelpTextColor
+	HeaderValueColor = scheme.HeaderValueColor
+	HeaderLoadingColor = scheme.HeaderLoadingColor
 
 	ResourceIcons = map[string]string{
 		"Pods":                   "󰀵",

@@ -19,6 +19,8 @@ type ColorScheme struct {
 	YAMLValueColor      string `json:"yaml_value_color,omitempty"`
 	YAMLTitleColor      string `json:"yaml_title_color,omitempty"`
 	HelpTextColor       string `json:"help_text_color,omitempty"`
+	HeaderValueColor    string `json:"header_value_color,omitempty"`
+	HeaderLoadingColor  string `json:"header_loading_color,omitempty"`
 }
 
 func DefaultColorScheme() ColorScheme {
@@ -34,6 +36,8 @@ func DefaultColorScheme() ColorScheme {
 		YAMLValueColor:      "",
 		YAMLTitleColor:      "#FAFAFA",
 		HelpTextColor:       "#757575",
+		HeaderValueColor:    "#A1EFD3",
+		HeaderLoadingColor:  "#FFA500",
 	}
 }
 
@@ -104,6 +108,12 @@ func LoadColorScheme() (ColorScheme, error) {
 	}
 	if loadedScheme.HelpTextColor != "" {
 		scheme.HelpTextColor = loadedScheme.HelpTextColor
+	}
+	if loadedScheme.HeaderValueColor != "" {
+		scheme.HeaderValueColor = loadedScheme.HeaderValueColor
+	}
+	if loadedScheme.HeaderLoadingColor != "" {
+		scheme.HeaderLoadingColor = loadedScheme.HeaderLoadingColor
 	}
 
 	return scheme, nil

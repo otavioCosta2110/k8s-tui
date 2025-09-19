@@ -15,7 +15,7 @@ type TabData struct {
 	Model        tea.Model
 	Breadcrumb   []string
 	ScreenStack  []tea.Model
-	CurrentIndex int 
+	CurrentIndex int
 }
 
 type TabManager struct {
@@ -26,7 +26,7 @@ type TabManager struct {
 }
 
 type TabManagerMsg struct {
-	Action       string 
+	Action       string
 	TabID        string
 	ResourceType string
 	NewModel     tea.Model
@@ -105,6 +105,7 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if len(activeTab.Breadcrumb) > 0 {
 				activeTab.Title = activeTab.Breadcrumb[len(activeTab.Breadcrumb)-1]
+				activeTab.ResourceType = activeTab.Title
 			}
 
 			return tm, msg.NewScreen.Init()
@@ -168,7 +169,7 @@ func (tm *TabManager) CreateNewTab(model tea.Model, breadcrumb string) (tea.Mode
 
 	newTab := TabData{
 		ID:           tabID,
-		Title:        resourceType,
+		Title:        breadcrumb,
 		ResourceType: resourceType,
 		Model:        model,
 		Breadcrumb:   []string{breadcrumb},
@@ -261,7 +262,7 @@ func (tm *TabManager) GetTabsForComponent() []components.Tab {
 			Title:        tab.Title,
 			ResourceType: tab.ResourceType,
 			IsActive:     i == tm.activeIndex,
-			IsModified:   false, 
+			IsModified:   false,
 			Breadcrumb:   tab.Breadcrumb,
 			CurrentIndex: tab.CurrentIndex,
 		})
@@ -283,6 +284,7 @@ func (tm *TabManager) navigateBack() (tea.Model, tea.Cmd) {
 			activeTab.Model = activeTab.ScreenStack[activeTab.CurrentIndex]
 			if len(activeTab.Breadcrumb) > 0 && activeTab.CurrentIndex < len(activeTab.Breadcrumb) {
 				activeTab.Title = activeTab.Breadcrumb[activeTab.CurrentIndex]
+				activeTab.ResourceType = activeTab.Title
 			}
 			return tm, activeTab.Model.Init()
 		}
@@ -298,6 +300,7 @@ func (tm *TabManager) navigateForward() (tea.Model, tea.Cmd) {
 			activeTab.Model = activeTab.ScreenStack[activeTab.CurrentIndex]
 			if len(activeTab.Breadcrumb) > 0 && activeTab.CurrentIndex < len(activeTab.Breadcrumb) {
 				activeTab.Title = activeTab.Breadcrumb[activeTab.CurrentIndex]
+				activeTab.ResourceType = activeTab.Title
 			}
 			return tm, activeTab.Model.Init()
 		}

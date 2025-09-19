@@ -117,10 +117,7 @@ func (m HeaderModel) buildEnhancedHeader(metrics Metrics) string {
 	clusterLines := strings.Split(strings.TrimSuffix(clusterSection, "\n"), "\n")
 	metricsLines := strings.Split(strings.TrimSuffix(metricsSection, "\n"), "\n")
 
-	maxLines := len(clusterLines)
-	if len(metricsLines) > maxLines {
-		maxLines = len(metricsLines)
-	}
+	maxLines := max(len(metricsLines), len(clusterLines))
 
 	for len(clusterLines) < maxLines {
 		clusterLines = append(clusterLines, "")
@@ -130,7 +127,7 @@ func (m HeaderModel) buildEnhancedHeader(metrics Metrics) string {
 	}
 
 	resultLines := make([]string, maxLines)
-	for i := 0; i < maxLines; i++ {
+	for i := range maxLines {
 		clusterLine := lipgloss.NewStyle().
 			Width(40).
 			Background(lipgloss.Color(customstyles.BackgroundColor)).
@@ -187,7 +184,7 @@ func (m HeaderModel) buildClusterSection(info map[string]string) string {
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	valueStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#A1EFD3")).
+		Foreground(lipgloss.Color(customstyles.HeaderValueColor)).
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	content := []string{
@@ -222,11 +219,11 @@ func (m HeaderModel) buildMetricsSection(metrics Metrics) string {
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	valueStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#A1EFD3")).
+		Foreground(lipgloss.Color(customstyles.HeaderValueColor)).
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	loadingStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#FFA500")).
+		Foreground(lipgloss.Color(customstyles.HeaderLoadingColor)).
 		Italic(true).
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 

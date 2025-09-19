@@ -152,11 +152,12 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 			return m, tea.Quit
-		case "q":
+		case "q", "[", "]":
 			if m.tabManager != nil {
 				updatedManager, cmd := m.tabManager.Update(msg)
 				if manager, ok := updatedManager.(*models.TabManager); ok {
 					m.tabManager = manager
+					m.updateHeaderTabs()
 				}
 				return m, cmd
 			}
@@ -337,7 +338,7 @@ func (m *AppModel) View() string {
 	if m.tabManager != nil {
 		if activeTab := m.tabManager.GetActiveTab(); activeTab != nil && len(activeTab.Breadcrumb) > 0 {
 			var breadcrumbParts []string
-			breadcrumbEnd := min(activeTab.CurrentIndex + 1, len(activeTab.Breadcrumb))
+			breadcrumbEnd := min(activeTab.CurrentIndex+1, len(activeTab.Breadcrumb))
 			for i := range breadcrumbEnd {
 				crumb := activeTab.Breadcrumb[i]
 				if i == activeTab.CurrentIndex && activeTab.CurrentIndex < len(activeTab.Breadcrumb) {
