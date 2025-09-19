@@ -7,12 +7,10 @@ import (
 )
 
 func TestLoadColorScheme(t *testing.T) {
-	// Create a temporary directory for testing
 	tempDir := t.TempDir()
 	configDir := filepath.Join(tempDir, ".config", "k8s-tui")
 	os.MkdirAll(configDir, 0755)
 
-	// Create a test colorscheme file
 	testScheme := `{
   "border_color": "#ff0000",
   "accent_color": "#00ff00",
@@ -30,18 +28,15 @@ func TestLoadColorScheme(t *testing.T) {
 		t.Fatalf("Failed to write test config file: %v", err)
 	}
 
-	// Change to temp directory to test config loading
 	oldHome := os.Getenv("HOME")
 	os.Setenv("HOME", tempDir)
 	defer os.Setenv("HOME", oldHome)
 
-	// Test loading
 	scheme, err := LoadColorScheme()
 	if err != nil {
 		t.Fatalf("Failed to load color scheme: %v", err)
 	}
 
-	// Verify the loaded values
 	if scheme.BorderColor != "#ff0000" {
 		t.Errorf("Expected BorderColor #ff0000, got %s", scheme.BorderColor)
 	}

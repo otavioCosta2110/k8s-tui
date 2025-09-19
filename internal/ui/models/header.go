@@ -6,6 +6,7 @@ import (
 	"otaviocosta2110/k8s-tui/internal/k8s"
 	"otaviocosta2110/k8s-tui/internal/ui/components"
 	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
+	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -48,7 +49,7 @@ func (m HeaderModel) Init() tea.Cmd {
 		})
 	}
 	m.height = global.HeaderSize
-	m.headerStyle = m.headerStyle.Height(m.height)
+	m.headerStyle = m.headerStyle.Height(m.height).Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	global.IsHeaderActive = true
 	return m.tabComponent.Init()
@@ -56,7 +57,7 @@ func (m HeaderModel) Init() tea.Cmd {
 
 func (m HeaderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.headerStyle = m.headerStyle.
-		Height(m.height)
+		Height(m.height).Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	var tabCmd tea.Cmd
 	if m.tabComponent != nil {
@@ -92,9 +93,9 @@ func (m HeaderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m HeaderModel) View() string {
 	var headerView string
 	if m.kubeconfig == nil {
-		headerView = m.headerStyle.Render("K8s TUI - No cluster connection")
+		headerView = m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render("K8s TUI - No cluster connection")
 	} else {
-		headerView = m.headerStyle.Render(m.content)
+		headerView = m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(m.content)
 	}
 
 	if m.tabComponent != nil && m.tabComponent.GetTabCount() > 0 {
@@ -113,12 +114,43 @@ func (m HeaderModel) buildEnhancedHeader(metrics Metrics) string {
 	clusterSection := m.buildClusterSection(clusterInfo)
 	metricsSection := m.buildMetricsSection(metrics)
 
-	return lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		clusterSection,
-		lipgloss.NewStyle().Width(4).Background(lipgloss.Color(customstyles.BackgroundColor)).Render(""),
-		metricsSection,
-	)
+	clusterLines := strings.Split(strings.TrimSuffix(clusterSection, "\n"), "\n")
+	metricsLines := strings.Split(strings.TrimSuffix(metricsSection, "\n"), "\n")
+
+	maxLines := len(clusterLines)
+	if len(metricsLines) > maxLines {
+		maxLines = len(metricsLines)
+	}
+
+	for len(clusterLines) < maxLines {
+		clusterLines = append(clusterLines, "")
+	}
+	for len(metricsLines) < maxLines {
+		metricsLines = append(metricsLines, "")
+	}
+
+	resultLines := make([]string, maxLines)
+	for i := 0; i < maxLines; i++ {
+		clusterLine := lipgloss.NewStyle().
+			Width(40).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
+			Render(clusterLines[i])
+
+		spacer := lipgloss.NewStyle().
+			Width(4).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
+			Render("    ")
+
+		metricsLine := lipgloss.NewStyle().
+			Width(60).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
+			Render(metricsLines[i])
+
+		resultLines[i] = lipgloss.JoinHorizontal(lipgloss.Left,
+			clusterLine, spacer, metricsLine)
+	}
+
+	return strings.Join(resultLines, "\n")
 }
 
 func (m HeaderModel) getClusterInfo() map[string]string {
@@ -158,20 +190,24 @@ func (m HeaderModel) buildClusterSection(info map[string]string) string {
 		Foreground(lipgloss.Color("#A1EFD3")).
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 
-	sectionStyle := lipgloss.NewStyle().
-		Width(40).
-		Padding(0, 2).
-		Background(lipgloss.Color(customstyles.BackgroundColor))
-
 	content := []string{
-		titleStyle.Render("Cluster Info"),
-		labelStyle.Render("Namespace:") + " " + valueStyle.Render(info["namespace"]),
-		labelStyle.Render("Server:") + " " + valueStyle.Render(info["server"]),
+		titleStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Cluster Info"),
+		lipgloss.JoinHorizontal(lipgloss.Left,
+			labelStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Namespace:"),
+			labelStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" "),
+			valueStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(info["namespace"])),
+		lipgloss.JoinHorizontal(lipgloss.Left,
+			labelStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Server:"),
+			labelStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" "),
+			valueStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(info["server"])),
 	}
 
-	return sectionStyle.Render(
-		lipgloss.JoinVertical(lipgloss.Left, content...),
-	)
+	filledContent := make([]string, len(content))
+	for i, line := range content {
+		filledContent[i] = lipgloss.PlaceHorizontal(40, lipgloss.Left, line, lipgloss.WithWhitespaceBackground(lipgloss.Color(customstyles.BackgroundColor)))
+	}
+
+	return lipgloss.JoinVertical(lipgloss.Left, filledContent...)
 }
 
 func (m HeaderModel) buildMetricsSection(metrics Metrics) string {
@@ -194,16 +230,17 @@ func (m HeaderModel) buildMetricsSection(metrics Metrics) string {
 		Italic(true).
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 
-	sectionStyle := lipgloss.NewStyle().
-		Width(60).
-		Padding(0, 2).
-		Background(lipgloss.Color(customstyles.BackgroundColor))
-
 	formatMetric := func(label string, value int, loading bool) string {
 		if loading && value == 0 {
-			return metricStyle.Render(label+":") + " " + loadingStyle.Render("Loading...")
+			return lipgloss.JoinHorizontal(lipgloss.Left,
+				metricStyle.Render(label+":"),
+				metricStyle.Render(" "),
+				loadingStyle.Render("Loading..."))
 		}
-		return metricStyle.Render(label+":") + " " + valueStyle.Render(fmt.Sprint(value))
+		return lipgloss.JoinHorizontal(lipgloss.Left,
+			metricStyle.Render(label+":"),
+			metricStyle.Render(" "),
+			valueStyle.Render(fmt.Sprint(value)))
 	}
 
 	content := []string{
@@ -215,9 +252,12 @@ func (m HeaderModel) buildMetricsSection(metrics Metrics) string {
 		formatMetric("Services", metrics.ServicesNumber, metrics.Loading),
 	}
 
-	return sectionStyle.Render(
-		lipgloss.JoinVertical(lipgloss.Left, content...),
-	)
+	filledContent := make([]string, len(content))
+	for i, line := range content {
+		filledContent[i] = lipgloss.PlaceHorizontal(60, lipgloss.Left, line, lipgloss.WithWhitespaceBackground(lipgloss.Color(customstyles.BackgroundColor)))
+	}
+
+	return lipgloss.JoinVertical(lipgloss.Left, filledContent...)
 }
 
 func (m *HeaderModel) SetContent(content string) {

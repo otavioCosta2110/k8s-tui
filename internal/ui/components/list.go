@@ -98,13 +98,11 @@ func (m *ListModel) View() string {
 	}
 	m.List.SetSize(global.ScreenWidth, global.ScreenHeight-1)
 
-	// Get the list view without title (temporarily disable title)
 	originalTitle := m.List.Title
 	m.List.Title = ""
 	listView := m.List.View()
 	m.List.Title = originalTitle
 
-	// Render title separately with proper styling
 	var view string
 	if originalTitle != "" {
 		titleView := customstyles.TitleStyle().Render(originalTitle)

@@ -338,7 +338,7 @@ func (m *AppModel) View() string {
 		if activeTab := m.tabManager.GetActiveTab(); activeTab != nil && len(activeTab.Breadcrumb) > 0 {
 			var breadcrumbParts []string
 			breadcrumbEnd := min(activeTab.CurrentIndex + 1, len(activeTab.Breadcrumb))
-			for i := 0; i < breadcrumbEnd; i++ {
+			for i := range breadcrumbEnd {
 				crumb := activeTab.Breadcrumb[i]
 				if i == activeTab.CurrentIndex && activeTab.CurrentIndex < len(activeTab.Breadcrumb) {
 					breadcrumbParts = append(breadcrumbParts, lipgloss.NewStyle().
@@ -354,7 +354,6 @@ func (m *AppModel) View() string {
 				}
 			}
 			breadCrumbArrow := lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" > ")
-			// breadcrumbStr := lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(strings.Join(breadcrumbParts, " > "))
 			breadcrumbStr := strings.Join(breadcrumbParts, breadCrumbArrow)
 			breadcrumbView = lipgloss.NewStyle().
 				Width(global.ScreenWidth + global.Margin).
