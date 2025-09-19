@@ -38,9 +38,9 @@ func TitleStyle() lipgloss.Style {
 		BorderBottom(true).
 		BorderStyle(lipgloss.NormalBorder()).
 		Padding(0, 1).
-		BorderForeground(lipgloss.Color(HeaderColor)).
+		BorderForeground(lipgloss.Color(BorderColor)).
 		BorderBackground(lipgloss.Color(BackgroundColor)).
-		Width(AvailableWidth-global.Margin).
+		Width(AvailableWidth).
 		Background(lipgloss.Color(BackgroundColor))
 }
 

@@ -49,6 +49,9 @@ func NewList(items []string, title string, onSelect func(selected string) tea.Ms
 	l.Title = title
 	l.Styles.Title = customstyles.TitleStyle()
 	l.SetShowStatusBar(false)
+	l.SetFilteringEnabled(false)
+	l.SetShowPagination(false)
+	l.SetShowTitle(false)
 
 	l.SetShowHelp(false)
 
@@ -93,9 +96,22 @@ func (m *ListModel) View() string {
 			Background(lipgloss.Color(customstyles.BackgroundColor)).
 			Render("Loading...")
 	}
-	m.List.SetSize(global.ScreenWidth, global.ScreenHeight+1)
+	m.List.SetSize(global.ScreenWidth, global.ScreenHeight-1)
 
-	view := m.List.View()
+	// Get the list view without title (temporarily disable title)
+	originalTitle := m.List.Title
+	m.List.Title = ""
+	listView := m.List.View()
+	m.List.Title = originalTitle
+
+	// Render title separately with proper styling
+	var view string
+	if originalTitle != "" {
+		titleView := customstyles.TitleStyle().Render(originalTitle)
+		view = lipgloss.JoinVertical(lipgloss.Left, titleView, listView)
+	} else {
+		view = listView
+	}
 
 	if m.footerText != "" {
 		footerStyle := lipgloss.NewStyle().

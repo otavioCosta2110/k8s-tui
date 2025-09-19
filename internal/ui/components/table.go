@@ -37,6 +37,7 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 		BorderBottom(true).
 		BorderForeground(lipgloss.Color(customstyles.HeaderColor)).
 		BorderStyle(lipgloss.NormalBorder()).
+		Foreground(lipgloss.Color(customstyles.TextColor)).
 		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		BorderBackground(lipgloss.Color(customstyles.BackgroundColor))
 
