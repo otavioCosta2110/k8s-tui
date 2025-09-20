@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	""
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/otavioCosta2110/k8s-tui/pkg/global"
 	"github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 )
 
@@ -29,7 +29,7 @@ type YAMLEditor struct {
 }
 
 func NewYAMLEditor(title, content string) *YAMLEditor {
-	editor := utils.GetPreferredEditor()
+	editor := global.GetPreferredEditor()
 
 	useExternal := editor != "vi"
 
@@ -169,7 +169,7 @@ func (m *YAMLEditor) View() string {
 
 	var content string
 	if m.useExternal {
-		editor := utils.GetPreferredEditor()
+		editor := global.GetPreferredEditor()
 		content = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color(m.styles.BorderColor)).
@@ -273,7 +273,7 @@ func createTempFile(content string) (string, error) {
 }
 
 func (m *YAMLEditor) launchExternalEditor() tea.Cmd {
-	editor := utils.GetPreferredEditor()
+	editor := global.GetPreferredEditor()
 
 	cmd := exec.Command(editor, m.tempFile)
 	m.editorCmd = cmd
