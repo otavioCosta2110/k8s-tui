@@ -3,8 +3,8 @@ package models
 import (
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
-	"github.com/otavioCosta2110/k8s-tui/pkg/utils"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -184,7 +184,7 @@ func (rf *ResourceFactory) GetValidResourceTypes() []string {
 	// Add custom resource types from plugins
 	if pm := plugins.GetGlobalPluginManager(); pm != nil {
 		for _, rt := range pm.GetRegistry().GetCustomResourceTypes() {
-			utils.WriteString("plugin.txt", rt.Name)
+			logger.Info(fmt.Sprintf("Loading custom resource type: %s", rt.Name))
 			validTypes = append(validTypes, rt.Name)
 		}
 	}
