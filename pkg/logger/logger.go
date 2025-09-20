@@ -18,10 +18,18 @@ const (
 )
 
 const (
-	LogDir         = "./local/state/k8s-tui/logs"
 	MaxLogFileSize = 10 * 1024 * 1024
 	MaxLogFiles    = 5
 )
+
+func getLogDir() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		// Fallback to current directory if home directory can't be determined
+		return "./.local/state/k8s-tui/logs"
+	}
+	return filepath.Join(homeDir, ".local", "state", "k8s-tui", "logs")
+}
 
 func (l Level) String() string {
 	switch l {
@@ -49,13 +57,14 @@ var defaultLogger *Logger
 var pluginLoggers = make(map[string]*Logger)
 
 func init() {
-	if err := os.MkdirAll(LogDir, 0755); err != nil {
-		log.Printf("Failed to create log directory %s: %v", LogDir, err)
+	logDir := getLogDir()
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		log.Printf("Failed to create log directory %s: %v", logDir, err)
 		return
 	}
 
 	timestamp := time.Now().Format("2006-01-02")
-	logFile := filepath.Join(LogDir, fmt.Sprintf("k8s-tui-%s.log", timestamp))
+	logFile := filepath.Join(logDir, fmt.Sprintf("k8s-tui-%s.log", timestamp))
 
 	file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
@@ -67,7 +76,7 @@ func init() {
 		level:  LEVEL_DEBUG,
 		logger: log.New(file, "", 0),
 		file:   file,
-		logDir: LogDir,
+		logDir: logDir,
 	}
 }
 
@@ -154,7 +163,7 @@ func GetPluginLogger(pluginName string) *Logger {
 	}
 
 	// Create plugin-specific log directory
-	pluginLogDir := filepath.Join(LogDir, "plugins")
+	pluginLogDir := filepath.Join(getLogDir(), "plugins")
 	if err := os.MkdirAll(pluginLogDir, 0755); err != nil {
 		log.Printf("Failed to create plugin log directory %s: %v", pluginLogDir, err)
 		return defaultLogger
