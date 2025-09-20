@@ -6,6 +6,7 @@ import (
 
 	ui "github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
+	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 	"github.com/otavioCosta2110/k8s-tui/pkg/types"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -23,6 +24,7 @@ type ResourceConfig struct {
 type GenericResourceModel struct {
 	namespace       string
 	k8sClient       *k8s.Client
+	pluginAPI       plugins.PluginAPI
 	resourceType    k8s.ResourceType
 	resourceData    []types.ResourceData
 	loading         bool
@@ -32,9 +34,17 @@ type GenericResourceModel struct {
 }
 
 func NewGenericResourceModel(k k8s.Client, namespace string, config ResourceConfig) *GenericResourceModel {
+	// Try to get plugin API from global plugin manager
+	var pluginAPI plugins.PluginAPI
+	if pm := plugins.GetGlobalPluginManager(); pm != nil {
+		pluginAPI = pm.GetAPI()
+		pluginAPI.SetClient(k)
+	}
+
 	return &GenericResourceModel{
 		namespace:       namespace,
 		k8sClient:       &k,
+		pluginAPI:       pluginAPI,
 		resourceType:    config.ResourceType,
 		loading:         false,
 		err:             nil,
@@ -73,6 +83,53 @@ func (g *GenericResourceModel) createDeleteAction(tableModel *ui.TableModel) fun
 }
 
 func (g *GenericResourceModel) deleteResource(resource types.ResourceData) error {
+	// Try to use plugin API first, fall back to k8s client
+	if g.pluginAPI != nil {
+		var err error
+		switch g.resourceType {
+		case k8s.ResourceTypePod:
+			err = g.pluginAPI.DeletePod(resource.GetNamespace(), resource.GetName())
+		case k8s.ResourceTypeService:
+			err = g.pluginAPI.DeleteService(resource.GetNamespace(), resource.GetName())
+		case k8s.ResourceTypeDeployment:
+			err = g.pluginAPI.DeleteDeployment(resource.GetNamespace(), resource.GetName())
+		case k8s.ResourceTypeConfigMap:
+			err = g.pluginAPI.DeleteConfigMap(resource.GetNamespace(), resource.GetName())
+		case k8s.ResourceTypeSecret:
+			err = g.pluginAPI.DeleteSecret(resource.GetNamespace(), resource.GetName())
+		case k8s.ResourceTypeIngress:
+			err = g.pluginAPI.DeleteIngress(resource.GetNamespace(), resource.GetName())
+		case k8s.ResourceTypeJob:
+			err = g.pluginAPI.DeleteJob(resource.GetNamespace(), resource.GetName())
+		case k8s.ResourceTypeCronJob:
+			err = g.pluginAPI.DeleteCronJob(resource.GetNamespace(), resource.GetName())
+		case k8s.ResourceTypeDaemonSet:
+			err = g.pluginAPI.DeleteDaemonSet(resource.GetNamespace(), resource.GetName())
+		case k8s.ResourceTypeStatefulSet:
+			err = g.pluginAPI.DeleteStatefulSet(resource.GetNamespace(), resource.GetName())
+		case k8s.ResourceTypeReplicaSet:
+			err = g.pluginAPI.DeleteReplicaSet(resource.GetNamespace(), resource.GetName())
+		case k8s.ResourceTypeServiceAccount:
+			err = g.pluginAPI.DeleteServiceAccount(resource.GetNamespace(), resource.GetName())
+		default:
+			// Fall back to k8s client for unsupported types
+			err = k8s.DeleteResource(*g.k8sClient, g.resourceType, resource.GetNamespace(), resource.GetName())
+		}
+		if err != nil {
+			return fmt.Errorf("failed to delete resource %s/%s: %v", resource.GetNamespace(), resource.GetName(), err)
+		}
+		return nil
+	}
+
+	// Fall back to k8s client
+	err := k8s.DeleteResource(*g.k8sClient, g.resourceType, resource.GetNamespace(), resource.GetName())
+	if err != nil {
+		return fmt.Errorf("failed to delete resource %s/%s: %v", resource.GetNamespace(), resource.GetName(), err)
+	}
+	return nil
+}
+
+func (g *GenericResourceModel) deleteResourceK8s(resource types.ResourceData) error {
 	err := k8s.DeleteResource(*g.k8sClient, g.resourceType, resource.GetNamespace(), resource.GetName())
 	if err != nil {
 		return fmt.Errorf("failed to delete resource %s/%s: %v", resource.GetNamespace(), resource.GetName(), err)

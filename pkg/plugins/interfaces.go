@@ -274,4 +274,34 @@ type PluginAPI interface {
 
 	// SetClient sets the Kubernetes client
 	SetClient(client k8s.Client)
+
+	// Kubernetes resource API methods
+	GetPods(namespace string) ([]k8s.PodInfo, error)
+	GetServices(namespace string) ([]k8s.ServiceInfo, error)
+	GetDeployments(namespace string) ([]k8s.DeploymentInfo, error)
+	GetConfigMaps(namespace string) ([]k8s.Configmap, error)
+	GetSecrets(namespace string) ([]k8s.SecretInfo, error)
+	GetIngresses(namespace string) ([]k8s.IngressInfo, error)
+	GetJobs(namespace string) ([]k8s.JobInfo, error)
+	GetCronJobs(namespace string) ([]k8s.CronJobInfo, error)
+	GetDaemonSets(namespace string) ([]k8s.DaemonSetInfo, error)
+	GetStatefulSets(namespace string) ([]k8s.StatefulSetInfo, error)
+	GetReplicaSets(namespace string) ([]k8s.ReplicaSetInfo, error)
+	GetNodes() ([]k8s.NodeInfo, error)
+	GetNamespaces() ([]string, error)
+	GetServiceAccounts(namespace string) ([]k8s.ServiceAccountInfo, error)
+
+	// Delete methods
+	DeletePod(namespace, name string) error
+	DeleteService(namespace, name string) error
+	DeleteDeployment(namespace, name string) error
+	DeleteConfigMap(namespace, name string) error
+	DeleteSecret(namespace, name string) error
+	DeleteIngress(namespace, name string) error
+	DeleteJob(namespace, name string) error
+	DeleteCronJob(namespace, name string) error
+	DeleteDaemonSet(namespace, name string) error
+	DeleteStatefulSet(namespace, name string) error
+	DeleteReplicaSet(namespace, name string) error
+	DeleteServiceAccount(namespace, name string) error
 }

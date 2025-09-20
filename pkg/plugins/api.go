@@ -109,3 +109,112 @@ func (api *PluginAPIImpl) GetClient() k8s.Client {
 func (api *PluginAPIImpl) SetClient(client k8s.Client) {
 	api.client = client
 }
+
+// Kubernetes resource API methods - for now, fall back to direct k8s calls
+// In the future, these could check for Lua plugin overrides
+
+func (api *PluginAPIImpl) GetPods(namespace string) ([]k8s.PodInfo, error) {
+	return k8s.FetchPods(api.client, namespace, "")
+}
+
+func (api *PluginAPIImpl) GetServices(namespace string) ([]k8s.ServiceInfo, error) {
+	return k8s.GetServicesTableData(api.client, namespace)
+}
+
+func (api *PluginAPIImpl) GetDeployments(namespace string) ([]k8s.DeploymentInfo, error) {
+	return k8s.GetDeploymentsTableData(api.client, namespace)
+}
+
+func (api *PluginAPIImpl) GetConfigMaps(namespace string) ([]k8s.Configmap, error) {
+	return k8s.FetchConfigmaps(api.client, namespace, "")
+}
+
+func (api *PluginAPIImpl) GetSecrets(namespace string) ([]k8s.SecretInfo, error) {
+	return k8s.GetSecretsTableData(api.client, namespace)
+}
+
+func (api *PluginAPIImpl) GetIngresses(namespace string) ([]k8s.IngressInfo, error) {
+	return k8s.GetIngressesTableData(api.client, namespace)
+}
+
+func (api *PluginAPIImpl) GetJobs(namespace string) ([]k8s.JobInfo, error) {
+	return k8s.GetJobsTableData(api.client, namespace)
+}
+
+func (api *PluginAPIImpl) GetCronJobs(namespace string) ([]k8s.CronJobInfo, error) {
+	return k8s.GetCronJobsTableData(api.client, namespace)
+}
+
+func (api *PluginAPIImpl) GetDaemonSets(namespace string) ([]k8s.DaemonSetInfo, error) {
+	return k8s.GetDaemonSetsTableData(api.client, namespace)
+}
+
+func (api *PluginAPIImpl) GetStatefulSets(namespace string) ([]k8s.StatefulSetInfo, error) {
+	return k8s.GetStatefulSetsTableData(api.client, namespace)
+}
+
+func (api *PluginAPIImpl) GetReplicaSets(namespace string) ([]k8s.ReplicaSetInfo, error) {
+	return k8s.GetReplicaSetsTableData(api.client, namespace)
+}
+
+func (api *PluginAPIImpl) GetNodes() ([]k8s.NodeInfo, error) {
+	return k8s.GetNodesTableData(api.client)
+}
+
+func (api *PluginAPIImpl) GetNamespaces() ([]string, error) {
+	return k8s.FetchNamespaces(api.client)
+}
+
+func (api *PluginAPIImpl) GetServiceAccounts(namespace string) ([]k8s.ServiceAccountInfo, error) {
+	return k8s.GetServiceAccountsTableData(api.client, namespace)
+}
+
+// Delete methods
+
+func (api *PluginAPIImpl) DeletePod(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypePod, namespace, name)
+}
+
+func (api *PluginAPIImpl) DeleteService(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypeService, namespace, name)
+}
+
+func (api *PluginAPIImpl) DeleteDeployment(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypeDeployment, namespace, name)
+}
+
+func (api *PluginAPIImpl) DeleteConfigMap(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypeConfigMap, namespace, name)
+}
+
+func (api *PluginAPIImpl) DeleteSecret(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypeSecret, namespace, name)
+}
+
+func (api *PluginAPIImpl) DeleteIngress(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypeIngress, namespace, name)
+}
+
+func (api *PluginAPIImpl) DeleteJob(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypeJob, namespace, name)
+}
+
+func (api *PluginAPIImpl) DeleteCronJob(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypeCronJob, namespace, name)
+}
+
+func (api *PluginAPIImpl) DeleteDaemonSet(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypeDaemonSet, namespace, name)
+}
+
+func (api *PluginAPIImpl) DeleteStatefulSet(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypeStatefulSet, namespace, name)
+}
+
+func (api *PluginAPIImpl) DeleteReplicaSet(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypeReplicaSet, namespace, name)
+}
+
+func (api *PluginAPIImpl) DeleteServiceAccount(namespace, name string) error {
+	return k8s.DeleteResource(api.client, k8s.ResourceTypeServiceAccount, namespace, name)
+}

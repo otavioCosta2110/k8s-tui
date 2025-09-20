@@ -87,7 +87,12 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (p *podsModel) fetchData(selector string) error {
-	podsInfo, err := k8s.FetchPods(*p.k8sClient, p.namespace, selector)
+	var podsInfo []k8s.PodInfo
+	var err error
+
+	// For now, use k8s client directly
+	podsInfo, err = k8s.FetchPods(*p.k8sClient, p.namespace, selector)
+
 	if err != nil {
 		return err
 	}
