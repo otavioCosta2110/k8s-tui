@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+func FalseFunc() bool {
+	return false
+}
+
 func WriteString(filePath string, data string) error {
 	return os.WriteFile(filePath, []byte(data), 0644)
 }
