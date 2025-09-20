@@ -110,7 +110,7 @@ func GetIngressesTableData(client Client, namespace string) ([]IngressInfo, erro
 			Hosts:     hostsStr,
 			Address:   address,
 			Ports:     portsStr,
-			Age:       utils.FormatAge(ingress.CreationTimestamp.Time),
+			Age:       format.FormatAge(ingress.CreationTimestamp.Time),
 			Raw:       ingress.DeepCopy(),
 			Client:    client,
 		})

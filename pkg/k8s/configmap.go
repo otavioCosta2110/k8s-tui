@@ -75,7 +75,7 @@ func GetConfigmapDetails(client Client, namespace string, cmCore *corev1.ConfigM
 		return Configmap{}, fmt.Errorf("failed to get pod details: %v", err)
 	}
 
-	age := utils.FormatAge(cm.GetCreationTimestamp().Time)
+	age := format.FormatAge(cm.GetCreationTimestamp().Time)
 
 	return Configmap{
 		Namespace: cm.Namespace,

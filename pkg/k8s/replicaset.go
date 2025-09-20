@@ -78,7 +78,7 @@ func GetReplicaSetsTableData(client Client, namespace string) ([]ReplicaSetInfo,
 			Desired:   fmt.Sprintf("%d", desiredReplicas),
 			Current:   fmt.Sprintf("%d", status.Replicas),
 			Ready:     readyStr,
-			Age:       utils.FormatAge(freshReplicaSet.CreationTimestamp.Time),
+			Age:       format.FormatAge(freshReplicaSet.CreationTimestamp.Time),
 			Raw:       freshReplicaSet.DeepCopy(),
 			Client:    client,
 		})

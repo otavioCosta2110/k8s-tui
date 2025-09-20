@@ -66,7 +66,7 @@ func GetCronJobsTableData(client Client, namespace string) ([]CronJobInfo, error
 
 		lastSchedule := "<none>"
 		if cronjob.Status.LastScheduleTime != nil {
-			lastSchedule = utils.FormatAge(cronjob.Status.LastScheduleTime.Time)
+			lastSchedule = format.FormatAge(cronjob.Status.LastScheduleTime.Time)
 		}
 
 		cronjobInfos = append(cronjobInfos, CronJobInfo{
@@ -76,7 +76,7 @@ func GetCronJobsTableData(client Client, namespace string) ([]CronJobInfo, error
 			Suspend:      suspend,
 			Active:       active,
 			LastSchedule: lastSchedule,
-			Age:          utils.FormatAge(cronjob.CreationTimestamp.Time),
+			Age:          format.FormatAge(cronjob.CreationTimestamp.Time),
 			Raw:          cronjob.DeepCopy(),
 			Client:       client,
 		})

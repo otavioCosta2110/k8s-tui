@@ -1,6 +1,6 @@
 module github.com/otavioCosta2110/k8s-tui
 
-go 1.24.4
+go 1.25.1
 
 require (
 	github.com/charmbracelet/bubbles v0.21.0

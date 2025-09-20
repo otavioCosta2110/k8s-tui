@@ -82,7 +82,7 @@ func GetDaemonSetsTableData(client Client, namespace string) ([]DaemonSetInfo, e
 			UpToDate:     upToDate,
 			Available:    available,
 			NodeSelector: nodeSelector,
-			Age:          utils.FormatAge(daemonset.CreationTimestamp.Time),
+			Age:          format.FormatAge(daemonset.CreationTimestamp.Time),
 			Raw:          daemonset.DeepCopy(),
 			Client:       client,
 		})

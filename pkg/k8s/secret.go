@@ -65,7 +65,7 @@ func GetSecretsTableData(client Client, namespace string) ([]SecretInfo, error) 
 			Name:      secret.Name,
 			Type:      secretType,
 			Data:      dataStr,
-			Age:       utils.FormatAge(secret.CreationTimestamp.Time),
+			Age:       format.FormatAge(secret.CreationTimestamp.Time),
 			Raw:       secret.DeepCopy(),
 			Client:    client,
 		})

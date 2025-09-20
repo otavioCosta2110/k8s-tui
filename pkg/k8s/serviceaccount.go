@@ -60,7 +60,7 @@ func GetServiceAccountsTableData(client Client, namespace string) ([]ServiceAcco
 			Namespace: sa.Namespace,
 			Name:      sa.Name,
 			Secrets:   secretsStr,
-			Age:       utils.FormatAge(sa.CreationTimestamp.Time),
+			Age:       format.FormatAge(sa.CreationTimestamp.Time),
 			Raw:       sa.DeepCopy(),
 			Client:    client,
 		})

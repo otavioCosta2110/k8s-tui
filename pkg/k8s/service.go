@@ -108,7 +108,7 @@ func GetServicesTableData(client Client, namespace string) ([]ServiceInfo, error
 			ClusterIP:  clusterIP,
 			ExternalIP: externalIP,
 			Ports:      portsStr,
-			Age:        utils.FormatAge(service.CreationTimestamp.Time),
+			Age:        format.FormatAge(service.CreationTimestamp.Time),
 			Raw:        service.DeepCopy(),
 			Client:     client,
 		})

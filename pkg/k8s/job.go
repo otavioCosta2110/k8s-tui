@@ -70,7 +70,7 @@ func GetJobsTableData(client Client, namespace string) ([]JobInfo, error) {
 			Name:        job.Name,
 			Completions: completions,
 			Duration:    duration,
-			Age:         utils.FormatAge(job.CreationTimestamp.Time),
+			Age:         format.FormatAge(job.CreationTimestamp.Time),
 			Raw:         job.DeepCopy(),
 			Client:      client,
 		})

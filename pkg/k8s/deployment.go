@@ -78,7 +78,7 @@ func GetDeploymentsTableData(client Client, namespace string) ([]DeploymentInfo,
 			Ready:     readyStr,
 			UpToDate:  fmt.Sprintf("%d", status.UpdatedReplicas),
 			Available: fmt.Sprintf("%d", status.AvailableReplicas),
-			Age:       utils.FormatAge(freshDeployment.CreationTimestamp.Time),
+			Age:       format.FormatAge(freshDeployment.CreationTimestamp.Time),
 			Raw:       freshDeployment.DeepCopy(),
 			Client:    client,
 		})

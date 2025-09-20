@@ -67,7 +67,7 @@ func GetStatefulSetsTableData(client Client, namespace string) ([]StatefulSetInf
 			Name:      statefulset.Name,
 			Replicas:  replicas,
 			Ready:     ready,
-			Age:       utils.FormatAge(statefulset.CreationTimestamp.Time),
+			Age:       format.FormatAge(statefulset.CreationTimestamp.Time),
 			Raw:       statefulset.DeepCopy(),
 			Client:    client,
 		})

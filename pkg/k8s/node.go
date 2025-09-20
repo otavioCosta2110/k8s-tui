@@ -74,7 +74,7 @@ func GetNodesTableData(client Client) ([]NodeInfo, error) {
 			CPU:     cpu,
 			Memory:  memory,
 			Pods:    pods,
-			Age:     utils.FormatAge(node.CreationTimestamp.Time),
+			Age:     format.FormatAge(node.CreationTimestamp.Time),
 			Raw:     node.DeepCopy(),
 			Client:  client,
 		})
@@ -124,7 +124,7 @@ func getNodeResources(node *corev1.Node) (cpu, memory string) {
 			cpu = cpuQty.String()
 		}
 		if memQty, ok := node.Status.Capacity[corev1.ResourceMemory]; ok {
-			memory = utils.FormatBytes(memQty.String())
+			memory = format.FormatBytes(memQty.String())
 		}
 	}
 	return cpu, memory
