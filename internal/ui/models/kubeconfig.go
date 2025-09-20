@@ -1,10 +1,12 @@
 package models
 
 import (
+	"fmt"
+	global "github.com/otavioCosta2110/k8s-tui/internal"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s"
+	"github.com/otavioCosta2110/k8s-tui/internal/logger"
+	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	"os"
-	global "otaviocosta2110/k8s-tui/internal"
-	"otaviocosta2110/k8s-tui/internal/k8s"
-	"otaviocosta2110/k8s-tui/internal/ui/components"
 	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -34,7 +36,7 @@ func (k kubeconfigModel) InitComponent(_ *k8s.Client) (tea.Model, error) {
 	for _, configs := range global.GetKubeconfigsLocations() {
 		kubeconfigs, err := os.ReadDir(configs)
 		if err != nil {
-			println("Warning:", err)
+			logger.Warn(fmt.Sprintf("Warning: %v", err))
 			continue
 		}
 		for _, file := range kubeconfigs {
@@ -52,7 +54,7 @@ func (k kubeconfigModel) InitComponent(_ *k8s.Client) (tea.Model, error) {
 		c, err := k8s.NewClient(selected, "")
 		k.k8sClient = c
 		if err != nil {
-			println("Error creating clientset:", err)
+			logger.Error(fmt.Sprintf("Error creating clientset: %v", err))
 			return components.NavigateMsg{
 				Error: err,
 			}

@@ -1,7 +1,7 @@
 package customstyles
 
 import (
-	"otaviocosta2110/k8s-tui/internal/config"
+	"github.com/otavioCosta2110/k8s-tui/internal/config"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"

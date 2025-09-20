@@ -3,7 +3,7 @@ package k8s
 import (
 	"context"
 	"fmt"
-	"otaviocosta2110/k8s-tui/utils"
+	"github.com/otavioCosta2110/k8s-tui/utils"
 
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

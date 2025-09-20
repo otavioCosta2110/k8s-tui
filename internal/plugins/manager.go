@@ -7,8 +7,9 @@ import (
 	"plugin"
 	"strings"
 
-	"otaviocosta2110/k8s-tui/internal/k8s"
-	"otaviocosta2110/k8s-tui/internal/types"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s"
+	"github.com/otavioCosta2110/k8s-tui/internal/logger"
+	"github.com/otavioCosta2110/k8s-tui/internal/types"
 )
 
 // PluginManager manages the loading and lifecycle of plugins
@@ -38,15 +39,24 @@ func (pm *PluginManager) LoadPlugins() error {
 		return nil // Plugin directory doesn't exist, skip loading
 	}
 
-	// Find all .so files in the plugin directory
-	files, err := filepath.Glob(filepath.Join(pm.pluginDir, "*.so"))
+	// Find all .so files in the plugin directory and subdirectories
+	var files []string
+	err := filepath.Walk(pm.pluginDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(info.Name(), ".so") {
+			files = append(files, path)
+		}
+		return nil
+	})
 	if err != nil {
 		return fmt.Errorf("failed to scan plugin directory: %v", err)
 	}
 
 	for _, file := range files {
 		if err := pm.loadPlugin(file); err != nil {
-			fmt.Printf("Failed to load plugin %s: %v\n", file, err)
+			logger.Error(fmt.Sprintf("Failed to load plugin %s: %v", file, err))
 			continue
 		}
 	}
@@ -82,12 +92,12 @@ func (pm *PluginManager) loadPlugin(path string) error {
 	// Register the plugin based on its type
 	if resourcePlugin, ok := pluginInstance.(ResourcePlugin); ok {
 		pm.registry.RegisterResourcePlugin(resourcePlugin)
-		fmt.Printf("Loaded resource plugin: %s v%s\n", pluginInstance.Name(), pluginInstance.Version())
+		logger.Info(fmt.Sprintf("Loaded resource plugin: %s v%s", pluginInstance.Name(), pluginInstance.Version()))
 	}
 
 	if uiPlugin, ok := pluginInstance.(UIPlugin); ok {
 		pm.registry.RegisterUIPlugin(uiPlugin)
-		fmt.Printf("Loaded UI plugin: %s v%s\n", pluginInstance.Name(), pluginInstance.Version())
+		logger.Info(fmt.Sprintf("Loaded UI plugin: %s v%s", pluginInstance.Name(), pluginInstance.Version()))
 	}
 
 	// Store the loaded plugin
@@ -145,7 +155,7 @@ func (pm *PluginManager) Shutdown() error {
 		for _, rp := range pm.registry.resourcePlugins {
 			if rp.Name() == name {
 				if err := rp.Shutdown(); err != nil {
-					fmt.Printf("Error shutting down plugin %s: %v\n", name, err)
+					logger.Error(fmt.Sprintf("Error shutting down plugin %s: %v", name, err))
 				}
 				break
 			}
@@ -153,7 +163,7 @@ func (pm *PluginManager) Shutdown() error {
 		for _, up := range pm.registry.uiPlugins {
 			if up.Name() == name {
 				if err := up.Shutdown(); err != nil {
-					fmt.Printf("Error shutting down plugin %s: %v\n", name, err)
+					logger.Error(fmt.Sprintf("Error shutting down plugin %s: %v", name, err))
 				}
 				break
 			}

@@ -30,6 +30,7 @@ type AppConfig struct {
 	RefreshInterval  int               `json:"refresh_interval_seconds"`
 	AutoRefresh      bool              `json:"auto_refresh"`
 	DefaultNamespace string            `json:"default_namespace"`
+	PluginDir        string            `json:"plugin_dir,omitempty"`
 	KeyBindings      map[string]string `json:"key_bindings,omitempty"`
 }
 
@@ -135,6 +136,7 @@ func DefaultAppConfig() AppConfig {
 		RefreshInterval:  10,
 		AutoRefresh:      true,
 		DefaultNamespace: "default",
+		PluginDir:        "~/.local/share/k8s-tui/plugins",
 		KeyBindings: map[string]string{
 			"quit":      "q",
 			"help":      "?",
@@ -188,6 +190,17 @@ func LoadAppConfig() (AppConfig, error) {
 	}
 	if loadedConfig.KeyBindings == nil {
 		loadedConfig.KeyBindings = config.KeyBindings
+	}
+	if loadedConfig.PluginDir == "" {
+		loadedConfig.PluginDir = config.PluginDir
+	}
+
+	// Expand ~ to home directory
+	if strings.HasPrefix(loadedConfig.PluginDir, "~/") {
+		homeDir, err := os.UserHomeDir()
+		if err == nil {
+			loadedConfig.PluginDir = filepath.Join(homeDir, loadedConfig.PluginDir[2:])
+		}
 	}
 
 	return loadedConfig, nil

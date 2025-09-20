@@ -2,85 +2,83 @@ package main
 
 import (
 	"fmt"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s"
+	"github.com/otavioCosta2110/k8s-tui/internal/logger"
+	"github.com/otavioCosta2110/k8s-tui/internal/plugins"
+	"github.com/otavioCosta2110/k8s-tui/internal/ui"
 	"os"
-	"otaviocosta2110/k8s-tui/internal/k8s"
-	"otaviocosta2110/k8s-tui/internal/plugins"
-	"otaviocosta2110/k8s-tui/internal/ui"
-	"otaviocosta2110/k8s-tui/utils"
 	"runtime/debug"
 
 	"github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-	utils.WriteStringNewLine("debug.log", "=== Application Starting ===")
+	logger.Debug("=== Application Starting ===")
 
 	cfg := ui.ParseFlags()
-	utils.WriteStringNewLine("debug.log", fmt.Sprintf("Parsed flags: namespace=%s, kubeconfig=%s, pluginDir=%s", cfg.Namespace, cfg.KubeconfigPath, cfg.PluginDir))
+	logger.Debug(fmt.Sprintf("Parsed flags: namespace=%s, kubeconfig=%s, pluginDir=%s", cfg.Namespace, cfg.KubeconfigPath, cfg.PluginDir))
 
 	// Initialize plugin manager
-	utils.WriteStringNewLine("debug.log", "Creating plugin manager")
+	logger.Debug("Creating plugin manager")
 	pluginManager := plugins.NewPluginManager(cfg.PluginDir)
-	utils.WriteStringNewLine("debug.log", "Plugin manager created")
+	logger.Debug("Plugin manager created")
 
 	if err := pluginManager.LoadPlugins(); err != nil {
-		utils.WriteStringNewLine("debug.log", fmt.Sprintf("Plugin load error: %v", err))
-		fmt.Printf("Failed to load plugins: %v\n", err)
+		logger.Error(fmt.Sprintf("Plugin load error: %v", err))
 	} else {
-		utils.WriteStringNewLine("debug.log", "Plugins loaded successfully")
+		logger.Info("Plugins loaded successfully")
 	}
 
 	// Set global plugin manager
 	plugins.SetGlobalPluginManager(pluginManager)
-	utils.WriteStringNewLine("debug.log", "Global plugin manager set")
+	logger.Debug("Global plugin manager set")
 
 	// Set up custom resource handlers
-	utils.WriteStringNewLine("debug.log", "Setting up custom resource handlers")
+	logger.Debug("Setting up custom resource handlers")
 	k8s.SetCustomResourceHandlers(
 		pluginManager.GetCustomResourceData,
 		pluginManager.DeleteCustomResource,
 		pluginManager.GetCustomResourceInfo,
 		func(resourceType string) bool {
-			utils.WriteStringNewLine("debug.log", fmt.Sprintf("Checking custom resource type: %s", resourceType))
+			logger.Debug(fmt.Sprintf("Checking custom resource type: %s", resourceType))
 			for _, rt := range pluginManager.GetRegistry().GetCustomResourceTypes() {
-				utils.WriteStringNewLine("debug.log", fmt.Sprintf("Available custom resource: %s (type: %s)", rt.Name, rt.Type))
+				logger.Debug(fmt.Sprintf("Available custom resource: %s (type: %s)", rt.Name, rt.Type))
 				if rt.Type == resourceType {
-					utils.WriteStringNewLine("debug.log", fmt.Sprintf("Found matching custom resource: %s", rt.Name))
+					logger.Debug(fmt.Sprintf("Found matching custom resource: %s", rt.Name))
 					return true
 				}
 			}
-			utils.WriteStringNewLine("debug.log", fmt.Sprintf("No matching custom resource found for: %s", resourceType))
+			logger.Debug(fmt.Sprintf("No matching custom resource found for: %s", resourceType))
 			return false
 		},
 	)
-	utils.WriteStringNewLine("debug.log", "Custom resource handlers set up")
+	logger.Debug("Custom resource handlers set up")
 
-	utils.WriteStringNewLine("debug.log", "Creating app model")
+	logger.Debug("Creating app model")
 	m := ui.NewAppModel(cfg, pluginManager)
-	utils.WriteStringNewLine("debug.log", "App model created")
+	logger.Debug("App model created")
 
 	p := tea.NewProgram(m, tea.WithAltScreen())
-	utils.WriteStringNewLine("debug.log", "Bubbletea program created")
+	logger.Debug("Bubbletea program created")
 
 	defer func() {
-		utils.WriteStringNewLine("debug.log", "Entering defer function")
+		logger.Debug("Entering defer function")
 		if r := recover(); r != nil {
-			utils.WriteStringNewLine("debug.log", fmt.Sprintf("Panic recovered: %v", r))
-			fmt.Println("Recovered from panic:", r)
+			logger.Error(fmt.Sprintf("Panic recovered: %v", r))
 			debug.PrintStack()
 		}
 		// Shutdown plugins
 		if err := pluginManager.Shutdown(); err != nil {
-			utils.WriteStringNewLine("debug.log", fmt.Sprintf("Plugin shutdown error: %v", err))
-			fmt.Printf("Error shutting down plugins: %v\n", err)
+			logger.Error(fmt.Sprintf("Plugin shutdown error: %v", err))
 		}
-		utils.WriteStringNewLine("debug.log", "Application shutting down")
+		logger.Info("Application shutting down")
+		logger.Close()
 	}()
 
-	utils.WriteStringNewLine("debug.log", "Starting Bubbletea program")
+	logger.Info("Starting Bubbletea program")
 	if _, err := p.Run(); err != nil {
-		utils.WriteStringNewLine("debug.log", fmt.Sprintf("Bubbletea program error: %v", err))
+		logger.Error(fmt.Sprintf("Bubbletea program error: %v", err))
 		os.Exit(1)
 	}
-	utils.WriteStringNewLine("debug.log", "Application completed successfully")
+	logger.Info("Application completed successfully")
 }

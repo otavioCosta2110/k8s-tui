@@ -1,9 +1,9 @@
 package models
 
 import (
-	"otaviocosta2110/k8s-tui/internal/k8s"
-	"otaviocosta2110/k8s-tui/internal/types"
-	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s"
+	"github.com/otavioCosta2110/k8s-tui/internal/types"
+	customstyles "github.com/otavioCosta2110/k8s-tui/internal/ui/custom_styles"
 	"slices"
 	"testing"
 	"time"

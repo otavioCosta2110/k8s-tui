@@ -2,9 +2,9 @@ package models
 
 import (
 	"fmt"
-	"otaviocosta2110/k8s-tui/internal/k8s"
-	"otaviocosta2110/k8s-tui/internal/plugins"
-	"otaviocosta2110/k8s-tui/utils"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s"
+	"github.com/otavioCosta2110/k8s-tui/internal/plugins"
+	"github.com/otavioCosta2110/k8s-tui/utils"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"

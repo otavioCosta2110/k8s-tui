@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/charmbracelet/bubbletea"
 	"os"
-	"otaviocosta2110/k8s-tui/internal/plugins"
-	"otaviocosta2110/k8s-tui/internal/ui"
+	"github.com/otavioCosta2110/k8s-tui/internal/plugins"
+	"github.com/otavioCosta2110/k8s-tui/internal/ui"
 	"testing"
 )
 

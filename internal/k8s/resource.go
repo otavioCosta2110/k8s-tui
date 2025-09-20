@@ -2,7 +2,7 @@ package k8s
 
 import (
 	"fmt"
-	"otaviocosta2110/k8s-tui/internal/types"
+	"github.com/otavioCosta2110/k8s-tui/internal/types"
 )
 
 func DeleteResource(client Client, resourceType ResourceType, namespace, name string) error {

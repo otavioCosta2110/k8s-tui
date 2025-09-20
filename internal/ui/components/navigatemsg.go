@@ -1,7 +1,7 @@
 package components
 
 import (
-	"otaviocosta2110/k8s-tui/internal/k8s"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

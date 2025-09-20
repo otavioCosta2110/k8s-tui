@@ -2,9 +2,9 @@ package models
 
 import (
 	"fmt"
-	global "otaviocosta2110/k8s-tui/internal"
-	"otaviocosta2110/k8s-tui/internal/k8s"
-	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
+	global "github.com/otavioCosta2110/k8s-tui/internal"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s"
+	customstyles "github.com/otavioCosta2110/k8s-tui/internal/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"

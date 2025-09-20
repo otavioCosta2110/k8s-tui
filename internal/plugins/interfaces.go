@@ -1,8 +1,8 @@
 package plugins
 
 import (
-	"otaviocosta2110/k8s-tui/internal/k8s"
-	"otaviocosta2110/k8s-tui/internal/types"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s"
+	"github.com/otavioCosta2110/k8s-tui/internal/types"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"

@@ -1,8 +1,8 @@
 package models
 
 import (
-	global "otaviocosta2110/k8s-tui/internal"
-	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
+	global "github.com/otavioCosta2110/k8s-tui/internal"
+	customstyles "github.com/otavioCosta2110/k8s-tui/internal/ui/custom_styles"
 
 	"github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

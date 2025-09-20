@@ -23,7 +23,7 @@ Plugins implement one or more of the following interfaces:
 
 ### Plugin Loading
 
-Plugins are loaded from a configurable directory (default: `./plugins`) at application startup. Each plugin is a `.so` file that exports a `Plugin` variable.
+Plugins are loaded from a configurable directory (default: `~/.local/share/k8s-tui/plugins`) at application startup. The plugin directory can contain `.so` files directly or organized in subdirectories. Each plugin is a `.so` file that exports a `Plugin` variable.
 
 ## Creating a Plugin
 
@@ -146,19 +146,36 @@ go build -buildmode=plugin -o my-plugin.so main.go
 ### 4. Install and use
 
 ```bash
-# Copy to plugins directory
-mkdir -p ./plugins
-cp my-plugin.so ./plugins/
+# Copy to plugins directory (create subdirectory for organization)
+mkdir -p ~/.local/share/k8s-tui/plugins/my-plugin
+cp my-plugin.so ~/.local/share/k8s-tui/plugins/my-plugin/
 
-# Run k8s-tui with plugins
-./k8s-tui --plugin-dir ./plugins
+# Or copy directly to plugins directory
+mkdir -p ~/.local/share/k8s-tui/plugins
+cp my-plugin.so ~/.local/share/k8s-tui/plugins/
+
+# Run k8s-tui (uses default plugin directory)
+./k8s-tui
+
+# Or specify custom plugin directory
+./k8s-tui --plugin-dir ~/.local/share/k8s-tui/plugins
 ```
 
 ## Configuration
 
 ### Command Line Options
 
-- `--plugin-dir`: Directory containing plugin files (default: `./plugins`)
+- `--plugin-dir`: Directory containing plugin files (default: `~/.local/share/k8s-tui/plugins`)
+
+### Configuration File
+
+The plugin directory can also be configured in `~/.config/k8s-tui/config.json`:
+
+```json
+{
+  "plugin_dir": "~/.local/share/k8s-tui/plugins"
+}
+```
 
 ### Environment Variables
 
@@ -185,7 +202,7 @@ Test your plugins by:
 Enable debug logging to troubleshoot plugin issues:
 
 ```bash
-./k8s-tui --plugin-dir ./plugins 2>&1 | grep -i plugin
+./k8s-tui --plugin-dir ~/.local/share/k8s-tui/plugins 2>&1 | grep -i plugin
 ```
 
 ## Example Plugins

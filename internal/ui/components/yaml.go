@@ -1,8 +1,8 @@
 package components
 
 import (
-	global "otaviocosta2110/k8s-tui/internal"
-	"otaviocosta2110/k8s-tui/internal/ui/custom_styles"
+	global "github.com/otavioCosta2110/k8s-tui/internal"
+	"github.com/otavioCosta2110/k8s-tui/internal/ui/custom_styles"
 	"strings"
 	"time"
 

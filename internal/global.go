@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/otavioCosta2110/k8s-tui/internal/logger"
 )
 
 var Margin = 2
@@ -20,7 +22,7 @@ var IsTabBarActive = false
 var kubeconfigsDefaultLocation = func() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Println("Erro ao obter o diretório home:", err)
+		logger.Error(fmt.Sprintf("Erro ao obter o diretório home: %v", err))
 		return ""
 	}
 	return filepath.Join(home, ".kube")

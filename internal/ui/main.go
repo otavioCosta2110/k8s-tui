@@ -1,14 +1,14 @@
 package ui
 
 import (
-	global "otaviocosta2110/k8s-tui/internal"
-	"otaviocosta2110/k8s-tui/internal/config"
-	"otaviocosta2110/k8s-tui/internal/k8s"
-	"otaviocosta2110/k8s-tui/internal/plugins"
-	"otaviocosta2110/k8s-tui/internal/ui/cli"
-	"otaviocosta2110/k8s-tui/internal/ui/components"
-	customstyles "otaviocosta2110/k8s-tui/internal/ui/custom_styles"
-	"otaviocosta2110/k8s-tui/internal/ui/models"
+	global "github.com/otavioCosta2110/k8s-tui/internal"
+	"github.com/otavioCosta2110/k8s-tui/internal/config"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s"
+	"github.com/otavioCosta2110/k8s-tui/internal/plugins"
+	"github.com/otavioCosta2110/k8s-tui/internal/ui/cli"
+	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
+	customstyles "github.com/otavioCosta2110/k8s-tui/internal/ui/custom_styles"
+	"github.com/otavioCosta2110/k8s-tui/internal/ui/models"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
