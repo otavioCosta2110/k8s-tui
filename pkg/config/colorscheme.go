@@ -195,7 +195,6 @@ func LoadAppConfig() (AppConfig, error) {
 		loadedConfig.PluginDir = config.PluginDir
 	}
 
-	// Expand ~ to home directory
 	if strings.HasPrefix(loadedConfig.PluginDir, "~/") {
 		homeDir, err := os.UserHomeDir()
 		if err == nil {

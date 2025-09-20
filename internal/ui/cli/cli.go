@@ -14,7 +14,6 @@ type Config struct {
 func ParseFlags() Config {
 	var cfg Config
 
-	// Load app config to get default plugin directory
 	appConfig, err := config.LoadAppConfig()
 	defaultPluginDir := "./plugins"
 	if err == nil {

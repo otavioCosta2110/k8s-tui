@@ -19,8 +19,8 @@ const (
 
 const (
 	LogDir         = "./local/state/k8s-tui"
-	MaxLogFileSize = 10 * 1024 * 1024 // 10MB
-	MaxLogFiles    = 5                // Keep 5 rotated files
+	MaxLogFileSize = 10 * 1024 * 1024 
+	MaxLogFiles    = 5                
 )
 
 func (l Level) String() string {
@@ -48,13 +48,11 @@ type Logger struct {
 var defaultLogger *Logger
 
 func init() {
-	// Create log directory
 	if err := os.MkdirAll(LogDir, 0755); err != nil {
 		log.Printf("Failed to create log directory %s: %v", LogDir, err)
 		return
 	}
 
-	// Create log file with timestamp
 	timestamp := time.Now().Format("2006-01-02")
 	logFile := filepath.Join(LogDir, fmt.Sprintf("k8s-tui-%s.log", timestamp))
 
@@ -66,7 +64,7 @@ func init() {
 
 	defaultLogger = &Logger{
 		level:  LEVEL_DEBUG,
-		logger: log.New(file, "", 0), // No prefix, we'll add our own
+		logger: log.New(file, "", 0), 
 		file:   file,
 		logDir: LogDir,
 	}
@@ -83,7 +81,6 @@ func rotateLogFile() error {
 		return nil
 	}
 
-	// Check file size
 	stat, err := defaultLogger.file.Stat()
 	if err != nil {
 		return err
@@ -93,10 +90,8 @@ func rotateLogFile() error {
 		return nil
 	}
 
-	// Close current file
 	defaultLogger.file.Close()
 
-	// Rotate existing files
 	for i := MaxLogFiles - 1; i >= 1; i-- {
 		oldFile := filepath.Join(defaultLogger.logDir, fmt.Sprintf("k8s-tui-%s.log.%d", time.Now().Format("2006-01-02"), i))
 		newFile := filepath.Join(defaultLogger.logDir, fmt.Sprintf("k8s-tui-%s.log.%d", time.Now().Format("2006-01-02"), i+1))
@@ -106,12 +101,10 @@ func rotateLogFile() error {
 		}
 	}
 
-	// Move current file to .1
 	currentFile := filepath.Join(defaultLogger.logDir, fmt.Sprintf("k8s-tui-%s.log", time.Now().Format("2006-01-02")))
 	rotatedFile := filepath.Join(defaultLogger.logDir, fmt.Sprintf("k8s-tui-%s.log.1", time.Now().Format("2006-01-02")))
 	os.Rename(currentFile, rotatedFile)
 
-	// Create new log file
 	file, err := os.OpenFile(currentFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return err
@@ -128,9 +121,7 @@ func logMessage(level Level, message string) {
 		return
 	}
 
-	// Check if rotation is needed
 	if err := rotateLogFile(); err != nil {
-		// Log rotation error to stderr as fallback
 		log.Printf("Failed to rotate log file: %v", err)
 	}
 

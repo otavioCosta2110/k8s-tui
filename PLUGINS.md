@@ -23,17 +23,11 @@ Plugins implement one or more of the following interfaces:
 
 ### Plugin Loading
 
-Plugins are loaded from a configurable directory (default: `~/.local/share/k8s-tui/plugins`) at application startup. The plugin directory can contain `.so` files directly or organized in subdirectories. Each plugin is a `.so` file that exports a `Plugin` variable.
+Plugins are loaded from a configurable directory (default: `~/.local/share/k8s-tui/plugins`) at application startup. The plugin directory contains `.lua` script files that define plugin functions. These Lua scripts are loaded and executed at runtime, providing a flexible and dynamic plugin system.
 
 ## Creating a Plugin
 
-### 1. Set up your plugin project
-
-```bash
-mkdir my-k8s-plugin
-cd my-k8s-plugin
-go mod init my-k8s-plugin
-```
+Plugins are created using Lua scripting for maximum flexibility and ease of development.
 
 ### 2. Implement the plugin
 
@@ -137,22 +131,72 @@ func (m *MyResourceData) GetColumns() table.Row {
 }
 ```
 
-### 3. Build the plugin
+### 1. Create your Lua plugin file
 
 ```bash
-go build -buildmode=plugin -o my-plugin.so main.go
+touch my-plugin.lua
+```
+
+#### 2. Implement the plugin in Lua
+
+```lua
+-- Plugin metadata
+function Name()
+    return "my-lua-plugin"
+end
+
+function Version()
+    return "1.0.0"
+end
+
+function Description()
+    return "My custom Lua plugin"
+end
+
+-- Initialize the plugin
+function Initialize()
+    print("Plugin initialized")
+    return nil
+end
+
+-- Define custom resource types
+function GetResourceTypes()
+    return {
+        {
+            Name = "MyResources",
+            Type = "myresource",
+            Icon = "🔌",
+            Columns = {
+                {Title = "Name", Width = 20},
+                {Title = "Status", Width = 10},
+            },
+            RefreshIntervalSeconds = 30,
+            Namespaced = true,
+        }
+    }
+end
+
+-- Fetch resource data
+function GetResourceData(resourceType, namespace)
+    return {
+        {
+            Name = "example-resource",
+            Namespace = namespace,
+            Status = "Running",
+            Age = "5m",
+        }
+    }, nil
+end
+
+-- Other functions as needed...
 ```
 
 ### 4. Install and use
 
 ```bash
-# Copy to plugins directory (create subdirectory for organization)
-mkdir -p ~/.local/share/k8s-tui/plugins/my-plugin
-cp my-plugin.so ~/.local/share/k8s-tui/plugins/my-plugin/
-
-# Or copy directly to plugins directory
+# Copy the .lua file to plugins directory
 mkdir -p ~/.local/share/k8s-tui/plugins
-cp my-plugin.so ~/.local/share/k8s-tui/plugins/
+cp my-plugin.lua ~/.local/share/k8s-tui/plugins/
 
 # Run k8s-tui (uses default plugin directory)
 ./k8s-tui
@@ -207,7 +251,7 @@ Enable debug logging to troubleshoot plugin issues:
 
 ## Example Plugins
 
-See the `example-plugin/` directory for a complete working example that demonstrates:
+See the `example-plugin/` directory for a complete working example in `main.lua` that demonstrates:
 
 - Custom resource type definition
 - Data fetching and display

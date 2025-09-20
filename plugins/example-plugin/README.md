@@ -2,21 +2,13 @@
 
 This is an example plugin that demonstrates how to extend k8s-tui with custom resource types.
 
-## Building the Plugin
-
-To build this plugin as a shared library:
-
-```bash
-go build -buildmode=plugin -o example-plugin.so main.go
-```
-
 ## Installing the Plugin
 
-Copy the `example-plugin.so` file to the plugins directory:
+Copy the `main.lua` file to the plugins directory:
 
 ```bash
 mkdir -p ./plugins
-cp example-plugin.so ./plugins/
+cp main.lua ./plugins/
 ```
 
 ## Running k8s-tui with the Plugin
@@ -38,24 +30,69 @@ This example plugin provides:
 
 ## Developing Custom Plugins
 
-To create your own plugin:
+To create a Lua plugin:
 
-1. Implement the `plugins.Plugin` interface
-2. For resource plugins, implement `plugins.ResourcePlugin`
-3. For UI extensions, implement `plugins.UIPlugin`
-4. Export your plugin instance as `var Plugin YourPluginType`
-5. Build with `-buildmode=plugin`
+1. Define required functions: `Name()`, `Version()`, `Description()`, `Initialize()`
+2. For resource plugins, define: `GetResourceTypes()`, `GetResourceData()`, etc.
+3. For UI extensions, define: `GetUIExtensions()`
+4. Save as `.lua` file
 
-## Plugin Interface
+## Plugin Functions
 
-```go
-type ResourcePlugin interface {
-    Plugin
-    GetResourceTypes() []CustomResourceType
-    GetResourceData(client k8s.Client, resourceType string, namespace string) ([]types.ResourceData, error)
-    DeleteResource(client k8s.Client, resourceType string, namespace string, name string) error
-    GetResourceInfo(client k8s.Client, resourceType string, namespace string, name string) (*k8s.ResourceInfo, error)
-}
+```lua
+-- Required functions
+function Name() return "my-plugin" end
+function Version() return "1.0.0" end
+function Description() return "My custom plugin" end
+function Initialize() return nil end  -- Return nil for success, string for error
+function Shutdown() return nil end    -- Optional cleanup function
+
+-- Resource plugin functions
+function GetResourceTypes()
+    return {
+        {
+            Name = "MyResources",
+            Type = "myresource",
+            Icon = "🔌",
+            Columns = {
+                {Title = "Name", Width = 20},
+                {Title = "Status", Width = 10},
+            },
+            RefreshIntervalSeconds = 30,
+            Namespaced = true,
+        }
+    }
+end
+
+function GetResourceData(resourceType, namespace)
+    return {
+        {
+            Name = "example-resource",
+            Namespace = namespace,
+            Status = "Running",
+            Age = "5m",
+        }
+    }, nil  -- Return data table and error (nil for success)
+end
+
+function DeleteResource(resourceType, namespace, name)
+    -- Implement delete logic
+    return nil  -- Return nil for success, string for error
+end
+
+function GetResourceInfo(resourceType, namespace, name)
+    return {
+        Name = name,
+        Namespace = namespace,
+        Kind = resourceType,
+        Age = "5m",
+    }, nil
+end
+
+-- UI extension functions (optional)
+function GetUIExtensions()
+    return {}  -- Return empty table if no extensions
+end
 ```
 
 ## Custom Resource Type Definition
@@ -71,4 +108,4 @@ type CustomResourceType struct {
 }
 ```
 
-This plugin system allows you to extend k8s-tui with custom Kubernetes resources, third-party CRDs, or any other data sources you want to monitor and manage through the TUI interface.
+This plugin system allows you to extend k8s-tui with custom Kubernetes resources, third-party CRDs, or any other data sources you want to monitor and manage through the TUI interface. Lua plugins provide maximum flexibility with easy development and runtime modification capabilities.

@@ -150,11 +150,9 @@ func (rf *ResourceFactory) registerResource(resourceType string, creator Resourc
 func (rf *ResourceFactory) CreateResource(resourceType string, k k8s.Client, namespace string) (tea.Model, error) {
 	creator, exists := rf.registry[resourceType]
 	if !exists {
-		// Check if this is a custom resource type from plugins
 		if pm := plugins.GetGlobalPluginManager(); pm != nil {
 			for _, rt := range pm.GetRegistry().GetCustomResourceTypes() {
 				if rt.Name == resourceType {
-					// Create a custom resource model for plugin resources
 					return NewCustomResourceModel(k, namespace, rt.Type)
 				}
 			}
@@ -181,7 +179,6 @@ func (rf *ResourceFactory) GetValidResourceTypes() []string {
 	validTypes := make([]string, len(rf.validTypes))
 	copy(validTypes, rf.validTypes)
 
-	// Add custom resource types from plugins
 	if pm := plugins.GetGlobalPluginManager(); pm != nil {
 		for _, rt := range pm.GetRegistry().GetCustomResourceTypes() {
 			logger.Info(fmt.Sprintf("Loading custom resource type: %s", rt.Name))

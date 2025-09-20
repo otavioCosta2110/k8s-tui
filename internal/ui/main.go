@@ -89,7 +89,6 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 	return appModel
 }
 
-// ParseFlags parses command line flags and returns the configuration
 func ParseFlags() cli.Config {
 	return cli.ParseFlags()
 }

@@ -2,11 +2,11 @@ package models
 
 import (
 	"fmt"
+	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
+	ui "github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
-	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
-	ui "github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -22,7 +22,6 @@ func NewCustomResourceModel(k k8s.Client, namespace string, resourceType string)
 	logger.Debug("=== Creating Custom Resource Model ===")
 	logger.Debug(fmt.Sprintf("Resource type: %s, Namespace: %s", resourceType, namespace))
 
-	// Get custom resource type info from plugins
 	var customRT plugins.CustomResourceType
 	if pm := plugins.GetGlobalPluginManager(); pm != nil {
 		logger.Debug(fmt.Sprintf("Plugin manager available, checking %d custom resource types", len(pm.GetRegistry().GetCustomResourceTypes())))
@@ -36,7 +35,6 @@ func NewCustomResourceModel(k k8s.Client, namespace string, resourceType string)
 		}
 	}
 
-	// Calculate column widths dynamically based on number of columns
 	numColumns := len(customRT.Columns)
 	logger.Debug("Number of columns: " + fmt.Sprintf("%d", numColumns))
 	var columnWidths []float64
@@ -47,14 +45,22 @@ func NewCustomResourceModel(k k8s.Client, namespace string, resourceType string)
 		width := 1.0 / float64(numColumns)
 		columnWidths = make([]float64, numColumns)
 		for i := range columnWidths {
-			columnWidths[i] = width - 0.01 // Slightly reduce to avoid overflow
+			columnWidths[i] = width - 0.01 
 		}
 		logger.Debug(fmt.Sprintf("Calculated %d column widths: %v", numColumns, columnWidths))
 	}
 
+	icon := customRT.Icon
+	if icon == "" {
+		icon = customstyles.ResourceIcons["ResourceList"]
+		logger.Debug(fmt.Sprintf("Using fallback icon for custom resource %s: %s", customRT.Name, icon))
+	} else {
+		logger.Debug(fmt.Sprintf("Using plugin-defined icon for custom resource %s: %s", customRT.Name, icon))
+	}
+
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceType(resourceType),
-		Title:           customstyles.ResourceIcons["ResourceList"] + " " + customRT.Name + " in " + namespace,
+		Title:           icon + " " + customRT.Name + " in " + namespace,
 		ColumnWidths:    columnWidths,
 		RefreshInterval: customRT.RefreshInterval,
 		Columns:         customRT.Columns,
@@ -78,7 +84,6 @@ func NewCustomResourceModel(k k8s.Client, namespace string, resourceType string)
 
 	onSelect := func(selected string) tea.Msg {
 		logger.Debug(fmt.Sprintf("Custom resource item selected: %s", selected))
-		// For now, just show an error that details view is not implemented
 		return components.NavigateMsg{
 			Error:   fmt.Errorf("Custom resource details view not yet implemented"),
 			Cluster: k,

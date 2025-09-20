@@ -9,7 +9,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// Plugin defines the interface that all plugins must implement
 type Plugin interface {
 	// Name returns the unique name of the plugin
 	Name() string
@@ -122,7 +121,6 @@ func (pr *PluginRegistry) GetUIPlugins() []UIPlugin {
 	return pr.uiPlugins
 }
 
-// GetCustomResourceTypes returns all custom resource types from all plugins
 func (pr *PluginRegistry) GetCustomResourceTypes() []CustomResourceType {
 	var types []CustomResourceType
 	for _, plugin := range pr.resourcePlugins {

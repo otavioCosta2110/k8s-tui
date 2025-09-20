@@ -18,7 +18,6 @@ func main() {
 	cfg := ui.ParseFlags()
 	logger.Debug(fmt.Sprintf("Parsed flags: namespace=%s, kubeconfig=%s, pluginDir=%s", cfg.Namespace, cfg.KubeconfigPath, cfg.PluginDir))
 
-	// Initialize plugin manager
 	logger.Debug("Creating plugin manager")
 	pluginManager := plugins.NewPluginManager(cfg.PluginDir)
 	logger.Debug("Plugin manager created")
@@ -29,11 +28,9 @@ func main() {
 		logger.Info("Plugins loaded successfully")
 	}
 
-	// Set global plugin manager
 	plugins.SetGlobalPluginManager(pluginManager)
 	logger.Debug("Global plugin manager set")
 
-	// Set up custom resource handlers
 	logger.Debug("Setting up custom resource handlers")
 	k8s.SetCustomResourceHandlers(
 		pluginManager.GetCustomResourceData,
@@ -67,7 +64,6 @@ func main() {
 			logger.Error(fmt.Sprintf("Panic recovered: %v", r))
 			debug.PrintStack()
 		}
-		// Shutdown plugins
 		if err := pluginManager.Shutdown(); err != nil {
 			logger.Error(fmt.Sprintf("Plugin shutdown error: %v", err))
 		}

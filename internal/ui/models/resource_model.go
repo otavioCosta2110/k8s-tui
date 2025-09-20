@@ -12,8 +12,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// ResourceData interface is now defined in the types package
-
 type ResourceConfig struct {
 	ResourceType    k8s.ResourceType
 	Title           string
