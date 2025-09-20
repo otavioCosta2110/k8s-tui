@@ -1,4 +1,4 @@
 main
-log*
+*.log
 *.so
 k8s-tui
