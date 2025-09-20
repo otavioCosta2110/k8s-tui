@@ -238,15 +238,15 @@ func TestAutoRefreshModelWithTableModel(t *testing.T) {
 
 func TestAutoRefreshModelTimerScheduling(t *testing.T) {
 	mockInner := &MockRefreshableModel{}
-	model := NewAutoRefreshModel(mockInner, 10*time.Millisecond, nil, "")
+	model := NewAutoRefreshModel(mockInner, 1*time.Second, nil, "")
 
 	initCmd := model.Init()
 	if initCmd == nil {
 		t.Error("Init should return a command")
 	}
 
-	if model.refreshInterval != 10*time.Millisecond {
-		t.Errorf("Expected refresh interval to be 10ms, got %v", model.refreshInterval)
+	if model.refreshInterval != 1*time.Second {
+		t.Errorf("Expected refresh interval to be 1s, got %v", model.refreshInterval)
 	}
 
 	if model.inner != mockInner {

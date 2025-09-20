@@ -21,7 +21,7 @@ func NewPods(k k8s.Client, namespace string, selector ...string) (*podsModel, er
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypePod,
 		Title:           customstyles.ResourceIcons["Pods"] + " Pods in " + namespace,
-		ColumnWidths:    []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.13},
+		ColumnWidths:    []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.15},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),

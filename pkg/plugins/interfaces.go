@@ -26,10 +26,6 @@ type Plugin interface {
 	Shutdown() error
 }
 
-// Legacy plugin interfaces - DEPRECATED
-// These will be removed in a future version. Use NeovimStylePlugin instead.
-
-// ResourcePlugin defines the interface for plugins that provide custom resources
 type ResourcePlugin interface {
 	Plugin
 
@@ -46,7 +42,6 @@ type ResourcePlugin interface {
 	GetResourceInfo(client k8s.Client, resourceType string, namespace string, name string) (*k8s.ResourceInfo, error)
 }
 
-// UIPlugin defines the interface for plugins that extend the UI
 type UIPlugin interface {
 	Plugin
 
@@ -54,7 +49,6 @@ type UIPlugin interface {
 	GetUIExtensions() []UIExtension
 }
 
-// CustomResourceType defines a custom resource type provided by a plugin
 type CustomResourceType struct {
 	// Name is the display name of the resource type
 	Name string
@@ -84,7 +78,6 @@ type CustomResourceType struct {
 	Description string
 }
 
-// DisplayComponent defines how plugin data should be rendered
 type DisplayComponent struct {
 	// Type is the component type (table, yaml, text, chart, gauge, etc.)
 	Type string
@@ -96,7 +89,6 @@ type DisplayComponent struct {
 	Style ComponentStyle
 }
 
-// ComponentStyle defines styling for display components
 type ComponentStyle struct {
 	// Width in characters (0 = auto)
 	Width int
@@ -113,7 +105,6 @@ type ComponentStyle struct {
 	BorderColor     string
 }
 
-// UIInjectionPoint defines where in the UI a plugin can inject content
 type UIInjectionPoint struct {
 	// Location where to inject (header, footer, sidebar, status_bar, notifications)
 	Location string
@@ -134,7 +125,6 @@ type UIInjectionPoint struct {
 	UpdateInterval int
 }
 
-// Interaction defines user interactions available for plugin content
 type Interaction struct {
 	// Type of interaction (button, menu, keybinding, hover)
 	Type string
@@ -158,7 +148,6 @@ type Interaction struct {
 	Tooltip string
 }
 
-// UIExtension defines a UI extension provided by a plugin
 type UIExtension struct {
 	// Name is the name of the extension
 	Name string
@@ -182,13 +171,11 @@ type UIExtension struct {
 	Dependencies []string
 }
 
-// PluginRegistry manages loaded plugins
 type PluginRegistry struct {
 	resourcePlugins []ResourcePlugin
 	uiPlugins       []UIPlugin
 }
 
-// NewPluginRegistry creates a new plugin registry
 func NewPluginRegistry() *PluginRegistry {
 	return &PluginRegistry{
 		resourcePlugins: make([]ResourcePlugin, 0),
@@ -196,22 +183,18 @@ func NewPluginRegistry() *PluginRegistry {
 	}
 }
 
-// RegisterResourcePlugin registers a resource plugin
 func (pr *PluginRegistry) RegisterResourcePlugin(plugin ResourcePlugin) {
 	pr.resourcePlugins = append(pr.resourcePlugins, plugin)
 }
 
-// RegisterUIPlugin registers a UI plugin
 func (pr *PluginRegistry) RegisterUIPlugin(plugin UIPlugin) {
 	pr.uiPlugins = append(pr.uiPlugins, plugin)
 }
 
-// GetResourcePlugins returns all registered resource plugins
 func (pr *PluginRegistry) GetResourcePlugins() []ResourcePlugin {
 	return pr.resourcePlugins
 }
 
-// GetUIPlugins returns all registered UI plugins
 func (pr *PluginRegistry) GetUIPlugins() []UIPlugin {
 	return pr.uiPlugins
 }
@@ -224,8 +207,7 @@ func (pr *PluginRegistry) GetCustomResourceTypes() []CustomResourceType {
 	return types
 }
 
-// NeovimStylePlugin defines a plugin that follows Neovim-style architecture
-type NeovimStylePlugin interface {
+type PluginmanagerStylePlugin interface {
 	Plugin
 
 	// Setup is called to configure the plugin with user options
@@ -241,20 +223,17 @@ type NeovimStylePlugin interface {
 	Hooks() []PluginHook
 }
 
-// PluginCommand represents a command that a plugin provides
 type PluginCommand struct {
 	Name        string
 	Description string
 	Handler     func(args []string) (string, error)
 }
 
-// PluginHook represents a hook that a plugin can register for
 type PluginHook struct {
 	Event   string
 	Handler func(data interface{}) error
 }
 
-// PluginEvent represents events that can be triggered in the application
 type PluginEvent string
 
 const (
@@ -265,7 +244,6 @@ const (
 	EventUIUpdate         PluginEvent = "ui_update"
 )
 
-// PluginAPI provides methods for plugins to interact with the application
 type PluginAPI interface {
 	// GetCurrentNamespace returns the current namespace
 	GetCurrentNamespace() string
@@ -290,4 +268,10 @@ type PluginAPI interface {
 
 	// SetConfig sets a configuration value
 	SetConfig(key string, value interface{})
+
+	// GetClient gets the Kubernetes client
+	GetClient() k8s.Client
+
+	// SetClient sets the Kubernetes client
+	SetClient(client k8s.Client)
 }

@@ -1,39 +1,39 @@
 package plugins
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/otavioCosta2110/k8s-tui/pkg/format"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/types"
 	"github.com/yuin/gopher-lua"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// PluginManager manages the loading and lifecycle of plugins
 type PluginManager struct {
-	registry      *PluginRegistry
-	pluginDir     string
-	luaStates     map[string]*lua.LState
-	api           *PluginAPIImpl
-	neovimPlugins []NeovimStylePlugin
+	registry             *PluginRegistry
+	pluginDir            string
+	luaStates            map[string]*lua.LState
+	api                  *PluginAPIImpl
+	pluginmanagerPlugins []PluginmanagerStylePlugin
 }
 
-// NewPluginManager creates a new plugin manager
 func NewPluginManager(pluginDir string) *PluginManager {
 	api := NewPluginAPI()
 	return &PluginManager{
-		registry:      NewPluginRegistry(),
-		pluginDir:     pluginDir,
-		luaStates:     make(map[string]*lua.LState),
-		api:           api,
-		neovimPlugins: make([]NeovimStylePlugin, 0),
+		registry:             NewPluginRegistry(),
+		pluginDir:            pluginDir,
+		luaStates:            make(map[string]*lua.LState),
+		api:                  api,
+		pluginmanagerPlugins: make([]PluginmanagerStylePlugin, 0),
 	}
 }
 
-// LoadPlugins loads all plugins from the plugin directory
 func (pm *PluginManager) LoadPlugins() error {
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Starting plugin loading from directory: %s", pm.pluginDir))
 
@@ -92,7 +92,6 @@ func (pm *PluginManager) LoadPlugins() error {
 	return nil
 }
 
-// loadLuaPlugin loads a single plugin from a .lua file
 func (pm *PluginManager) loadLuaPlugin(path string) error {
 	pluginName := strings.TrimSuffix(filepath.Base(path), ".lua")
 
@@ -150,8 +149,8 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 
 	// For Neovim-style plugins, set up the k8s_tui API before initialization
 	if isNeovimStyle {
-		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected Neovim-style plugin: %s", pluginName))
-		logger.Info("🔌 Plugin Manager: Setting up k8s_tui API for Neovim-style plugin")
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: %s", pluginName))
+		logger.Info("🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin")
 
 		// Create API table
 		apiTable := L.NewTable()
@@ -199,6 +198,665 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			pm.api.RegisterCommand(command.Name, command.Description, command.Handler)
 			return 0
 		}))
+		// Kubernetes resource API functions
+		L.SetField(apiTable, "get_pods", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			pods, err := k8s.FetchPods(client, namespace, "")
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch pods: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, pod := range pods {
+				podTable := L.NewTable()
+				L.SetField(podTable, "Name", lua.LString(pod.Name))
+				L.SetField(podTable, "Namespace", lua.LString(pod.Namespace))
+				L.SetField(podTable, "Ready", lua.LString(pod.Ready))
+				L.SetField(podTable, "Status", lua.LString(pod.Status))
+				L.SetField(podTable, "Restarts", lua.LNumber(pod.Restarts))
+				L.SetField(podTable, "Age", lua.LString(pod.Age))
+				L.RawSetInt(resultTable, i+1, podTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_services", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			services, err := k8s.GetServicesTableData(client, namespace)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch services: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, svc := range services {
+				svcTable := L.NewTable()
+				L.SetField(svcTable, "Name", lua.LString(svc.Name))
+				L.SetField(svcTable, "Namespace", lua.LString(svc.Namespace))
+				L.SetField(svcTable, "Type", lua.LString(svc.Type))
+				L.SetField(svcTable, "ClusterIP", lua.LString(svc.ClusterIP))
+				L.SetField(svcTable, "ExternalIP", lua.LString(svc.ExternalIP))
+				L.SetField(svcTable, "Ports", lua.LString(svc.Ports))
+				L.SetField(svcTable, "Age", lua.LString(svc.Age))
+				L.RawSetInt(resultTable, i+1, svcTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_deployments", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			deployments, err := k8s.GetDeploymentsTableData(client, namespace)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch deployments: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, dep := range deployments {
+				depTable := L.NewTable()
+				L.SetField(depTable, "Name", lua.LString(dep.Name))
+				L.SetField(depTable, "Namespace", lua.LString(dep.Namespace))
+				L.SetField(depTable, "Ready", lua.LString(dep.Ready))
+				L.SetField(depTable, "UpToDate", lua.LString(dep.UpToDate))
+				L.SetField(depTable, "Available", lua.LString(dep.Available))
+				L.SetField(depTable, "Age", lua.LString(dep.Age))
+				L.RawSetInt(resultTable, i+1, depTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_configmaps", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			configmaps, err := k8s.FetchConfigmaps(client, namespace, "")
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch configmaps: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, cm := range configmaps {
+				cmTable := L.NewTable()
+				L.SetField(cmTable, "Name", lua.LString(cm.Name))
+				L.SetField(cmTable, "Namespace", lua.LString(cm.Namespace))
+				L.SetField(cmTable, "Data", lua.LNumber(len(cm.Data)))
+				L.SetField(cmTable, "Age", lua.LString(cm.Age))
+				L.RawSetInt(resultTable, i+1, cmTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_secrets", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			secrets, err := k8s.GetSecretsTableData(client, namespace)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch secrets: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, secret := range secrets {
+				secretTable := L.NewTable()
+				L.SetField(secretTable, "Name", lua.LString(secret.Name))
+				L.SetField(secretTable, "Namespace", lua.LString(secret.Namespace))
+				L.SetField(secretTable, "Type", lua.LString(secret.Type))
+				L.SetField(secretTable, "Data", lua.LNumber(len(secret.Data)))
+				L.SetField(secretTable, "Age", lua.LString(secret.Age))
+				L.RawSetInt(resultTable, i+1, secretTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_ingresses", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			ingresses, err := k8s.GetIngressesTableData(client, namespace)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch ingresses: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, ing := range ingresses {
+				ingTable := L.NewTable()
+				L.SetField(ingTable, "Name", lua.LString(ing.Name))
+				L.SetField(ingTable, "Namespace", lua.LString(ing.Namespace))
+				L.SetField(ingTable, "Class", lua.LString(ing.Class))
+				L.SetField(ingTable, "Hosts", lua.LString(ing.Hosts))
+				L.SetField(ingTable, "Address", lua.LString(ing.Address))
+				L.SetField(ingTable, "Ports", lua.LString(ing.Ports))
+				L.SetField(ingTable, "Age", lua.LString(ing.Age))
+				L.RawSetInt(resultTable, i+1, ingTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_jobs", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			jobs, err := k8s.GetJobsTableData(client, namespace)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch jobs: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, job := range jobs {
+				jobTable := L.NewTable()
+				L.SetField(jobTable, "Name", lua.LString(job.Name))
+				L.SetField(jobTable, "Namespace", lua.LString(job.Namespace))
+				L.SetField(jobTable, "Completions", lua.LString(job.Completions))
+				L.SetField(jobTable, "Duration", lua.LString(job.Duration))
+				L.SetField(jobTable, "Age", lua.LString(job.Age))
+				L.RawSetInt(resultTable, i+1, jobTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_cronjobs", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			cronjobs, err := k8s.GetCronJobsTableData(client, namespace)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch cronjobs: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, cj := range cronjobs {
+				cjTable := L.NewTable()
+				L.SetField(cjTable, "Name", lua.LString(cj.Name))
+				L.SetField(cjTable, "Namespace", lua.LString(cj.Namespace))
+				L.SetField(cjTable, "Schedule", lua.LString(cj.Schedule))
+				L.SetField(cjTable, "Suspend", lua.LString(cj.Suspend))
+				L.SetField(cjTable, "Active", lua.LString(cj.Active))
+				L.SetField(cjTable, "LastSchedule", lua.LString(cj.LastSchedule))
+				L.SetField(cjTable, "Age", lua.LString(cj.Age))
+				L.RawSetInt(resultTable, i+1, cjTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_daemonsets", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			daemonsets, err := k8s.GetDaemonSetsTableData(client, namespace)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch daemonsets: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, ds := range daemonsets {
+				dsTable := L.NewTable()
+				L.SetField(dsTable, "Name", lua.LString(ds.Name))
+				L.SetField(dsTable, "Namespace", lua.LString(ds.Namespace))
+				L.SetField(dsTable, "Desired", lua.LString(ds.Desired))
+				L.SetField(dsTable, "Current", lua.LString(ds.Current))
+				L.SetField(dsTable, "Ready", lua.LString(ds.Ready))
+				L.SetField(dsTable, "UpToDate", lua.LString(ds.UpToDate))
+				L.SetField(dsTable, "Available", lua.LString(ds.Available))
+				L.SetField(dsTable, "Age", lua.LString(ds.Age))
+				L.RawSetInt(resultTable, i+1, dsTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_statefulsets", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			statefulsets, err := k8s.GetStatefulSetsTableData(client, namespace)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch statefulsets: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, sts := range statefulsets {
+				stsTable := L.NewTable()
+				L.SetField(stsTable, "Name", lua.LString(sts.Name))
+				L.SetField(stsTable, "Namespace", lua.LString(sts.Namespace))
+				L.SetField(stsTable, "Ready", lua.LString(sts.Ready))
+				L.SetField(stsTable, "Age", lua.LString(sts.Age))
+				L.RawSetInt(resultTable, i+1, stsTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_replicasets", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			replicasets, err := k8s.GetReplicaSetsTableData(client, namespace)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch replicasets: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, rs := range replicasets {
+				rsTable := L.NewTable()
+				L.SetField(rsTable, "Name", lua.LString(rs.Name))
+				L.SetField(rsTable, "Namespace", lua.LString(rs.Namespace))
+				L.SetField(rsTable, "Desired", lua.LString(rs.Desired))
+				L.SetField(rsTable, "Current", lua.LString(rs.Current))
+				L.SetField(rsTable, "Ready", lua.LString(rs.Ready))
+				L.SetField(rsTable, "Age", lua.LString(rs.Age))
+				L.RawSetInt(resultTable, i+1, rsTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_nodes", L.NewFunction(func(L *lua.LState) int {
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			nodes, err := k8s.GetNodesTableData(client)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch nodes: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, node := range nodes {
+				nodeTable := L.NewTable()
+				L.SetField(nodeTable, "Name", lua.LString(node.Name))
+				L.SetField(nodeTable, "Status", lua.LString(node.Status))
+				L.SetField(nodeTable, "Roles", lua.LString(node.Roles))
+				L.SetField(nodeTable, "Age", lua.LString(node.Age))
+				L.SetField(nodeTable, "Version", lua.LString(node.Version))
+				L.RawSetInt(resultTable, i+1, nodeTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_namespaces", L.NewFunction(func(L *lua.LState) int {
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			namespaces, err := k8s.FetchNamespaces(client)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch namespaces: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, ns := range namespaces {
+				L.RawSetInt(resultTable, i+1, lua.LString(ns))
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		L.SetField(apiTable, "get_serviceaccounts", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			serviceaccounts, err := k8s.GetServiceAccountsTableData(client, namespace)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch serviceaccounts: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, sa := range serviceaccounts {
+				saTable := L.NewTable()
+				L.SetField(saTable, "Name", lua.LString(sa.Name))
+				L.SetField(saTable, "Namespace", lua.LString(sa.Namespace))
+				L.SetField(saTable, "Secrets", lua.LString(sa.Secrets))
+				L.SetField(saTable, "Age", lua.LString(sa.Age))
+				L.RawSetInt(resultTable, i+1, saTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
+		// Delete functions
+		L.SetField(apiTable, "delete_pod", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeletePod(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete pod: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		L.SetField(apiTable, "delete_service", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeleteService(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete service: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		L.SetField(apiTable, "delete_deployment", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeleteDeployment(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete deployment: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		L.SetField(apiTable, "delete_configmap", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeleteConfigmap(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete configmap: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		L.SetField(apiTable, "delete_secret", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeleteSecret(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete secret: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		L.SetField(apiTable, "delete_ingress", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeleteIngress(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete ingress: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		L.SetField(apiTable, "delete_job", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeleteJob(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete job: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		L.SetField(apiTable, "delete_cronjob", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeleteCronJob(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete cronjob: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		L.SetField(apiTable, "delete_daemonset", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeleteDaemonSet(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete daemonset: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		L.SetField(apiTable, "delete_statefulset", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeleteStatefulSet(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete statefulset: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		L.SetField(apiTable, "delete_replicaset", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeleteReplicaSet(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete replicaset: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		L.SetField(apiTable, "delete_serviceaccount", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			name := L.CheckString(2)
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+			err := k8s.DeleteServiceAccount(client, namespace, name)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to delete serviceaccount: %v", err)))
+				return 1
+			}
+			L.Push(lua.LString("ok"))
+			return 1
+		}))
+
+		// Keep the existing get_endpoints function
+		L.SetField(apiTable, "get_endpoints", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+
+			// Get the current client from the API
+			client := pm.api.GetClient()
+			if client.Clientset == nil {
+				L.Push(lua.LString("no kubernetes client available"))
+				return 1
+			}
+
+			// Fetch endpoint slices data using the modern discovery.k8s.io/v1 API
+			endpointSlices, err := client.Clientset.DiscoveryV1().EndpointSlices(namespace).List(context.Background(), metav1.ListOptions{})
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to fetch endpoint slices: %v", err)))
+				return 1
+			}
+
+			// Convert to Lua table
+			resultTable := L.NewTable()
+			for i, endpointSlice := range endpointSlices.Items {
+				// Format addresses
+				var addresses []string
+				for _, endpoint := range endpointSlice.Endpoints {
+					for _, addr := range endpoint.Addresses {
+						if addr != "" {
+							// Check if endpoint is ready
+							isReady := true
+							if endpoint.Conditions.Ready != nil {
+								isReady = *endpoint.Conditions.Ready
+							}
+							if !isReady {
+								addresses = append(addresses, addr+" (not ready)")
+							} else {
+								addresses = append(addresses, addr)
+							}
+						}
+					}
+				}
+				addressesStr := strings.Join(addresses, ", ")
+				if addressesStr == "" {
+					addressesStr = "<none>"
+				}
+
+				// Format ports
+				var ports []string
+				for _, port := range endpointSlice.Ports {
+					if port.Port != nil {
+						portStr := fmt.Sprintf("%d/%s", *port.Port, string(*port.Protocol))
+						if port.Name != nil && *port.Name != "" {
+							portStr = *port.Name + ":" + portStr
+						}
+						ports = append(ports, portStr)
+					}
+				}
+				portsStr := strings.Join(ports, ", ")
+				if portsStr == "" {
+					portsStr = "<none>"
+				}
+
+				// Get associated service name from labels
+				serviceName := "unknown"
+				if endpointSlice.Labels != nil {
+					if svcName, ok := endpointSlice.Labels["kubernetes.io/service-name"]; ok {
+						serviceName = svcName
+					}
+				}
+
+				// Calculate age
+				age := "Unknown"
+				if !endpointSlice.CreationTimestamp.IsZero() {
+					age = format.FormatAge(endpointSlice.CreationTimestamp.Time)
+				}
+
+				endpointTable := L.NewTable()
+				L.SetField(endpointTable, "Name", lua.LString(endpointSlice.Name))
+				L.SetField(endpointTable, "Namespace", lua.LString(endpointSlice.Namespace))
+				L.SetField(endpointTable, "Addresses", lua.LString(addressesStr))
+				L.SetField(endpointTable, "Ports", lua.LString(portsStr))
+				L.SetField(endpointTable, "Service", lua.LString(serviceName))
+				L.SetField(endpointTable, "Age", lua.LString(age))
+
+				L.RawSetInt(resultTable, i+1, endpointTable)
+			}
+
+			L.Push(resultTable)
+			return 1
+		}))
 
 		// Set the API in the global environment
 		L.SetGlobal("k8s_tui", apiTable)
@@ -232,33 +890,33 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		pluginName, setupType, configType, commandsType, hooksType))
 
 	if isNeovimStyle {
-		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected Neovim-style plugin: %s", pluginDisplayName))
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: %s", pluginDisplayName))
 
 		// Create Neovim-style plugin wrapper
-		neovimPlugin := NewNeovimStyleLuaPlugin(L, pluginName, pm.api)
+		pluginmanagerPlugin := NewPluginmanagerStyleLuaPlugin(L, pluginName, pm.api)
 
 		// Setup the plugin with default config
-		defaultConfig := neovimPlugin.Config()
-		if err := neovimPlugin.Setup(defaultConfig); err != nil {
+		defaultConfig := pluginmanagerPlugin.Config()
+		if err := pluginmanagerPlugin.Setup(defaultConfig); err != nil {
 			logger.Error(fmt.Sprintf("🔌 Plugin Manager: Failed to setup Neovim-style plugin %s: %v", pluginDisplayName, err))
 			L.Close()
 			return fmt.Errorf("failed to setup Neovim-style plugin: %v", err)
 		}
 
 		// Register commands
-		commands := neovimPlugin.Commands()
+		commands := pluginmanagerPlugin.Commands()
 		for _, cmd := range commands {
 			pm.api.RegisterCommand(cmd.Name, cmd.Description, cmd.Handler)
 		}
 
 		// Register hooks
-		hooks := neovimPlugin.Hooks()
+		hooks := pluginmanagerPlugin.Hooks()
 		for _, hook := range hooks {
 			pm.api.RegisterEventHandler(PluginEvent(hook.Event), hook.Handler)
 		}
 
-		pm.neovimPlugins = append(pm.neovimPlugins, neovimPlugin)
-		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Registered Neovim-style plugin: %s v%s", pluginDisplayName, pluginVersion))
+		pm.pluginmanagerPlugins = append(pm.pluginmanagerPlugins, pluginmanagerPlugin)
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: %s v%s", pluginDisplayName, pluginVersion))
 
 		// Also register as legacy plugin for backward compatibility
 		hasResourcePlugin := luaPlugin.hasResourcePlugin()
@@ -275,7 +933,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		}
 	} else {
 		// Handle legacy plugins (deprecated)
-		logger.Warn(fmt.Sprintf("🔌 Plugin Manager: ⚠️  Legacy plugin detected: %s - Consider migrating to Neovim-style", pluginDisplayName))
+		logger.Warn(fmt.Sprintf("🔌 Plugin Manager: ⚠️  Legacy plugin detected: %s - Consider migrating to pluginmanager-style", pluginDisplayName))
 
 		// Check plugin capabilities
 		hasResourcePlugin := luaPlugin.hasResourcePlugin()
@@ -309,28 +967,26 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 	return nil
 }
 
-// GetRegistry returns the plugin registry
 func (pm *PluginManager) GetRegistry() *PluginRegistry {
 	return pm.registry
 }
 
-// GetAPI returns the plugin API
 func (pm *PluginManager) GetAPI() *PluginAPIImpl {
 	return pm.api
 }
 
-// GetNeovimPlugins returns all loaded Neovim-style plugins
-func (pm *PluginManager) GetNeovimPlugins() []NeovimStylePlugin {
-	return pm.neovimPlugins
+func (pm *PluginManager) GetPluginmanagerPlugins() []PluginmanagerStylePlugin {
+	return pm.pluginmanagerPlugins
 }
 
-// TriggerEvent triggers an event for all registered plugins
 func (pm *PluginManager) TriggerEvent(event PluginEvent, data interface{}) {
 	pm.api.TriggerEvent(event, data)
 }
 
-// GetCustomResourceData fetches data for a custom resource type from plugins
 func (pm *PluginManager) GetCustomResourceData(client k8s.Client, resourceType string, namespace string) ([]types.ResourceData, error) {
+	// Set the client on the API so plugins can access it
+	pm.api.SetClient(client)
+
 	for _, plugin := range pm.registry.resourcePlugins {
 		for _, rt := range plugin.GetResourceTypes() {
 			if rt.Type == resourceType {
@@ -341,7 +997,6 @@ func (pm *PluginManager) GetCustomResourceData(client k8s.Client, resourceType s
 	return nil, fmt.Errorf("custom resource type %s not found", resourceType)
 }
 
-// DeleteCustomResource deletes a custom resource using the appropriate plugin
 func (pm *PluginManager) DeleteCustomResource(client k8s.Client, resourceType string, namespace string, name string) error {
 	for _, plugin := range pm.registry.resourcePlugins {
 		for _, rt := range plugin.GetResourceTypes() {
@@ -353,7 +1008,6 @@ func (pm *PluginManager) DeleteCustomResource(client k8s.Client, resourceType st
 	return fmt.Errorf("custom resource type %s not found", resourceType)
 }
 
-// GetCustomResourceInfo gets information about a custom resource using the appropriate plugin
 func (pm *PluginManager) GetCustomResourceInfo(client k8s.Client, resourceType string, namespace string, name string) (*k8s.ResourceInfo, error) {
 	for _, plugin := range pm.registry.resourcePlugins {
 		for _, rt := range plugin.GetResourceTypes() {
@@ -365,7 +1019,6 @@ func (pm *PluginManager) GetCustomResourceInfo(client k8s.Client, resourceType s
 	return nil, fmt.Errorf("custom resource type %s not found", resourceType)
 }
 
-// Shutdown shuts down all loaded plugins
 func (pm *PluginManager) Shutdown() error {
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Shutting down %d loaded plugins", len(pm.luaStates)))
 

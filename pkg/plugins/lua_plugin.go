@@ -252,6 +252,9 @@ func (lp *LuaPlugin) parseDisplayComponent(tbl *lua.LTable) DisplayComponent {
 func (lp *LuaPlugin) GetResourceData(client k8s.Client, resourceType string, namespace string) ([]types.ResourceData, error) {
 	logger.PluginDebug(lp.pluginName, fmt.Sprintf("Calling GetResourceData(%s, %s)", resourceType, namespace))
 
+	// Set the client as a global variable for the Lua script to access
+	lp.L.SetGlobal("k8s_client", lua.LString("available")) // Placeholder for now
+
 	if err := lp.L.CallByParam(lua.P{
 		Fn:      lp.L.GetGlobal("GetResourceData"),
 		NRet:    1,

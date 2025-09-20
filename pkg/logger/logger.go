@@ -148,7 +148,6 @@ func Error(message string) {
 	logMessage(LEVEL_ERROR, message)
 }
 
-// GetPluginLogger returns a logger for a specific plugin
 func GetPluginLogger(pluginName string) *Logger {
 	if logger, exists := pluginLoggers[pluginName]; exists {
 		return logger
@@ -181,7 +180,6 @@ func GetPluginLogger(pluginName string) *Logger {
 	return pluginLogger
 }
 
-// PluginDebug logs a debug message for a specific plugin
 func PluginDebug(pluginName, message string) {
 	logger := GetPluginLogger(pluginName)
 	if logger != nil {
@@ -189,7 +187,6 @@ func PluginDebug(pluginName, message string) {
 	}
 }
 
-// PluginInfo logs an info message for a specific plugin
 func PluginInfo(pluginName, message string) {
 	logger := GetPluginLogger(pluginName)
 	if logger != nil {
@@ -197,7 +194,6 @@ func PluginInfo(pluginName, message string) {
 	}
 }
 
-// PluginWarn logs a warning message for a specific plugin
 func PluginWarn(pluginName, message string) {
 	logger := GetPluginLogger(pluginName)
 	if logger != nil {
@@ -205,7 +201,6 @@ func PluginWarn(pluginName, message string) {
 	}
 }
 
-// PluginError logs an error message for a specific plugin
 func PluginError(pluginName, message string) {
 	logger := GetPluginLogger(pluginName)
 	if logger != nil {

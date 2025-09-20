@@ -2,10 +2,10 @@ package plugins
 
 import (
 	"fmt"
+	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 )
 
-// PluginAPIImpl implements the PluginAPI interface
 type PluginAPIImpl struct {
 	currentNamespace string
 	headerComponents []UIInjectionPoint
@@ -13,9 +13,9 @@ type PluginAPIImpl struct {
 	commands         map[string]PluginCommand
 	config           map[string]interface{}
 	eventHandlers    map[PluginEvent][]func(data interface{}) error
+	client           k8s.Client
 }
 
-// NewPluginAPI creates a new plugin API implementation
 func NewPluginAPI() *PluginAPIImpl {
 	return &PluginAPIImpl{
 		currentNamespace: "default",
@@ -100,4 +100,12 @@ func (api *PluginAPIImpl) TriggerEvent(event PluginEvent, data any) {
 
 func (api *PluginAPIImpl) GetCommands() map[string]PluginCommand {
 	return api.commands
+}
+
+func (api *PluginAPIImpl) GetClient() k8s.Client {
+	return api.client
+}
+
+func (api *PluginAPIImpl) SetClient(client k8s.Client) {
+	api.client = client
 }

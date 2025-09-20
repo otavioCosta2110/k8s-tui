@@ -135,7 +135,7 @@ function GetResourceTypes()
             DisplayComponent = {
                 Type = "table",
                 Config = {
-                    ColumnWidths = {0.15, 0.25, 0.15, 0.15},
+                    ColumnWidths = {0.30, 0.30, 0.19, 0.15},
                 },
             },
             RefreshIntervalSeconds = config.refresh_interval or 10,
@@ -216,20 +216,6 @@ function GetUIExtensions()
                         Style = {
                             ForegroundColor = "#00FF00",
                             BackgroundColor = "#000000"
-                        }
-                    },
-                    DataSource = "static",
-                    UpdateInterval = 0
-                },
-                {
-                    Location = "footer",
-                    Position = "left",
-                    Priority = 5,
-                    Component = {
-                        Type = "text",
-                        Config = {
-                            content = "Plugin: " .. Name() .. " v" .. Version(),
-                            style = "info"
                         }
                     },
                     DataSource = "static",

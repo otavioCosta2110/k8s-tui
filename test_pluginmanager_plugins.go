@@ -15,11 +15,11 @@ func main() {
 
 	fmt.Printf("Loaded plugins successfully\n")
 
-	// Test Neovim-style plugins
-	neovimPlugins := pm.GetNeovimPlugins()
-	fmt.Printf("Found %d Neovim-style plugins:\n", len(neovimPlugins))
+	// Test pluginmanager-style plugins
+	pluginmanagerPlugins := pm.GetPluginmanagerPlugins()
+	fmt.Printf("Found %d pluginmanager-style plugins:\n", len(pluginmanagerPlugins))
 
-	for i, plugin := range neovimPlugins {
+	for i, plugin := range pluginmanagerPlugins {
 		fmt.Printf("  %d. %s v%s - %s\n", i+1, plugin.Name(), plugin.Version(), plugin.Description())
 
 		// Test commands

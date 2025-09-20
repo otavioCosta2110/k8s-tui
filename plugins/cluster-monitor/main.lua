@@ -274,24 +274,6 @@ function GetUIExtensions()
                     },
                     DataSource = "cluster_status",
                     UpdateInterval = config.refresh_interval or 30
-                },
-                {
-                    Location = "footer",
-                    Position = "right",
-                    Priority = 15,
-                    Component = {
-                        Type = "text",
-                        Config = {
-                            content = config.monitoring_message or "Monitoring Active",
-                            style = "info"
-                        },
-                        Style = {
-                            ForegroundColor = "#89B4FA",
-                            BackgroundColor = "#000000"
-                        }
-                    },
-                    DataSource = "static",
-                    UpdateInterval = 0
                 }
             }
         }

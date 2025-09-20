@@ -105,7 +105,6 @@ func NewCustomResourceModel(k k8s.Client, namespace string, resourceType string)
 	}
 }
 
-// CustomResourceTextModel displays plugin data as formatted text instead of a table
 type CustomResourceTextModel struct {
 	crModel      *customResourceModel
 	resourceName string
@@ -246,7 +245,6 @@ func (cr *customResourceModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	return cr, nil
 }
 
-// CustomResourceYAMLModel displays plugin data as YAML
 type CustomResourceYAMLModel struct {
 	crModel      *customResourceModel
 	resourceName string
@@ -353,7 +351,6 @@ func (cy *CustomResourceYAMLModel) Refresh() (tea.Model, tea.Cmd) {
 	return cy, nil
 }
 
-// CustomResourceChartModel displays plugin data as simple charts/gauges
 type CustomResourceChartModel struct {
 	crModel      *customResourceModel
 	resourceName string
@@ -464,7 +461,6 @@ func (cc *CustomResourceChartModel) Refresh() (tea.Model, tea.Cmd) {
 	return cc, nil
 }
 
-// CustomResourceTableModel displays plugin data as a table using the existing TableModel
 type CustomResourceTableModel struct {
 	tableModel  *components.TableModel
 	crModel     *customResourceModel
@@ -474,8 +470,15 @@ type CustomResourceTableModel struct {
 func NewCustomResourceTableModel(cr *customResourceModel, resourceName, icon, namespace string, displayComp plugins.DisplayComponent) *CustomResourceTableModel {
 	logger.Info(fmt.Sprintf("Creating table model for %s with %d items", resourceName, len(cr.resourceData)))
 
-	// Extract columns from display component config
-	var columns []table.Column
+	// Define table columns
+	// TODO: Properly parse columns from displayComp.Config
+	columns := []table.Column{
+		{Title: "Name", Width: 20},
+		{Title: "Namespace", Width: 15},
+		{Title: "Status", Width: 12},
+		{Title: "Age", Width: 10},
+	}
+
 	var colWidths []float64
 
 	// Try to parse ColumnWidths from config
@@ -492,23 +495,28 @@ func NewCustomResourceTableModel(cr *customResourceModel, resourceName, icon, na
 			}
 		}
 		// If fewer widths than columns, pad with equal distribution
-		for len(colWidths) < len(columns) {
-			colWidths = append(colWidths, 1.0/float64(len(columns)))
+		if len(colWidths) < len(columns) {
+			remainingWidth := 1.0
+			for _, w := range colWidths {
+				remainingWidth -= w
+			}
+			remainingCols := len(columns) - len(colWidths)
+			if remainingCols > 0 {
+				avgWidth := remainingWidth / float64(remainingCols)
+				for len(colWidths) < len(columns) {
+					colWidths = append(colWidths, avgWidth)
+				}
+			}
 		}
 		logger.Info(fmt.Sprintf("Using custom column widths from config: %v", colWidths))
 	} else {
 		// Default column widths
-		colWidths = []float64{0.25, 0.25, 0.25, 0.25}
+		defaultWidth := 1.0 / float64(len(columns))
+		colWidths = make([]float64, len(columns))
+		for i := range colWidths {
+			colWidths[i] = defaultWidth
+		}
 		logger.Info("Using default column widths")
-	}
-
-	// For now, use default columns since the config parsing is complex
-	// TODO: Properly parse columns from displayComp.Config
-	columns = []table.Column{
-		{Title: "Name", Width: 20},
-		{Title: "Namespace", Width: 15},
-		{Title: "Status", Width: 12},
-		{Title: "Age", Width: 10},
 	}
 
 	// Convert resource data to table rows

@@ -37,6 +37,7 @@ func NewHeader(headerText string, kubeconfig *k8s.Client) HeaderModel {
 		kubeconfig:   kubeconfig,
 		headerStyle:  lipgloss.NewStyle().Height(global.HeaderSize).Background(lipgloss.Color(customstyles.BackgroundColor)),
 		tabComponent: components.NewTabComponent(),
+		height:       global.HeaderSize,
 	}
 }
 
@@ -73,6 +74,7 @@ func (m HeaderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case components.TabMsg:
 		return m, func() tea.Msg { return msg }
 	case tea.WindowSizeMsg:
+		m.width = msg.Width
 		m.headerStyle = m.headerStyle.
 			Width(msg.Width).
 			Height(m.height)
@@ -92,27 +94,47 @@ func (m HeaderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m HeaderModel) View() string {
-	var headerView string
+	var left, right string
+
 	if m.kubeconfig == nil {
-		headerView = m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render("K8s TUI - No cluster connection")
+		left = "K8s TUI - No cluster connection"
 	} else {
-		headerView = m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(m.content)
+		left = m.content
 	}
 
-	// Add plugin components to header
 	if len(m.pluginComponents) > 0 {
-		pluginContent := strings.Join(m.pluginComponents, " | ")
-		headerView = m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(m.content + " | " + pluginContent)
+		right = strings.Join(m.pluginComponents, " | ")
 	}
+
+	leftLines := strings.Split(left, "\n")
+
+	rightWidth := lipgloss.Width(right)
+	leftWidth := m.width - rightWidth
+
+	line1Left := lipgloss.NewStyle().Width(leftWidth).Background(lipgloss.Color(customstyles.BackgroundColor)).Render(leftLines[0])
+	line1Right := lipgloss.NewStyle().Width(rightWidth).Background(lipgloss.Color(customstyles.BackgroundColor)).Align(lipgloss.Right).Render(right)
+	line1 := lipgloss.JoinHorizontal(lipgloss.Top, line1Left, line1Right)
+
+	otherLines := leftLines[1:]
+
+	// Pad other lines to full width with background color
+	paddedOtherLines := make([]string, len(otherLines))
+	for i, line := range otherLines {
+		paddedOtherLines[i] = lipgloss.PlaceHorizontal(m.width, lipgloss.Left, line, lipgloss.WithWhitespaceBackground(lipgloss.Color(customstyles.BackgroundColor)))
+	}
+
+	allLines := append([]string{line1}, paddedOtherLines...)
+
+	headerView := lipgloss.JoinVertical(lipgloss.Left, allLines...)
 
 	if m.tabComponent != nil && m.tabComponent.GetTabCount() > 0 {
 		tabView := m.tabComponent.View()
 		if tabView != "" {
-			return lipgloss.JoinVertical(lipgloss.Top, headerView, tabView)
+			return lipgloss.JoinVertical(lipgloss.Top, m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(headerView), tabView)
 		}
 	}
 
-	return headerView
+	return m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(headerView)
 }
 
 func (m *HeaderModel) AddPluginComponent(component string) {

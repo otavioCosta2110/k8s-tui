@@ -15,7 +15,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// UIInjector manages UI injections from plugins
 type UIInjector struct {
 	injections map[string][]plugins.UIInjectionPoint
 }
