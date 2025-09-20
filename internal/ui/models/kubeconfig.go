@@ -4,7 +4,7 @@ import (
 	"fmt"
 	global "github.com/otavioCosta2110/k8s-tui/internal"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
-	"github.com/otavioCosta2110/k8s-tui/internal/logger"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	"os"
 	"path/filepath"

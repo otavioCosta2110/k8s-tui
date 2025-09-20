@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/otavioCosta2110/k8s-tui/internal/logger"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 )
 
 var Margin = 2
