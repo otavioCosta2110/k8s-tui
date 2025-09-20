@@ -3,7 +3,7 @@ package models
 import (
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
-	"github.com/otavioCosta2110/k8s-tui/internal/plugins"
+	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 	"github.com/otavioCosta2110/k8s-tui/utils"
 	"strings"
 

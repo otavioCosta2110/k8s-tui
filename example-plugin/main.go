@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
-	"github.com/otavioCosta2110/k8s-tui/internal/plugins"
-	"github.com/otavioCosta2110/k8s-tui/internal/types"
+	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
+	"github.com/otavioCosta2110/k8s-tui/pkg/types"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
