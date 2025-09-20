@@ -6,7 +6,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
 	"github.com/otavioCosta2110/k8s-tui/pkg/types"
-	customstyles "github.com/otavioCosta2110/k8s-tui/internal/ui/custom_styles"
+	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 	"testing"
 	"time"
 

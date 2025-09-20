@@ -2,7 +2,7 @@ package cli
 
 import (
 	"flag"
-	"github.com/otavioCosta2110/k8s-tui/internal/config"
+	"github.com/otavioCosta2110/k8s-tui/pkg/config"
 )
 
 type Config struct {

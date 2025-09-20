@@ -1,7 +1,7 @@
 package ui
 
 import (
-	global "github.com/otavioCosta2110/k8s-tui/internal"
+	global "github.com/otavioCosta2110/k8s-tui/pkg/global"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	"strings"

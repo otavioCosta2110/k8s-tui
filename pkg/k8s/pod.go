@@ -16,7 +16,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/remotecommand"
-	customstyles "github.com/otavioCosta2110/k8s-tui/internal/ui/custom_styles"
+	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 )
 
 type Pod struct {

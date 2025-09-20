@@ -11,7 +11,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/otavioCosta2110/k8s-tui/internal/ui/custom_styles"
+	"github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 	"github.com/otavioCosta2110/k8s-tui/utils"
 )
 

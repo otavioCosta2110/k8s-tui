@@ -6,7 +6,7 @@ import (
 	"github.com/otavioCosta2110/k8s-tui/pkg/types"
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	ui "github.com/otavioCosta2110/k8s-tui/internal/ui/components"
-	customstyles "github.com/otavioCosta2110/k8s-tui/internal/ui/custom_styles"
+	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
