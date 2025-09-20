@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
-	"github.com/otavioCosta2110/k8s-tui/utils"
+	"github.com/otavioCosta2110/k8s-tui/pkg/utils"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"

@@ -3,7 +3,7 @@ package k8s
 import (
 	"context"
 	"fmt"
-	"github.com/otavioCosta2110/k8s-tui/utils"
+	"github.com/otavioCosta2110/k8s-tui/pkg/utils"
 	"time"
 
 	"gopkg.in/yaml.v3"
