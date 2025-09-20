@@ -9,7 +9,7 @@
 - **Lint**: `golangci-lint run` (if available)
 
 ## Logging System
-- **Log Directory**: `./local/state/k8s-tui/` - Local state directory for logs
+- **Log Directory**: `./local/state/k8s-tui/logs/` - Local state directory for logs
 - **Log File Format**: `k8s-tui-YYYY-MM-DD.log` - Daily log files with timestamps
 - **Log Levels**: DEBUG, INFO, WARN, ERROR
 - **Log Rotation**: Automatic rotation when file exceeds 10MB, keeps up to 5 rotated files

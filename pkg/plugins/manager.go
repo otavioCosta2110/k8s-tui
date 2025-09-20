@@ -14,17 +14,22 @@ import (
 
 // PluginManager manages the loading and lifecycle of plugins
 type PluginManager struct {
-	registry  *PluginRegistry
-	pluginDir string
-	luaStates map[string]*lua.LState
+	registry      *PluginRegistry
+	pluginDir     string
+	luaStates     map[string]*lua.LState
+	api           *PluginAPIImpl
+	neovimPlugins []NeovimStylePlugin
 }
 
 // NewPluginManager creates a new plugin manager
 func NewPluginManager(pluginDir string) *PluginManager {
+	api := NewPluginAPI()
 	return &PluginManager{
-		registry:  NewPluginRegistry(),
-		pluginDir: pluginDir,
-		luaStates: make(map[string]*lua.LState),
+		registry:      NewPluginRegistry(),
+		pluginDir:     pluginDir,
+		luaStates:     make(map[string]*lua.LState),
+		api:           api,
+		neovimPlugins: make([]NeovimStylePlugin, 0),
 	}
 }
 
@@ -94,6 +99,10 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Creating Lua state for plugin: %s", pluginName))
 	L := lua.NewState()
 
+	// Variables for Neovim-style detection
+	var setupType, configType, commandsType, hooksType lua.LValueType
+	var isNeovimStyle bool
+
 	// Load the Lua script
 	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Loading Lua script: %s", path))
 	if err := L.DoFile(path); err != nil {
@@ -101,8 +110,20 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		logger.Error(fmt.Sprintf("🔌 Plugin Manager: Failed to execute Lua script %s: %v", path, err))
 		return fmt.Errorf("failed to load Lua script: %v", err)
 	}
+	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Successfully loaded Lua script: %s", path))
 
-	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Validating required functions for plugin: %s", pluginName))
+	// Debug: Check what functions are available
+	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Available functions in %s:", pluginName))
+	for _, funcName := range []string{"Name", "Version", "Description", "Initialize", "Setup", "Config", "Commands", "Hooks", "GetResourceTypes", "GetUIExtensions"} {
+		funcType := L.GetGlobal(funcName).Type()
+		if funcType == lua.LTFunction {
+			logger.Info(fmt.Sprintf("🔌 Plugin Manager:   %s: FUNCTION", funcName))
+		} else {
+			logger.Info(fmt.Sprintf("🔌 Plugin Manager:   %s: %s", funcName, funcType))
+		}
+	}
+
+	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Validating required functions for plugin: %s", pluginName))
 
 	// Check if required functions exist
 	if L.GetGlobal("Name").Type() != lua.LTFunction {
@@ -116,10 +137,79 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		return fmt.Errorf("Lua plugin must define an Initialize function")
 	}
 
+	// Check if this is a Neovim-style plugin
+	setupType = L.GetGlobal("Setup").Type()
+	configType = L.GetGlobal("Config").Type()
+	commandsType = L.GetGlobal("Commands").Type()
+	hooksType = L.GetGlobal("Hooks").Type()
+
+	isNeovimStyle = setupType == lua.LTFunction ||
+		configType == lua.LTFunction ||
+		commandsType == lua.LTFunction ||
+		hooksType == lua.LTFunction
+
+	// For Neovim-style plugins, set up the k8s_tui API before initialization
+	if isNeovimStyle {
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected Neovim-style plugin: %s", pluginName))
+		logger.Info("🔌 Plugin Manager: Setting up k8s_tui API for Neovim-style plugin")
+
+		// Create API table
+		apiTable := L.NewTable()
+
+		// Add API functions
+		L.SetField(apiTable, "get_namespace", L.NewFunction(func(L *lua.LState) int {
+			namespace := pm.api.GetCurrentNamespace()
+			L.Push(lua.LString(namespace))
+			return 1
+		}))
+		L.SetField(apiTable, "set_status", L.NewFunction(func(L *lua.LState) int {
+			message := L.CheckString(1)
+			pm.api.SetStatusMessage(message)
+			return 0
+		}))
+		L.SetField(apiTable, "add_header", L.NewFunction(func(L *lua.LState) int {
+			content := L.CheckString(1)
+			component := UIInjectionPoint{
+				Location: "header",
+				Position: "right",
+				Priority: 10,
+				Component: DisplayComponent{
+					Type: "text",
+					Config: map[string]any{
+						"content": content,
+						"style":   "info",
+					},
+				},
+				DataSource:     "static",
+				UpdateInterval: 0,
+			}
+			pm.api.AddHeaderComponent(component)
+			return 0
+		}))
+		L.SetField(apiTable, "register_command", L.NewFunction(func(L *lua.LState) int {
+			name := L.CheckString(1)
+			description := L.CheckString(2)
+			command := PluginCommand{
+				Name:        name,
+				Description: description,
+				Handler: func(args []string) (string, error) {
+					return "Command executed from Lua", nil
+				},
+			}
+			pm.api.RegisterCommand(command.Name, command.Description, command.Handler)
+			return 0
+		}))
+
+		// Set the API in the global environment
+		L.SetGlobal("k8s_tui", apiTable)
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: k8s_tui API set up for plugin: %s", pluginName))
+	}
+
 	// Create a LuaPlugin wrapper
-	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Creating plugin wrapper for: %s", pluginName))
+	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Creating plugin wrapper for: %s", pluginName))
 	luaPlugin := &LuaPlugin{
-		L: L,
+		L:          L,
+		pluginName: pluginName,
 	}
 
 	// Get plugin metadata for logging
@@ -138,27 +228,77 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Plugin %s initialized successfully", pluginDisplayName))
 
-	// Check plugin capabilities
-	hasResourcePlugin := luaPlugin.hasResourcePlugin()
-	hasUIPlugin := luaPlugin.hasUIPlugin()
+	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Function types for %s - Setup: %s, Config: %s, Commands: %s, Hooks: %s",
+		pluginName, setupType, configType, commandsType, hooksType))
 
-	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Plugin %s capabilities - Resource: %t, UI: %t", pluginDisplayName, hasResourcePlugin, hasUIPlugin))
+	if isNeovimStyle {
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected Neovim-style plugin: %s", pluginDisplayName))
 
-	// Register based on capabilities
-	if hasResourcePlugin {
-		pm.registry.RegisterResourcePlugin(luaPlugin)
-		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 📊 Registered resource plugin: %s v%s - %s", pluginDisplayName, pluginVersion, pluginDescription))
+		// Create Neovim-style plugin wrapper
+		neovimPlugin := NewNeovimStyleLuaPlugin(L, pluginName, pm.api)
 
-		// Log resource types
-		resourceTypes := luaPlugin.GetResourceTypes()
-		for _, rt := range resourceTypes {
-			logger.Info(fmt.Sprintf("🔌 Plugin Manager:   └─ Resource type: %s (%s)", rt.Name, rt.Type))
+		// Setup the plugin with default config
+		defaultConfig := neovimPlugin.Config()
+		if err := neovimPlugin.Setup(defaultConfig); err != nil {
+			logger.Error(fmt.Sprintf("🔌 Plugin Manager: Failed to setup Neovim-style plugin %s: %v", pluginDisplayName, err))
+			L.Close()
+			return fmt.Errorf("failed to setup Neovim-style plugin: %v", err)
 		}
-	}
 
-	if hasUIPlugin {
-		pm.registry.RegisterUIPlugin(luaPlugin)
-		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎨 Registered UI plugin: %s v%s - %s", pluginDisplayName, pluginVersion, pluginDescription))
+		// Register commands
+		commands := neovimPlugin.Commands()
+		for _, cmd := range commands {
+			pm.api.RegisterCommand(cmd.Name, cmd.Description, cmd.Handler)
+		}
+
+		// Register hooks
+		hooks := neovimPlugin.Hooks()
+		for _, hook := range hooks {
+			pm.api.RegisterEventHandler(PluginEvent(hook.Event), hook.Handler)
+		}
+
+		pm.neovimPlugins = append(pm.neovimPlugins, neovimPlugin)
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Registered Neovim-style plugin: %s v%s", pluginDisplayName, pluginVersion))
+
+		// Also register as legacy plugin for backward compatibility
+		hasResourcePlugin := luaPlugin.hasResourcePlugin()
+		hasUIPlugin := luaPlugin.hasUIPlugin()
+
+		if hasResourcePlugin {
+			pm.registry.RegisterResourcePlugin(luaPlugin)
+			logger.Info(fmt.Sprintf("🔌 Plugin Manager: 📊 Also registered as legacy resource plugin: %s", pluginDisplayName))
+		}
+
+		if hasUIPlugin {
+			pm.registry.RegisterUIPlugin(luaPlugin)
+			logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎨 Also registered as legacy UI plugin: %s", pluginDisplayName))
+		}
+	} else {
+		// Handle legacy plugins (deprecated)
+		logger.Warn(fmt.Sprintf("🔌 Plugin Manager: ⚠️  Legacy plugin detected: %s - Consider migrating to Neovim-style", pluginDisplayName))
+
+		// Check plugin capabilities
+		hasResourcePlugin := luaPlugin.hasResourcePlugin()
+		hasUIPlugin := luaPlugin.hasUIPlugin()
+
+		logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Plugin %s capabilities - Resource: %t, UI: %t", pluginDisplayName, hasResourcePlugin, hasUIPlugin))
+
+		// Register based on capabilities
+		if hasResourcePlugin {
+			pm.registry.RegisterResourcePlugin(luaPlugin)
+			logger.Info(fmt.Sprintf("🔌 Plugin Manager: 📊 Registered legacy resource plugin: %s v%s - %s", pluginDisplayName, pluginVersion, pluginDescription))
+
+			// Log resource types
+			resourceTypes := luaPlugin.GetResourceTypes()
+			for _, rt := range resourceTypes {
+				logger.Info(fmt.Sprintf("🔌 Plugin Manager:   └─ Resource type: %s (%s)", rt.Name, rt.Type))
+			}
+		}
+
+		if hasUIPlugin {
+			pm.registry.RegisterUIPlugin(luaPlugin)
+			logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎨 Registered legacy UI plugin: %s v%s - %s", pluginDisplayName, pluginVersion, pluginDescription))
+		}
 	}
 
 	// Store the Lua state
@@ -172,6 +312,21 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 // GetRegistry returns the plugin registry
 func (pm *PluginManager) GetRegistry() *PluginRegistry {
 	return pm.registry
+}
+
+// GetAPI returns the plugin API
+func (pm *PluginManager) GetAPI() *PluginAPIImpl {
+	return pm.api
+}
+
+// GetNeovimPlugins returns all loaded Neovim-style plugins
+func (pm *PluginManager) GetNeovimPlugins() []NeovimStylePlugin {
+	return pm.neovimPlugins
+}
+
+// TriggerEvent triggers an event for all registered plugins
+func (pm *PluginManager) TriggerEvent(event PluginEvent, data interface{}) {
+	pm.api.TriggerEvent(event, data)
 }
 
 // GetCustomResourceData fetches data for a custom resource type from plugins

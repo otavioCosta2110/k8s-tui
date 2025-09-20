@@ -1,19 +1,63 @@
 package ui
 
 import (
-	global "github.com/otavioCosta2110/k8s-tui/pkg/global"
-	"github.com/otavioCosta2110/k8s-tui/pkg/config"
-	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
-	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/cli"
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
-	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/models"
+	"github.com/otavioCosta2110/k8s-tui/pkg/config"
+	global "github.com/otavioCosta2110/k8s-tui/pkg/global"
+	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
+	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
+	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
+
+// UIInjector manages UI injections from plugins
+type UIInjector struct {
+	injections map[string][]plugins.UIInjectionPoint
+}
+
+func NewUIInjector() *UIInjector {
+	return &UIInjector{
+		injections: make(map[string][]plugins.UIInjectionPoint),
+	}
+}
+
+func (ui *UIInjector) AddInjection(location string, injection plugins.UIInjectionPoint) {
+	ui.injections[location] = append(ui.injections[location], injection)
+}
+
+func (ui *UIInjector) GetInjections(location string) []plugins.UIInjectionPoint {
+	return ui.injections[location]
+}
+
+func (ui *UIInjector) RenderInjections(location string) string {
+	injections := ui.GetInjections(location)
+	if len(injections) == 0 {
+		return ""
+	}
+
+	var rendered []string
+	for _, injection := range injections {
+		// Render based on component type
+		switch injection.Component.Type {
+		case "text":
+			if content, ok := injection.Component.Config["content"].(string); ok {
+				rendered = append(rendered, content)
+			}
+		default:
+			// Fallback to simple text
+			if content, ok := injection.Component.Config["content"].(string); ok {
+				rendered = append(rendered, content)
+			}
+		}
+	}
+
+	return strings.Join(rendered, " | ")
+}
 
 type AppModel struct {
 	tabManager          *models.TabManager
@@ -26,6 +70,7 @@ type AppModel struct {
 	currentResourceType string
 	breadcrumbTrail     []string
 	pluginManager       *plugins.PluginManager
+	uiInjector          *UIInjector
 }
 
 func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel {
@@ -45,6 +90,8 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 
 		tabManager := models.NewTabManager(kubeClient, cfg.Namespace, appConfig.KeyBindings)
 
+		uiInjector := NewUIInjector()
+
 		appModel := &AppModel{
 			tabManager:     tabManager,
 			header:         header,
@@ -52,6 +99,12 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 			config:         appConfig,
 			configSelected: true,
 			pluginManager:  pluginManager,
+			uiInjector:     uiInjector,
+		}
+
+		// Load plugin UI extensions
+		if pluginManager != nil {
+			appModel.loadPluginUIExtensions()
 		}
 
 		tabs := tabManager.GetTabsForComponent()
@@ -72,18 +125,34 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 	_, err = models.NewKubeconfigModel().InitComponent(nil)
 	if err != nil {
 		popup := models.NewErrorScreen(err, "Failed to initialize Kubernetes config", "")
-		return &AppModel{
+		uiInjector := NewUIInjector()
+		appModel := &AppModel{
 			header:        models.NewHeader("K8s TUI", nil),
 			config:        appConfig,
 			errorPopup:    &popup,
 			pluginManager: pluginManager,
+			uiInjector:    uiInjector,
 		}
+
+		// Load plugin UI extensions
+		if pluginManager != nil {
+			appModel.loadPluginUIExtensions()
+		}
+
+		return appModel
 	}
 
+	uiInjector := NewUIInjector()
 	appModel := &AppModel{
 		header:        models.NewHeader("K8s TUI", nil),
 		config:        appConfig,
 		pluginManager: pluginManager,
+		uiInjector:    uiInjector,
+	}
+
+	// Load plugin UI extensions
+	if pluginManager != nil {
+		appModel.loadPluginUIExtensions()
 	}
 
 	return appModel
@@ -435,9 +504,25 @@ func (m *AppModel) View() string {
 		return finalView
 	}
 
+	// Add footer injections if any
+	footerInjections := m.uiInjector.RenderInjections("footer")
+	var footerView string
+	if footerInjections != "" {
+		footerView = lipgloss.NewStyle().
+			Width(global.ScreenWidth).
+			Background(lipgloss.Color(customstyles.BackgroundColor)).
+			Foreground(lipgloss.Color("#888888")).
+			Padding(0, 1).
+			Render(footerInjections)
+	}
+
 	var finalView string
-	if breadcrumbView != "" {
+	if breadcrumbView != "" && footerView != "" {
+		finalView = lipgloss.JoinVertical(lipgloss.Top, headerView, content, breadcrumbView, footerView)
+	} else if breadcrumbView != "" {
 		finalView = lipgloss.JoinVertical(lipgloss.Top, headerView, content, breadcrumbView)
+	} else if footerView != "" {
+		finalView = lipgloss.JoinVertical(lipgloss.Top, headerView, content, footerView)
 	} else {
 		finalView = lipgloss.JoinVertical(lipgloss.Top, headerView, content)
 	}
@@ -528,5 +613,47 @@ func (m *AppModel) initializeInitialBreadcrumb(listModel interface{}) {
 		}
 	} else {
 		m.breadcrumbTrail = []string{}
+	}
+}
+
+func (m *AppModel) loadPluginUIExtensions() {
+	if m.pluginManager == nil {
+		return
+	}
+
+	registry := m.pluginManager.GetRegistry()
+	if registry == nil {
+		return
+	}
+
+	// Load UI extensions from legacy plugins
+	for _, plugin := range registry.GetUIPlugins() {
+		extensions := plugin.GetUIExtensions()
+		for _, ext := range extensions {
+			// Add injection points to the UI injector
+			for _, injection := range ext.InjectionPoints {
+				m.uiInjector.AddInjection(injection.Location, injection)
+			}
+		}
+	}
+
+	// Load UI components from Neovim-style plugins
+	api := m.pluginManager.GetAPI()
+	if api != nil {
+		// Add header components
+		headerComponents := api.GetHeaderComponents()
+		for _, component := range headerComponents {
+			if content, ok := component.Component.Config["content"].(string); ok {
+				m.header.AddPluginComponent(content)
+			}
+		}
+
+		// Add footer components
+		footerComponents := api.GetFooterComponents()
+		for _, component := range footerComponents {
+			if _, ok := component.Component.Config["content"].(string); ok {
+				m.uiInjector.AddInjection("footer", component)
+			}
+		}
 	}
 }

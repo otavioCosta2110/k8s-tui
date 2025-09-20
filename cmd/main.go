@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/otavioCosta2110/k8s-tui/internal/ui"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
-	"github.com/otavioCosta2110/k8s-tui/internal/ui"
 	"os"
 	"runtime/debug"
 
@@ -30,6 +30,10 @@ func main() {
 
 	plugins.SetGlobalPluginManager(pluginManager)
 	logger.Debug("Global plugin manager set")
+
+	// Trigger app started event for Neovim-style plugins
+	pluginManager.TriggerEvent(plugins.EventAppStarted, "k8s-tui started")
+	logger.Debug("App started event triggered")
 
 	logger.Debug("Setting up custom resource handlers")
 	k8s.SetCustomResourceHandlers(

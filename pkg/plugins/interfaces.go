@@ -26,6 +26,9 @@ type Plugin interface {
 	Shutdown() error
 }
 
+// Legacy plugin interfaces - DEPRECATED
+// These will be removed in a future version. Use NeovimStylePlugin instead.
+
 // ResourcePlugin defines the interface for plugins that provide custom resources
 type ResourcePlugin interface {
 	Plugin
@@ -62,7 +65,10 @@ type CustomResourceType struct {
 	// Icon is the icon to display for this resource type
 	Icon string
 
-	// Columns defines the table columns for this resource type
+	// DisplayComponent defines how this resource should be rendered
+	DisplayComponent DisplayComponent
+
+	// Columns defines the table columns for this resource type (legacy support)
 	Columns []table.Column
 
 	// RefreshInterval defines how often to refresh this resource type
@@ -70,6 +76,86 @@ type CustomResourceType struct {
 
 	// Namespaced indicates if this resource type is namespaced
 	Namespaced bool
+
+	// Category for grouping similar resources
+	Category string
+
+	// Description of what this resource type shows
+	Description string
+}
+
+// DisplayComponent defines how plugin data should be rendered
+type DisplayComponent struct {
+	// Type is the component type (table, yaml, text, chart, gauge, etc.)
+	Type string
+
+	// Config contains component-specific configuration
+	Config map[string]interface{}
+
+	// Style contains styling information
+	Style ComponentStyle
+}
+
+// ComponentStyle defines styling for display components
+type ComponentStyle struct {
+	// Width in characters (0 = auto)
+	Width int
+
+	// Height in lines (0 = auto)
+	Height int
+
+	// Border style
+	Border string
+
+	// Colors
+	ForegroundColor string
+	BackgroundColor string
+	BorderColor     string
+}
+
+// UIInjectionPoint defines where in the UI a plugin can inject content
+type UIInjectionPoint struct {
+	// Location where to inject (header, footer, sidebar, status_bar, notifications)
+	Location string
+
+	// Position within the location (left, right, center, top, bottom)
+	Position string
+
+	// Priority for ordering (higher = more prominent)
+	Priority int
+
+	// Component to render at this location
+	Component DisplayComponent
+
+	// Data source for dynamic content
+	DataSource string
+
+	// UpdateInterval in seconds (0 = static)
+	UpdateInterval int
+}
+
+// Interaction defines user interactions available for plugin content
+type Interaction struct {
+	// Type of interaction (button, menu, keybinding, hover)
+	Type string
+
+	// Label for display
+	Label string
+
+	// KeyBinding for keyboard activation
+	KeyBinding string
+
+	// Handler function to call
+	Handler func() tea.Cmd
+
+	// Context when this interaction is available
+	Context string
+
+	// Enabled indicates if this interaction is currently available
+	Enabled bool
+
+	// Tooltip for hover help
+	Tooltip string
 }
 
 // UIExtension defines a UI extension provided by a plugin
@@ -77,7 +163,7 @@ type UIExtension struct {
 	// Name is the name of the extension
 	Name string
 
-	// Type is the type of extension (e.g., "menu_item", "toolbar_button")
+	// Type is the type of extension (e.g., "menu_item", "toolbar_button", "ui_injection")
 	Type string
 
 	// Handler is the function to call when the extension is activated
@@ -85,6 +171,15 @@ type UIExtension struct {
 
 	// KeyBinding is the key binding for this extension
 	KeyBinding string
+
+	// InjectionPoints where this extension should be rendered
+	InjectionPoints []UIInjectionPoint
+
+	// Interactions available for this extension
+	Interactions []Interaction
+
+	// Dependencies on other plugins or features
+	Dependencies []string
 }
 
 // PluginRegistry manages loaded plugins
@@ -127,4 +222,72 @@ func (pr *PluginRegistry) GetCustomResourceTypes() []CustomResourceType {
 		types = append(types, plugin.GetResourceTypes()...)
 	}
 	return types
+}
+
+// NeovimStylePlugin defines a plugin that follows Neovim-style architecture
+type NeovimStylePlugin interface {
+	Plugin
+
+	// Setup is called to configure the plugin with user options
+	Setup(opts map[string]interface{}) error
+
+	// Config returns the default configuration for this plugin
+	Config() map[string]interface{}
+
+	// Commands returns the commands this plugin provides
+	Commands() []PluginCommand
+
+	// Hooks returns the hooks this plugin registers for
+	Hooks() []PluginHook
+}
+
+// PluginCommand represents a command that a plugin provides
+type PluginCommand struct {
+	Name        string
+	Description string
+	Handler     func(args []string) (string, error)
+}
+
+// PluginHook represents a hook that a plugin can register for
+type PluginHook struct {
+	Event   string
+	Handler func(data interface{}) error
+}
+
+// PluginEvent represents events that can be triggered in the application
+type PluginEvent string
+
+const (
+	EventAppStarted       PluginEvent = "app_started"
+	EventAppShutdown      PluginEvent = "app_shutdown"
+	EventNamespaceChanged PluginEvent = "namespace_changed"
+	EventResourceSelected PluginEvent = "resource_selected"
+	EventUIUpdate         PluginEvent = "ui_update"
+)
+
+// PluginAPI provides methods for plugins to interact with the application
+type PluginAPI interface {
+	// GetCurrentNamespace returns the current namespace
+	GetCurrentNamespace() string
+
+	// SetStatusMessage sets a status message in the UI
+	SetStatusMessage(message string)
+
+	// AddHeaderComponent adds a component to the header
+	AddHeaderComponent(component UIInjectionPoint)
+
+	// AddFooterComponent adds a component to the footer
+	AddFooterComponent(component UIInjectionPoint)
+
+	// RegisterCommand registers a new command
+	RegisterCommand(name, description string, handler func(args []string) (string, error))
+
+	// ExecuteCommand executes a command by name
+	ExecuteCommand(name string, args []string) (string, error)
+
+	// GetConfig gets a configuration value
+	GetConfig(key string) interface{}
+
+	// SetConfig sets a configuration value
+	SetConfig(key string, value interface{})
 }

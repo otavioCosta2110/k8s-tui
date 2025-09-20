@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
+	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
 	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 
 	tea "github.com/charmbracelet/bubbletea"

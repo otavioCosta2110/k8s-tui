@@ -36,13 +36,17 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 		} else {
 			icon := ""
 			if pm := plugins.GetGlobalPluginManager(); pm != nil {
+				logger.Debug(fmt.Sprintf("🔌 UI: Plugin manager available for icon lookup, checking %d custom types", len(pm.GetRegistry().GetCustomResourceTypes())))
 				for _, rt := range pm.GetRegistry().GetCustomResourceTypes() {
+					logger.Debug(fmt.Sprintf("🔌 UI: Checking custom resource %s for icon", rt.Name))
 					if rt.Name == resourceType {
 						icon = rt.Icon
-						logger.Debug(fmt.Sprintf("🔌 UI: Found plugin icon for %s: '%s'", resourceType, icon))
+						logger.Info(fmt.Sprintf("🔌 UI: Found plugin icon for %s: '%s'", resourceType, icon))
 						break
 					}
 				}
+			} else {
+				logger.Warn("🔌 UI: Plugin manager not available for icon lookup")
 			}
 
 			if icon != "" {
@@ -56,10 +60,26 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 
 	onSelect := func(selected string) tea.Msg {
 		resourceType := selected
+
+		// First check built-in icons
 		for _, icon := range customstyles.ResourceIcons {
 			if strings.HasPrefix(selected, icon+" ") {
 				resourceType = strings.TrimPrefix(selected, icon+" ")
 				break
+			}
+		}
+
+		// If still has icon prefix, check plugin icons
+		if resourceType == selected { // No built-in icon was stripped
+			if pm := plugins.GetGlobalPluginManager(); pm != nil {
+				for _, rt := range pm.GetRegistry().GetCustomResourceTypes() {
+					iconWithSpace := rt.Icon + " "
+					if strings.HasPrefix(selected, iconWithSpace) {
+						resourceType = strings.TrimPrefix(selected, iconWithSpace)
+						logger.Debug(fmt.Sprintf("🔌 UI: Stripped plugin icon '%s' from '%s', result: '%s'", rt.Icon, selected, resourceType))
+						break
+					}
+				}
 			}
 		}
 

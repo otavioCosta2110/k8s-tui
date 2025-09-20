@@ -2,9 +2,9 @@ package models
 
 import (
 	"fmt"
+	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	global "github.com/otavioCosta2110/k8s-tui/pkg/global"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
-	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 	"strings"
 	"time"
@@ -20,14 +20,15 @@ const (
 type HeaderRefreshMsg struct{}
 
 type HeaderModel struct {
-	content        string
-	width          int
-	height         int
-	headerStyle    lipgloss.Style
-	kubeconfig     *k8s.Client
-	namespace      string
-	metricsManager *MetricsManager
-	tabComponent   *components.TabComponent
+	content          string
+	width            int
+	height           int
+	headerStyle      lipgloss.Style
+	kubeconfig       *k8s.Client
+	namespace        string
+	metricsManager   *MetricsManager
+	tabComponent     *components.TabComponent
+	pluginComponents []string
 }
 
 func NewHeader(headerText string, kubeconfig *k8s.Client) HeaderModel {
@@ -98,6 +99,12 @@ func (m HeaderModel) View() string {
 		headerView = m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(m.content)
 	}
 
+	// Add plugin components to header
+	if len(m.pluginComponents) > 0 {
+		pluginContent := strings.Join(m.pluginComponents, " | ")
+		headerView = m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(m.content + " | " + pluginContent)
+	}
+
 	if m.tabComponent != nil && m.tabComponent.GetTabCount() > 0 {
 		tabView := m.tabComponent.View()
 		if tabView != "" {
@@ -106,6 +113,10 @@ func (m HeaderModel) View() string {
 	}
 
 	return headerView
+}
+
+func (m *HeaderModel) AddPluginComponent(component string) {
+	m.pluginComponents = append(m.pluginComponents, component)
 }
 
 func (m HeaderModel) buildEnhancedHeader(metrics Metrics) string {

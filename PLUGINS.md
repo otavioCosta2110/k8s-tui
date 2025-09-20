@@ -1,148 +1,25 @@
 # k8s-tui Plugin System
 
-k8s-tui supports a plugin system that allows you to extend the application with custom resource types and UI functionality.
+k8s-tui supports a powerful plugin system inspired by Neovim's architecture, allowing you to extend the application with custom functionality written in Lua.
 
-## Overview
+## Plugin Types
 
-The plugin system uses Go's native plugin mechanism to load shared libraries (.so files) at runtime. Plugins can:
+### 1. Legacy Plugins
+- Basic Lua plugins with `GetResourceTypes()`, `GetResourceData()`, etc.
+- Located in `./plugins/` directory
+- Example: `cluster-monitor/main.lua`, `example-plugin/main.lua`
 
-- Add custom resource types to the resource list
-- Provide custom data fetching and display logic
-- Extend the UI with new components and functionality
-- Integrate with external systems and APIs
+### 2. Neovim-Style Plugins ✨
+- Advanced plugins with setup functions, configuration, commands, and hooks
+- Follow Neovim's plugin architecture patterns
+- Example: `neovim-header/main.lua`
 
-## Plugin Architecture
-
-### Core Interfaces
-
-Plugins implement one or more of the following interfaces:
-
-- `Plugin`: Base interface for all plugins
-- `ResourcePlugin`: For plugins that provide custom resources
-- `UIPlugin`: For plugins that extend the UI
-
-### Plugin Loading
-
-Plugins are loaded from a configurable directory (default: `~/.local/share/k8s-tui/plugins`) at application startup. The plugin directory contains `.lua` script files that define plugin functions. These Lua scripts are loaded and executed at runtime, providing a flexible and dynamic plugin system.
-
-## Creating a Plugin
-
-Plugins are created using Lua scripting for maximum flexibility and ease of development.
-
-### 2. Implement the plugin
-
-```go
-package main
-
-import (
-    "otaviocosta2110/k8s-tui/internal/k8s"
-    "otaviocosta2110/k8s-tui/internal/plugins"
-    "otaviocosta2110/k8s-tui/internal/types"
-    "time"
-    "github.com/charmbracelet/bubbles/table"
-)
-
-type MyPlugin struct {
-    name    string
-    version string
-}
-
-var Plugin MyPlugin
-
-func init() {
-    Plugin = MyPlugin{
-        name:    "my-plugin",
-        version: "1.0.0",
-    }
-}
-
-func (p MyPlugin) Name() string { return p.name }
-func (p MyPlugin) Version() string { return p.version }
-func (p MyPlugin) Description() string { return "My custom plugin" }
-
-func (p MyPlugin) Initialize() error {
-    // Plugin initialization logic
-    return nil
-}
-
-func (p MyPlugin) Shutdown() error {
-    // Plugin cleanup logic
-    return nil
-}
-
-func (p MyPlugin) GetResourceTypes() []plugins.CustomResourceType {
-    return []plugins.CustomResourceType{
-        {
-            Name:  "MyResources",
-            Type:  "myresource",
-            Icon:  "🔧",
-            Columns: []table.Column{
-                {Title: "Name", Width: 20},
-                {Title: "Status", Width: 10},
-                {Title: "Age", Width: 10},
-            },
-            RefreshInterval: 30 * time.Second,
-            Namespaced:      true,
-        },
-    }
-}
-
-func (p MyPlugin) GetResourceData(client k8s.Client, resourceType string, namespace string) ([]types.ResourceData, error) {
-    // Fetch and return your custom resource data
-    return []types.ResourceData{
-        &MyResourceData{
-            name:   "example-resource",
-            status: "Running",
-            age:    "5m",
-        },
-    }, nil
-}
-
-func (p MyPlugin) DeleteResource(client k8s.Client, resourceType string, namespace string, name string) error {
-    // Implement delete logic
-    return nil
-}
-
-func (p MyPlugin) GetResourceInfo(client k8s.Client, resourceType string, namespace string, name string) (*k8s.ResourceInfo, error) {
-    // Return resource information
-    return &k8s.ResourceInfo{
-        Name:      name,
-        Namespace: namespace,
-        Kind:      k8s.ResourceType(resourceType),
-        Age:       "5m",
-    }, nil
-}
-
-func (p MyPlugin) GetUIExtensions() []plugins.UIExtension {
-    return []plugins.UIExtension{}
-}
-
-// Implement ResourceData interface
-type MyResourceData struct {
-    name   string
-    status string
-    age    string
-}
-
-func (m *MyResourceData) GetName() string { return m.name }
-func (m *MyResourceData) GetNamespace() string { return "" }
-func (m *MyResourceData) GetColumns() table.Row {
-    return table.Row{m.name, m.status, m.age}
-}
-```
-
-### 1. Create your Lua plugin file
-
-```bash
-touch my-plugin.lua
-```
-
-#### 2. Implement the plugin in Lua
+## Neovim-Style Plugin Structure
 
 ```lua
 -- Plugin metadata
 function Name()
-    return "my-lua-plugin"
+    return "my-plugin"
 end
 
 function Version()
@@ -150,141 +27,137 @@ function Version()
 end
 
 function Description()
-    return "My custom Lua plugin"
+    return "My awesome k8s-tui plugin"
+end
+
+-- Default configuration
+function Config()
+    return {
+        enabled = true,
+        refresh_rate = 30,
+        theme = "default"
+    }
+end
+
+-- Setup function (called with user configuration)
+function Setup(opts)
+    print("Setting up plugin with options:")
+    for k, v in pairs(opts) do
+        print("  " .. k .. " = " .. v)
+    end
+    -- Plugin initialization code here
+    return nil
 end
 
 -- Initialize the plugin
 function Initialize()
     print("Plugin initialized")
+    k8s_tui.set_status("Plugin ready!")
     return nil
 end
 
--- Define custom resource types
-function GetResourceTypes()
+-- Shutdown the plugin
+function Shutdown()
+    print("Plugin shutting down")
+    return nil
+end
+
+-- Commands provided by this plugin
+function Commands()
     return {
         {
-            Name = "MyResources",
-            Type = "myresource",
-            Icon = "🔌",
-            Columns = {
-                {Title = "Name", Width = 20},
-                {Title = "Status", Width = 10},
-            },
-            RefreshIntervalSeconds = 30,
-            Namespaced = true,
+            name = "my-command",
+            description = "Execute my custom command"
         }
     }
 end
 
--- Fetch resource data
-function GetResourceData(resourceType, namespace)
+-- Hooks that this plugin registers for
+function Hooks()
     return {
         {
-            Name = "example-resource",
-            Namespace = namespace,
-            Status = "Running",
-            Age = "5m",
+            event = "app_started",
+            handler = "on_app_started"
+        },
+        {
+            event = "namespace_changed",
+            handler = "on_namespace_changed"
         }
-    }, nil
+    }
 end
 
--- Other functions as needed...
+-- Hook handlers
+function on_app_started(data)
+    print("App started event received")
+    k8s_tui.add_header("🚀 Plugin Active")
+end
+
+function on_namespace_changed(data)
+    print("Namespace changed to " .. data)
+    k8s_tui.set_status("Switched to namespace: " .. data)
+end
 ```
 
-### 4. Install and use
+## Plugin API
+
+Neovim-style plugins have access to the `k8s_tui` API:
+
+### Core Functions
+- `k8s_tui.get_namespace()` - Get current namespace
+- `k8s_tui.set_status(message)` - Set status message
+- `k8s_tui.add_header(content)` - Add content to header
+- `k8s_tui.register_command(name, description, handler)` - Register a command
+
+### Events
+Plugins can register for these events:
+- `app_started` - Fired when the application starts
+- `app_shutdown` - Fired when the application shuts down
+- `namespace_changed` - Fired when namespace changes
+- `resource_selected` - Fired when a resource is selected
+- `ui_update` - Fired when UI updates
+
+## Creating a Neovim-Style Plugin
+
+1. Create a directory in `./plugins/` (e.g., `my-plugin/`)
+2. Create `main.lua` with the plugin structure above
+3. Implement the required functions (`Name`, `Version`, `Description`, `Initialize`)
+4. Optionally implement advanced features (`Setup`, `Config`, `Commands`, `Hooks`)
+
+## Example Plugin: Neovim Header
+
+The `neovim-header` plugin demonstrates:
+- Configuration system
+- Setup function
+- Event hooks
+- Header integration
+- Status messages
 
 ```bash
-# Copy the .lua file to plugins directory
-mkdir -p ~/.local/share/k8s-tui/plugins
-cp my-plugin.lua ~/.local/share/k8s-tui/plugins/
-
-# Run k8s-tui (uses default plugin directory)
-./k8s-tui
-
-# Or specify custom plugin directory
-./k8s-tui --plugin-dir ~/.local/share/k8s-tui/plugins
+# Test the plugin
+go run cmd/main.go --plugin-dir ./plugins
 ```
 
-## Configuration
-
-### Command Line Options
-
-- `--plugin-dir`: Directory containing plugin files (default: `~/.local/share/k8s-tui/plugins`)
-
-### Configuration File
-
-The plugin directory can also be configured in `~/.config/k8s-tui/config.json`:
-
-```json
-{
-  "plugin_dir": "~/.local/share/k8s-tui/plugins"
-}
-```
-
-### Environment Variables
-
-- `K8S_TUI_PLUGIN_DIR`: Alternative way to specify plugin directory
+You should see:
+- "Neovim Header Plugin initialized" in logs
+- Custom header content added by the plugin
+- Status messages from plugin hooks
 
 ## Plugin Development Tips
 
-### Best Practices
+1. **Error Handling**: Always return `nil` for success, or an error string for failures
+2. **Logging**: Use `print()` for debug output (visible in application logs)
+3. **Configuration**: Use the `Config()` function to provide sensible defaults
+4. **Events**: Register for events sparingly to avoid performance issues
+5. **API**: Check the k8s_tui API documentation for available functions
 
-1. **Error Handling**: Always handle errors appropriately and return meaningful error messages
-2. **Resource Naming**: Use consistent naming conventions for your custom resources
-3. **Performance**: Be mindful of refresh intervals and data fetching performance
-4. **Thread Safety**: Ensure your plugin code is thread-safe if it maintains state
+## Migration from Legacy Plugins
 
-### Testing
+To migrate a legacy plugin to Neovim-style:
 
-Test your plugins by:
-1. Building with `go build -buildmode=plugin`
-2. Loading in k8s-tui and verifying functionality
-3. Testing error conditions and edge cases
+1. Add `Setup(opts)` function for configuration
+2. Add `Config()` function for defaults
+3. Add `Commands()` and `Hooks()` functions
+4. Use the `k8s_tui` API instead of direct function calls
+5. Update function signatures to match the new pattern
 
-### Debugging
-
-Enable debug logging to troubleshoot plugin issues:
-
-```bash
-./k8s-tui --plugin-dir ~/.local/share/k8s-tui/plugins 2>&1 | grep -i plugin
-```
-
-## Example Plugins
-
-See the `example-plugin/` directory for a complete working example in `main.lua` that demonstrates:
-
-- Custom resource type definition
-- Data fetching and display
-- Basic CRUD operations
-- Plugin lifecycle management
-
-## Security Considerations
-
-- Plugins run with the same permissions as the main application
-- Be cautious when loading plugins from untrusted sources
-- Validate all inputs and outputs in your plugin code
-- Avoid executing system commands or accessing sensitive resources
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Plugin not loading**: Check file permissions and ensure it's a valid `.so` file
-2. **Import errors**: Verify all required packages are available
-3. **Runtime errors**: Check plugin logs and error messages
-
-### Getting Help
-
-- Check the example plugin for reference implementations
-- Review the plugin interfaces in `internal/plugins/`
-- File issues on the GitHub repository
-
-## Future Enhancements
-
-Planned improvements to the plugin system:
-
-- Plugin configuration files
-- Hot-reloading of plugins
-- Plugin marketplace/registry
-- Enhanced UI extension APIs
-- Plugin dependency management
+Legacy plugins will continue to work alongside Neovim-style plugins.

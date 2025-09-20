@@ -1,9 +1,9 @@
 package models
 
 import (
-	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	ui "github.com/otavioCosta2110/k8s-tui/internal/ui/components"
+	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -23,6 +23,11 @@ type AutoRefreshModel struct {
 }
 
 func NewAutoRefreshModel(inner RefreshableModel, interval time.Duration, client *k8s.Client, footerText string) *AutoRefreshModel {
+	// Prevent refresh intervals that are too small to avoid infinite loops
+	if interval < time.Second {
+		interval = 10 * time.Second // Default to 10 seconds minimum
+	}
+
 	return &AutoRefreshModel{
 		inner:           inner,
 		refreshInterval: interval,

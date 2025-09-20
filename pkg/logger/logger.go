@@ -18,9 +18,9 @@ const (
 )
 
 const (
-	LogDir         = "./local/state/k8s-tui"
-	MaxLogFileSize = 10 * 1024 * 1024 
-	MaxLogFiles    = 5                
+	LogDir         = "./local/state/k8s-tui/logs"
+	MaxLogFileSize = 10 * 1024 * 1024
+	MaxLogFiles    = 5
 )
 
 func (l Level) String() string {
@@ -46,6 +46,7 @@ type Logger struct {
 }
 
 var defaultLogger *Logger
+var pluginLoggers = make(map[string]*Logger)
 
 func init() {
 	if err := os.MkdirAll(LogDir, 0755); err != nil {
@@ -64,7 +65,7 @@ func init() {
 
 	defaultLogger = &Logger{
 		level:  LEVEL_DEBUG,
-		logger: log.New(file, "", 0), 
+		logger: log.New(file, "", 0),
 		file:   file,
 		logDir: LogDir,
 	}
@@ -147,8 +148,147 @@ func Error(message string) {
 	logMessage(LEVEL_ERROR, message)
 }
 
+// GetPluginLogger returns a logger for a specific plugin
+func GetPluginLogger(pluginName string) *Logger {
+	if logger, exists := pluginLoggers[pluginName]; exists {
+		return logger
+	}
+
+	// Create plugin-specific log directory
+	pluginLogDir := filepath.Join(LogDir, "plugins")
+	if err := os.MkdirAll(pluginLogDir, 0755); err != nil {
+		log.Printf("Failed to create plugin log directory %s: %v", pluginLogDir, err)
+		return defaultLogger
+	}
+
+	timestamp := time.Now().Format("2006-01-02")
+	logFile := filepath.Join(pluginLogDir, fmt.Sprintf("%s-%s.log", pluginName, timestamp))
+
+	file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Printf("Failed to open plugin log file %s: %v", logFile, err)
+		return defaultLogger
+	}
+
+	pluginLogger := &Logger{
+		level:  LEVEL_DEBUG,
+		logger: log.New(file, "", 0),
+		file:   file,
+		logDir: pluginLogDir,
+	}
+
+	pluginLoggers[pluginName] = pluginLogger
+	return pluginLogger
+}
+
+// PluginDebug logs a debug message for a specific plugin
+func PluginDebug(pluginName, message string) {
+	logger := GetPluginLogger(pluginName)
+	if logger != nil {
+		logMessageWithLogger(logger, LEVEL_DEBUG, message)
+	}
+}
+
+// PluginInfo logs an info message for a specific plugin
+func PluginInfo(pluginName, message string) {
+	logger := GetPluginLogger(pluginName)
+	if logger != nil {
+		logMessageWithLogger(logger, LEVEL_INFO, message)
+	}
+}
+
+// PluginWarn logs a warning message for a specific plugin
+func PluginWarn(pluginName, message string) {
+	logger := GetPluginLogger(pluginName)
+	if logger != nil {
+		logMessageWithLogger(logger, LEVEL_WARN, message)
+	}
+}
+
+// PluginError logs an error message for a specific plugin
+func PluginError(pluginName, message string) {
+	logger := GetPluginLogger(pluginName)
+	if logger != nil {
+		logMessageWithLogger(logger, LEVEL_ERROR, message)
+	}
+}
+
+func logMessageWithLogger(logger *Logger, level Level, message string) {
+	if logger == nil || level < logger.level {
+		return
+	}
+
+	if err := rotatePluginLogFile(logger); err != nil {
+		log.Printf("Failed to rotate plugin log file: %v", err)
+	}
+
+	timestamp := time.Now().Format("2006-01-02 15:04:05")
+	formattedMessage := fmt.Sprintf("[%s] %s: %s\n", timestamp, level.String(), message)
+
+	logger.logger.Print(formattedMessage)
+}
+
+func rotatePluginLogFile(logger *Logger) error {
+	if logger == nil || logger.file == nil {
+		return nil
+	}
+
+	stat, err := logger.file.Stat()
+	if err != nil {
+		return err
+	}
+
+	if stat.Size() < MaxLogFileSize {
+		return nil
+	}
+
+	logger.file.Close()
+
+	// Find the plugin name from the loggers map
+	var pluginName string
+	for name, l := range pluginLoggers {
+		if l == logger {
+			pluginName = name
+			break
+		}
+	}
+
+	if pluginName == "" {
+		return nil
+	}
+
+	for i := MaxLogFiles - 1; i >= 1; i-- {
+		oldFile := filepath.Join(logger.logDir, fmt.Sprintf("%s-%s.log.%d", pluginName, time.Now().Format("2006-01-02"), i))
+		newFile := filepath.Join(logger.logDir, fmt.Sprintf("%s-%s.log.%d", pluginName, time.Now().Format("2006-01-02"), i+1))
+
+		if _, err := os.Stat(oldFile); err == nil {
+			os.Rename(oldFile, newFile)
+		}
+	}
+
+	currentFile := filepath.Join(logger.logDir, fmt.Sprintf("%s-%s.log", pluginName, time.Now().Format("2006-01-02")))
+	rotatedFile := filepath.Join(logger.logDir, fmt.Sprintf("%s-%s.log.1", pluginName, time.Now().Format("2006-01-02")))
+	os.Rename(currentFile, rotatedFile)
+
+	file, err := os.OpenFile(currentFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return err
+	}
+
+	logger.file = file
+	logger.logger = log.New(file, "", 0)
+
+	return nil
+}
+
 func Close() {
 	if defaultLogger != nil && defaultLogger.file != nil {
 		defaultLogger.file.Close()
+	}
+
+	for _, logger := range pluginLoggers {
+		if logger != nil && logger.file != nil {
+			logger.file.Close()
+		}
 	}
 }

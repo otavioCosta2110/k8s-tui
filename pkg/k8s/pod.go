@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,7 +17,6 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/remotecommand"
-	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 )
 
 type Pod struct {

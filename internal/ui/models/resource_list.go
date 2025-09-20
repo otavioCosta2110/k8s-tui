@@ -152,7 +152,9 @@ func (rf *ResourceFactory) CreateResource(resourceType string, k k8s.Client, nam
 	if !exists {
 		if pm := plugins.GetGlobalPluginManager(); pm != nil {
 			for _, rt := range pm.GetRegistry().GetCustomResourceTypes() {
-				if rt.Name == resourceType {
+				// Check both Name (display name) and Type (internal identifier)
+				if rt.Name == resourceType || rt.Type == resourceType {
+					logger.Info(fmt.Sprintf("Found custom resource: %s (type: %s) for requested: %s", rt.Name, rt.Type, resourceType))
 					return NewCustomResourceModel(k, namespace, rt.Type)
 				}
 			}
@@ -180,10 +182,13 @@ func (rf *ResourceFactory) GetValidResourceTypes() []string {
 	copy(validTypes, rf.validTypes)
 
 	if pm := plugins.GetGlobalPluginManager(); pm != nil {
+		logger.Info(fmt.Sprintf("🔌 Plugin manager available, found %d custom resource types", len(pm.GetRegistry().GetCustomResourceTypes())))
 		for _, rt := range pm.GetRegistry().GetCustomResourceTypes() {
-			logger.Info(fmt.Sprintf("Loading custom resource type: %s", rt.Name))
+			logger.Info(fmt.Sprintf("🔌 Loading custom resource type: %s (type: %s)", rt.Name, rt.Type))
 			validTypes = append(validTypes, rt.Name)
 		}
+	} else {
+		logger.Warn("🔌 Plugin manager not available when getting valid resource types")
 	}
 
 	return validTypes
