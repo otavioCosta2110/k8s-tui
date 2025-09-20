@@ -10,7 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 )
 
-// ExamplePlugin demonstrate a custom resource plugin
+// ExamplePlugin demonstrates a custom resource plugin
 type ExamplePlugin struct {
 	name    string
 	version string
