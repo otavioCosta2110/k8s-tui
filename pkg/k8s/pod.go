@@ -24,7 +24,7 @@ type Pod struct {
 	Namespace string
 	YAML      string
 	Raw       *corev1.Pod
-	Client    *kubernetes.Clientset
+	Client    kubernetes.Interface
 	Config    *rest.Config
 }
 

@@ -52,7 +52,19 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	onSelect := func(selected string) tea.Msg {
 		replicaset := k8s.NewReplicaSet(selected, r.namespace, *k)
-		selector := fmt.Sprintf("app=%s", replicaset.Name)
+		// Fetch the replicaset data to get the proper selector
+		err := replicaset.Fetch()
+		if err != nil {
+			return components.NavigateMsg{
+				Error:   fmt.Errorf("failed to fetch replicaset: %v", err),
+				Cluster: *k,
+			}
+		}
+		selector, err := replicaset.GetLabelSelector()
+		if err != nil {
+			// Fallback to old behavior if selector can't be determined
+			selector = fmt.Sprintf("app=%s", replicaset.Name)
+		}
 		pods, err := NewPods(*k, r.namespace, selector)
 		if err != nil {
 			return components.NavigateMsg{
@@ -96,12 +108,8 @@ func (r *replicasetsModel) fetchData() error {
 	var replicasetInfo []k8s.ReplicaSetInfo
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if r.pluginAPI != nil {
-		replicasetInfo, err = r.pluginAPI.GetReplicaSets(r.namespace)
-	} else {
-		replicasetInfo, err = k8s.GetReplicaSetsTableData(*r.k8sClient, r.namespace)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	replicasetInfo, err = r.pluginAPI.GetReplicaSets(r.namespace)
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch replicasets: %v", err)

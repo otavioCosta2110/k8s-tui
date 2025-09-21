@@ -2,12 +2,14 @@ package models
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	ui "github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/types"
 	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
-	"time"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -52,7 +54,21 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	onSelect := func(selected string) tea.Msg {
 		deployment := k8s.NewDeployment(selected, d.namespace, *k)
-		selector := fmt.Sprintf("app=%s", deployment.Name)
+		// Fetch the deployment data to get the proper selector
+		err := deployment.Fetch()
+		if err != nil {
+			return components.NavigateMsg{
+				Error:   fmt.Errorf("failed to fetch deployment: %v", err),
+				Cluster: *k,
+			}
+		}
+		selector, err := deployment.GetLabelSelector()
+		if err != nil {
+			// Fallback to old behavior if selector can't be determined
+			logger.Debug(fmt.Sprintf("Failed to get label selector for deployment %s: %v, using fallback", deployment.Name, err))
+			selector = fmt.Sprintf("app=%s", deployment.Name)
+		}
+		logger.Debug(fmt.Sprintf("Using selector for deployment %s: %s", deployment.Name, selector))
 		pods, err := NewPods(*k, d.namespace, selector)
 		if err != nil {
 			return components.NavigateMsg{
@@ -96,12 +112,8 @@ func (d *deploymentsModel) fetchData() error {
 	var deploymentInfo []k8s.DeploymentInfo
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if d.pluginAPI != nil {
-		deploymentInfo, err = d.pluginAPI.GetDeployments(d.namespace)
-	} else {
-		deploymentInfo, err = k8s.GetDeploymentsTableData(*d.k8sClient, d.namespace)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	deploymentInfo, err = d.pluginAPI.GetDeployments(d.namespace)
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch deployments: %v", err)

@@ -1,12 +1,15 @@
 package models
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	ui "github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/types"
 	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
-	"time"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -37,6 +40,7 @@ func NewPods(k k8s.Client, namespace string, selector ...string) (*podsModel, er
 	if len(selector) > 0 {
 		selectorStr = selector[0]
 	}
+	logger.Debug("Pods selector: " + selectorStr)
 
 	genericModel := NewGenericResourceModel(k, namespace, config)
 
@@ -90,12 +94,9 @@ func (p *podsModel) fetchData(selector string) error {
 	var podsInfo []k8s.PodInfo
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if p.pluginAPI != nil {
-		podsInfo, err = p.pluginAPI.GetPods(p.namespace)
-	} else {
-		podsInfo, err = k8s.FetchPods(*p.k8sClient, p.namespace, selector)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	logger.Debug(fmt.Sprintf("Pods fetchData: namespace=%s, selector=%s", p.namespace, selector))
+	podsInfo, err = p.pluginAPI.GetPods(p.namespace, selector)
 
 	if err != nil {
 		return err

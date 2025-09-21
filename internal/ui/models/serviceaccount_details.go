@@ -33,14 +33,11 @@ func (s *serviceaccountDetailsModel) InitComponent(k *k8s.Client) (tea.Model, er
 	var desc string
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if pm := plugins.GetGlobalPluginManager(); pm != nil && pm.GetAPI() != nil {
-		api := pm.GetAPI()
-		api.SetClient(*k)
-		desc, err = api.DescribeServiceAccount(s.serviceaccount.Namespace, s.serviceaccount.Name)
-	} else {
-		desc, err = k8s.DescribeResource(*k, k8s.ResourceTypeServiceAccount, s.serviceaccount.Namespace, s.serviceaccount.Name)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	pm := plugins.GetGlobalPluginManager()
+	api := pm.GetAPI()
+	api.SetClient(*k)
+	desc, err = api.DescribeServiceAccount(s.serviceaccount.Namespace, s.serviceaccount.Name)
 
 	if err != nil {
 		return nil, err

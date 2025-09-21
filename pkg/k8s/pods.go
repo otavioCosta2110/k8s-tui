@@ -3,7 +3,9 @@ package k8s
 import (
 	"context"
 	"fmt"
+
 	"github.com/otavioCosta2110/k8s-tui/pkg/format"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,10 +21,12 @@ type PodInfo struct {
 }
 
 func FetchPods(client Client, namespace string, selector string) ([]PodInfo, error) {
+	logger.Debug("selector 5" + selector)
 	listOptions := metav1.ListOptions{}
 	if selector != "" {
 		listOptions.LabelSelector = selector
 	}
+	logger.Debug("selector " + listOptions.LabelSelector + selector)
 	pods, err := client.Clientset.CoreV1().Pods(namespace).List(context.Background(), listOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch pods: %v", err)

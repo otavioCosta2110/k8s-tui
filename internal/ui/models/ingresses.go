@@ -85,12 +85,8 @@ func (i *ingressesModel) fetchData() error {
 	var ingressInfo []k8s.IngressInfo
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if i.pluginAPI != nil {
-		ingressInfo, err = i.pluginAPI.GetIngresses(i.namespace)
-	} else {
-		ingressInfo, err = k8s.GetIngressesTableData(*i.k8sClient, i.namespace)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	ingressInfo, err = i.pluginAPI.GetIngresses(i.namespace)
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch ingresses: %v", err)

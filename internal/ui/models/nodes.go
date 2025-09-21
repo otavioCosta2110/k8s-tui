@@ -86,12 +86,8 @@ func (n *nodesModel) fetchData() error {
 	var nodeInfo []k8s.NodeInfo
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if n.pluginAPI != nil {
-		nodeInfo, err = n.pluginAPI.GetNodes()
-	} else {
-		nodeInfo, err = k8s.GetNodesTableData(*n.k8sClient)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	nodeInfo, err = n.pluginAPI.GetNodes()
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch nodes: %v", err)

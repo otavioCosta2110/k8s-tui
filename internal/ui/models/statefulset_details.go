@@ -30,14 +30,11 @@ func (ss *statefulsetDetailsModel) InitComponent(k *k8s.Client) (tea.Model, erro
 	var desc string
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if pm := plugins.GetGlobalPluginManager(); pm != nil && pm.GetAPI() != nil {
-		api := pm.GetAPI()
-		api.SetClient(*k)
-		desc, err = api.DescribeStatefulSet(ss.statefulset.Namespace, ss.statefulset.Name)
-	} else {
-		desc, err = k8s.DescribeResource(*k, k8s.ResourceTypeStatefulSet, ss.statefulset.Namespace, ss.statefulset.Name)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	pm := plugins.GetGlobalPluginManager()
+	api := pm.GetAPI()
+	api.SetClient(*k)
+	desc, err = api.DescribeStatefulSet(ss.statefulset.Namespace, ss.statefulset.Name)
 
 	if err != nil {
 		return nil, err

@@ -83,46 +83,37 @@ func (g *GenericResourceModel) createDeleteAction(tableModel *ui.TableModel) fun
 }
 
 func (g *GenericResourceModel) deleteResource(resource types.ResourceData) error {
-	// Try to use plugin API first, fall back to k8s client
-	if g.pluginAPI != nil {
-		var err error
-		switch g.resourceType {
-		case k8s.ResourceTypePod:
-			err = g.pluginAPI.DeletePod(resource.GetNamespace(), resource.GetName())
-		case k8s.ResourceTypeService:
-			err = g.pluginAPI.DeleteService(resource.GetNamespace(), resource.GetName())
-		case k8s.ResourceTypeDeployment:
-			err = g.pluginAPI.DeleteDeployment(resource.GetNamespace(), resource.GetName())
-		case k8s.ResourceTypeConfigMap:
-			err = g.pluginAPI.DeleteConfigMap(resource.GetNamespace(), resource.GetName())
-		case k8s.ResourceTypeSecret:
-			err = g.pluginAPI.DeleteSecret(resource.GetNamespace(), resource.GetName())
-		case k8s.ResourceTypeIngress:
-			err = g.pluginAPI.DeleteIngress(resource.GetNamespace(), resource.GetName())
-		case k8s.ResourceTypeJob:
-			err = g.pluginAPI.DeleteJob(resource.GetNamespace(), resource.GetName())
-		case k8s.ResourceTypeCronJob:
-			err = g.pluginAPI.DeleteCronJob(resource.GetNamespace(), resource.GetName())
-		case k8s.ResourceTypeDaemonSet:
-			err = g.pluginAPI.DeleteDaemonSet(resource.GetNamespace(), resource.GetName())
-		case k8s.ResourceTypeStatefulSet:
-			err = g.pluginAPI.DeleteStatefulSet(resource.GetNamespace(), resource.GetName())
-		case k8s.ResourceTypeReplicaSet:
-			err = g.pluginAPI.DeleteReplicaSet(resource.GetNamespace(), resource.GetName())
-		case k8s.ResourceTypeServiceAccount:
-			err = g.pluginAPI.DeleteServiceAccount(resource.GetNamespace(), resource.GetName())
-		default:
-			// Fall back to k8s client for unsupported types
-			err = k8s.DeleteResource(*g.k8sClient, g.resourceType, resource.GetNamespace(), resource.GetName())
-		}
-		if err != nil {
-			return fmt.Errorf("failed to delete resource %s/%s: %v", resource.GetNamespace(), resource.GetName(), err)
-		}
-		return nil
+	// Always use plugin API - resources should never bypass the plugin system
+	var err error
+	switch g.resourceType {
+	case k8s.ResourceTypePod:
+		err = g.pluginAPI.DeletePod(resource.GetNamespace(), resource.GetName())
+	case k8s.ResourceTypeService:
+		err = g.pluginAPI.DeleteService(resource.GetNamespace(), resource.GetName())
+	case k8s.ResourceTypeDeployment:
+		err = g.pluginAPI.DeleteDeployment(resource.GetNamespace(), resource.GetName())
+	case k8s.ResourceTypeConfigMap:
+		err = g.pluginAPI.DeleteConfigMap(resource.GetNamespace(), resource.GetName())
+	case k8s.ResourceTypeSecret:
+		err = g.pluginAPI.DeleteSecret(resource.GetNamespace(), resource.GetName())
+	case k8s.ResourceTypeIngress:
+		err = g.pluginAPI.DeleteIngress(resource.GetNamespace(), resource.GetName())
+	case k8s.ResourceTypeJob:
+		err = g.pluginAPI.DeleteJob(resource.GetNamespace(), resource.GetName())
+	case k8s.ResourceTypeCronJob:
+		err = g.pluginAPI.DeleteCronJob(resource.GetNamespace(), resource.GetName())
+	case k8s.ResourceTypeDaemonSet:
+		err = g.pluginAPI.DeleteDaemonSet(resource.GetNamespace(), resource.GetName())
+	case k8s.ResourceTypeStatefulSet:
+		err = g.pluginAPI.DeleteStatefulSet(resource.GetNamespace(), resource.GetName())
+	case k8s.ResourceTypeReplicaSet:
+		err = g.pluginAPI.DeleteReplicaSet(resource.GetNamespace(), resource.GetName())
+	case k8s.ResourceTypeServiceAccount:
+		err = g.pluginAPI.DeleteServiceAccount(resource.GetNamespace(), resource.GetName())
+	default:
+		// Use plugin API for custom resources
+		err = k8s.DeleteResource(*g.k8sClient, g.resourceType, resource.GetNamespace(), resource.GetName())
 	}
-
-	// Fall back to k8s client
-	err := k8s.DeleteResource(*g.k8sClient, g.resourceType, resource.GetNamespace(), resource.GetName())
 	if err != nil {
 		return fmt.Errorf("failed to delete resource %s/%s: %v", resource.GetNamespace(), resource.GetName(), err)
 	}

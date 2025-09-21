@@ -85,12 +85,8 @@ func (cj *cronjobsModel) fetchData() error {
 	var cronjobInfo []k8s.CronJobInfo
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if cj.pluginAPI != nil {
-		cronjobInfo, err = cj.pluginAPI.GetCronJobs(cj.namespace)
-	} else {
-		cronjobInfo, err = k8s.GetCronJobsTableData(*cj.k8sClient, cj.namespace)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	cronjobInfo, err = cj.pluginAPI.GetCronJobs(cj.namespace)
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch cronjobs: %v", err)

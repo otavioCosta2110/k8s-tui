@@ -82,12 +82,8 @@ func (s *serviceaccountsModel) fetchData() error {
 	var serviceaccountInfo []k8s.ServiceAccountInfo
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if s.pluginAPI != nil {
-		serviceaccountInfo, err = s.pluginAPI.GetServiceAccounts(s.namespace)
-	} else {
-		serviceaccountInfo, err = k8s.GetServiceAccountsTableData(*s.k8sClient, s.namespace)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	serviceaccountInfo, err = s.pluginAPI.GetServiceAccounts(s.namespace)
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch serviceaccounts: %v", err)

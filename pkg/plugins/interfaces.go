@@ -276,7 +276,7 @@ type PluginAPI interface {
 	SetClient(client k8s.Client)
 
 	// Kubernetes resource API methods
-	GetPods(namespace string) ([]k8s.PodInfo, error)
+	GetPods(namespace string, selector ...string) ([]k8s.PodInfo, error)
 	GetServices(namespace string) ([]k8s.ServiceInfo, error)
 	GetDeployments(namespace string) ([]k8s.DeploymentInfo, error)
 	GetConfigMaps(namespace string) ([]k8s.Configmap, error)
@@ -305,6 +305,11 @@ type PluginAPI interface {
 	DescribeReplicaSet(namespace, name string) (string, error)
 	DescribeNode(name string) (string, error)
 	DescribeServiceAccount(namespace, name string) (string, error)
+
+	// Plugin extensibility methods
+	RegisterResourceHandler(resourceType k8s.ResourceType, handler ResourceHandler)
+	GetSupportedResourceTypes() []k8s.ResourceType
+	GetResourceHandler(resourceType k8s.ResourceType) (ResourceHandler, bool)
 
 	// Delete methods
 	DeletePod(namespace, name string) error

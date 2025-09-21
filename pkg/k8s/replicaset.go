@@ -28,6 +28,19 @@ func NewReplicaSet(name, namespace string, k Client) *ReplicaSetInfo {
 	}
 }
 
+func (r *ReplicaSetInfo) Fetch() error {
+	replicaSet, err := r.Client.Clientset.AppsV1().ReplicaSets(r.Namespace).Get(
+		context.Background(),
+		r.Name,
+		metav1.GetOptions{},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to get replicaset: %v", err)
+	}
+	r.Raw = replicaSet
+	return nil
+}
+
 func FetchReplicaSetList(client Client, namespace string) ([]string, error) {
 	rs, err := client.Clientset.AppsV1().ReplicaSets(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
@@ -88,11 +101,33 @@ func GetReplicaSetsTableData(client Client, namespace string) ([]ReplicaSetInfo,
 }
 
 func (r *ReplicaSetInfo) GetPods() ([]PodInfo, error) {
-	pods, err := FetchPods(r.Client, r.Namespace, fmt.Sprintf("app=%s", r.Name))
+	selector, err := r.GetLabelSelector()
+	if err != nil {
+		return nil, err
+	}
+	pods, err := FetchPods(r.Client, r.Namespace, selector)
 	if err != nil {
 		return nil, err
 	}
 	return pods, nil
+}
+
+func (r *ReplicaSetInfo) GetLabelSelector() (string, error) {
+	if r.Raw == nil {
+		return "", fmt.Errorf("replicaset raw data not available")
+	}
+
+	if r.Raw.Spec.Selector == nil {
+		return "", fmt.Errorf("replicaset has no selector")
+	}
+
+	// Convert label selector to string format
+	requirements, err := metav1.LabelSelectorAsSelector(r.Raw.Spec.Selector)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert label selector: %v", err)
+	}
+
+	return requirements.String(), nil
 }
 
 func DeleteReplicaSet(client Client, namespace string, replicaSetName string) error {

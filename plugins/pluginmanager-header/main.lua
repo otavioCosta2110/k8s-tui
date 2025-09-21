@@ -19,7 +19,7 @@ function Config()
     return {
         show_namespace = true,
         show_time = true,
-        custom_message = "🚀 k8s-tui Enhanced",
+        custom_message = "🚀 k8s-tui",
         update_interval = 30
     }
 end

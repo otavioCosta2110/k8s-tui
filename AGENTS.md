@@ -15,6 +15,8 @@
 - **Log Rotation**: Automatic rotation when file exceeds 10MB, keeps up to 5 rotated files
 - **Usage**: Use `logger.Debug()`, `logger.Info()`, `logger.Warn()`, `logger.Error()` functions
 - **Set Log Level**: Call `logger.SetLevel(logger.LEVEL_INFO)` to change log level
+- **Plugin Logging**: Use `logger.PluginDebug()`, `logger.PluginInfo()`, `logger.PluginWarn()`, `logger.PluginError()` for plugin-specific logging
+- **IMPORTANT**: Never log to stdout/stderr directly - always use `pkg/logger/logger.go` functions
 
 ## Configuration System
 - **Config Directory**: `~/.config/k8s-tui/` - User configuration directory
@@ -58,3 +60,4 @@
 - **Events**: Plugin lifecycle events (app_started, namespace_changed, resource_selected, ui_update)
 - **Commands**: Plugins can register custom commands with handlers
 - **Hooks**: Event-driven callbacks for plugin integration
+- **Resource Access**: All UI components ALWAYS use the plugin API for resource operations - no direct k8s client bypass

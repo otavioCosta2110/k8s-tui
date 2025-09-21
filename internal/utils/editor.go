@@ -1,10 +1,8 @@
 package utils
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
-	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 )
 
 func GetPreferredEditor() string {

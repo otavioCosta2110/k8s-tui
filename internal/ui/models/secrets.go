@@ -83,12 +83,8 @@ func (s *secretsModel) fetchData() error {
 	var secretInfo []k8s.SecretInfo
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if s.pluginAPI != nil {
-		secretInfo, err = s.pluginAPI.GetSecrets(s.namespace)
-	} else {
-		secretInfo, err = k8s.GetSecretsTableData(*s.k8sClient, s.namespace)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	secretInfo, err = s.pluginAPI.GetSecrets(s.namespace)
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch secrets: %v", err)

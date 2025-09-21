@@ -82,12 +82,8 @@ func (c *configmapsModel) fetchData() error {
 	var cms []k8s.Configmap
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if c.pluginAPI != nil {
-		cms, err = c.pluginAPI.GetConfigMaps(c.namespace)
-	} else {
-		cms, err = k8s.FetchConfigmaps(*c.k8sClient, c.namespace, "")
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	cms, err = c.pluginAPI.GetConfigMaps(c.namespace)
 
 	if err != nil {
 		return err

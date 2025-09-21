@@ -87,12 +87,8 @@ func (ds *daemonsetsModel) fetchData() error {
 	var daemonsetInfo []k8s.DaemonSetInfo
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if ds.pluginAPI != nil {
-		daemonsetInfo, err = ds.pluginAPI.GetDaemonSets(ds.namespace)
-	} else {
-		daemonsetInfo, err = k8s.GetDaemonSetsTableData(*ds.k8sClient, ds.namespace)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	daemonsetInfo, err = ds.pluginAPI.GetDaemonSets(ds.namespace)
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch daemonsets: %v", err)

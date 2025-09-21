@@ -20,7 +20,7 @@ type Configmap struct {
 	Data      string
 	Age       string
 	Raw       *corev1.ConfigMap
-	Client    *kubernetes.Clientset
+	Client    kubernetes.Interface
 	Config    *rest.Config
 	YAML      string
 }

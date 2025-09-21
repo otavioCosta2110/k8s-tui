@@ -82,12 +82,8 @@ func (ss *statefulsetsModel) fetchData() error {
 	var statefulsetInfo []k8s.StatefulSetInfo
 	var err error
 
-	// Use plugin API if available, otherwise fall back to k8s client
-	if ss.pluginAPI != nil {
-		statefulsetInfo, err = ss.pluginAPI.GetStatefulSets(ss.namespace)
-	} else {
-		statefulsetInfo, err = k8s.GetStatefulSetsTableData(*ss.k8sClient, ss.namespace)
-	}
+	// Always use plugin API - resources should never bypass the plugin system
+	statefulsetInfo, err = ss.pluginAPI.GetStatefulSets(ss.namespace)
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch statefulsets: %v", err)

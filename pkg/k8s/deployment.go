@@ -3,6 +3,7 @@ package k8s
 import (
 	"context"
 	"fmt"
+
 	"github.com/otavioCosta2110/k8s-tui/pkg/format"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -26,6 +27,19 @@ func NewDeployment(name, namespace string, k Client) *DeploymentInfo {
 		Namespace: namespace,
 		Client:    k,
 	}
+}
+
+func (d *DeploymentInfo) Fetch() error {
+	deployment, err := d.Client.Clientset.AppsV1().Deployments(d.Namespace).Get(
+		context.Background(),
+		d.Name,
+		metav1.GetOptions{},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to get deployment: %v", err)
+	}
+	d.Raw = deployment
+	return nil
 }
 
 func FetchDeploymentList(client Client, namespace string) ([]string, error) {
@@ -88,11 +102,33 @@ func GetDeploymentsTableData(client Client, namespace string) ([]DeploymentInfo,
 }
 
 func (d *DeploymentInfo) GetPods() ([]PodInfo, error) {
-	pods, err := FetchPods(d.Client, d.Namespace, fmt.Sprintf("app=%s", d.Name))
+	selector, err := d.GetLabelSelector()
+	if err != nil {
+		return nil, err
+	}
+	pods, err := FetchPods(d.Client, d.Namespace, selector)
 	if err != nil {
 		return nil, err
 	}
 	return pods, nil
+}
+
+func (d *DeploymentInfo) GetLabelSelector() (string, error) {
+	if d.Raw == nil {
+		return "", fmt.Errorf("deployment raw data not available")
+	}
+
+	if d.Raw.Spec.Selector == nil {
+		return "", fmt.Errorf("deployment has no selector")
+	}
+
+	// Convert label selector to string format
+	requirements, err := metav1.LabelSelectorAsSelector(d.Raw.Spec.Selector)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert label selector: %v", err)
+	}
+
+	return requirements.String(), nil
 }
 
 func DeleteDeployment(client Client, namespace string, deploymentName string) error {
