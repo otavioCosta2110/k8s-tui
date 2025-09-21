@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/pkg/format"
-	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/yuin/gopher-lua"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

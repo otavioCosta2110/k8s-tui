@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/charmbracelet/bubbletea"
-	"github.com/otavioCosta2110/k8s-tui/internal/ui"
+	"github.com/otavioCosta2110/k8s-tui/internal/app/ui"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 	"os"
 	"testing"

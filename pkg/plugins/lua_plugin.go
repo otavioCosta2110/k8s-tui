@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
-	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
-	"github.com/otavioCosta2110/k8s-tui/pkg/types"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
 	"github.com/yuin/gopher-lua"
 )
 

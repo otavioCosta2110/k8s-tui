@@ -1,7 +1,7 @@
 package plugins
 
 import (
-	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 )
 
 // ResourceHandler defines the interface for handling resource operations
