@@ -36,3 +36,25 @@
 - **Testing**: Table-driven tests with `t.Run()`, test success/error paths
 - **Organization**: Interfaces for abstraction, single-purpose functions, meaningful names
 - **Go Idioms**: Use `gofmt`, struct embedding, composition over inheritance
+
+## API Usage
+
+### Kubernetes API
+- **Client Library**: Uses `k8s.io/client-go` for Kubernetes API interactions
+- **Authentication**: Supports kubeconfig-based authentication via `clientcmd.BuildConfigFromFlags()`
+- **Client Creation**: Creates `*kubernetes.Clientset` and `*rest.Config` for API calls
+- **Supported Resources**: Pods, Deployments, Services, ConfigMaps, Secrets, Ingresses, Jobs, CronJobs, DaemonSets, StatefulSets, Nodes, ServiceAccounts, ReplicaSets, Events
+- **Operations**: List, Get, Describe, Delete, Logs, Exec (for pods)
+- **Custom Resources**: Extensible via plugin system for CRDs and custom resource types
+- **Metrics**: Aggregates cluster-wide resource counts for dashboard display
+
+### Plugin API
+- **Plugin Types**: ResourcePlugin, UIPlugin, PluginmanagerStylePlugin
+- **Language Support**: Go-based plugins and Lua scripts
+- **Registration**: Plugins register via `PluginRegistry` with metadata (name, version, description)
+- **Resource Plugins**: Can define custom resource types with display components, refresh intervals, and CRUD operations
+- **UI Plugins**: Inject UI components into header, footer, sidebar, status bar
+- **Lua API**: Provides `k8s_tui` global with methods for status updates, header components, and k8s resource access
+- **Events**: Plugin lifecycle events (app_started, namespace_changed, resource_selected, ui_update)
+- **Commands**: Plugins can register custom commands with handlers
+- **Hooks**: Event-driven callbacks for plugin integration
