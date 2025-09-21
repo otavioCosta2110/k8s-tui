@@ -80,7 +80,16 @@ func (j *jobsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (j *jobsModel) fetchData() error {
-	jobInfo, err := k8s.GetJobsTableData(*j.k8sClient, j.namespace)
+	var jobInfo []k8s.JobInfo
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if j.pluginAPI != nil {
+		jobInfo, err = j.pluginAPI.GetJobs(j.namespace)
+	} else {
+		jobInfo, err = k8s.GetJobsTableData(*j.k8sClient, j.namespace)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to fetch jobs: %v", err)
 	}

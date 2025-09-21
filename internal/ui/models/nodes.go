@@ -22,7 +22,7 @@ func NewNodes(k k8s.Client, namespace string) (*nodesModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeNode,
 		Title:           customstyles.ResourceIcons["Nodes"] + " Nodes in cluster",
-		ColumnWidths:    []float64{0.25, 0.10, 0.12, 0.10, 0.05, 0.07, 0.12, 0.10},
+		ColumnWidths:    []float64{0.5, 0.3, 0.5, 0.3, 0.3, 0.3, 0.3, 0.5},
 		RefreshInterval: 10 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAME", 0),
@@ -83,7 +83,16 @@ func (n *nodesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (n *nodesModel) fetchData() error {
-	nodeInfo, err := k8s.GetNodesTableData(*n.k8sClient)
+	var nodeInfo []k8s.NodeInfo
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if n.pluginAPI != nil {
+		nodeInfo, err = n.pluginAPI.GetNodes()
+	} else {
+		nodeInfo, err = k8s.GetNodesTableData(*n.k8sClient)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to fetch nodes: %v", err)
 	}

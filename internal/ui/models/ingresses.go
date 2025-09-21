@@ -22,7 +22,7 @@ func NewIngresses(k k8s.Client, namespace string) (*ingressesModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeIngress,
 		Title:           customstyles.ResourceIcons["Ingresses"] + " Ingresses in " + namespace,
-		ColumnWidths:    []float64{0.13, 0.23, 0.13, 0.13, 0.13, 0.13, 0.03},
+		ColumnWidths:    []float64{1, 2.1, 1, 1, 1, 1, 1},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),
@@ -82,7 +82,16 @@ func (i *ingressesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (i *ingressesModel) fetchData() error {
-	ingressInfo, err := k8s.GetIngressesTableData(*i.k8sClient, i.namespace)
+	var ingressInfo []k8s.IngressInfo
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if i.pluginAPI != nil {
+		ingressInfo, err = i.pluginAPI.GetIngresses(i.namespace)
+	} else {
+		ingressInfo, err = k8s.GetIngressesTableData(*i.k8sClient, i.namespace)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to fetch ingresses: %v", err)
 	}

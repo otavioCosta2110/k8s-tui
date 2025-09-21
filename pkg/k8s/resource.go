@@ -354,3 +354,75 @@ func GetCustomResourceInfo(client Client, resourceType ResourceType, namespace s
 	}
 	return nil, fmt.Errorf("custom resource handler not set")
 }
+
+func DescribeResource(client Client, resourceType ResourceType, namespace, name string) (string, error) {
+	if IsCustomResourceType(resourceType) {
+		return "", fmt.Errorf("custom resource description not implemented")
+	}
+
+	switch resourceType {
+	case ResourceTypePod:
+		pod := NewPod(name, namespace, client)
+		return pod.Describe()
+	case ResourceTypeService:
+		service := NewService(name, namespace, client)
+		return service.Describe()
+	case ResourceTypeConfigMap:
+		configmap := NewConfigmap(name, namespace, client)
+		return configmap.Describe()
+	case ResourceTypeSecret:
+		secret := NewSecret(name, namespace, client)
+		return secret.Describe()
+	case ResourceTypeIngress:
+		ingress := NewIngress(name, namespace, client)
+		return ingress.Describe()
+	case ResourceTypeJob:
+		job := NewJob(name, namespace, client)
+		return job.Describe()
+	case ResourceTypeCronJob:
+		cronjob := NewCronJob(name, namespace, client)
+		return cronjob.Describe()
+	case ResourceTypeDaemonSet:
+		daemonset := NewDaemonSet(name, namespace, client)
+		return daemonset.Describe()
+	case ResourceTypeStatefulSet:
+		statefulset := NewStatefulSet(name, namespace, client)
+		return statefulset.Describe()
+	case ResourceTypeNode:
+		node := NewNode(name, client)
+		return node.Describe()
+	case ResourceTypeServiceAccount:
+		serviceaccount := NewServiceAccount(name, namespace, client)
+		return serviceaccount.Describe()
+	default:
+		return "", fmt.Errorf("unsupported resource type for description: %s", resourceType)
+	}
+}
+
+func GetResourceLogs(client Client, resourceType ResourceType, namespace, name string) (string, error) {
+	if IsCustomResourceType(resourceType) {
+		return "", fmt.Errorf("custom resource logs not implemented")
+	}
+
+	switch resourceType {
+	case ResourceTypePod:
+		pod := NewPod(name, namespace, client)
+		return pod.GetLogs()
+	default:
+		return "", fmt.Errorf("logs not supported for resource type: %s", resourceType)
+	}
+}
+
+func ExecResource(client Client, resourceType ResourceType, namespace, name string, command []string) (string, string, error) {
+	if IsCustomResourceType(resourceType) {
+		return "", "", fmt.Errorf("custom resource exec not implemented")
+	}
+
+	switch resourceType {
+	case ResourceTypePod:
+		pod := NewPod(name, namespace, client)
+		return pod.Exec(command)
+	default:
+		return "", "", fmt.Errorf("exec not supported for resource type: %s", resourceType)
+	}
+}

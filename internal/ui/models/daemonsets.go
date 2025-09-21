@@ -84,7 +84,16 @@ func (ds *daemonsetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (ds *daemonsetsModel) fetchData() error {
-	daemonsetInfo, err := k8s.GetDaemonSetsTableData(*ds.k8sClient, ds.namespace)
+	var daemonsetInfo []k8s.DaemonSetInfo
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if ds.pluginAPI != nil {
+		daemonsetInfo, err = ds.pluginAPI.GetDaemonSets(ds.namespace)
+	} else {
+		daemonsetInfo, err = k8s.GetDaemonSetsTableData(*ds.k8sClient, ds.namespace)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to fetch daemonsets: %v", err)
 	}

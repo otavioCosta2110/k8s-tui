@@ -79,7 +79,16 @@ func (c *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (c *configmapsModel) fetchData() error {
-	cms, err := k8s.FetchConfigmaps(*c.k8sClient, c.namespace, "")
+	var cms []k8s.Configmap
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if c.pluginAPI != nil {
+		cms, err = c.pluginAPI.GetConfigMaps(c.namespace)
+	} else {
+		cms, err = k8s.FetchConfigmaps(*c.k8sClient, c.namespace, "")
+	}
+
 	if err != nil {
 		return err
 	}

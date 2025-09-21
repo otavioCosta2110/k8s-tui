@@ -80,7 +80,16 @@ func (s *secretsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (s *secretsModel) fetchData() error {
-	secretInfo, err := k8s.GetSecretsTableData(*s.k8sClient, s.namespace)
+	var secretInfo []k8s.SecretInfo
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if s.pluginAPI != nil {
+		secretInfo, err = s.pluginAPI.GetSecrets(s.namespace)
+	} else {
+		secretInfo, err = k8s.GetSecretsTableData(*s.k8sClient, s.namespace)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to fetch secrets: %v", err)
 	}

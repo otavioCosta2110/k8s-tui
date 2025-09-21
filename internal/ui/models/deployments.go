@@ -93,7 +93,16 @@ func (d *deploymentsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (d *deploymentsModel) fetchData() error {
-	deploymentInfo, err := k8s.GetDeploymentsTableData(*d.k8sClient, d.namespace)
+	var deploymentInfo []k8s.DeploymentInfo
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if d.pluginAPI != nil {
+		deploymentInfo, err = d.pluginAPI.GetDeployments(d.namespace)
+	} else {
+		deploymentInfo, err = k8s.GetDeploymentsTableData(*d.k8sClient, d.namespace)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to fetch deployments: %v", err)
 	}

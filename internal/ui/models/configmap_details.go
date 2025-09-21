@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
+	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 	customstyles "github.com/otavioCosta2110/k8s-tui/pkg/ui/custom_styles"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -32,7 +33,18 @@ func NewConfigmapDetails(k k8s.Client, namespace, cmName string) *cmDetailsModel
 func (c *cmDetailsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	c.k8sClient = k
 
-	desc, err := c.cm.Describe()
+	var desc string
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if pm := plugins.GetGlobalPluginManager(); pm != nil && pm.GetAPI() != nil {
+		api := pm.GetAPI()
+		api.SetClient(*k)
+		desc, err = api.DescribeConfigMap(c.cm.Namespace, c.cm.Name)
+	} else {
+		desc, err = k8s.DescribeResource(*k, k8s.ResourceTypeConfigMap, c.cm.Namespace, c.cm.Name)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +91,17 @@ func (c *cmDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		c.isEditing = false
 		c.editor = nil
 
-		desc, err := c.cm.Describe()
+		var desc string
+
+		// Use plugin API if available, otherwise fall back to k8s client
+		if pm := plugins.GetGlobalPluginManager(); pm != nil && pm.GetAPI() != nil {
+			api := pm.GetAPI()
+			api.SetClient(*c.k8sClient)
+			desc, err = api.DescribeConfigMap(c.cm.Namespace, c.cm.Name)
+		} else {
+			desc, err = k8s.DescribeResource(*c.k8sClient, k8s.ResourceTypeConfigMap, c.cm.Namespace, c.cm.Name)
+		}
+
 		if err != nil {
 			c.err = err
 			return c, nil

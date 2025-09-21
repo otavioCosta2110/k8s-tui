@@ -93,7 +93,16 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (r *replicasetsModel) fetchData() error {
-	replicasetInfo, err := k8s.GetReplicaSetsTableData(*r.k8sClient, r.namespace)
+	var replicasetInfo []k8s.ReplicaSetInfo
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if r.pluginAPI != nil {
+		replicasetInfo, err = r.pluginAPI.GetReplicaSets(r.namespace)
+	} else {
+		replicasetInfo, err = k8s.GetReplicaSetsTableData(*r.k8sClient, r.namespace)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to fetch replicasets: %v", err)
 	}

@@ -21,7 +21,7 @@ func NewPods(k k8s.Client, namespace string, selector ...string) (*podsModel, er
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypePod,
 		Title:           customstyles.ResourceIcons["Pods"] + " Pods in " + namespace,
-		ColumnWidths:    []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.13},
+		ColumnWidths:    []float64{1, 2, 1, 0.8, 0.5, 1},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),
@@ -90,8 +90,12 @@ func (p *podsModel) fetchData(selector string) error {
 	var podsInfo []k8s.PodInfo
 	var err error
 
-	// For now, use k8s client directly
-	podsInfo, err = k8s.FetchPods(*p.k8sClient, p.namespace, selector)
+	// Use plugin API if available, otherwise fall back to k8s client
+	if p.pluginAPI != nil {
+		podsInfo, err = p.pluginAPI.GetPods(p.namespace)
+	} else {
+		podsInfo, err = k8s.FetchPods(*p.k8sClient, p.namespace, selector)
+	}
 
 	if err != nil {
 		return err

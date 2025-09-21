@@ -22,7 +22,7 @@ func NewServices(k k8s.Client, namespace string) (*servicesModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeService,
 		Title:           customstyles.ResourceIcons["Services"] + " Services in " + namespace,
-		ColumnWidths:    []float64{0.12, 0.21, 0.10, 0.15, 0.15, 0.15, 0.05},
+		ColumnWidths:    []float64{0.06, 0.05, 0.10, 0.11, 0.05, 0.05, 0.05},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),
@@ -82,7 +82,16 @@ func (s *servicesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (s *servicesModel) fetchData() error {
-	serviceInfo, err := k8s.GetServicesTableData(*s.k8sClient, s.namespace)
+	var serviceInfo []k8s.ServiceInfo
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if s.pluginAPI != nil {
+		serviceInfo, err = s.pluginAPI.GetServices(s.namespace)
+	} else {
+		serviceInfo, err = k8s.GetServicesTableData(*s.k8sClient, s.namespace)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to fetch services: %v", err)
 	}

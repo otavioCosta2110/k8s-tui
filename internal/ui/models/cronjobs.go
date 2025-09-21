@@ -22,7 +22,7 @@ func NewCronJobs(k k8s.Client, namespace string) (*cronjobsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeCronJob,
 		Title:           customstyles.ResourceIcons["CronJobs"] + " CronJobs in " + namespace,
-		ColumnWidths:    []float64{0.15, 0.25, 0.20, 0.10, 0.05, 0.1, 0.07},
+		ColumnWidths:    []float64{0.6, 1.0, 0.7, 0.5, 0.5, 1, 0.9},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),
@@ -82,7 +82,16 @@ func (cj *cronjobsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 }
 
 func (cj *cronjobsModel) fetchData() error {
-	cronjobInfo, err := k8s.GetCronJobsTableData(*cj.k8sClient, cj.namespace)
+	var cronjobInfo []k8s.CronJobInfo
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if cj.pluginAPI != nil {
+		cronjobInfo, err = cj.pluginAPI.GetCronJobs(cj.namespace)
+	} else {
+		cronjobInfo, err = k8s.GetCronJobsTableData(*cj.k8sClient, cj.namespace)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to fetch cronjobs: %v", err)
 	}

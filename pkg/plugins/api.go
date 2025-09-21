@@ -218,3 +218,57 @@ func (api *PluginAPIImpl) DeleteReplicaSet(namespace, name string) error {
 func (api *PluginAPIImpl) DeleteServiceAccount(namespace, name string) error {
 	return k8s.DeleteResource(api.client, k8s.ResourceTypeServiceAccount, namespace, name)
 }
+
+// Describe methods for individual resources
+
+func (api *PluginAPIImpl) DescribePod(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypePod, namespace, name)
+}
+
+func (api *PluginAPIImpl) DescribeService(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeService, namespace, name)
+}
+
+func (api *PluginAPIImpl) DescribeDeployment(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeDeployment, namespace, name)
+}
+
+func (api *PluginAPIImpl) DescribeConfigMap(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeConfigMap, namespace, name)
+}
+
+func (api *PluginAPIImpl) DescribeSecret(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeSecret, namespace, name)
+}
+
+func (api *PluginAPIImpl) DescribeIngress(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeIngress, namespace, name)
+}
+
+func (api *PluginAPIImpl) DescribeJob(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeJob, namespace, name)
+}
+
+func (api *PluginAPIImpl) DescribeCronJob(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeCronJob, namespace, name)
+}
+
+func (api *PluginAPIImpl) DescribeDaemonSet(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeDaemonSet, namespace, name)
+}
+
+func (api *PluginAPIImpl) DescribeStatefulSet(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeStatefulSet, namespace, name)
+}
+
+func (api *PluginAPIImpl) DescribeReplicaSet(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeReplicaSet, namespace, name)
+}
+
+func (api *PluginAPIImpl) DescribeNode(name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeNode, "", name)
+}
+
+func (api *PluginAPIImpl) DescribeServiceAccount(namespace, name string) (string, error) {
+	return k8s.DescribeResource(api.client, k8s.ResourceTypeServiceAccount, namespace, name)
+}

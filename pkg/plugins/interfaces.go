@@ -291,6 +291,21 @@ type PluginAPI interface {
 	GetNamespaces() ([]string, error)
 	GetServiceAccounts(namespace string) ([]k8s.ServiceAccountInfo, error)
 
+	// Describe methods for individual resources
+	DescribePod(namespace, name string) (string, error)
+	DescribeService(namespace, name string) (string, error)
+	DescribeDeployment(namespace, name string) (string, error)
+	DescribeConfigMap(namespace, name string) (string, error)
+	DescribeSecret(namespace, name string) (string, error)
+	DescribeIngress(namespace, name string) (string, error)
+	DescribeJob(namespace, name string) (string, error)
+	DescribeCronJob(namespace, name string) (string, error)
+	DescribeDaemonSet(namespace, name string) (string, error)
+	DescribeStatefulSet(namespace, name string) (string, error)
+	DescribeReplicaSet(namespace, name string) (string, error)
+	DescribeNode(name string) (string, error)
+	DescribeServiceAccount(namespace, name string) (string, error)
+
 	// Delete methods
 	DeletePod(namespace, name string) error
 	DeleteService(namespace, name string) error

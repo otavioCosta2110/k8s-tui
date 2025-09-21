@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/otavioCosta2110/k8s-tui/internal/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/pkg/k8s"
+	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -26,7 +27,18 @@ func NewIngressDetails(k k8s.Client, namespace, ingressName string) *ingressDeta
 func (i *ingressDetailsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	i.k8sClient = k
 
-	desc, err := i.ingress.Describe()
+	var desc string
+	var err error
+
+	// Use plugin API if available, otherwise fall back to k8s client
+	if pm := plugins.GetGlobalPluginManager(); pm != nil && pm.GetAPI() != nil {
+		api := pm.GetAPI()
+		api.SetClient(*k)
+		desc, err = api.DescribeIngress(i.ingress.Namespace, i.ingress.Name)
+	} else {
+		desc, err = k8s.DescribeResource(*k, k8s.ResourceTypeIngress, i.ingress.Namespace, i.ingress.Name)
+	}
+
 	if err != nil {
 		return nil, err
 	}
