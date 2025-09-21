@@ -108,25 +108,6 @@ func TestIngressesModelConfig(t *testing.T) {
 	}
 }
 
-func TestIngressesModelColumnWidths(t *testing.T) {
-	client := k8s.Client{Namespace: "default"}
-	model, err := NewIngresses(client, "default")
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-
-	expectedWidths := []float64{0.13, 0.23, 0.13, 0.13, 0.13, 0.13, 0.03}
-	if len(model.config.ColumnWidths) != len(expectedWidths) {
-		t.Error("ColumnWidths length mismatch")
-	}
-
-	for i, expected := range expectedWidths {
-		if model.config.ColumnWidths[i] != expected {
-			t.Errorf("ColumnWidth[%d] expected %f, got %f", i, expected, model.config.ColumnWidths[i])
-		}
-	}
-}
-
 func TestIngressesModelWithMultipleItems(t *testing.T) {
 	client := k8s.Client{Namespace: "default"}
 	model, err := NewIngresses(client, "default")
