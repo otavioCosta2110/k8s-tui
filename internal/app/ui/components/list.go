@@ -40,7 +40,7 @@ func NewList(items []string, title string, onSelect func(selected string) tea.Ms
 	delegate := list.NewDefaultDelegate()
 	delegate.Styles.NormalTitle = customstyles.NormalStyle()
 
-	delegate.Styles.SelectedTitle = customstyles.SelectedStyle()
+	delegate.Styles.SelectedTitle = customstyles.SelectedStyle().Width(customstyles.AvailableWidth)
 
 	delegate.SetSpacing(0)
 	delegate.ShowDescription = false
@@ -71,7 +71,7 @@ func NewListWithItems(items []ListItem, title string, onSelect func(selected str
 	delegate := list.NewDefaultDelegate()
 	delegate.Styles.NormalTitle = customstyles.NormalStyle()
 
-	delegate.Styles.SelectedTitle = customstyles.SelectedStyle()
+	delegate.Styles.SelectedTitle = customstyles.SelectedStyle().Width(customstyles.AvailableWidth)
 
 	delegate.SetSpacing(0)
 	delegate.ShowDescription = false

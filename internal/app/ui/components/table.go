@@ -36,13 +36,14 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 	styles := table.DefaultStyles()
 	styles.Header = styles.Header.
 		BorderBottom(true).
-		BorderForeground(lipgloss.Color(customstyles.HeaderColor)).
+		BorderForeground(lipgloss.Color(customstyles.TextColor)).
 		BorderStyle(lipgloss.NormalBorder()).
 		Foreground(lipgloss.Color(customstyles.TextColor)).
 		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		BorderBackground(lipgloss.Color(customstyles.BackgroundColor))
 
-	styles.Selected = customstyles.SelectedStyle().Padding(0, 0).Margin(0, 0)
+	styles.Cell = styles.Cell.Foreground(lipgloss.Color(customstyles.TextColor)).Background(lipgloss.Color(customstyles.BackgroundColor))
+	styles.Selected = customstyles.SelectedStyle().Foreground(lipgloss.Color(customstyles.SelectionForeground)).Background(lipgloss.Color(customstyles.SelectionBackground))
 	checkboxColumn := table.Column{Title: "✓", Width: 3}
 	columns = append([]table.Column{checkboxColumn}, columns...)
 
@@ -165,6 +166,7 @@ func (m *TableModel) View() string {
 
 	tableHeight := styles.ScreenHeight + 1
 	m.Table.SetHeight(tableHeight)
+	m.Table.SetWidth(styles.ScreenWidth)
 
 	tableView := m.Table.View()
 
@@ -178,7 +180,7 @@ func (m *TableModel) updateColumnWidths(totalWidth int) {
 	checkboxWidth := 3
 	widths[0] = checkboxWidth
 	remainingWidth := totalWidth + checkboxWidth
-	totalAssigned := checkboxWidth + len(columns) * 2
+	totalAssigned := checkboxWidth + len(columns)*2
 	// Distribute remaining width among data columns based on weights
 	for i := 1; i < len(columns); i++ {
 		width := int(float64(remainingWidth) * m.colPercent[i])

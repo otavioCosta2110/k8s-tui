@@ -26,7 +26,6 @@ func SelectedStyle() lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(lipgloss.Color(SelectionForeground)).
 		Background(lipgloss.Color(SelectionBackground)).
-		Width(AvailableWidth).
 		Padding(0, 1).
 		Bold(true)
 }
