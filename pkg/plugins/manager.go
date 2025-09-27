@@ -42,7 +42,7 @@ func (pm *PluginManager) LoadPlugins() error {
 		return nil
 	}
 
-	// Check if plugin directory exists
+	
 	if _, err := os.Stat(pm.pluginDir); os.IsNotExist(err) {
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: Plugin directory does not exist: %s", pm.pluginDir))
 		return nil
@@ -50,7 +50,7 @@ func (pm *PluginManager) LoadPlugins() error {
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Scanning for Lua plugins in: %s", pm.pluginDir))
 
-	// Find all .lua files in the plugin directory and subdirectories
+	
 	var files []string
 	err := filepath.Walk(pm.pluginDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -98,11 +98,11 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Creating Lua state for plugin: %s", pluginName))
 	L := lua.NewState()
 
-	// Variables for Neovim-style detection
+	
 	var setupType, configType, commandsType, hooksType lua.LValueType
 	var isNeovimStyle bool
 
-	// Load the Lua script
+	
 	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Loading Lua script: %s", path))
 	if err := L.DoFile(path); err != nil {
 		L.Close()
@@ -111,7 +111,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 	}
 	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Successfully loaded Lua script: %s", path))
 
-	// Debug: Check what functions are available
+	
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Available functions in %s:", pluginName))
 	for _, funcName := range []string{"Name", "Version", "Description", "Initialize", "Setup", "Config", "Commands", "Hooks", "GetResourceTypes", "GetUIExtensions"} {
 		funcType := L.GetGlobal(funcName).Type()
@@ -124,7 +124,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Validating required functions for plugin: %s", pluginName))
 
-	// Check if required functions exist
+	
 	if L.GetGlobal("Name").Type() != lua.LTFunction {
 		L.Close()
 		logger.Error(fmt.Sprintf("🔌 Plugin Manager: Plugin %s missing required Name() function", pluginName))
@@ -136,7 +136,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		return fmt.Errorf("Lua plugin must define an Initialize function")
 	}
 
-	// Check if this is a Neovim-style plugin
+	
 	setupType = L.GetGlobal("Setup").Type()
 	configType = L.GetGlobal("Config").Type()
 	commandsType = L.GetGlobal("Commands").Type()
@@ -147,15 +147,15 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		commandsType == lua.LTFunction ||
 		hooksType == lua.LTFunction
 
-	// For Neovim-style plugins, set up the k8s_tui API before initialization
+	
 	if isNeovimStyle {
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: %s", pluginName))
 		logger.Info("🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin")
 
-		// Create API table
+		
 		apiTable := L.NewTable()
 
-		// Add API functions
+		
 		L.SetField(apiTable, "get_namespace", L.NewFunction(func(L *lua.LState) int {
 			namespace := pm.api.GetCurrentNamespace()
 			L.Push(lua.LString(namespace))
@@ -198,7 +198,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			pm.api.RegisterCommand(command.Name, command.Description, command.Handler)
 			return 0
 		}))
-		// Kubernetes resource API functions
+		
 		L.SetField(apiTable, "get_pods", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
 			client := pm.api.GetClient()
@@ -564,7 +564,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			return 1
 		}))
 
-		// Delete functions
+		
 		L.SetField(apiTable, "delete_pod", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
 			name := L.CheckString(2)
@@ -769,33 +769,33 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			return 1
 		}))
 
-		// Keep the existing get_endpoints function
+		
 		L.SetField(apiTable, "get_endpoints", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
 
-			// Get the current client from the API
+			
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
 				return 1
 			}
 
-			// Fetch endpoint slices data using the modern discovery.k8s.io/v1 API
+			
 			endpointSlices, err := client.Clientset.DiscoveryV1().EndpointSlices(namespace).List(context.Background(), metav1.ListOptions{})
 			if err != nil {
 				L.Push(lua.LString(fmt.Sprintf("failed to fetch endpoint slices: %v", err)))
 				return 1
 			}
 
-			// Convert to Lua table
+			
 			resultTable := L.NewTable()
 			for i, endpointSlice := range endpointSlices.Items {
-				// Format addresses
+				
 				var addresses []string
 				for _, endpoint := range endpointSlice.Endpoints {
 					for _, addr := range endpoint.Addresses {
 						if addr != "" {
-							// Check if endpoint is ready
+							
 							isReady := true
 							if endpoint.Conditions.Ready != nil {
 								isReady = *endpoint.Conditions.Ready
@@ -813,7 +813,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 					addressesStr = "<none>"
 				}
 
-				// Format ports
+				
 				var ports []string
 				for _, port := range endpointSlice.Ports {
 					if port.Port != nil {
@@ -829,7 +829,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 					portsStr = "<none>"
 				}
 
-				// Get associated service name from labels
+				
 				serviceName := "unknown"
 				if endpointSlice.Labels != nil {
 					if svcName, ok := endpointSlice.Labels["kubernetes.io/service-name"]; ok {
@@ -837,7 +837,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 					}
 				}
 
-				// Calculate age
+				
 				age := "Unknown"
 				if !endpointSlice.CreationTimestamp.IsZero() {
 					age = format.FormatAge(endpointSlice.CreationTimestamp.Time)
@@ -858,26 +858,26 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			return 1
 		}))
 
-		// Set the API in the global environment
+		
 		L.SetGlobal("k8s_tui", apiTable)
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: k8s_tui API set up for plugin: %s", pluginName))
 	}
 
-	// Create a LuaPlugin wrapper
+	
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Creating plugin wrapper for: %s", pluginName))
 	luaPlugin := &LuaPlugin{
 		L:          L,
 		pluginName: pluginName,
 	}
 
-	// Get plugin metadata for logging
+	
 	pluginDisplayName := luaPlugin.Name()
 	pluginVersion := luaPlugin.Version()
 	pluginDescription := luaPlugin.Description()
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Initializing plugin %s (%s v%s)", pluginDisplayName, pluginName, pluginVersion))
 
-	// Initialize the plugin
+	
 	if err := luaPlugin.Initialize(); err != nil {
 		L.Close()
 		logger.Error(fmt.Sprintf("🔌 Plugin Manager: Plugin %s initialization failed: %v", pluginDisplayName, err))
@@ -892,10 +892,10 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 	if isNeovimStyle {
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: %s", pluginDisplayName))
 
-		// Create Neovim-style plugin wrapper
+		
 		pluginmanagerPlugin := NewPluginmanagerStyleLuaPlugin(L, pluginName, pm.api)
 
-		// Setup the plugin with default config
+		
 		defaultConfig := pluginmanagerPlugin.Config()
 		if err := pluginmanagerPlugin.Setup(defaultConfig); err != nil {
 			logger.Error(fmt.Sprintf("🔌 Plugin Manager: Failed to setup Neovim-style plugin %s: %v", pluginDisplayName, err))
@@ -903,13 +903,13 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			return fmt.Errorf("failed to setup Neovim-style plugin: %v", err)
 		}
 
-		// Register commands
+		
 		commands := pluginmanagerPlugin.Commands()
 		for _, cmd := range commands {
 			pm.api.RegisterCommand(cmd.Name, cmd.Description, cmd.Handler)
 		}
 
-		// Register hooks
+		
 		hooks := pluginmanagerPlugin.Hooks()
 		for _, hook := range hooks {
 			pm.api.RegisterEventHandler(PluginEvent(hook.Event), hook.Handler)
@@ -918,7 +918,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		pm.pluginmanagerPlugins = append(pm.pluginmanagerPlugins, pluginmanagerPlugin)
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: %s v%s", pluginDisplayName, pluginVersion))
 
-		// Also register as legacy plugin for backward compatibility
+		
 		hasResourcePlugin := luaPlugin.hasResourcePlugin()
 		hasUIPlugin := luaPlugin.hasUIPlugin()
 
@@ -932,21 +932,21 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎨 Also registered as legacy UI plugin: %s", pluginDisplayName))
 		}
 	} else {
-		// Handle legacy plugins (deprecated)
+		
 		logger.Warn(fmt.Sprintf("🔌 Plugin Manager: ⚠️  Legacy plugin detected: %s - Consider migrating to pluginmanager-style", pluginDisplayName))
 
-		// Check plugin capabilities
+		
 		hasResourcePlugin := luaPlugin.hasResourcePlugin()
 		hasUIPlugin := luaPlugin.hasUIPlugin()
 
 		logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Plugin %s capabilities - Resource: %t, UI: %t", pluginDisplayName, hasResourcePlugin, hasUIPlugin))
 
-		// Register based on capabilities
+		
 		if hasResourcePlugin {
 			pm.registry.RegisterResourcePlugin(luaPlugin)
 			logger.Info(fmt.Sprintf("🔌 Plugin Manager: 📊 Registered legacy resource plugin: %s v%s - %s", pluginDisplayName, pluginVersion, pluginDescription))
 
-			// Log resource types
+			
 			resourceTypes := luaPlugin.GetResourceTypes()
 			for _, rt := range resourceTypes {
 				logger.Info(fmt.Sprintf("🔌 Plugin Manager:   └─ Resource type: %s (%s)", rt.Name, rt.Type))
@@ -959,7 +959,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		}
 	}
 
-	// Store the Lua state
+	
 	pm.luaStates[pluginName] = L
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎉 Plugin %s loaded and registered successfully", pluginDisplayName))
@@ -984,7 +984,7 @@ func (pm *PluginManager) TriggerEvent(event PluginEvent, data interface{}) {
 }
 
 func (pm *PluginManager) GetCustomResourceData(client k8s.Client, resourceType string, namespace string) ([]types.ResourceData, error) {
-	// Set the client on the API so plugins can access it
+	
 	pm.api.SetClient(client)
 
 	for _, plugin := range pm.registry.resourcePlugins {
@@ -1028,7 +1028,7 @@ func (pm *PluginManager) Shutdown() error {
 	for name, L := range pm.luaStates {
 		logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Shutting down plugin: %s", name))
 
-		// Call Shutdown if defined
+		
 		if L.GetGlobal("Shutdown").Type() == lua.LTFunction {
 			logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Calling Shutdown() for plugin: %s", name))
 			if err := L.CallByParam(lua.P{
@@ -1039,7 +1039,7 @@ func (pm *PluginManager) Shutdown() error {
 				logger.Error(fmt.Sprintf("🔌 Plugin Manager: Error calling Shutdown() for plugin %s: %v", name, err))
 				errorCount++
 			} else {
-				// Check for error return
+				
 				ret := L.Get(-1)
 				L.Pop(1)
 				if ret.Type() == lua.LTString {

@@ -76,7 +76,7 @@ func (p *PluginmanagerStyleLuaPlugin) Description() string {
 func (p *PluginmanagerStyleLuaPlugin) Initialize() error {
 	logger.PluginDebug(p.pluginName, "Initializing pluginmanager-style plugin")
 
-	// Set up the plugin API in Lua
+	
 	p.setupLuaAPI()
 
 	if err := p.L.CallByParam(lua.P{
@@ -118,17 +118,17 @@ func (p *PluginmanagerStyleLuaPlugin) Shutdown() error {
 func (p *PluginmanagerStyleLuaPlugin) Setup(opts map[string]interface{}) error {
 	logger.PluginDebug(p.pluginName, "Setting up plugin with options")
 
-	// Merge options with existing config
+	
 	for k, v := range opts {
 		p.config[k] = v
 	}
 
-	// Call Lua setup function if it exists
+	
 	setupType := p.L.GetGlobal("Setup").Type()
 	logger.PluginDebug(p.pluginName, fmt.Sprintf("Setup function type: %s", setupType))
 
 	if setupType == lua.LTFunction {
-		// Convert Go map to Lua table
+		
 		optsTable := p.L.NewTable()
 		for k, v := range opts {
 			optsTable.RawSetString(k, lua.LString(fmt.Sprintf("%v", v)))
@@ -168,7 +168,7 @@ func (p *PluginmanagerStyleLuaPlugin) Config() map[string]interface{} {
 		ret := p.L.Get(-1)
 		p.L.Pop(1)
 		if ret.Type() == lua.LTTable {
-			// Convert Lua table to Go map
+			
 			config := make(map[string]interface{})
 			ret.(*lua.LTable).ForEach(func(key, value lua.LValue) {
 				if key.Type() == lua.LTString {
@@ -240,7 +240,7 @@ func (p *PluginmanagerStyleLuaPlugin) parsePluginCommand(tbl *lua.LTable) Plugin
 		Name:        p.getStringField(tbl, "name"),
 		Description: p.getStringField(tbl, "description"),
 		Handler: func(args []string) (string, error) {
-			// This would need to be implemented to call Lua functions
+			
 			return "Command executed", nil
 		},
 	}
@@ -253,7 +253,7 @@ func (p *PluginmanagerStyleLuaPlugin) parsePluginHook(tbl *lua.LTable) PluginHoo
 	return PluginHook{
 		Event: event,
 		Handler: func(data interface{}) error {
-			// Call the Lua handler function
+			
 			if p.L.GetGlobal(handlerName).Type() == lua.LTFunction {
 				if err := p.L.CallByParam(lua.P{
 					Fn:      p.L.GetGlobal(handlerName),
@@ -287,16 +287,16 @@ func (p *PluginmanagerStyleLuaPlugin) getStringField(tbl *lua.LTable, key string
 }
 
 func (p *PluginmanagerStyleLuaPlugin) setupLuaAPI() {
-	// Create the k8s_tui API table
+	
 	apiTable := p.L.NewTable()
 
-	// Add API functions
+	
 	p.L.SetField(apiTable, "get_namespace", p.L.NewFunction(p.luaGetNamespace))
 	p.L.SetField(apiTable, "set_status", p.L.NewFunction(p.luaSetStatus))
 	p.L.SetField(apiTable, "add_header", p.L.NewFunction(p.luaAddHeader))
 	p.L.SetField(apiTable, "register_command", p.L.NewFunction(p.luaRegisterCommand))
 
-	// Kubernetes resource API functions
+	
 	p.L.SetField(apiTable, "get_pods", p.L.NewFunction(p.luaGetPods))
 	p.L.SetField(apiTable, "get_services", p.L.NewFunction(p.luaGetServices))
 	p.L.SetField(apiTable, "get_deployments", p.L.NewFunction(p.luaGetDeployments))
@@ -312,7 +312,7 @@ func (p *PluginmanagerStyleLuaPlugin) setupLuaAPI() {
 	p.L.SetField(apiTable, "get_namespaces", p.L.NewFunction(p.luaGetNamespaces))
 	p.L.SetField(apiTable, "get_serviceaccounts", p.L.NewFunction(p.luaGetServiceAccounts))
 
-	// Delete functions
+	
 	p.L.SetField(apiTable, "delete_pod", p.L.NewFunction(p.luaDeletePod))
 	p.L.SetField(apiTable, "delete_service", p.L.NewFunction(p.luaDeleteService))
 	p.L.SetField(apiTable, "delete_deployment", p.L.NewFunction(p.luaDeleteDeployment))
@@ -328,7 +328,7 @@ func (p *PluginmanagerStyleLuaPlugin) setupLuaAPI() {
 
 	p.L.SetField(apiTable, "get_endpoints", p.L.NewFunction(p.luaGetEndpoints))
 
-	// Set the API in the global environment
+	
 	p.L.SetGlobal("k8s_tui", apiTable)
 }
 
@@ -367,12 +367,12 @@ func (p *PluginmanagerStyleLuaPlugin) luaAddHeader(L *lua.LState) int {
 func (p *PluginmanagerStyleLuaPlugin) luaRegisterCommand(L *lua.LState) int {
 	name := L.CheckString(1)
 	description := L.CheckString(2)
-	// Store the command for later execution
+	
 	command := PluginCommand{
 		Name:        name,
 		Description: description,
 		Handler: func(args []string) (string, error) {
-			// This would call the Lua function
+			
 			return "Command executed from Lua", nil
 		},
 	}
@@ -380,7 +380,7 @@ func (p *PluginmanagerStyleLuaPlugin) luaRegisterCommand(L *lua.LState) int {
 	return 0
 }
 
-// Kubernetes resource API functions
+
 func (p *PluginmanagerStyleLuaPlugin) luaGetPods(L *lua.LState) int {
 	namespace := L.CheckString(1)
 	client := p.api.GetClient()
@@ -746,7 +746,7 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetServiceAccounts(L *lua.LState) int {
 	return 1
 }
 
-// Delete functions
+
 func (p *PluginmanagerStyleLuaPlugin) luaDeletePod(L *lua.LState) int {
 	namespace := L.CheckString(1)
 	name := L.CheckString(2)
@@ -954,29 +954,29 @@ func (p *PluginmanagerStyleLuaPlugin) luaDeleteServiceAccount(L *lua.LState) int
 func (p *PluginmanagerStyleLuaPlugin) luaGetEndpoints(L *lua.LState) int {
 	namespace := L.CheckString(1)
 
-	// Get the current client from the API
+	
 	client := p.api.GetClient()
 	if client.Clientset == nil {
 		L.Push(lua.LString("no kubernetes client available"))
 		return 1
 	}
 
-	// Fetch endpoint slices data using the modern discovery.k8s.io/v1 API
+	
 	endpointSlices, err := client.Clientset.DiscoveryV1().EndpointSlices(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		L.Push(lua.LString(fmt.Sprintf("failed to fetch endpoint slices: %v", err)))
 		return 1
 	}
 
-	// Convert to Lua table
+	
 	resultTable := L.NewTable()
 	for i, endpointSlice := range endpointSlices.Items {
-		// Format addresses
+		
 		var addresses []string
 		for _, endpoint := range endpointSlice.Endpoints {
 			for _, addr := range endpoint.Addresses {
 				if addr != "" {
-					// Check if endpoint is ready
+					
 					isReady := true
 					if endpoint.Conditions.Ready != nil {
 						isReady = *endpoint.Conditions.Ready
@@ -994,7 +994,7 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetEndpoints(L *lua.LState) int {
 			addressesStr = "<none>"
 		}
 
-		// Format ports
+		
 		var ports []string
 		for _, port := range endpointSlice.Ports {
 			if port.Port != nil {
@@ -1010,7 +1010,7 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetEndpoints(L *lua.LState) int {
 			portsStr = "<none>"
 		}
 
-		// Get associated service name from labels
+		
 		serviceName := "unknown"
 		if endpointSlice.Labels != nil {
 			if svcName, ok := endpointSlice.Labels["kubernetes.io/service-name"]; ok {
@@ -1018,7 +1018,7 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetEndpoints(L *lua.LState) int {
 			}
 		}
 
-		// Calculate age
+		
 		age := "Unknown"
 		if !endpointSlice.CreationTimestamp.IsZero() {
 			age = format.FormatAge(endpointSlice.CreationTimestamp.Time)

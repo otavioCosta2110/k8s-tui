@@ -47,10 +47,10 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 	checkboxColumn := table.Column{Title: "✓", Width: 3}
 	columns = append([]table.Column{checkboxColumn}, columns...)
 
-	// colPercent are weights for the data columns, normalize them
+	
 	normalizedDataWeights := normalizeColumnPercentages(colPercent)
 	newColPercent := make([]float64, len(normalizedDataWeights)+1)
-	newColPercent[0] = 0 // checkbox has fixed width
+	newColPercent[0] = 0 
 	for i, p := range normalizedDataWeights {
 		newColPercent[i+1] = p
 	}
@@ -176,18 +176,18 @@ func (m *TableModel) View() string {
 func (m *TableModel) updateColumnWidths(totalWidth int) {
 	columns := m.Table.Columns()
 	widths := make([]int, len(columns))
-	// Set checkbox to fixed width
+	
 	checkboxWidth := 3
 	widths[0] = checkboxWidth
 	remainingWidth := totalWidth + checkboxWidth
 	totalAssigned := checkboxWidth + len(columns)*2
-	// Distribute remaining width among data columns based on weights
+	
 	for i := 1; i < len(columns); i++ {
 		width := int(float64(remainingWidth) * m.colPercent[i])
 		widths[i] = width
 		totalAssigned += width
 	}
-	// Adjust the last column to fill the remaining width
+	
 	if len(widths) > 1 {
 		widths[len(widths)-1] += totalWidth - totalAssigned
 	}
@@ -197,7 +197,7 @@ func (m *TableModel) updateColumnWidths(totalWidth int) {
 	m.Table.SetColumns(columns)
 }
 
-// normalizeColumnPercentages ensures that column percentages add up to 1.0
+
 func normalizeColumnPercentages(percentages []float64) []float64 {
 	if len(percentages) == 0 {
 		return percentages
@@ -209,7 +209,7 @@ func normalizeColumnPercentages(percentages []float64) []float64 {
 	}
 
 	if total == 0 {
-		// If all percentages are 0, distribute evenly
+		
 		evenPercent := 1.0 / float64(len(percentages))
 		normalized := make([]float64, len(percentages))
 		for i := range normalized {
@@ -218,7 +218,7 @@ func normalizeColumnPercentages(percentages []float64) []float64 {
 		return normalized
 	}
 
-	// Normalize to sum to 1.0
+	
 	normalized := make([]float64, len(percentages))
 	for i, p := range percentages {
 		normalized[i] = p / total

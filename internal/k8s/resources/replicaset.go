@@ -121,7 +121,7 @@ func (r *ReplicaSetInfo) GetLabelSelector() (string, error) {
 		return "", fmt.Errorf("replicaset has no selector")
 	}
 
-	// Convert label selector to string format
+	
 	requirements, err := metav1.LabelSelectorAsSelector(r.Raw.Spec.Selector)
 	if err != nil {
 		return "", fmt.Errorf("failed to convert label selector: %v", err)

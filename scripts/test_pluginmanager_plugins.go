@@ -15,14 +15,14 @@ func main() {
 
 	fmt.Printf("Loaded plugins successfully\n")
 
-	// Test pluginmanager-style plugins
+	
 	pluginmanagerPlugins := pm.GetPluginmanagerPlugins()
 	fmt.Printf("Found %d pluginmanager-style plugins:\n", len(pluginmanagerPlugins))
 
 	for i, plugin := range pluginmanagerPlugins {
 		fmt.Printf("  %d. %s v%s - %s\n", i+1, plugin.Name(), plugin.Version(), plugin.Description())
 
-		// Test commands
+		
 		commands := plugin.Commands()
 		if len(commands) > 0 {
 			fmt.Printf("     Commands:\n")
@@ -31,7 +31,7 @@ func main() {
 			}
 		}
 
-		// Test hooks
+		
 		hooks := plugin.Hooks()
 		if len(hooks) > 0 {
 			fmt.Printf("     Hooks:\n")
@@ -40,7 +40,7 @@ func main() {
 			}
 		}
 
-		// Test config
+		
 		config := plugin.Config()
 		if len(config) > 0 {
 			fmt.Printf("     Config:\n")
@@ -50,7 +50,7 @@ func main() {
 		}
 	}
 
-	// Test API
+	
 	api := pm.GetAPI()
 	fmt.Printf("\nPlugin API Status:\n")
 	fmt.Printf("  Current namespace: %s\n", api.GetCurrentNamespace())

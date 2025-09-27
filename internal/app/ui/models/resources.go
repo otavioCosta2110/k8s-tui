@@ -68,7 +68,7 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 			}
 		}
 
-		if resourceType == selected { // No built-in icon was stripped
+		if resourceType == selected { 
 			if pm := plugins.GetGlobalPluginManager(); pm != nil {
 				for _, rt := range pm.GetRegistry().GetCustomResourceTypes() {
 					iconWithSpace := rt.Icon + " "

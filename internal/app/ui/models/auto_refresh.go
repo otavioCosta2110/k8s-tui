@@ -24,7 +24,7 @@ type AutoRefreshModel struct {
 
 func NewAutoRefreshModel(inner RefreshableModel, interval time.Duration, client *resources.Client, footerText string) *AutoRefreshModel {
 	if interval < time.Second {
-		interval = 10 * time.Second // Default to 10 seconds minimum
+		interval = 10 * time.Second 
 	}
 
 	return &AutoRefreshModel{

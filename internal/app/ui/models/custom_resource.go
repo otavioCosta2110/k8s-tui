@@ -419,7 +419,7 @@ func (cc *CustomResourceChartModel) renderChart() string {
 			status := columns[1]
 			age := columns[2]
 
-			bar := strings.Repeat("█", 20) // Simple filled bar for now
+			bar := strings.Repeat("█", 20) 
 			line := fmt.Sprintf("%s: %s (%s, %s)", name, bar, status, age)
 
 			chartStyle := lipgloss.NewStyle().
@@ -511,7 +511,7 @@ func NewCustomResourceTableModel(cr *customResourceModel, resourceName, icon, na
 			}
 			itemColumns := item.GetColumns()
 			if len(itemColumns) >= 4 {
-				rows = append(rows, itemColumns[:4]) // Take only first 4 columns
+				rows = append(rows, itemColumns[:4]) 
 				logger.Debug(fmt.Sprintf("Row %d: %v", i, itemColumns[:4]))
 			} else if len(itemColumns) > 0 {
 				paddedRow := make(table.Row, 4)
@@ -540,8 +540,8 @@ func NewCustomResourceTableModel(cr *customResourceModel, resourceName, icon, na
 		colWidths,
 		rows,
 		title,
-		nil, // onSelect function
-		0,   // selectColumn
+		nil, 
+		0,   
 		func() ([]table.Row, error) {
 			logger.Debug("Refreshing table data")
 			if err := cr.fetchData(); err != nil {
@@ -568,7 +568,7 @@ func NewCustomResourceTableModel(cr *customResourceModel, resourceName, icon, na
 			logger.Debug(fmt.Sprintf("Refreshed to %d rows", len(newRows)))
 			return newRows, nil
 		},
-		nil, // updateActions
+		nil, 
 	)
 
 	logger.Info("Table model created successfully")

@@ -6,7 +6,7 @@ import (
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 )
 
-// UIManager handles UI-related operations
+
 type UIManager struct {
 	headerComponents []UIInjectionPoint
 	footerComponents []UIInjectionPoint
@@ -37,7 +37,7 @@ func (ui *UIManager) GetFooterComponents() []UIInjectionPoint {
 	return ui.footerComponents
 }
 
-// CommandManager handles command registration and execution
+
 type CommandManager struct {
 	commands map[string]PluginCommand
 }
@@ -68,7 +68,7 @@ func (cm *CommandManager) GetCommands() map[string]PluginCommand {
 	return cm.commands
 }
 
-// EventManager handles event registration and triggering
+
 type EventManager struct {
 	eventHandlers map[PluginEvent][]func(data interface{}) error
 }
@@ -93,7 +93,7 @@ func (em *EventManager) TriggerEvent(event PluginEvent, data interface{}) {
 	}
 }
 
-// ConfigManager handles configuration operations
+
 type ConfigManager struct {
 	config map[string]interface{}
 }
@@ -145,7 +145,7 @@ func (api *PluginAPIImpl) SetCurrentNamespace(namespace string) {
 
 func (api *PluginAPIImpl) SetStatusMessage(message string) {
 	logger.Info(fmt.Sprintf("📢 Plugin Status: %s", message))
-	// In a real implementation, this would update the UI status bar
+	
 }
 
 func (api *PluginAPIImpl) AddHeaderComponent(component UIInjectionPoint) {
@@ -200,7 +200,7 @@ func (api *PluginAPIImpl) SetClient(client k8s.Client) {
 	api.client = client
 }
 
-// Kubernetes resource API methods using the resource registry
+
 
 func (api *PluginAPIImpl) GetPods(namespace string, selector ...string) ([]k8s.PodInfo, error) {
 	selectorStr := ""
@@ -210,18 +210,18 @@ func (api *PluginAPIImpl) GetPods(namespace string, selector ...string) ([]k8s.P
 
 	logger.Debug(fmt.Sprintf("PluginAPI GetPods called with namespace=%s, selector=%s", namespace, selectorStr))
 
-	// Check if a custom handler is registered for pods
+	
 	handler, exists := api.resourceRegistry.GetHandler(k8s.ResourceTypePod)
 	logger.Debug(fmt.Sprintf("Pod handler exists: %v, handler: %v", exists, handler))
 
-	// If no custom handler is registered, or if a selector is provided (custom handlers don't support selectors),
-	// use the direct k8s client call with selector
+	
+	
 	if !exists || handler == nil || selectorStr != "" {
 		logger.Debug(fmt.Sprintf("Using direct k8s client with selector: %s", selectorStr))
 		return k8s.FetchPods(api.client, namespace, selectorStr)
 	}
 
-	// Use custom handler if registered and no selector is needed
+	
 	logger.Debug("Using custom handler (no selector provided)")
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypePod, namespace)
 	if err != nil {
@@ -330,7 +330,7 @@ func (api *PluginAPIImpl) GetServiceAccounts(namespace string) ([]k8s.ServiceAcc
 	return result.([]k8s.ServiceAccountInfo), nil
 }
 
-// Delete methods using resource registry
+
 
 func (api *PluginAPIImpl) DeletePod(namespace, name string) error {
 	return api.resourceRegistry.DeleteResource(api.client, k8s.ResourceTypePod, namespace, name)
@@ -380,7 +380,7 @@ func (api *PluginAPIImpl) DeleteServiceAccount(namespace, name string) error {
 	return api.resourceRegistry.DeleteResource(api.client, k8s.ResourceTypeServiceAccount, namespace, name)
 }
 
-// Describe methods for individual resources using resource registry
+
 
 func (api *PluginAPIImpl) DescribePod(namespace, name string) (string, error) {
 	return api.resourceRegistry.DescribeResource(api.client, k8s.ResourceTypePod, namespace, name)
@@ -434,20 +434,20 @@ func (api *PluginAPIImpl) DescribeServiceAccount(namespace, name string) (string
 	return api.resourceRegistry.DescribeResource(api.client, k8s.ResourceTypeServiceAccount, namespace, name)
 }
 
-// Plugin extensibility methods
 
-// RegisterResourceHandler allows plugins to register custom resource handlers
+
+
 func (api *PluginAPIImpl) RegisterResourceHandler(resourceType k8s.ResourceType, handler ResourceHandler) {
 	api.resourceRegistry.RegisterHandler(resourceType, handler)
 	logger.PluginDebug("api", fmt.Sprintf("Registered custom handler for resource type: %s", resourceType))
 }
 
-// GetSupportedResourceTypes returns all currently supported resource types
+
 func (api *PluginAPIImpl) GetSupportedResourceTypes() []k8s.ResourceType {
 	return api.resourceRegistry.GetSupportedTypes()
 }
 
-// GetResourceHandler returns the handler for a specific resource type
+
 func (api *PluginAPIImpl) GetResourceHandler(resourceType k8s.ResourceType) (ResourceHandler, bool) {
 	return api.resourceRegistry.GetHandler(resourceType)
 }

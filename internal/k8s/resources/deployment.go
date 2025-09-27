@@ -122,7 +122,7 @@ func (d *DeploymentInfo) GetLabelSelector() (string, error) {
 		return "", fmt.Errorf("deployment has no selector")
 	}
 
-	// Convert label selector to string format
+	
 	requirements, err := metav1.LabelSelectorAsSelector(d.Raw.Spec.Selector)
 	if err != nil {
 		return "", fmt.Errorf("failed to convert label selector: %v", err)
