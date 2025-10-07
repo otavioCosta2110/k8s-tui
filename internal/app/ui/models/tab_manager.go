@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
+	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -163,8 +164,53 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		tm.tabs[tm.activeIndex].Model, cmd = tm.tabs[tm.activeIndex].Model.Update(msg)
 		return tm, cmd
 	}
-
 	return tm, nil
+}
+
+func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
+	// Clear existing tabs
+	tm.tabs = []TabData{}
+	tm.activeIndex = 0
+
+	// Create tabs from the saved information
+	for _, tabInfo := range tabInfos {
+		// Create the appropriate model for this resource type
+		var model tea.Model
+		var err error
+
+		if tabInfo.ResourceType == "ResourceList" || tabInfo.ResourceType == "Resources" {
+			// Resource list view
+			resourceModel := NewResource(*tm.kubeClient, tm.namespace)
+			model = resourceModel.InitComponent(*tm.kubeClient)
+		} else {
+			// Specific resource type view
+			resourceList := NewResourceList(*tm.kubeClient, tm.namespace, tabInfo.ResourceType)
+			model, err = resourceList.InitComponent(*tm.kubeClient)
+			if err != nil {
+				return fmt.Errorf("failed to create %s model: %v", tabInfo.ResourceType, err)
+			}
+		}
+
+		// Create tab data
+		tabData := TabData{
+			ID:           tabInfo.ID,
+			Title:        tabInfo.Title,
+			ResourceType: tabInfo.ResourceType,
+			Model:        model,
+			Breadcrumb:   tabInfo.Breadcrumb,
+			ScreenStack:  []tea.Model{model},
+			CurrentIndex: 0,
+		}
+
+		tm.tabs = append(tm.tabs, tabData)
+	}
+
+	// Set active tab to the first one
+	if len(tm.tabs) > 0 {
+		tm.activeIndex = 0
+	}
+
+	return nil
 }
 
 func (tm *TabManager) View() string {

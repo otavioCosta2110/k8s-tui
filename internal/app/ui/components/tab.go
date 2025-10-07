@@ -213,3 +213,10 @@ func (t *TabComponent) ClearTabs() {
 	t.Tabs = []Tab{}
 	t.ActiveIndex = 0
 }
+
+func (t *TabComponent) SetTabs(tabs []Tab) {
+	t.Tabs = tabs
+	if len(tabs) > 0 && t.ActiveIndex >= len(tabs) {
+		t.ActiveIndex = len(tabs) - 1
+	}
+}

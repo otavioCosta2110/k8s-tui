@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/otavioCosta2110/k8s-tui/pkg/format"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
-	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
+	"github.com/otavioCosta2110/k8s-tui/pkg/format"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/yuin/gopher-lua"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -42,7 +42,6 @@ func (pm *PluginManager) LoadPlugins() error {
 		return nil
 	}
 
-	
 	if _, err := os.Stat(pm.pluginDir); os.IsNotExist(err) {
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: Plugin directory does not exist: %s", pm.pluginDir))
 		return nil
@@ -50,7 +49,6 @@ func (pm *PluginManager) LoadPlugins() error {
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Scanning for Lua plugins in: %s", pm.pluginDir))
 
-	
 	var files []string
 	err := filepath.Walk(pm.pluginDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -59,7 +57,7 @@ func (pm *PluginManager) LoadPlugins() error {
 		}
 		if !info.IsDir() && strings.HasSuffix(info.Name(), ".lua") {
 			files = append(files, path)
-			logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Found potential plugin file: %s", path))
+			logger.Info(fmt.Sprintf("🔌 Plugin Manager: Found potential plugin file: %s", path))
 		}
 		return nil
 	})
@@ -69,12 +67,15 @@ func (pm *PluginManager) LoadPlugins() error {
 	}
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Found %d potential plugin files", len(files)))
+	for i, file := range files {
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: File %d: %s", i+1, file))
+	}
 
 	loadedCount := 0
 	failedCount := 0
 
 	for _, file := range files {
-		pluginName := strings.TrimSuffix(filepath.Base(file), ".lua")
+		pluginName := filepath.Base(filepath.Dir(file))
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: Attempting to load plugin: %s from %s", pluginName, file))
 
 		if err := pm.loadLuaPlugin(file); err != nil {
@@ -92,26 +93,393 @@ func (pm *PluginManager) LoadPlugins() error {
 	return nil
 }
 
+func (pm *PluginManager) setupBasicLuaAPI(L *lua.LState) {
+	print("DEBUG: Setting up basic k8s_tui API for Lua plugin")
+
+	apiTable := L.NewTable()
+
+	// Create a basic plugin instance for API access
+	plugin := &basicLuaPlugin{api: pm.api}
+
+	L.SetField(apiTable, "get_namespace", L.NewFunction(plugin.luaGetNamespace))
+	L.SetField(apiTable, "set_namespace", L.NewFunction(plugin.luaSetNamespace))
+	L.SetField(apiTable, "set_status", L.NewFunction(plugin.luaSetStatus))
+	L.SetField(apiTable, "restore_tabs", L.NewFunction(plugin.luaRestoreTabs))
+
+	L.SetField(apiTable, "log", L.NewFunction(func(L *lua.LState) int {
+		message := L.CheckString(1)
+		logger.PluginInfo("basic", message)
+		return 0
+	}))
+
+	L.SetGlobal("k8s_tui", apiTable)
+	print("DEBUG: Basic k8s_tui API set up for Lua plugin")
+}
+
+type basicLuaPlugin struct {
+	api *PluginAPIImpl
+}
+
+func (p *basicLuaPlugin) luaGetNamespace(L *lua.LState) int {
+	namespace := p.api.GetCurrentNamespace()
+	L.Push(lua.LString(namespace))
+	return 1
+}
+
+func (p *basicLuaPlugin) luaSetNamespace(L *lua.LState) int {
+	namespace := L.CheckString(1)
+	logger.Info(fmt.Sprintf("DEBUG: basic luaSetNamespace called with: %s", namespace))
+	p.api.SetCurrentNamespace(namespace)
+	logger.Info("DEBUG: basic luaSetNamespace completed")
+	return 0
+}
+
+func (p *basicLuaPlugin) luaSetStatus(L *lua.LState) int {
+	message := L.CheckString(1)
+	p.api.SetStatusMessage(message)
+	return 0
+}
+
+func (p *basicLuaPlugin) luaRestoreTabs(L *lua.LState) int {
+	logger.Info("DEBUG: basic luaRestoreTabs called")
+	tabsTable := L.CheckTable(1)
+
+	var tabs []TabInfo
+	tabsTable.ForEach(func(key, value lua.LValue) {
+		if value.Type() == lua.LTTable {
+			tab := parseTabInfo(value.(*lua.LTable))
+			tabs = append(tabs, tab)
+		}
+	})
+
+	logger.Info(fmt.Sprintf("DEBUG: basic Parsed %d tabs, calling p.api.RestoreTabs", len(tabs)))
+	err := p.api.RestoreTabs(tabs)
+	if err != nil {
+		logger.Info(fmt.Sprintf("DEBUG: basic p.api.RestoreTabs failed: %v", err))
+		L.Push(lua.LString(fmt.Sprintf("failed to restore tabs: %v", err)))
+		return 1
+	}
+
+	logger.Info("DEBUG: basic luaRestoreTabs completed successfully")
+	L.Push(lua.LString("ok"))
+	return 1
+}
+
+func parseTabInfo(tbl *lua.LTable) TabInfo {
+	id := getStringField(tbl, "ID")
+	title := getStringField(tbl, "Title")
+	resourceType := getStringField(tbl, "ResourceType")
+
+	var breadcrumb []string
+	if breadcrumbTable := tbl.RawGetString("Breadcrumb"); breadcrumbTable.Type() == lua.LTTable {
+		breadcrumbTable.(*lua.LTable).ForEach(func(key, value lua.LValue) {
+			if value.Type() == lua.LTString {
+				breadcrumb = append(breadcrumb, value.String())
+			}
+		})
+	}
+
+	return TabInfo{
+		ID:           id,
+		Title:        title,
+		ResourceType: resourceType,
+		Breadcrumb:   breadcrumb,
+	}
+}
+
+func getStringField(tbl *lua.LTable, key string) string {
+	if val := tbl.RawGetString(key); val.Type() == lua.LTString {
+		return val.String()
+	}
+	return ""
+}
+
 func (pm *PluginManager) loadLuaPlugin(path string) error {
-	pluginName := strings.TrimSuffix(filepath.Base(path), ".lua")
+	pluginName := filepath.Base(filepath.Dir(path))
 
 	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Creating Lua state for plugin: %s", pluginName))
 	L := lua.NewState()
 
-	
 	var setupType, configType, commandsType, hooksType lua.LValueType
 	var isNeovimStyle bool
 
-	
-	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Loading Lua script: %s", path))
-	if err := L.DoFile(path); err != nil {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		L.Close()
+		logger.Error(fmt.Sprintf("🔌 Plugin Manager: Failed to read Lua script %s: %v", path, err))
+		return fmt.Errorf("failed to read Lua script: %v", err)
+	}
+
+	// Execute the script content
+	if err := L.DoString(string(content)); err != nil {
 		L.Close()
 		logger.Error(fmt.Sprintf("🔌 Plugin Manager: Failed to execute Lua script %s: %v", path, err))
 		return fmt.Errorf("failed to load Lua script: %v", err)
 	}
-	logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Successfully loaded Lua script: %s", path))
 
-	
+	// Set up basic k8s_tui API for Lua plugins
+	print(fmt.Sprintf("DEBUG: Setting up basic k8s_tui API for plugin: %s", pluginName))
+	pm.setupBasicLuaAPI(L)
+
+	// If CLIArguments is not defined, define it manually
+	if L.GetGlobal("CLIArguments").Type() != lua.LTFunction {
+		cliArgsCode := `
+function CLIArguments()
+    return {
+        {
+            name = "session",
+            description = "Load session from JSON file",
+            handler = "load_session_cli_handler"
+        }
+    }
+end
+
+function load_session_cli_handler(value)
+    if k8s_tui and k8s_tui.log then
+        k8s_tui.log("DEBUG: load_session_cli_handler called with value: " .. tostring(value))
+    end
+
+    -- Read the session file
+    local file = io.open(value, "r")
+    if not file then
+        if k8s_tui and k8s_tui.log then
+            k8s_tui.log("DEBUG: Failed to open session file: " .. value)
+        end
+        return nil, "Failed to open session file: " .. value
+    end
+
+    local content = file:read("*all")
+    file:close()
+
+    if k8s_tui and k8s_tui.log then
+        k8s_tui.log("DEBUG: Session file content: " .. content)
+    end
+
+    -- Simple JSON parsing for namespace
+    -- Look for "namespace":"value"
+    local namespace_pattern = '"namespace"%s*:%s*"([^"]+)"'
+    if k8s_tui and k8s_tui.log then
+        k8s_tui.log("DEBUG: Looking for namespace with pattern: " .. namespace_pattern)
+    end
+    local namespace = content:match(namespace_pattern)
+    if k8s_tui and k8s_tui.log then
+        k8s_tui.log("DEBUG: Namespace match result: " .. (namespace or "nil"))
+    end
+    if namespace then
+        if k8s_tui and k8s_tui.log then
+            k8s_tui.log("DEBUG: Found namespace: '" .. namespace .. "'")
+        end
+    else
+        if k8s_tui and k8s_tui.log then
+            k8s_tui.log("DEBUG: No namespace found in content")
+        end
+    end
+
+    -- Parse tabs array with proper bracket matching
+    local tabs = {}
+    -- Find the position after "tabs":[
+    local tabs_start = content:find('"tabs"%s*:%s*%[')
+    local tabs_content = nil
+    if tabs_start then
+        -- Find the matching closing bracket
+        local bracket_count = 0
+        local in_string = false
+        local escape_next = false
+        local end_pos = tabs_start - 1
+
+        for i = tabs_start, #content do
+            local char = content:sub(i, i)
+            if escape_next then
+                escape_next = false
+            elseif char == '\\' then
+                escape_next = true
+            elseif char == '"' then
+                in_string = not in_string
+            elseif not in_string then
+                if char == '[' then
+                    bracket_count = bracket_count + 1
+                elseif char == ']' then
+                    bracket_count = bracket_count - 1
+                    if bracket_count == 0 then
+                        end_pos = i
+                        break
+                    end
+                end
+            end
+        end
+
+        if end_pos > tabs_start then
+            -- Extract content between brackets
+            local start_bracket = content:find('%[', tabs_start)
+            if start_bracket then
+                tabs_content = content:sub(start_bracket + 1, end_pos - 1)
+            end
+        end
+    end
+
+    if k8s_tui and k8s_tui.log then
+        k8s_tui.log("DEBUG: Tabs content extraction result: " .. (tabs_content or "nil"))
+    end
+    if tabs_content then
+        if k8s_tui and k8s_tui.log then
+            k8s_tui.log("DEBUG: Found tabs_content: '" .. tabs_content .. "'")
+            k8s_tui.log("DEBUG: Starting to parse individual tab objects from tabs_content")
+        end
+        for tab_str in tabs_content:gmatch('{%s*([^}]+)%s*}') do
+            if k8s_tui and k8s_tui.log then
+                k8s_tui.log("DEBUG: Processing tab_str: '" .. tab_str .. "'")
+            end
+            local tab = {}
+
+            -- Extract ID
+            local id = tab_str:match('"id"%s*:%s*"([^"]+)"') or tab_str:match('"ID"%s*:%s*"([^"]+)"')
+
+            -- Extract title
+            local title = tab_str:match('"title"%s*:%s*"([^"]+)"') or tab_str:match('"Title"%s*:%s*"([^"]+)"')
+
+            -- Extract resourceType
+            local resourceType = tab_str:match('"resourceType"%s*:%s*"([^"]+)"') or tab_str:match('"ResourceType"%s*:%s*"([^"]+)"')
+            if resourceType then tab.ResourceType = resourceType end
+
+            -- Extract breadcrumb array with proper bracket matching
+            if k8s_tui and k8s_tui.log then
+                k8s_tui.log("DEBUG: Looking for breadcrumb in tab_str")
+            end
+            local breadcrumb_start = tab_str:find('"breadcrumb"%s*:%s*%[') or tab_str:find('"Breadcrumb"%s*:%s*%[')
+            if k8s_tui and k8s_tui.log then
+                k8s_tui.log("DEBUG: breadcrumb_start: " .. (breadcrumb_start or "nil"))
+            end
+            local breadcrumb_content = nil
+            if breadcrumb_start then
+                if k8s_tui and k8s_tui.log then
+                    k8s_tui.log("DEBUG: Found breadcrumb start, parsing brackets")
+                end
+                local bracket_count = 0
+                local in_string = false
+                local escape_next = false
+                local end_pos = breadcrumb_start - 1
+
+                for i = breadcrumb_start, #tab_str do
+                    local char = tab_str:sub(i, i)
+                    if escape_next then
+                        escape_next = false
+                    elseif char == '\\' then
+                        escape_next = true
+                    elseif char == '"' then
+                        in_string = not in_string
+                    elseif not in_string then
+                        if char == '[' then
+                            bracket_count = bracket_count + 1
+                        elseif char == ']' then
+                            bracket_count = bracket_count - 1
+                            if bracket_count == 0 then
+                                end_pos = i
+                                break
+                            end
+                        end
+                    end
+                end
+
+                if k8s_tui and k8s_tui.log then
+                    k8s_tui.log("DEBUG: breadcrumb end_pos: " .. end_pos)
+                end
+                if end_pos > breadcrumb_start then
+                    local start_bracket = tab_str:find('%[', breadcrumb_start)
+                    if k8s_tui and k8s_tui.log then
+                        k8s_tui.log("DEBUG: breadcrumb start_bracket: " .. (start_bracket or "nil"))
+                    end
+                    if start_bracket then
+                        breadcrumb_content = tab_str:sub(start_bracket + 1, end_pos - 1)
+                        if k8s_tui and k8s_tui.log then
+                            k8s_tui.log("DEBUG: breadcrumb_content: '" .. breadcrumb_content .. "'")
+                        end
+                    end
+                end
+            end
+
+            if breadcrumb_content then
+                if k8s_tui and k8s_tui.log then
+                    k8s_tui.log("DEBUG: Parsing breadcrumb crumbs")
+                end
+                tab.Breadcrumb = {}
+                for crumb in breadcrumb_content:gmatch('"([^"]+)"') do
+                    if k8s_tui and k8s_tui.log then
+                        k8s_tui.log("DEBUG: Found crumb: '" .. crumb .. "'")
+                    end
+                    table.insert(tab.Breadcrumb, crumb)
+                end
+                if k8s_tui and k8s_tui.log then
+                    k8s_tui.log("DEBUG: Breadcrumb array has " .. #tab.Breadcrumb .. " elements")
+                end
+            else
+                if k8s_tui and k8s_tui.log then
+                    k8s_tui.log("DEBUG: No breadcrumb content found")
+                end
+                tab.Breadcrumb = {}
+            end
+
+            if tab.ID and tab.Title and tab.ResourceType then
+                table.insert(tabs, tab)
+            end
+        end
+    end
+
+    -- Set namespace if found
+    if namespace then
+        if k8s_tui and k8s_tui.log then
+            k8s_tui.log("DEBUG: Calling k8s_tui.set_namespace with: " .. namespace)
+        end
+        k8s_tui.set_namespace(namespace)
+        if k8s_tui and k8s_tui.log then
+            k8s_tui.log("DEBUG: k8s_tui.set_namespace called successfully")
+        end
+    else
+        if k8s_tui and k8s_tui.log then
+            k8s_tui.log("DEBUG: No namespace found, skipping set_namespace")
+        end
+    end
+
+    -- Restore tabs if found
+    if #tabs > 0 then
+        if k8s_tui and k8s_tui.log then
+            k8s_tui.log("DEBUG: Calling k8s_tui.restore_tabs with " .. #tabs .. " tabs")
+        end
+        for i, tab in ipairs(tabs) do
+            if k8s_tui and k8s_tui.log then
+                k8s_tui.log("DEBUG: Tab " .. i .. ": ID=" .. (tab.ID or "nil") .. ", Title=" .. (tab.Title or "nil") .. ", ResourceType=" .. (tab.ResourceType or "nil"))
+                if tab.Breadcrumb then
+                    k8s_tui.log("DEBUG: Tab " .. i .. " Breadcrumb: " .. table.concat(tab.Breadcrumb, " > "))
+                end
+            end
+        end
+        k8s_tui.restore_tabs(tabs)
+        if k8s_tui and k8s_tui.log then
+            k8s_tui.log("DEBUG: k8s_tui.restore_tabs called")
+        end
+    else
+        if k8s_tui and k8s_tui.log then
+            k8s_tui.log("DEBUG: No tabs found, skipping restore_tabs")
+        end
+    end
+
+    -- Set status
+    local status_msg = "Session loaded from " .. value
+    if namespace then
+        status_msg = status_msg .. " (namespace: " .. namespace .. ")"
+    end
+    if #tabs > 0 then
+        status_msg = status_msg .. " (" .. #tabs .. " tabs restored)"
+    end
+    k8s_tui.set_status(status_msg)
+
+    return "Session loaded successfully", nil
+end
+`
+		if err := L.DoString(cliArgsCode); err != nil {
+			logger.Error(fmt.Sprintf("🔌 Plugin Manager: Failed to execute CLI args code for %s: %v", pluginName, err))
+		}
+	}
+
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Available functions in %s:", pluginName))
 	for _, funcName := range []string{"Name", "Version", "Description", "Initialize", "Setup", "Config", "Commands", "Hooks", "GetResourceTypes", "GetUIExtensions"} {
 		funcType := L.GetGlobal(funcName).Type()
@@ -124,7 +492,6 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Validating required functions for plugin: %s", pluginName))
 
-	
 	if L.GetGlobal("Name").Type() != lua.LTFunction {
 		L.Close()
 		logger.Error(fmt.Sprintf("🔌 Plugin Manager: Plugin %s missing required Name() function", pluginName))
@@ -136,30 +503,35 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		return fmt.Errorf("Lua plugin must define an Initialize function")
 	}
 
-	
 	setupType = L.GetGlobal("Setup").Type()
 	configType = L.GetGlobal("Config").Type()
 	commandsType = L.GetGlobal("Commands").Type()
 	hooksType = L.GetGlobal("Hooks").Type()
+
+	print(fmt.Sprintf("DEBUG: Plugin %s function types: Setup=%s, Config=%s, Commands=%s, Hooks=%s", pluginName, setupType, configType, commandsType, hooksType))
 
 	isNeovimStyle = setupType == lua.LTFunction ||
 		configType == lua.LTFunction ||
 		commandsType == lua.LTFunction ||
 		hooksType == lua.LTFunction
 
-	
+	print(fmt.Sprintf("DEBUG: Plugin %s isNeovimStyle: %t", pluginName, isNeovimStyle))
+
 	if isNeovimStyle {
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: %s", pluginName))
 		logger.Info("🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin")
 
-		
 		apiTable := L.NewTable()
 
-		
 		L.SetField(apiTable, "get_namespace", L.NewFunction(func(L *lua.LState) int {
 			namespace := pm.api.GetCurrentNamespace()
 			L.Push(lua.LString(namespace))
 			return 1
+		}))
+		L.SetField(apiTable, "set_namespace", L.NewFunction(func(L *lua.LState) int {
+			namespace := L.CheckString(1)
+			pm.api.SetCurrentNamespace(namespace)
+			return 0
 		}))
 		L.SetField(apiTable, "set_status", L.NewFunction(func(L *lua.LState) int {
 			message := L.CheckString(1)
@@ -188,17 +560,50 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		L.SetField(apiTable, "register_command", L.NewFunction(func(L *lua.LState) int {
 			name := L.CheckString(1)
 			description := L.CheckString(2)
+			// handlerName := L.CheckString(3) // Not used in legacy implementation
+
 			command := PluginCommand{
 				Name:        name,
 				Description: description,
 				Handler: func(args []string) (string, error) {
-					return "Command executed from Lua", nil
+					// For legacy plugins, we can't easily call Lua functions
+					// This would need more complex implementation
+					return "Command executed from Lua (legacy)", nil
 				},
 			}
 			pm.api.RegisterCommand(command.Name, command.Description, command.Handler)
 			return 0
 		}))
-		
+		L.SetField(apiTable, "register_cli_argument", L.NewFunction(func(L *lua.LState) int {
+			name := L.CheckString(1)
+			description := L.CheckString(2)
+			handlerName := L.CheckString(3)
+
+			pm.api.RegisterCLIArgument(name, description, func(value string) error {
+				// Call the Lua function
+				if L.GetGlobal(handlerName).Type() == lua.LTFunction {
+
+					if err := L.CallByParam(lua.P{
+						Fn:      L.GetGlobal(handlerName),
+						NRet:    1,
+						Protect: true,
+					}, lua.LString(value)); err != nil {
+						logger.PluginError(pluginName, fmt.Sprintf("Error calling CLI argument handler %s: %v", handlerName, err))
+						return err
+					}
+					ret := L.Get(-1)
+					L.Pop(1)
+					if ret.Type() == lua.LTString && ret.String() != "" {
+						return fmt.Errorf("%s", ret.String())
+					}
+				} else {
+					logger.PluginWarn(pluginName, fmt.Sprintf("CLI argument handler function %s not found", handlerName))
+				}
+				return nil
+			})
+			return 0
+		}))
+
 		L.SetField(apiTable, "get_pods", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
 			client := pm.api.GetClient()
@@ -564,7 +969,29 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			return 1
 		}))
 
-		
+		L.SetField(apiTable, "get_tabs", L.NewFunction(func(L *lua.LState) int {
+			tabs, err := pm.api.GetTabs()
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to get tabs: %v", err)))
+				return 1
+			}
+			resultTable := L.NewTable()
+			for i, tab := range tabs {
+				tabTable := L.NewTable()
+				L.SetField(tabTable, "ID", lua.LString(tab.ID))
+				L.SetField(tabTable, "Title", lua.LString(tab.Title))
+				L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+				breadcrumbTable := L.NewTable()
+				for j, crumb := range tab.Breadcrumb {
+					L.RawSetInt(breadcrumbTable, j+1, lua.LString(crumb))
+				}
+				L.SetField(tabTable, "Breadcrumb", breadcrumbTable)
+				L.RawSetInt(resultTable, i+1, tabTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+
 		L.SetField(apiTable, "delete_pod", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
 			name := L.CheckString(2)
@@ -769,33 +1196,29 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			return 1
 		}))
 
-		
 		L.SetField(apiTable, "get_endpoints", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
 
-			
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
 				return 1
 			}
 
-			
 			endpointSlices, err := client.Clientset.DiscoveryV1().EndpointSlices(namespace).List(context.Background(), metav1.ListOptions{})
 			if err != nil {
 				L.Push(lua.LString(fmt.Sprintf("failed to fetch endpoint slices: %v", err)))
 				return 1
 			}
 
-			
 			resultTable := L.NewTable()
 			for i, endpointSlice := range endpointSlices.Items {
-				
+
 				var addresses []string
 				for _, endpoint := range endpointSlice.Endpoints {
 					for _, addr := range endpoint.Addresses {
 						if addr != "" {
-							
+
 							isReady := true
 							if endpoint.Conditions.Ready != nil {
 								isReady = *endpoint.Conditions.Ready
@@ -813,7 +1236,6 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 					addressesStr = "<none>"
 				}
 
-				
 				var ports []string
 				for _, port := range endpointSlice.Ports {
 					if port.Port != nil {
@@ -829,7 +1251,6 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 					portsStr = "<none>"
 				}
 
-				
 				serviceName := "unknown"
 				if endpointSlice.Labels != nil {
 					if svcName, ok := endpointSlice.Labels["kubernetes.io/service-name"]; ok {
@@ -837,7 +1258,6 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 					}
 				}
 
-				
 				age := "Unknown"
 				if !endpointSlice.CreationTimestamp.IsZero() {
 					age = format.FormatAge(endpointSlice.CreationTimestamp.Time)
@@ -858,26 +1278,22 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			return 1
 		}))
 
-		
 		L.SetGlobal("k8s_tui", apiTable)
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: k8s_tui API set up for plugin: %s", pluginName))
 	}
 
-	
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Creating plugin wrapper for: %s", pluginName))
 	luaPlugin := &LuaPlugin{
 		L:          L,
 		pluginName: pluginName,
 	}
 
-	
 	pluginDisplayName := luaPlugin.Name()
 	pluginVersion := luaPlugin.Version()
 	pluginDescription := luaPlugin.Description()
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Initializing plugin %s (%s v%s)", pluginDisplayName, pluginName, pluginVersion))
 
-	
 	if err := luaPlugin.Initialize(); err != nil {
 		L.Close()
 		logger.Error(fmt.Sprintf("🔌 Plugin Manager: Plugin %s initialization failed: %v", pluginDisplayName, err))
@@ -892,24 +1308,29 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 	if isNeovimStyle {
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: %s", pluginDisplayName))
 
-		
 		pluginmanagerPlugin := NewPluginmanagerStyleLuaPlugin(L, pluginName, pm.api)
 
-		
+		// Setup the Lua API before registering CLI arguments
+		pluginmanagerPlugin.SetupLuaAPI()
+
 		defaultConfig := pluginmanagerPlugin.Config()
+
 		if err := pluginmanagerPlugin.Setup(defaultConfig); err != nil {
 			logger.Error(fmt.Sprintf("🔌 Plugin Manager: Failed to setup Neovim-style plugin %s: %v", pluginDisplayName, err))
 			L.Close()
 			return fmt.Errorf("failed to setup Neovim-style plugin: %v", err)
 		}
 
-		
 		commands := pluginmanagerPlugin.Commands()
 		for _, cmd := range commands {
 			pm.api.RegisterCommand(cmd.Name, cmd.Description, cmd.Handler)
 		}
 
-		
+		cliArgs := pluginmanagerPlugin.CLIArguments()
+		for _, arg := range cliArgs {
+			pm.api.RegisterCLIArgument(arg.Name, arg.Description, arg.Handler)
+		}
+
 		hooks := pluginmanagerPlugin.Hooks()
 		for _, hook := range hooks {
 			pm.api.RegisterEventHandler(PluginEvent(hook.Event), hook.Handler)
@@ -918,7 +1339,6 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		pm.pluginmanagerPlugins = append(pm.pluginmanagerPlugins, pluginmanagerPlugin)
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: %s v%s", pluginDisplayName, pluginVersion))
 
-		
 		hasResourcePlugin := luaPlugin.hasResourcePlugin()
 		hasUIPlugin := luaPlugin.hasUIPlugin()
 
@@ -932,21 +1352,18 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎨 Also registered as legacy UI plugin: %s", pluginDisplayName))
 		}
 	} else {
-		
+
 		logger.Warn(fmt.Sprintf("🔌 Plugin Manager: ⚠️  Legacy plugin detected: %s - Consider migrating to pluginmanager-style", pluginDisplayName))
 
-		
 		hasResourcePlugin := luaPlugin.hasResourcePlugin()
 		hasUIPlugin := luaPlugin.hasUIPlugin()
 
 		logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Plugin %s capabilities - Resource: %t, UI: %t", pluginDisplayName, hasResourcePlugin, hasUIPlugin))
 
-		
 		if hasResourcePlugin {
 			pm.registry.RegisterResourcePlugin(luaPlugin)
 			logger.Info(fmt.Sprintf("🔌 Plugin Manager: 📊 Registered legacy resource plugin: %s v%s - %s", pluginDisplayName, pluginVersion, pluginDescription))
 
-			
 			resourceTypes := luaPlugin.GetResourceTypes()
 			for _, rt := range resourceTypes {
 				logger.Info(fmt.Sprintf("🔌 Plugin Manager:   └─ Resource type: %s (%s)", rt.Name, rt.Type))
@@ -959,7 +1376,6 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		}
 	}
 
-	
 	pm.luaStates[pluginName] = L
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎉 Plugin %s loaded and registered successfully", pluginDisplayName))
@@ -984,7 +1400,7 @@ func (pm *PluginManager) TriggerEvent(event PluginEvent, data interface{}) {
 }
 
 func (pm *PluginManager) GetCustomResourceData(client k8s.Client, resourceType string, namespace string) ([]types.ResourceData, error) {
-	
+
 	pm.api.SetClient(client)
 
 	for _, plugin := range pm.registry.resourcePlugins {
@@ -1028,7 +1444,6 @@ func (pm *PluginManager) Shutdown() error {
 	for name, L := range pm.luaStates {
 		logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Shutting down plugin: %s", name))
 
-		
 		if L.GetGlobal("Shutdown").Type() == lua.LTFunction {
 			logger.Debug(fmt.Sprintf("🔌 Plugin Manager: Calling Shutdown() for plugin: %s", name))
 			if err := L.CallByParam(lua.P{
@@ -1039,7 +1454,7 @@ func (pm *PluginManager) Shutdown() error {
 				logger.Error(fmt.Sprintf("🔌 Plugin Manager: Error calling Shutdown() for plugin %s: %v", name, err))
 				errorCount++
 			} else {
-				
+
 				ret := L.Get(-1)
 				L.Pop(1)
 				if ret.Type() == lua.LTString {

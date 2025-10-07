@@ -6,8 +6,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
-	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/yuin/gopher-lua"
 )
 
@@ -156,7 +156,7 @@ func (lp *LuaPlugin) parseCustomResourceType(tbl *lua.LTable) CustomResourceType
 	rt.Namespaced = lp.getBoolField(tbl, "Namespaced")
 	refreshSeconds := lp.getNumberField(tbl, "RefreshIntervalSeconds")
 	if refreshSeconds <= 0 {
-		refreshSeconds = 10 
+		refreshSeconds = 10
 	}
 	rt.RefreshInterval = time.Duration(refreshSeconds) * time.Second
 	logger.Debug(fmt.Sprintf("🔌 Lua Plugin: RefreshIntervalSeconds = %f, RefreshInterval = %v", refreshSeconds, rt.RefreshInterval))
@@ -166,12 +166,11 @@ func (lp *LuaPlugin) parseCustomResourceType(tbl *lua.LTable) CustomResourceType
 	logger.Debug(fmt.Sprintf("🔌 Lua Plugin: Parsing resource type - Name: '%s', Type: '%s', Icon: '%s', Namespaced: %t, Refresh: %v, Category: '%s'",
 		rt.Name, rt.Type, rt.Icon, rt.Namespaced, rt.RefreshInterval, rt.Category))
 
-	
 	if displayComp := lp.getTableField(tbl, "DisplayComponent"); displayComp != nil {
 		rt.DisplayComponent = lp.parseDisplayComponent(displayComp)
 		logger.Debug(fmt.Sprintf("🔌 Lua Plugin: Display component type: %s", rt.DisplayComponent.Type))
 	} else {
-		
+
 		if cols := lp.getTableField(tbl, "Columns"); cols != nil {
 			cols.ForEach(func(_, col lua.LValue) {
 				if col.Type() == lua.LTTable {
@@ -179,7 +178,7 @@ func (lp *LuaPlugin) parseCustomResourceType(tbl *lua.LTable) CustomResourceType
 					rt.Columns = append(rt.Columns, column)
 				}
 			})
-			
+
 			rt.DisplayComponent = DisplayComponent{
 				Type: "table",
 				Config: map[string]interface{}{
@@ -203,7 +202,6 @@ func (lp *LuaPlugin) parseDisplayComponent(tbl *lua.LTable) DisplayComponent {
 	dc := DisplayComponent{}
 	dc.Type = lp.getStringField(tbl, "Type")
 
-	
 	if config := lp.getTableField(tbl, "Config"); config != nil {
 		dc.Config = make(map[string]interface{})
 		config.ForEach(func(key, value lua.LValue) {
@@ -217,7 +215,7 @@ func (lp *LuaPlugin) parseDisplayComponent(tbl *lua.LTable) DisplayComponent {
 				case lua.LTBool:
 					dc.Config[keyStr] = lua.LVAsBool(value)
 				case lua.LTTable:
-					
+
 					tableSlice := []interface{}{}
 					value.(*lua.LTable).ForEach(func(_, item lua.LValue) {
 						switch item.Type() {
@@ -227,7 +225,7 @@ func (lp *LuaPlugin) parseDisplayComponent(tbl *lua.LTable) DisplayComponent {
 							tableSlice = append(tableSlice, item.String())
 						case lua.LTBool:
 							tableSlice = append(tableSlice, lua.LVAsBool(item))
-							
+
 						}
 					})
 					dc.Config[keyStr] = tableSlice
@@ -236,7 +234,6 @@ func (lp *LuaPlugin) parseDisplayComponent(tbl *lua.LTable) DisplayComponent {
 		})
 	}
 
-	
 	if style := lp.getTableField(tbl, "Style"); style != nil {
 		dc.Style.Width = int(lp.getNumberField(style, "Width"))
 		dc.Style.Height = int(lp.getNumberField(style, "Height"))
@@ -252,8 +249,7 @@ func (lp *LuaPlugin) parseDisplayComponent(tbl *lua.LTable) DisplayComponent {
 func (lp *LuaPlugin) GetResourceData(client k8s.Client, resourceType string, namespace string) ([]types.ResourceData, error) {
 	logger.PluginDebug(lp.pluginName, fmt.Sprintf("Calling GetResourceData(%s, %s)", resourceType, namespace))
 
-	
-	lp.L.SetGlobal("k8s_client", lua.LString("available")) 
+	lp.L.SetGlobal("k8s_client", lua.LString("available"))
 
 	if err := lp.L.CallByParam(lua.P{
 		Fn:      lp.L.GetGlobal("GetResourceData"),
@@ -285,13 +281,12 @@ func (lp *LuaPlugin) GetResourceData(client k8s.Client, resourceType string, nam
 }
 
 func (lp *LuaPlugin) parseResourceData(tbl *lua.LTable) types.ResourceData {
-	
+
 	name := lp.getStringField(tbl, "Name")
 	namespace := lp.getStringField(tbl, "Namespace")
 	status := lp.getStringField(tbl, "Status")
 	age := lp.getStringField(tbl, "Age")
 
-	
 	fields := make(map[string]string)
 	tbl.ForEach(func(key lua.LValue, value lua.LValue) {
 		if key.Type() == lua.LTString {
@@ -412,7 +407,6 @@ func (lp *LuaPlugin) parseUIExtension(tbl *lua.LTable) UIExtension {
 		KeyBinding: lp.getStringField(tbl, "KeyBinding"),
 	}
 
-	
 	if injectionPoints := lp.getTableField(tbl, "InjectionPoints"); injectionPoints != nil {
 		injectionPoints.ForEach(func(_, point lua.LValue) {
 			if point.Type() == lua.LTTable {
@@ -422,7 +416,6 @@ func (lp *LuaPlugin) parseUIExtension(tbl *lua.LTable) UIExtension {
 		})
 	}
 
-	
 	if interactions := lp.getTableField(tbl, "Interactions"); interactions != nil {
 		interactions.ForEach(func(_, interaction lua.LValue) {
 			if interaction.Type() == lua.LTTable {
@@ -432,7 +425,6 @@ func (lp *LuaPlugin) parseUIExtension(tbl *lua.LTable) UIExtension {
 		})
 	}
 
-	
 	if dependencies := lp.getTableField(tbl, "Dependencies"); dependencies != nil {
 		dependencies.ForEach(func(_, dep lua.LValue) {
 			if dep.Type() == lua.LTString {
@@ -522,8 +514,7 @@ func (lrd *LuaResourceData) GetNamespace() string {
 }
 
 func (lrd *LuaResourceData) GetColumns() table.Row {
-	
-	
+
 	return table.Row{lrd.name, lrd.namespace, lrd.status, lrd.age}
 }
 

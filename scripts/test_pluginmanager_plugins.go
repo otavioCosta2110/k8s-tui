@@ -15,14 +15,12 @@ func main() {
 
 	fmt.Printf("Loaded plugins successfully\n")
 
-	
 	pluginmanagerPlugins := pm.GetPluginmanagerPlugins()
 	fmt.Printf("Found %d pluginmanager-style plugins:\n", len(pluginmanagerPlugins))
 
 	for i, plugin := range pluginmanagerPlugins {
 		fmt.Printf("  %d. %s v%s - %s\n", i+1, plugin.Name(), plugin.Version(), plugin.Description())
 
-		
 		commands := plugin.Commands()
 		if len(commands) > 0 {
 			fmt.Printf("     Commands:\n")
@@ -31,7 +29,6 @@ func main() {
 			}
 		}
 
-		
 		hooks := plugin.Hooks()
 		if len(hooks) > 0 {
 			fmt.Printf("     Hooks:\n")
@@ -40,7 +37,6 @@ func main() {
 			}
 		}
 
-		
 		config := plugin.Config()
 		if len(config) > 0 {
 			fmt.Printf("     Config:\n")
@@ -50,11 +46,19 @@ func main() {
 		}
 	}
 
-	
 	api := pm.GetAPI()
 	fmt.Printf("\nPlugin API Status:\n")
 	fmt.Printf("  Current namespace: %s\n", api.GetCurrentNamespace())
 	fmt.Printf("  Header components: %d\n", len(api.GetHeaderComponents()))
 	fmt.Printf("  Footer components: %d\n", len(api.GetFooterComponents()))
 	fmt.Printf("  Registered commands: %d\n", len(api.GetCommands()))
+
+	// Test executing the session:save command
+	fmt.Printf("\nTesting session:save command:\n")
+	result, err := api.ExecuteCommand("session:save", []string{})
+	if err != nil {
+		fmt.Printf("Error executing command: %v\n", err)
+	} else {
+		fmt.Printf("Command result: %s\n", result)
+	}
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/charmbracelet/bubbletea"
+	"github.com/otavioCosta2110/k8s-tui/internal/app/cli"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui"
 	resources "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
@@ -19,6 +20,7 @@ func main() {
 	} else {
 		logger.Info("Plugins loaded successfully")
 	}
+
 	plugins.SetGlobalPluginManager(pluginManager)
 	pluginManager.TriggerEvent(plugins.EventAppStarted, "k8s-tui started")
 	resources.SetCustomResourceHandlers(
@@ -35,6 +37,11 @@ func main() {
 		},
 	)
 	m := ui.NewAppModel(cfg, pluginManager)
+
+	// Handle plugin CLI arguments after the app model is created (so callbacks are set up)
+	if err := cli.HandlePluginArgs(pluginManager, cfg.PluginArgs); err != nil {
+		logger.Error(fmt.Sprintf("Plugin CLI argument handling error: %v", err))
+	}
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	defer func() {
 		if r := recover(); r != nil {

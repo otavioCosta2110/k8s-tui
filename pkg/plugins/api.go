@@ -6,7 +6,6 @@ import (
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 )
 
-
 type UIManager struct {
 	headerComponents []UIInjectionPoint
 	footerComponents []UIInjectionPoint
@@ -36,7 +35,6 @@ func (ui *UIManager) GetHeaderComponents() []UIInjectionPoint {
 func (ui *UIManager) GetFooterComponents() []UIInjectionPoint {
 	return ui.footerComponents
 }
-
 
 type CommandManager struct {
 	commands map[string]PluginCommand
@@ -68,6 +66,40 @@ func (cm *CommandManager) GetCommands() map[string]PluginCommand {
 	return cm.commands
 }
 
+type CLIArgumentManager struct {
+	arguments map[string]CLIArgument
+}
+
+func NewCLIArgumentManager() *CLIArgumentManager {
+	return &CLIArgumentManager{
+		arguments: make(map[string]CLIArgument),
+	}
+}
+
+func (cam *CLIArgumentManager) RegisterArgument(name, description string, handler func(value string) error) {
+	cam.arguments[name] = CLIArgument{
+		Name:        name,
+		Description: description,
+		Handler:     handler,
+	}
+
+}
+
+func (cam *CLIArgumentManager) ExecuteArgument(name string, value string) error {
+	if arg, exists := cam.arguments[name]; exists {
+		return arg.Handler(value)
+	}
+	return fmt.Errorf("CLI argument not found: %s", name)
+}
+
+func (cam *CLIArgumentManager) GetArguments() map[string]CLIArgument {
+	return cam.arguments
+}
+
+func (cam *CLIArgumentManager) HasArgument(name string) bool {
+	_, exists := cam.arguments[name]
+	return exists
+}
 
 type EventManager struct {
 	eventHandlers map[PluginEvent][]func(data interface{}) error
@@ -93,7 +125,6 @@ func (em *EventManager) TriggerEvent(event PluginEvent, data interface{}) {
 	}
 }
 
-
 type ConfigManager struct {
 	config map[string]interface{}
 }
@@ -114,23 +145,30 @@ func (cm *ConfigManager) SetConfig(key string, value interface{}) {
 }
 
 type PluginAPIImpl struct {
-	currentNamespace string
-	uiManager        *UIManager
-	commandManager   *CommandManager
-	eventManager     *EventManager
-	configManager    *ConfigManager
-	resourceRegistry *ResourceRegistry
-	client           k8s.Client
+	currentNamespace   string
+	uiManager          *UIManager
+	commandManager     *CommandManager
+	cliArgumentManager *CLIArgumentManager
+	eventManager       *EventManager
+	configManager      *ConfigManager
+	resourceRegistry   *ResourceRegistry
+	client             k8s.Client
+	tabGetter          func() ([]TabInfo, error)
+	tabRestorer        func(tabs []TabInfo) error
+	// Callbacks to main app
+	setNamespaceCallback func(namespace string)
+	setStatusCallback    func(message string)
 }
 
 func NewPluginAPI() *PluginAPIImpl {
 	return &PluginAPIImpl{
-		currentNamespace: "default",
-		uiManager:        NewUIManager(),
-		commandManager:   NewCommandManager(),
-		eventManager:     NewEventManager(),
-		configManager:    NewConfigManager(),
-		resourceRegistry: NewResourceRegistry(),
+		currentNamespace:   "default",
+		uiManager:          NewUIManager(),
+		commandManager:     NewCommandManager(),
+		cliArgumentManager: NewCLIArgumentManager(),
+		eventManager:       NewEventManager(),
+		configManager:      NewConfigManager(),
+		resourceRegistry:   NewResourceRegistry(),
 	}
 }
 
@@ -139,13 +177,22 @@ func (api *PluginAPIImpl) GetCurrentNamespace() string {
 }
 
 func (api *PluginAPIImpl) SetCurrentNamespace(namespace string) {
+	logger.Info(fmt.Sprintf("DEBUG: SetCurrentNamespace called with: %s", namespace))
 	api.currentNamespace = namespace
+	if api.setNamespaceCallback != nil {
+		logger.Info("DEBUG: Calling setNamespaceCallback")
+		api.setNamespaceCallback(namespace)
+	} else {
+		logger.Info("DEBUG: setNamespaceCallback is nil")
+	}
 	api.eventManager.TriggerEvent(EventNamespaceChanged, namespace)
 }
 
 func (api *PluginAPIImpl) SetStatusMessage(message string) {
 	logger.Info(fmt.Sprintf("📢 Plugin Status: %s", message))
-	
+	if api.setStatusCallback != nil {
+		api.setStatusCallback(message)
+	}
 }
 
 func (api *PluginAPIImpl) AddHeaderComponent(component UIInjectionPoint) {
@@ -172,6 +219,11 @@ func (api *PluginAPIImpl) ExecuteCommand(name string, args []string) (string, er
 	return api.commandManager.ExecuteCommand(name, args)
 }
 
+func (api *PluginAPIImpl) RegisterCLIArgument(name, description string, handler func(value string) error) {
+	fmt.Printf("DEBUG: Registering CLI argument: %s\n", name)
+	api.cliArgumentManager.RegisterArgument(name, description, handler)
+}
+
 func (api *PluginAPIImpl) GetConfig(key string) any {
 	return api.configManager.GetConfig(key)
 }
@@ -192,6 +244,18 @@ func (api *PluginAPIImpl) GetCommands() map[string]PluginCommand {
 	return api.commandManager.GetCommands()
 }
 
+func (api *PluginAPIImpl) GetCLIArguments() map[string]CLIArgument {
+	return api.cliArgumentManager.GetArguments()
+}
+
+func (api *PluginAPIImpl) HasCLIArgument(name string) bool {
+	return api.cliArgumentManager.HasArgument(name)
+}
+
+func (api *PluginAPIImpl) ExecuteCLIArgument(name string, value string) error {
+	return api.cliArgumentManager.ExecuteArgument(name, value)
+}
+
 func (api *PluginAPIImpl) GetClient() k8s.Client {
 	return api.client
 }
@@ -199,8 +263,6 @@ func (api *PluginAPIImpl) GetClient() k8s.Client {
 func (api *PluginAPIImpl) SetClient(client k8s.Client) {
 	api.client = client
 }
-
-
 
 func (api *PluginAPIImpl) GetPods(namespace string, selector ...string) ([]k8s.PodInfo, error) {
 	selectorStr := ""
@@ -210,18 +272,14 @@ func (api *PluginAPIImpl) GetPods(namespace string, selector ...string) ([]k8s.P
 
 	logger.Debug(fmt.Sprintf("PluginAPI GetPods called with namespace=%s, selector=%s", namespace, selectorStr))
 
-	
 	handler, exists := api.resourceRegistry.GetHandler(k8s.ResourceTypePod)
 	logger.Debug(fmt.Sprintf("Pod handler exists: %v, handler: %v", exists, handler))
 
-	
-	
 	if !exists || handler == nil || selectorStr != "" {
 		logger.Debug(fmt.Sprintf("Using direct k8s client with selector: %s", selectorStr))
 		return k8s.FetchPods(api.client, namespace, selectorStr)
 	}
 
-	
 	logger.Debug("Using custom handler (no selector provided)")
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypePod, namespace)
 	if err != nil {
@@ -330,8 +388,6 @@ func (api *PluginAPIImpl) GetServiceAccounts(namespace string) ([]k8s.ServiceAcc
 	return result.([]k8s.ServiceAccountInfo), nil
 }
 
-
-
 func (api *PluginAPIImpl) DeletePod(namespace, name string) error {
 	return api.resourceRegistry.DeleteResource(api.client, k8s.ResourceTypePod, namespace, name)
 }
@@ -379,8 +435,6 @@ func (api *PluginAPIImpl) DeleteReplicaSet(namespace, name string) error {
 func (api *PluginAPIImpl) DeleteServiceAccount(namespace, name string) error {
 	return api.resourceRegistry.DeleteResource(api.client, k8s.ResourceTypeServiceAccount, namespace, name)
 }
-
-
 
 func (api *PluginAPIImpl) DescribePod(namespace, name string) (string, error) {
 	return api.resourceRegistry.DescribeResource(api.client, k8s.ResourceTypePod, namespace, name)
@@ -434,20 +488,48 @@ func (api *PluginAPIImpl) DescribeServiceAccount(namespace, name string) (string
 	return api.resourceRegistry.DescribeResource(api.client, k8s.ResourceTypeServiceAccount, namespace, name)
 }
 
-
-
-
 func (api *PluginAPIImpl) RegisterResourceHandler(resourceType k8s.ResourceType, handler ResourceHandler) {
 	api.resourceRegistry.RegisterHandler(resourceType, handler)
 	logger.PluginDebug("api", fmt.Sprintf("Registered custom handler for resource type: %s", resourceType))
 }
 
-
 func (api *PluginAPIImpl) GetSupportedResourceTypes() []k8s.ResourceType {
 	return api.resourceRegistry.GetSupportedTypes()
 }
 
-
 func (api *PluginAPIImpl) GetResourceHandler(resourceType k8s.ResourceType) (ResourceHandler, bool) {
 	return api.resourceRegistry.GetHandler(resourceType)
+}
+
+func (api *PluginAPIImpl) GetTabs() ([]TabInfo, error) {
+	if api.tabGetter != nil {
+		return api.tabGetter()
+	}
+	return nil, fmt.Errorf("tab getter not set")
+}
+
+func (api *PluginAPIImpl) RestoreTabs(tabs []TabInfo) error {
+	logger.Info(fmt.Sprintf("DEBUG: API RestoreTabs called with %d tabs", len(tabs)))
+	if api.tabRestorer != nil {
+		logger.Info("DEBUG: Calling tabRestorer")
+		return api.tabRestorer(tabs)
+	}
+	logger.Info("DEBUG: tabRestorer is nil")
+	return fmt.Errorf("tab restorer not set")
+}
+
+func (api *PluginAPIImpl) SetTabGetter(getter func() ([]TabInfo, error)) {
+	api.tabGetter = getter
+}
+
+func (api *PluginAPIImpl) SetTabRestorer(restorer func(tabs []TabInfo) error) {
+	api.tabRestorer = restorer
+}
+
+func (api *PluginAPIImpl) SetNamespaceCallback(callback func(namespace string)) {
+	api.setNamespaceCallback = callback
+}
+
+func (api *PluginAPIImpl) SetStatusCallback(callback func(message string)) {
+	api.setStatusCallback = callback
 }

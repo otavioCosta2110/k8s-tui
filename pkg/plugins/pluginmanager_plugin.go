@@ -3,8 +3,8 @@ package plugins
 import (
 	"context"
 	"fmt"
-	"github.com/otavioCosta2110/k8s-tui/pkg/format"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
+	"github.com/otavioCosta2110/k8s-tui/pkg/format"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/yuin/gopher-lua"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -76,8 +76,13 @@ func (p *PluginmanagerStyleLuaPlugin) Description() string {
 func (p *PluginmanagerStyleLuaPlugin) Initialize() error {
 	logger.PluginDebug(p.pluginName, "Initializing pluginmanager-style plugin")
 
-	
-	p.setupLuaAPI()
+	p.SetupLuaAPI()
+	logger.PluginDebug(p.pluginName, "setupLuaAPI completed")
+
+	if p.L.GetGlobal("Initialize").Type() != lua.LTFunction {
+		logger.PluginError(p.pluginName, "Initialize function not found")
+		return fmt.Errorf("Initialize function not found")
+	}
 
 	if err := p.L.CallByParam(lua.P{
 		Fn:      p.L.GetGlobal("Initialize"),
@@ -118,17 +123,15 @@ func (p *PluginmanagerStyleLuaPlugin) Shutdown() error {
 func (p *PluginmanagerStyleLuaPlugin) Setup(opts map[string]interface{}) error {
 	logger.PluginDebug(p.pluginName, "Setting up plugin with options")
 
-	
 	for k, v := range opts {
 		p.config[k] = v
 	}
 
-	
 	setupType := p.L.GetGlobal("Setup").Type()
 	logger.PluginDebug(p.pluginName, fmt.Sprintf("Setup function type: %s", setupType))
 
 	if setupType == lua.LTFunction {
-		
+
 		optsTable := p.L.NewTable()
 		for k, v := range opts {
 			optsTable.RawSetString(k, lua.LString(fmt.Sprintf("%v", v)))
@@ -168,7 +171,7 @@ func (p *PluginmanagerStyleLuaPlugin) Config() map[string]interface{} {
 		ret := p.L.Get(-1)
 		p.L.Pop(1)
 		if ret.Type() == lua.LTTable {
-			
+
 			config := make(map[string]interface{})
 			ret.(*lua.LTable).ForEach(func(key, value lua.LValue) {
 				if key.Type() == lua.LTString {
@@ -208,6 +211,33 @@ func (p *PluginmanagerStyleLuaPlugin) Commands() []PluginCommand {
 	return commands
 }
 
+func (p *PluginmanagerStyleLuaPlugin) CLIArguments() []CLIArgument {
+	var args []CLIArgument
+
+	if fn := p.L.GetGlobal("CLIArguments"); fn.Type() == lua.LTFunction {
+		if err := p.L.CallByParam(lua.P{
+			Fn:      fn,
+			NRet:    1,
+			Protect: true,
+		}); err != nil {
+			logger.PluginError(p.pluginName, fmt.Sprintf("Error calling CLIArguments(): %v", err))
+			return args
+		}
+		ret := p.L.Get(-1)
+		p.L.Pop(1)
+		if ret.Type() == lua.LTTable {
+			ret.(*lua.LTable).ForEach(func(key, value lua.LValue) {
+				if value.Type() == lua.LTTable {
+					arg := p.parseCLIArgument(value.(*lua.LTable))
+					args = append(args, arg)
+				}
+			})
+		}
+	}
+
+	return args
+}
+
 func (p *PluginmanagerStyleLuaPlugin) Hooks() []PluginHook {
 	var hooks []PluginHook
 
@@ -235,13 +265,61 @@ func (p *PluginmanagerStyleLuaPlugin) Hooks() []PluginHook {
 	return hooks
 }
 
+func (p *PluginmanagerStyleLuaPlugin) callLuaFunction(functionName string, args []string) (string, error) {
+	if p.L.GetGlobal(functionName).Type() != lua.LTFunction {
+		return "", fmt.Errorf("Lua function %s not found", functionName)
+	}
+
+	luaArgs := make([]lua.LValue, len(args))
+	for i, arg := range args {
+		luaArgs[i] = lua.LString(arg)
+	}
+
+	if err := p.L.CallByParam(lua.P{
+		Fn:      p.L.GetGlobal(functionName),
+		NRet:    2, // Return value and error
+		Protect: true,
+	}, luaArgs...); err != nil {
+		logger.PluginError(p.pluginName, fmt.Sprintf("Error calling Lua function %s: %v", functionName, err))
+		return "", err
+	}
+
+	result := p.L.Get(-2)
+	errorValue := p.L.Get(-1)
+	p.L.Pop(2)
+
+	if errorValue.Type() == lua.LTString && errorValue.String() != "" {
+		return "", fmt.Errorf("%s", errorValue.String())
+	}
+
+	return result.String(), nil
+}
+
 func (p *PluginmanagerStyleLuaPlugin) parsePluginCommand(tbl *lua.LTable) PluginCommand {
+	name := p.getStringField(tbl, "name")
+	description := p.getStringField(tbl, "description")
+	handlerName := p.getStringField(tbl, "handler")
+
 	return PluginCommand{
-		Name:        p.getStringField(tbl, "name"),
-		Description: p.getStringField(tbl, "description"),
+		Name:        name,
+		Description: description,
 		Handler: func(args []string) (string, error) {
-			
-			return "Command executed", nil
+			return p.callLuaFunction(handlerName, args)
+		},
+	}
+}
+
+func (p *PluginmanagerStyleLuaPlugin) parseCLIArgument(tbl *lua.LTable) CLIArgument {
+	name := p.getStringField(tbl, "name")
+	description := p.getStringField(tbl, "description")
+	handlerName := p.getStringField(tbl, "handler")
+
+	return CLIArgument{
+		Name:        name,
+		Description: description,
+		Handler: func(value string) error {
+			_, err := p.callLuaFunction(handlerName, []string{value})
+			return err
 		},
 	}
 }
@@ -253,7 +331,7 @@ func (p *PluginmanagerStyleLuaPlugin) parsePluginHook(tbl *lua.LTable) PluginHoo
 	return PluginHook{
 		Event: event,
 		Handler: func(data interface{}) error {
-			
+
 			if p.L.GetGlobal(handlerName).Type() == lua.LTFunction {
 				if err := p.L.CallByParam(lua.P{
 					Fn:      p.L.GetGlobal(handlerName),
@@ -279,6 +357,28 @@ func (p *PluginmanagerStyleLuaPlugin) parsePluginHook(tbl *lua.LTable) PluginHoo
 	}
 }
 
+func (p *PluginmanagerStyleLuaPlugin) parseTabInfo(tbl *lua.LTable) TabInfo {
+	id := p.getStringField(tbl, "ID")
+	title := p.getStringField(tbl, "Title")
+	resourceType := p.getStringField(tbl, "ResourceType")
+
+	var breadcrumb []string
+	if breadcrumbTable := tbl.RawGetString("Breadcrumb"); breadcrumbTable.Type() == lua.LTTable {
+		breadcrumbTable.(*lua.LTable).ForEach(func(key, value lua.LValue) {
+			if value.Type() == lua.LTString {
+				breadcrumb = append(breadcrumb, value.String())
+			}
+		})
+	}
+
+	return TabInfo{
+		ID:           id,
+		Title:        title,
+		ResourceType: resourceType,
+		Breadcrumb:   breadcrumb,
+	}
+}
+
 func (p *PluginmanagerStyleLuaPlugin) getStringField(tbl *lua.LTable, key string) string {
 	if val := tbl.RawGetString(key); val.Type() == lua.LTString {
 		return val.String()
@@ -286,17 +386,28 @@ func (p *PluginmanagerStyleLuaPlugin) getStringField(tbl *lua.LTable, key string
 	return ""
 }
 
-func (p *PluginmanagerStyleLuaPlugin) setupLuaAPI() {
-	
+func (p *PluginmanagerStyleLuaPlugin) SetupLuaAPI() {
+	logger.Info("DEBUG: PluginmanagerStyle SetupLuaAPI called")
+
 	apiTable := p.L.NewTable()
 
-	
 	p.L.SetField(apiTable, "get_namespace", p.L.NewFunction(p.luaGetNamespace))
+	p.L.SetField(apiTable, "set_namespace", p.L.NewFunction(p.luaSetNamespace))
 	p.L.SetField(apiTable, "set_status", p.L.NewFunction(p.luaSetStatus))
 	p.L.SetField(apiTable, "add_header", p.L.NewFunction(p.luaAddHeader))
 	p.L.SetField(apiTable, "register_command", p.L.NewFunction(p.luaRegisterCommand))
+	p.L.SetField(apiTable, "register_cli_argument", p.L.NewFunction(p.luaRegisterCLIArgument))
+	p.L.SetField(apiTable, "get_tabs", p.L.NewFunction(p.luaGetTabs))
+	p.L.SetField(apiTable, "restore_tabs", p.L.NewFunction(p.luaRestoreTabs))
 
-	
+	p.L.SetField(apiTable, "log", p.L.NewFunction(func(L *lua.LState) int {
+		message := L.CheckString(1)
+		logger.PluginInfo(p.pluginName, message)
+		return 0
+	}))
+
+	logger.Info("DEBUG: API functions registered")
+
 	p.L.SetField(apiTable, "get_pods", p.L.NewFunction(p.luaGetPods))
 	p.L.SetField(apiTable, "get_services", p.L.NewFunction(p.luaGetServices))
 	p.L.SetField(apiTable, "get_deployments", p.L.NewFunction(p.luaGetDeployments))
@@ -312,7 +423,6 @@ func (p *PluginmanagerStyleLuaPlugin) setupLuaAPI() {
 	p.L.SetField(apiTable, "get_namespaces", p.L.NewFunction(p.luaGetNamespaces))
 	p.L.SetField(apiTable, "get_serviceaccounts", p.L.NewFunction(p.luaGetServiceAccounts))
 
-	
 	p.L.SetField(apiTable, "delete_pod", p.L.NewFunction(p.luaDeletePod))
 	p.L.SetField(apiTable, "delete_service", p.L.NewFunction(p.luaDeleteService))
 	p.L.SetField(apiTable, "delete_deployment", p.L.NewFunction(p.luaDeleteDeployment))
@@ -328,13 +438,73 @@ func (p *PluginmanagerStyleLuaPlugin) setupLuaAPI() {
 
 	p.L.SetField(apiTable, "get_endpoints", p.L.NewFunction(p.luaGetEndpoints))
 
-	
 	p.L.SetGlobal("k8s_tui", apiTable)
+	logger.Info("DEBUG: PluginmanagerStyle k8s_tui table set")
+	logger.Info("DEBUG: k8s_tui table set as global")
 }
 
 func (p *PluginmanagerStyleLuaPlugin) luaGetNamespace(L *lua.LState) int {
 	namespace := p.api.GetCurrentNamespace()
 	L.Push(lua.LString(namespace))
+	return 1
+}
+
+func (p *PluginmanagerStyleLuaPlugin) luaSetNamespace(L *lua.LState) int {
+	namespace := L.CheckString(1)
+	logger.Info(fmt.Sprintf("DEBUG: luaSetNamespace called with: %s", namespace))
+	p.api.SetCurrentNamespace(namespace)
+	logger.Info("DEBUG: luaSetNamespace completed")
+	return 0
+}
+
+func (p *PluginmanagerStyleLuaPlugin) luaGetTabs(L *lua.LState) int {
+	tabs, err := p.api.GetTabs()
+	if err != nil {
+		L.Push(lua.LString(fmt.Sprintf("failed to get tabs: %v", err)))
+		return 1
+	}
+
+	resultTable := L.NewTable()
+	for i, tab := range tabs {
+		tabTable := L.NewTable()
+		L.SetField(tabTable, "ID", lua.LString(tab.ID))
+		L.SetField(tabTable, "Title", lua.LString(tab.Title))
+		L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+
+		breadcrumbTable := L.NewTable()
+		for j, crumb := range tab.Breadcrumb {
+			L.RawSetInt(breadcrumbTable, j+1, lua.LString(crumb))
+		}
+		L.SetField(tabTable, "Breadcrumb", breadcrumbTable)
+
+		L.RawSetInt(resultTable, i+1, tabTable)
+	}
+	L.Push(resultTable)
+	return 1
+}
+
+func (p *PluginmanagerStyleLuaPlugin) luaRestoreTabs(L *lua.LState) int {
+	logger.Info("DEBUG: luaRestoreTabs called")
+	tabsTable := L.CheckTable(1)
+
+	var tabs []TabInfo
+	tabsTable.ForEach(func(key, value lua.LValue) {
+		if value.Type() == lua.LTTable {
+			tab := p.parseTabInfo(value.(*lua.LTable))
+			tabs = append(tabs, tab)
+		}
+	})
+
+	logger.Info(fmt.Sprintf("DEBUG: Parsed %d tabs, calling p.api.RestoreTabs", len(tabs)))
+	err := p.api.RestoreTabs(tabs)
+	if err != nil {
+		logger.Info(fmt.Sprintf("DEBUG: p.api.RestoreTabs failed: %v", err))
+		L.Push(lua.LString(fmt.Sprintf("failed to restore tabs: %v", err)))
+		return 1
+	}
+
+	logger.Info("DEBUG: luaRestoreTabs completed successfully")
+	L.Push(lua.LString("ok"))
 	return 1
 }
 
@@ -367,19 +537,30 @@ func (p *PluginmanagerStyleLuaPlugin) luaAddHeader(L *lua.LState) int {
 func (p *PluginmanagerStyleLuaPlugin) luaRegisterCommand(L *lua.LState) int {
 	name := L.CheckString(1)
 	description := L.CheckString(2)
-	
+	handlerName := L.CheckString(3)
+
 	command := PluginCommand{
 		Name:        name,
 		Description: description,
 		Handler: func(args []string) (string, error) {
-			
-			return "Command executed from Lua", nil
+			return p.callLuaFunction(handlerName, args)
 		},
 	}
 	p.api.RegisterCommand(command.Name, command.Description, command.Handler)
 	return 0
 }
 
+func (p *PluginmanagerStyleLuaPlugin) luaRegisterCLIArgument(L *lua.LState) int {
+	name := L.CheckString(1)
+	description := L.CheckString(2)
+	handlerName := L.CheckString(3)
+
+	p.api.RegisterCLIArgument(name, description, func(value string) error {
+		_, err := p.callLuaFunction(handlerName, []string{value})
+		return err
+	})
+	return 0
+}
 
 func (p *PluginmanagerStyleLuaPlugin) luaGetPods(L *lua.LState) int {
 	namespace := L.CheckString(1)
@@ -746,7 +927,6 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetServiceAccounts(L *lua.LState) int {
 	return 1
 }
 
-
 func (p *PluginmanagerStyleLuaPlugin) luaDeletePod(L *lua.LState) int {
 	namespace := L.CheckString(1)
 	name := L.CheckString(2)
@@ -954,29 +1134,26 @@ func (p *PluginmanagerStyleLuaPlugin) luaDeleteServiceAccount(L *lua.LState) int
 func (p *PluginmanagerStyleLuaPlugin) luaGetEndpoints(L *lua.LState) int {
 	namespace := L.CheckString(1)
 
-	
 	client := p.api.GetClient()
 	if client.Clientset == nil {
 		L.Push(lua.LString("no kubernetes client available"))
 		return 1
 	}
 
-	
 	endpointSlices, err := client.Clientset.DiscoveryV1().EndpointSlices(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		L.Push(lua.LString(fmt.Sprintf("failed to fetch endpoint slices: %v", err)))
 		return 1
 	}
 
-	
 	resultTable := L.NewTable()
 	for i, endpointSlice := range endpointSlices.Items {
-		
+
 		var addresses []string
 		for _, endpoint := range endpointSlice.Endpoints {
 			for _, addr := range endpoint.Addresses {
 				if addr != "" {
-					
+
 					isReady := true
 					if endpoint.Conditions.Ready != nil {
 						isReady = *endpoint.Conditions.Ready
@@ -994,7 +1171,6 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetEndpoints(L *lua.LState) int {
 			addressesStr = "<none>"
 		}
 
-		
 		var ports []string
 		for _, port := range endpointSlice.Ports {
 			if port.Port != nil {
@@ -1010,7 +1186,6 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetEndpoints(L *lua.LState) int {
 			portsStr = "<none>"
 		}
 
-		
 		serviceName := "unknown"
 		if endpointSlice.Labels != nil {
 			if svcName, ok := endpointSlice.Labels["kubernetes.io/service-name"]; ok {
@@ -1018,7 +1193,6 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetEndpoints(L *lua.LState) int {
 			}
 		}
 
-		
 		age := "Unknown"
 		if !endpointSlice.CreationTimestamp.IsZero() {
 			age = format.FormatAge(endpointSlice.CreationTimestamp.Time)

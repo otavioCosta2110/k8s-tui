@@ -22,7 +22,7 @@ func NewServices(k k8s.Client, namespace string) (*servicesModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeService,
 		Title:           customstyles.ResourceIcons["Services"] + " Services in " + namespace,
-		ColumnWidths:    []float64{0.06, 0.05, 0.10, 0.11, 0.05, 0.05, 0.05},
+		ColumnWidths:    []float64{0.06, 0.05, 0.09, 0.11, 0.05, 0.05, 0.05},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),
