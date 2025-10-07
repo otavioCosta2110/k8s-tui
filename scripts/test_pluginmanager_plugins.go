@@ -53,7 +53,6 @@ func main() {
 	fmt.Printf("  Footer components: %d\n", len(api.GetFooterComponents()))
 	fmt.Printf("  Registered commands: %d\n", len(api.GetCommands()))
 
-	// Test executing the session:save command
 	fmt.Printf("\nTesting session:save command:\n")
 	result, err := api.ExecuteCommand("session:save", []string{})
 	if err != nil {

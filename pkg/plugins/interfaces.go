@@ -286,9 +286,7 @@ type PluginAPI interface {
 	DeleteReplicaSet(namespace, name string) error
 	DeleteServiceAccount(namespace, name string) error
 
-	// Get current tabs information
 	GetTabs() ([]TabInfo, error)
 
-	// Restore tabs from saved session
 	RestoreTabs(tabs []TabInfo) error
 }

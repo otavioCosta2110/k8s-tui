@@ -98,7 +98,6 @@ func (pm *PluginManager) setupBasicLuaAPI(L *lua.LState) {
 
 	apiTable := L.NewTable()
 
-	// Create a basic plugin instance for API access
 	plugin := &basicLuaPlugin{api: pm.api}
 
 	L.SetField(apiTable, "get_namespace", L.NewFunction(plugin.luaGetNamespace))
@@ -210,18 +209,15 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		return fmt.Errorf("failed to read Lua script: %v", err)
 	}
 
-	// Execute the script content
 	if err := L.DoString(string(content)); err != nil {
 		L.Close()
 		logger.Error(fmt.Sprintf("🔌 Plugin Manager: Failed to execute Lua script %s: %v", path, err))
 		return fmt.Errorf("failed to load Lua script: %v", err)
 	}
 
-	// Set up basic k8s_tui API for Lua plugins
 	print(fmt.Sprintf("DEBUG: Setting up basic k8s_tui API for plugin: %s", pluginName))
 	pm.setupBasicLuaAPI(L)
 
-	// If CLIArguments is not defined, define it manually
 	if L.GetGlobal("CLIArguments").Type() != lua.LTFunction {
 		cliArgsCode := `
 function CLIArguments()
@@ -560,14 +556,11 @@ end
 		L.SetField(apiTable, "register_command", L.NewFunction(func(L *lua.LState) int {
 			name := L.CheckString(1)
 			description := L.CheckString(2)
-			// handlerName := L.CheckString(3) // Not used in legacy implementation
 
 			command := PluginCommand{
 				Name:        name,
 				Description: description,
 				Handler: func(args []string) (string, error) {
-					// For legacy plugins, we can't easily call Lua functions
-					// This would need more complex implementation
 					return "Command executed from Lua (legacy)", nil
 				},
 			}
@@ -580,7 +573,6 @@ end
 			handlerName := L.CheckString(3)
 
 			pm.api.RegisterCLIArgument(name, description, func(value string) error {
-				// Call the Lua function
 				if L.GetGlobal(handlerName).Type() == lua.LTFunction {
 
 					if err := L.CallByParam(lua.P{
@@ -1310,7 +1302,6 @@ end
 
 		pluginmanagerPlugin := NewPluginmanagerStyleLuaPlugin(L, pluginName, pm.api)
 
-		// Setup the Lua API before registering CLI arguments
 		pluginmanagerPlugin.SetupLuaAPI()
 
 		defaultConfig := pluginmanagerPlugin.Config()

@@ -86,7 +86,6 @@ type AppModel struct {
 	uiInjector          *UIInjector
 }
 
-// loadSession loads session data from a JSON file
 func loadSession(sessionFile string) (*SessionData, error) {
 	if sessionFile == "" {
 		return nil, nil
@@ -105,7 +104,6 @@ func loadSession(sessionFile string) (*SessionData, error) {
 	return &session, nil
 }
 
-// restoreSession restores tabs from session data
 func (m *AppModel) restoreSession(session *SessionData) error {
 	if session == nil || len(session.Tabs) == 0 {
 		return nil
@@ -113,13 +111,11 @@ func (m *AppModel) restoreSession(session *SessionData) error {
 
 	logger.Info(fmt.Sprintf("Restoring session with %d tabs", len(session.Tabs)))
 
-	// Close all existing tabs except the first one (resource list)
 	for len(m.tabManager.GetTabsForComponent()) > 1 {
 		lastTab := m.tabManager.GetTabsForComponent()[len(m.tabManager.GetTabsForComponent())-1]
 		m.tabManager.Update(components.TabMsg{Action: "close", TabID: lastTab.ID})
 	}
 
-	// Restore tabs from session
 	for _, sessionTab := range session.Tabs {
 		if err := m.restoreTab(sessionTab); err != nil {
 			logger.Error(fmt.Sprintf("Failed to restore tab %s: %v", sessionTab.Title, err))
@@ -130,27 +126,22 @@ func (m *AppModel) restoreSession(session *SessionData) error {
 	return nil
 }
 
-// restoreTab recreates a single tab based on session data
 func (m *AppModel) restoreTab(sessionTab SessionTab) error {
 	logger.Info(fmt.Sprintf("Restoring tab: %s (%s) - Breadcrumb: %v",
 		sessionTab.Title, sessionTab.ResourceType, sessionTab.Breadcrumb))
 
-	// Skip the initial resource list tab
 	if sessionTab.ResourceType == "ResourceList" {
 		return nil
 	}
 
-	// Create the appropriate model based on breadcrumb path
 	model, err := m.createModelForBreadcrumb(sessionTab.Breadcrumb)
 	if err != nil {
 		return fmt.Errorf("failed to create model for breadcrumb %v: %v", sessionTab.Breadcrumb, err)
 	}
 
 	if model != nil {
-		// Create new tab with the restored model
 		_, cmd := m.tabManager.CreateNewTab(model, sessionTab.Title)
 		if cmd != nil {
-			// Execute the init command
 			model, _ = model.Update(cmd)
 		}
 		logger.Info(fmt.Sprintf("Successfully restored tab: %s", sessionTab.Title))
@@ -159,26 +150,21 @@ func (m *AppModel) restoreTab(sessionTab SessionTab) error {
 	return nil
 }
 
-// createModelForBreadcrumb creates the appropriate model based on breadcrumb navigation
 func (m *AppModel) createModelForBreadcrumb(breadcrumb []string) (tea.Model, error) {
 	if len(breadcrumb) < 2 {
 		return nil, fmt.Errorf("breadcrumb too short: %v", breadcrumb)
 	}
 
-	// breadcrumb[0] should be "Resource List"
 	if breadcrumb[0] != "Resource List" {
 		return nil, fmt.Errorf("invalid breadcrumb start: %s", breadcrumb[0])
 	}
 
 	resourceType := breadcrumb[1]
 
-	// If only 2 elements, it's a resource list (e.g., ["Resource List", "Pods"])
 	if len(breadcrumb) == 2 {
-		// Use the same approach as the resourceFactory
 		return models.NewResourceList(m.kube, m.config.DefaultNamespace, resourceType).InitComponent(m.kube)
 	}
 
-	// If 3+ elements, it's a specific resource details (e.g., ["Resource List", "Pods", "my-pod"])
 	if len(breadcrumb) >= 3 {
 		resourceName := breadcrumb[2]
 		return m.createResourceDetailsModel(resourceType, resourceName)
@@ -187,7 +173,6 @@ func (m *AppModel) createModelForBreadcrumb(breadcrumb []string) (tea.Model, err
 	return nil, fmt.Errorf("unable to determine model type for breadcrumb: %v", breadcrumb)
 }
 
-// createResourceDetailsModel creates the appropriate details model for a specific resource
 func (m *AppModel) createResourceDetailsModel(resourceType, resourceName string) (tea.Model, error) {
 	switch resourceType {
 	case "Pods", "pods":
@@ -248,7 +233,6 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 		}
 
 		if pluginManager != nil {
-			// Set tab getter for plugins
 			pluginManager.GetAPI().SetTabGetter(func() ([]plugins.TabInfo, error) {
 				tabs := tabManager.GetTabsForComponent()
 				var tabInfos []plugins.TabInfo
@@ -263,7 +247,6 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 				return tabInfos, nil
 			})
 
-			// Set tab restorer for plugins
 			pluginManager.GetAPI().SetTabRestorer(func(tabInfos []plugins.TabInfo) error {
 				logger.Info(fmt.Sprintf("DEBUG: SetTabRestorer callback called with %d tabInfos", len(tabInfos)))
 				for i, tabInfo := range tabInfos {
@@ -281,25 +264,20 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 				return nil
 			})
 
-			// Set callbacks for plugin API to affect main app state
 			pluginManager.GetAPI().SetNamespaceCallback(func(namespace string) {
 				logger.Info(fmt.Sprintf("DEBUG: SetNamespaceCallback called with namespace: %s", namespace))
 				appModel.header.SetNamespace(namespace)
 				logger.Info("DEBUG: Called header.SetNamespace, now calling UpdateContent")
 				appModel.header.UpdateContent()
-				// TODO: Update tab manager namespace if needed
 				logger.Info(fmt.Sprintf("Plugin changed namespace to: %s", namespace))
 			})
 
 			pluginManager.GetAPI().SetStatusCallback(func(message string) {
-				// For now, just log the status message
-				// TODO: Display status message in UI
 				logger.Info(fmt.Sprintf("Plugin status: %s", message))
 			})
 
 			appModel.loadPluginUIExtensions()
 
-			// Handle plugin CLI arguments
 			if err := cli.HandlePluginArgs(pluginManager, cfg.PluginArgs); err != nil {
 				logger.Error(fmt.Sprintf("Failed to handle plugin CLI arguments: %v", err))
 			}
@@ -334,7 +312,6 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 		}
 
 		if pluginManager != nil {
-			// Set callbacks for plugin API to affect main app state
 			pluginManager.GetAPI().SetNamespaceCallback(func(namespace string) {
 				logger.Info(fmt.Sprintf("DEBUG: SetNamespaceCallback called with namespace: %s", namespace))
 				appModel.header.SetNamespace(namespace)
@@ -349,7 +326,6 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 
 			appModel.loadPluginUIExtensions()
 
-			// Handle plugin CLI arguments even in error case
 
 			if err := cli.HandlePluginArgs(pluginManager, cfg.PluginArgs); err != nil {
 				logger.Error(fmt.Sprintf("Failed to handle plugin CLI arguments: %v", err))
@@ -368,7 +344,6 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 	}
 
 	if pluginManager != nil {
-		// Set callbacks for plugin API to affect main app state
 		pluginManager.GetAPI().SetNamespaceCallback(func(namespace string) {
 			appModel.header.SetNamespace(namespace)
 			appModel.header.UpdateContent()
@@ -381,7 +356,6 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 
 		appModel.loadPluginUIExtensions()
 
-		// Handle plugin CLI arguments even in error case
 
 		if err := cli.HandlePluginArgs(pluginManager, cfg.PluginArgs); err != nil {
 			logger.Error(fmt.Sprintf("Failed to handle plugin CLI arguments: %v", err))
@@ -554,23 +528,18 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		default:
-			// Check for custom keybindings that execute plugin commands
 			if command, exists := m.config.KeyBindings[msg.String()]; exists {
 				if m.pluginManager != nil {
-					// Execute plugin command
 					result, err := m.pluginManager.GetAPI().ExecuteCommand(command, []string{})
 					if err != nil {
-						// Could show error message to user
 						logger.Error(fmt.Sprintf("Failed to execute command %s: %v", command, err))
 					} else {
-						// Could show success message
 						logger.Info(fmt.Sprintf("Executed command %s: %s", command, result))
 					}
 					return m, nil
 				}
 			}
 
-			// Pass to tab manager for default handling
 			if m.tabManager != nil {
 				updatedManager, cmd := m.tabManager.Update(msg)
 				if manager, ok := updatedManager.(*models.TabManager); ok {

@@ -155,7 +155,6 @@ type PluginAPIImpl struct {
 	client             k8s.Client
 	tabGetter          func() ([]TabInfo, error)
 	tabRestorer        func(tabs []TabInfo) error
-	// Callbacks to main app
 	setNamespaceCallback func(namespace string)
 	setStatusCallback    func(message string)
 }

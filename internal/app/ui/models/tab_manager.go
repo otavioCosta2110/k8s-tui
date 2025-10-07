@@ -168,22 +168,17 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
-	// Clear existing tabs
 	tm.tabs = []TabData{}
 	tm.activeIndex = 0
 
-	// Create tabs from the saved information
 	for _, tabInfo := range tabInfos {
-		// Create the appropriate model for this resource type
 		var model tea.Model
 		var err error
 
 		if tabInfo.ResourceType == "ResourceList" || tabInfo.ResourceType == "Resources" {
-			// Resource list view
 			resourceModel := NewResource(*tm.kubeClient, tm.namespace)
 			model = resourceModel.InitComponent(*tm.kubeClient)
 		} else {
-			// Specific resource type view
 			resourceList := NewResourceList(*tm.kubeClient, tm.namespace, tabInfo.ResourceType)
 			model, err = resourceList.InitComponent(*tm.kubeClient)
 			if err != nil {
@@ -191,7 +186,6 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 			}
 		}
 
-		// Create tab data
 		tabData := TabData{
 			ID:           tabInfo.ID,
 			Title:        tabInfo.Title,
@@ -205,7 +199,6 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 		tm.tabs = append(tm.tabs, tabData)
 	}
 
-	// Set active tab to the first one
 	if len(tm.tabs) > 0 {
 		tm.activeIndex = 0
 	}

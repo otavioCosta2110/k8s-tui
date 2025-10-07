@@ -2,3 +2,4 @@ main
 *.log
 *.so
 k8s-tui
+session.json

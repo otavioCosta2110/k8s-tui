@@ -25,7 +25,6 @@ func ParseFlags() Config {
 		defaultPluginDir = appConfig.PluginDir
 	}
 
-	// Parse all command line arguments manually to handle both known and plugin flags
 	args := os.Args[1:] // Skip program name
 	cfg.PluginArgs = make(map[string]string)
 
@@ -35,7 +34,6 @@ func ParseFlags() Config {
 			flagName := strings.TrimPrefix(arg, "--")
 			if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
 				flagValue := args[i+1]
-				// Check if it's a known flag
 				switch flagName {
 				case "kubeconfig":
 					cfg.KubeconfigPath = flagValue
@@ -44,15 +42,12 @@ func ParseFlags() Config {
 				case "plugin-dir":
 					cfg.PluginDir = flagValue
 				default:
-					// Treat as plugin argument
 					cfg.PluginArgs[flagName] = flagValue
 				}
 				i++ // Skip the value
 			} else {
-				// Flag without value
 				switch flagName {
 				case "help", "h":
-					// Handle help flag
 				default:
 					cfg.PluginArgs[flagName] = "true"
 				}
@@ -60,7 +55,6 @@ func ParseFlags() Config {
 		}
 	}
 
-	// Set defaults if not provided
 	if cfg.PluginDir == "" {
 		cfg.PluginDir = defaultPluginDir
 	}

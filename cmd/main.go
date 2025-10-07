@@ -38,7 +38,6 @@ func main() {
 	)
 	m := ui.NewAppModel(cfg, pluginManager)
 
-	// Handle plugin CLI arguments after the app model is created (so callbacks are set up)
 	if err := cli.HandlePluginArgs(pluginManager, cfg.PluginArgs); err != nil {
 		logger.Error(fmt.Sprintf("Plugin CLI argument handling error: %v", err))
 	}
