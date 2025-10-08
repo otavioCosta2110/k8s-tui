@@ -223,6 +223,11 @@ func (m HeaderModel) buildClusterSection(info map[string]string) string {
 		Foreground(lipgloss.Color(customstyles.HeaderValueColor)).
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 
+	serverValue := info["server"]
+	if len(serverValue) > 25 { 
+		serverValue = serverValue[:22] + "..."
+	}
+
 	content := []string{
 		titleStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Cluster Info"),
 		lipgloss.JoinHorizontal(lipgloss.Left,
@@ -232,7 +237,7 @@ func (m HeaderModel) buildClusterSection(info map[string]string) string {
 		lipgloss.JoinHorizontal(lipgloss.Left,
 			labelStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Server:"),
 			labelStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" "),
-			valueStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(info["server"])),
+			valueStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(serverValue)),
 	}
 
 	filledContent := make([]string, len(content))

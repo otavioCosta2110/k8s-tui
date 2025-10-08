@@ -17,6 +17,7 @@ type cmDetailsModel struct {
 	err        error
 	yamlViewer *components.YAMLViewer
 	editor     *components.YAMLEditor
+	spinner    components.SpinnerModel
 	isEditing  bool
 }
 
@@ -30,6 +31,7 @@ func NewConfigmapDetails(k resources.Client, namespace, cmName string) *cmDetail
 		cm:         resources.NewConfigmap(cmName, namespace, k),
 		k8sClient:  &k,
 		yamlViewer: components.NewYAMLViewerWithHelp("Configmap: "+cmName, "Loading...", "↑/↓: Scroll • e: Edit • q: Quit"),
+		spinner:    components.NewSpinner("Loading configmap details..."),
 		loading:    true,
 		err:        nil,
 		isEditing:  false,
@@ -52,7 +54,7 @@ func (c *cmDetailsModel) fetchConfigmapDetails() tea.Cmd {
 }
 
 func (c *cmDetailsModel) Init() tea.Cmd {
-	return tea.Batch(c.yamlViewer.Init(), c.fetchConfigmapDetails())
+	return tea.Batch(c.yamlViewer.Init(), c.spinner.Init(), c.fetchConfigmapDetails())
 }
 
 func (c *cmDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -129,7 +131,9 @@ func (c *cmDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if viewer, ok := updatedModel.(*components.YAMLViewer); ok {
 			c.yamlViewer = viewer
 		}
-		return c, cmd
+		var spinnerCmd tea.Cmd
+		c.spinner, spinnerCmd = c.spinner.Update(msg)
+		return c, tea.Batch(cmd, spinnerCmd)
 	}
 
 	return c, nil
@@ -144,6 +148,10 @@ func (c *cmDetailsModel) View() string {
 
 	if c.isEditing && c.editor != nil {
 		return c.editor.View()
+	}
+
+	if c.loading {
+		return c.spinner.View()
 	}
 
 	if c.yamlViewer != nil {

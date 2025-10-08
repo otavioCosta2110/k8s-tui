@@ -12,6 +12,7 @@ type serviceDetailsModel struct {
 	service    *k8s.ServiceInfo
 	k8sClient  *k8s.Client
 	yamlViewer *components.YAMLViewer
+	spinner    components.SpinnerModel
 	loading    bool
 	err        error
 }
@@ -26,6 +27,7 @@ func NewServiceDetails(k k8s.Client, namespace, serviceName string) *serviceDeta
 		service:    k8s.NewService(serviceName, namespace, k),
 		k8sClient:  &k,
 		yamlViewer: components.NewYAMLViewer("Service: "+serviceName, "Loading..."),
+		spinner:    components.NewSpinner("Loading service details..."),
 		loading:    true,
 		err:        nil,
 	}
@@ -47,7 +49,7 @@ func (s *serviceDetailsModel) fetchServiceDetails() tea.Cmd {
 }
 
 func (s *serviceDetailsModel) Init() tea.Cmd {
-	return tea.Batch(s.yamlViewer.Init(), s.fetchServiceDetails())
+	return tea.Batch(s.yamlViewer.Init(), s.spinner.Init(), s.fetchServiceDetails())
 }
 
 func (s *serviceDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -65,10 +67,17 @@ func (s *serviceDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		updatedViewer, cmd := s.yamlViewer.Update(msg)
 		s.yamlViewer = updatedViewer.(*components.YAMLViewer)
-		return s, cmd
+
+		var spinnerCmd tea.Cmd
+		s.spinner, spinnerCmd = s.spinner.Update(msg)
+
+		return s, tea.Batch(cmd, spinnerCmd)
 	}
 }
 
 func (s *serviceDetailsModel) View() string {
+	if s.loading {
+		return s.spinner.View()
+	}
 	return s.yamlViewer.View()
 }

@@ -33,9 +33,8 @@ type TableModel struct {
 	lastRefresh     time.Time
 	refreshFunc     func() ([]table.Row, error)
 	updateActions   map[string]func() tea.Cmd
+	spinner         SpinnerModel
 }
-
-type loadedTableMsg struct{}
 
 func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, title string, onSelect func(selected string) tea.Msg, selectColumn int, refreshFunc func() ([]table.Row, error), updateActions map[string]func() tea.Cmd) *TableModel {
 	styles := table.DefaultStyles()
@@ -77,33 +76,35 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 		OnSelected:      onSelect,
 		selectColumn:    selectColumn + 1,
 		colPercent:      newColPercent,
-		loading:         false,
+		loading:         len(rows) == 0, 
 		initialized:     false,
 		checkedRows:     make(map[int]bool),
 		refreshInterval: 5 * time.Second,
 		refreshFunc:     refreshFunc,
 		lastRefresh:     time.Now(),
 		updateActions:   updateActions,
+		spinner:         NewSpinner("Loading resources..."),
 	}
 }
 
 func (m *TableModel) Init() tea.Cmd {
-	return tea.Tick(time.Second, func(time.Time) tea.Msg {
-		return loadedTableMsg{}
-	})
+	cmds := []tea.Cmd{m.spinner.Init()}
+
+	if m.loading && m.refreshFunc != nil {
+		cmds = append(cmds, m.fetchDataCmd())
+	}
+
+	return tea.Batch(cmds...)
 }
 
 func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case loadedTableMsg:
-		m.loading = false
-		m.initialized = true
-		return m, nil
 	case fetchResultMsg:
 		if msg.err != nil {
 			return m, nil
 		}
 		m.UpdateRows(msg.rows)
+		m.loading = false 
 		return m, nil
 	case tea.WindowSizeMsg:
 		m.updateColumnWidths(msg.Width)
@@ -140,7 +141,11 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 	m.Table, cmd = m.Table.Update(msg)
-	return m, cmd
+
+	var spinnerCmd tea.Cmd
+	m.spinner, spinnerCmd = m.spinner.Update(msg)
+
+	return m, tea.Batch(cmd, spinnerCmd)
 }
 
 func (m *TableModel) SetUpdateActions(actions map[string]func() tea.Cmd) {
@@ -166,10 +171,7 @@ func (m *TableModel) toggleCheckbox(rowIdx int) {
 
 func (m *TableModel) View() string {
 	if m.loading {
-		return lipgloss.NewStyle().
-			Align(lipgloss.Center, lipgloss.Center).
-			Background(lipgloss.Color(customstyles.BackgroundColor)).
-			Render("Loading...")
+		return m.spinner.View()
 	}
 
 	m.updateColumnWidths(styles.ScreenWidth)
