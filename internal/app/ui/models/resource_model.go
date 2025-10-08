@@ -6,8 +6,8 @@ import (
 
 	ui "github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
-	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
+	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"

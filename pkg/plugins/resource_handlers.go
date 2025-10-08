@@ -4,26 +4,19 @@ import (
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 )
 
-
 type ResourceHandler interface {
-	
 	Get(client k8s.Client, namespace string) (interface{}, error)
 
-	
 	Delete(client k8s.Client, namespace, name string) error
 
-	
 	Describe(client k8s.Client, namespace, name string) (string, error)
 
-	
 	GetType() k8s.ResourceType
 }
-
 
 type DefaultResourceHandler struct {
 	ResourceType k8s.ResourceType
 }
-
 
 func (h *DefaultResourceHandler) Get(client k8s.Client, namespace string) (interface{}, error) {
 	switch h.ResourceType {
@@ -58,33 +51,27 @@ func (h *DefaultResourceHandler) Get(client k8s.Client, namespace string) (inter
 	}
 }
 
-
 func (h *DefaultResourceHandler) Delete(client k8s.Client, namespace, name string) error {
 	return k8s.DeleteResource(client, h.ResourceType, namespace, name)
 }
-
 
 func (h *DefaultResourceHandler) Describe(client k8s.Client, namespace, name string) (string, error) {
 	return k8s.DescribeResource(client, h.ResourceType, namespace, name)
 }
 
-
 func (h *DefaultResourceHandler) GetType() k8s.ResourceType {
 	return h.ResourceType
 }
 
-
 type ResourceRegistry struct {
 	handlers map[k8s.ResourceType]ResourceHandler
 }
-
 
 func NewResourceRegistry() *ResourceRegistry {
 	registry := &ResourceRegistry{
 		handlers: make(map[k8s.ResourceType]ResourceHandler),
 	}
 
-	
 	defaultTypes := []k8s.ResourceType{
 		k8s.ResourceTypePod,
 		k8s.ResourceTypeService,
@@ -108,17 +95,14 @@ func NewResourceRegistry() *ResourceRegistry {
 	return registry
 }
 
-
 func (r *ResourceRegistry) RegisterHandler(resourceType k8s.ResourceType, handler ResourceHandler) {
 	r.handlers[resourceType] = handler
 }
-
 
 func (r *ResourceRegistry) GetHandler(resourceType k8s.ResourceType) (ResourceHandler, bool) {
 	handler, exists := r.handlers[resourceType]
 	return handler, exists
 }
-
 
 func (r *ResourceRegistry) GetResource(client k8s.Client, resourceType k8s.ResourceType, namespace string) (interface{}, error) {
 	if handler, exists := r.handlers[resourceType]; exists {
@@ -127,14 +111,12 @@ func (r *ResourceRegistry) GetResource(client k8s.Client, resourceType k8s.Resou
 	return nil, ErrResourceTypeNotSupported{ResourceType: resourceType}
 }
 
-
 func (r *ResourceRegistry) DeleteResource(client k8s.Client, resourceType k8s.ResourceType, namespace, name string) error {
 	if handler, exists := r.handlers[resourceType]; exists {
 		return handler.Delete(client, namespace, name)
 	}
 	return ErrResourceTypeNotSupported{ResourceType: resourceType}
 }
-
 
 func (r *ResourceRegistry) DescribeResource(client k8s.Client, resourceType k8s.ResourceType, namespace, name string) (string, error) {
 	if handler, exists := r.handlers[resourceType]; exists {
@@ -143,7 +125,6 @@ func (r *ResourceRegistry) DescribeResource(client k8s.Client, resourceType k8s.
 	return "", ErrResourceTypeNotSupported{ResourceType: resourceType}
 }
 
-
 func (r *ResourceRegistry) GetSupportedTypes() []k8s.ResourceType {
 	types := make([]k8s.ResourceType, 0, len(r.handlers))
 	for resourceType := range r.handlers {
@@ -151,7 +132,6 @@ func (r *ResourceRegistry) GetSupportedTypes() []k8s.ResourceType {
 	}
 	return types
 }
-
 
 type ErrResourceTypeNotSupported struct {
 	ResourceType k8s.ResourceType

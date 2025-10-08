@@ -224,7 +224,7 @@ func (m HeaderModel) buildClusterSection(info map[string]string) string {
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	serverValue := info["server"]
-	if len(serverValue) > 25 { 
+	if len(serverValue) > 25 {
 		serverValue = serverValue[:22] + "..."
 	}
 

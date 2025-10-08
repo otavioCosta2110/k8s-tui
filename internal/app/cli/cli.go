@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -25,12 +24,12 @@ func ParseFlags() Config {
 		defaultPluginDir = appConfig.PluginDir
 	}
 
-	args := os.Args[1:] 
+	args := os.Args[1:]
 	cfg.PluginArgs = make(map[string]string)
 
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
-		if after, ok :=strings.CutPrefix(arg, "--"); ok  {
+		if after, ok := strings.CutPrefix(arg, "--"); ok {
 			flagName := after
 			if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
 				flagValue := args[i+1]
@@ -44,7 +43,7 @@ func ParseFlags() Config {
 				default:
 					cfg.PluginArgs[flagName] = flagValue
 				}
-				i++ 
+				i++
 			} else {
 				switch flagName {
 				case "help", "h":
@@ -63,7 +62,6 @@ func ParseFlags() Config {
 }
 
 func HandlePluginArgs(pluginManager *plugins.PluginManager, pluginArgs map[string]string) error {
-	fmt.Printf("DEBUG: HandlePluginArgs called with args: %v\n", pluginArgs)
 	if pluginManager == nil {
 		return nil
 	}
@@ -74,16 +72,10 @@ func HandlePluginArgs(pluginManager *plugins.PluginManager, pluginArgs map[strin
 	}
 
 	for argName, argValue := range pluginArgs {
-		fmt.Printf("DEBUG: Checking arg %s\n", argName)
 		if api.HasCLIArgument(argName) {
-			fmt.Printf("DEBUG: Executing arg %s with value %s\n", argName, argValue)
 			if err := api.ExecuteCLIArgument(argName, argValue); err != nil {
-				fmt.Printf("DEBUG: Error executing arg: %v\n", err)
 				return err
 			}
-			fmt.Printf("DEBUG: Arg executed successfully\n")
-		} else {
-			fmt.Printf("DEBUG: Arg %s not registered\n", argName)
 		}
 	}
 

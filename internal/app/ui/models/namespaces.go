@@ -3,8 +3,8 @@ package models
 import (
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	ui "github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
-	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"

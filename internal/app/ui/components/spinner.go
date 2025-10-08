@@ -1,46 +1,68 @@
 package components
 
 import (
-	"github.com/charmbracelet/bubbles/spinner"
+	"time"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	styles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles"
 	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 )
 
 type SpinnerModel struct {
-	spinner spinner.Model
-	text    string
+	text   string
+	frame  int
+	ticker *time.Ticker
 }
 
+type spinnerTickMsg struct{}
+
 func NewSpinner(text string) SpinnerModel {
-	s := spinner.New()
-	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.TextColor)).Background(lipgloss.Color(customstyles.BackgroundColor))
-
-	textStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.TextColor)).Background(lipgloss.Color(customstyles.BackgroundColor))
-	textWithStyle := textStyle.Render(text)
-
 	return SpinnerModel{
-		spinner: s,
-		text:    textWithStyle,
+		text:   text,
+		frame:  0,
+		ticker: nil,
 	}
 }
 
 func (s SpinnerModel) Init() tea.Cmd {
-	return s.spinner.Tick
+	return tea.Tick(time.Millisecond*100, func(t time.Time) tea.Msg {
+		return spinnerTickMsg{}
+	})
 }
 
 func (s SpinnerModel) Update(msg tea.Msg) (SpinnerModel, tea.Cmd) {
-	var cmd tea.Cmd
-	s.spinner, cmd = s.spinner.Update(msg)
-	return s, cmd
+	switch msg.(type) {
+	case spinnerTickMsg:
+		s.frame = (s.frame + 1) % 10
+		return s, tea.Tick(time.Millisecond*100, func(t time.Time) tea.Msg {
+			return spinnerTickMsg{}
+		})
+	}
+	return s, nil
 }
 
 func (s SpinnerModel) View() string {
-	whiteSpace:= lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ")
+	spinnerChars := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+	char := spinnerChars[s.frame]
+
 	return lipgloss.NewStyle().
+		Foreground(lipgloss.Color(customstyles.TextColor)).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		Render(char + " " + s.text)
+}
+
+func (s SpinnerModel) CenteredView(width, height int) string {
+	spinnerView := s.View()
+
+	return lipgloss.NewStyle().
+		Width(width).
+		Height(height).
 		Align(lipgloss.Center, lipgloss.Center).
 		Background(lipgloss.Color(customstyles.BackgroundColor)).
-		Foreground(lipgloss.Color(customstyles.TextColor)).
-		Render(s.spinner.View() + whiteSpace + s.text)
+		Render(spinnerView)
+}
+
+func (s SpinnerModel) CenteredScreenView() string {
+	return s.CenteredView(styles.ScreenWidth, styles.ScreenHeight)
 }

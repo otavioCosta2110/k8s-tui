@@ -25,7 +25,7 @@ const (
 func getLogDir() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		
+
 		return "./.local/state/k8s-tui/logs"
 	}
 	return filepath.Join(homeDir, ".local", "state", "k8s-tui", "logs")
@@ -162,7 +162,6 @@ func GetPluginLogger(pluginName string) *Logger {
 		return logger
 	}
 
-	
 	pluginLogDir := filepath.Join(getLogDir(), "plugins")
 	if err := os.MkdirAll(pluginLogDir, 0755); err != nil {
 		log.Printf("Failed to create plugin log directory %s: %v", pluginLogDir, err)
@@ -248,7 +247,6 @@ func rotatePluginLogFile(logger *Logger) error {
 
 	logger.file.Close()
 
-	
 	var pluginName string
 	for name, l := range pluginLoggers {
 		if l == logger {

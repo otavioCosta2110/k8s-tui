@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 
@@ -9,11 +8,8 @@ import (
 )
 
 type cronjobDetailsModel struct {
-	cronjob    *k8s.CronJobInfo
-	k8sClient  *k8s.Client
-	yamlViewer *components.YAMLViewer
-	loading    bool
-	err        error
+	baseDetailsModel
+	cronjob *k8s.CronJobInfo
 }
 
 type cronjobDetailsLoadedMsg struct {
@@ -23,11 +19,8 @@ type cronjobDetailsLoadedMsg struct {
 
 func NewCronJobDetails(k k8s.Client, namespace, cronjobName string) *cronjobDetailsModel {
 	return &cronjobDetailsModel{
-		cronjob:    k8s.NewCronJob(cronjobName, namespace, k),
-		k8sClient:  &k,
-		yamlViewer: components.NewYAMLViewer("CronJob: "+cronjobName, "Loading..."),
-		loading:    true,
-		err:        nil,
+		baseDetailsModel: newBaseDetailsModel("CronJob: "+cronjobName, "Loading cronjob details..."),
+		cronjob:          k8s.NewCronJob(cronjobName, namespace, k),
 	}
 }
 
@@ -47,28 +40,20 @@ func (cj *cronjobDetailsModel) fetchCronJobDetails() tea.Cmd {
 }
 
 func (cj *cronjobDetailsModel) Init() tea.Cmd {
-	return tea.Batch(cj.yamlViewer.Init(), cj.fetchCronJobDetails())
+	return tea.Batch(cj.yamlViewer.Init(), cj.spinner.Init(), cj.fetchCronJobDetails())
 }
 
-func (cj *cronjobDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (c *cronjobDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case cronjobDetailsLoadedMsg:
-		cj.loading = false
-		if msg.err != nil {
-			cj.err = msg.err
-			cj.yamlViewer.SetContent("Error loading cronjob details: " + msg.err.Error())
-		} else {
-			cj.yamlViewer.SetContent(msg.content)
-		}
-		return cj, nil
+		c.setLoadedContent(msg.content, msg.err)
+		return c, nil
 	default:
-		var cmd tea.Cmd
-		updatedViewer, cmd := cj.yamlViewer.Update(msg)
-		cj.yamlViewer = updatedViewer.(*components.YAMLViewer)
-		return cj, cmd
+		cmd, _ := c.updateCommon(msg)
+		return c, cmd
 	}
 }
 
-func (cj *cronjobDetailsModel) View() string {
-	return cj.yamlViewer.View()
+func (c *cronjobDetailsModel) View() string {
+	return c.baseDetailsModel.View()
 }

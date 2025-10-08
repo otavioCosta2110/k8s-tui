@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
+	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
-	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -145,7 +145,6 @@ func TestDeploymentSelectionWithPodFiltering(t *testing.T) {
 
 	model.deploymentsInfo = []k8s.DeploymentInfo{*deployment}
 	model.resourceData = []types.ResourceData{DeploymentData{deployment}}
-
 
 	selector, err := deployment.GetLabelSelector()
 	if err != nil {

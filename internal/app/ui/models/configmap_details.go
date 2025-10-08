@@ -3,7 +3,7 @@ package models
 import (
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
-	resources "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
+	k8s "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -11,14 +11,10 @@ import (
 )
 
 type cmDetailsModel struct {
-	cm         *resources.Configmap
-	k8sClient  *resources.Client
-	loading    bool
-	err        error
-	yamlViewer *components.YAMLViewer
-	editor     *components.YAMLEditor
-	spinner    components.SpinnerModel
-	isEditing  bool
+	baseDetailsModel
+	cm        *k8s.Configmap
+	editor    *components.YAMLEditor
+	isEditing bool
 }
 
 type cmDetailsLoadedMsg struct {
@@ -26,20 +22,16 @@ type cmDetailsLoadedMsg struct {
 	err     error
 }
 
-func NewConfigmapDetails(k resources.Client, namespace, cmName string) *cmDetailsModel {
+func NewConfigmapDetails(k k8s.Client, namespace, cmName string) *cmDetailsModel {
 	return &cmDetailsModel{
-		cm:         resources.NewConfigmap(cmName, namespace, k),
-		k8sClient:  &k,
-		yamlViewer: components.NewYAMLViewerWithHelp("Configmap: "+cmName, "Loading...", "↑/↓: Scroll • e: Edit • q: Quit"),
-		spinner:    components.NewSpinner("Loading configmap details..."),
-		loading:    true,
-		err:        nil,
-		isEditing:  false,
+		baseDetailsModel: newBaseDetailsModel("Configmap: "+cmName, "Loading configmap details..."),
+		cm:               k8s.NewConfigmap(cmName, namespace, k),
+		isEditing:        false,
 	}
 }
 
-func (c *cmDetailsModel) InitComponent(k *resources.Client) (tea.Model, error) {
-	c.k8sClient = k
+func (c *cmDetailsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
+	c.setClient(k)
 	return c, nil
 }
 
@@ -54,7 +46,7 @@ func (c *cmDetailsModel) fetchConfigmapDetails() tea.Cmd {
 }
 
 func (c *cmDetailsModel) Init() tea.Cmd {
-	return tea.Batch(c.yamlViewer.Init(), c.spinner.Init(), c.fetchConfigmapDetails())
+	return c.initCommon(c.fetchConfigmapDetails())
 }
 
 func (c *cmDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -150,15 +142,5 @@ func (c *cmDetailsModel) View() string {
 		return c.editor.View()
 	}
 
-	if c.loading {
-		return c.spinner.View()
-	}
-
-	if c.yamlViewer != nil {
-		return c.yamlViewer.View()
-	}
-
-	return lipgloss.NewStyle().
-		Background(lipgloss.Color(customstyles.BackgroundColor)).
-		Render("Loading...")
+	return c.baseDetailsModel.View()
 }

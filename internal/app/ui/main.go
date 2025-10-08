@@ -326,7 +326,6 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 
 			appModel.loadPluginUIExtensions()
 
-
 			if err := cli.HandlePluginArgs(pluginManager, cfg.PluginArgs); err != nil {
 				logger.Error(fmt.Sprintf("Failed to handle plugin CLI arguments: %v", err))
 			}
@@ -355,7 +354,6 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel
 		})
 
 		appModel.loadPluginUIExtensions()
-
 
 		if err := cli.HandlePluginArgs(pluginManager, cfg.PluginArgs); err != nil {
 			logger.Error(fmt.Sprintf("Failed to handle plugin CLI arguments: %v", err))
@@ -404,7 +402,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		styles.ScreenWidth = msg.Width - styles.Margin
-		styles.ScreenHeight = msg.Height - styles.Margin
+		styles.ScreenHeight = msg.Height - 1
 		if !styles.IsHeaderActive {
 			styles.HeaderSize = styles.ScreenHeight/4 - (styles.Margin * 2)
 			styles.IsHeaderActive = true

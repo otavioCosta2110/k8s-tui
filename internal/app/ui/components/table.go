@@ -76,7 +76,7 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 		OnSelected:      onSelect,
 		selectColumn:    selectColumn + 1,
 		colPercent:      newColPercent,
-		loading:         len(rows) == 0, 
+		loading:         len(rows) == 0,
 		initialized:     false,
 		checkedRows:     make(map[int]bool),
 		refreshInterval: 5 * time.Second,
@@ -104,7 +104,7 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.UpdateRows(msg.rows)
-		m.loading = false 
+		m.loading = false
 		return m, nil
 	case tea.WindowSizeMsg:
 		m.updateColumnWidths(msg.Width)
@@ -171,12 +171,12 @@ func (m *TableModel) toggleCheckbox(rowIdx int) {
 
 func (m *TableModel) View() string {
 	if m.loading {
-		return m.spinner.View()
+		return m.spinner.CenteredView(styles.ScreenWidth, styles.ScreenHeight)
 	}
 
 	m.updateColumnWidths(styles.ScreenWidth)
 
-	tableHeight := styles.ScreenHeight + 1
+	tableHeight := styles.ScreenHeight 
 	m.Table.SetHeight(tableHeight)
 	m.Table.SetWidth(styles.ScreenWidth)
 

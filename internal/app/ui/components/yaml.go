@@ -96,7 +96,7 @@ func (m *YAMLViewer) SetContent(content string) {
 
 func (m *YAMLViewer) Init() tea.Cmd {
 	contentWidth := styles.ScreenWidth
-	m.viewport = viewport.New(contentWidth, styles.ScreenHeight-1)
+	m.viewport = viewport.New(contentWidth, styles.ScreenHeight-2)
 	return tea.Tick(time.Second, func(time.Time) tea.Msg {
 		return loadedMsg{}
 	})
@@ -118,12 +118,12 @@ func (m *YAMLViewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		if !m.ready {
 			contentWidth := styles.ScreenWidth
-			m.viewport = viewport.New(contentWidth, styles.ScreenHeight-1)
+			m.viewport = viewport.New(contentWidth, styles.ScreenHeight-2)
 			m.ready = true
 			m.viewport.SetContent(m.content)
 		} else {
 			m.viewport.Width = styles.ScreenWidth
-			m.viewport.Height = styles.ScreenHeight - 1
+			m.viewport.Height = styles.ScreenHeight - 2
 		}
 	}
 
@@ -140,7 +140,7 @@ func (m *YAMLViewer) View() string {
 		Render(m.viewport.View())
 
 	m.viewport.Width = styles.ScreenWidth
-	m.viewport.Height = styles.ScreenHeight - 1
+	m.viewport.Height = styles.ScreenHeight - 2
 	m.viewport.SetContent(m.content)
 
 	return lipgloss.JoinVertical(

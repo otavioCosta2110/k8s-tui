@@ -3,8 +3,8 @@ package models
 import (
 	"fmt"
 	styles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles"
-	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"

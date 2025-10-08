@@ -98,7 +98,7 @@ func TestDeploymentInfo_GetLabelSelector(t *testing.T) {
 }
 
 func TestDeploymentInfo_Fetch(t *testing.T) {
-	
+
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-deployment",
@@ -139,29 +139,24 @@ func TestDeploymentInfo_Fetch(t *testing.T) {
 		},
 	}
 
-	
 	fakeClientset := fake.NewSimpleClientset(deployment)
 
-	
 	client := Client{
 		Clientset: fakeClientset,
 		Namespace: "default",
 	}
 
-	
 	deploymentInfo := &DeploymentInfo{
 		Name:      "test-deployment",
 		Namespace: "default",
 		Client:    client,
 	}
 
-	
 	err := deploymentInfo.Fetch()
 	if err != nil {
 		t.Errorf("Fetch failed: %v", err)
 	}
 
-	
 	if deploymentInfo.Raw == nil {
 		t.Error("Expected Raw to be populated after Fetch")
 	}
@@ -176,7 +171,7 @@ func TestDeploymentInfo_Fetch(t *testing.T) {
 }
 
 func TestDeploymentInfo_GetPods(t *testing.T) {
-	
+
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-deployment",
@@ -191,7 +186,6 @@ func TestDeploymentInfo_GetPods(t *testing.T) {
 		},
 	}
 
-	
 	matchingPod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "matching-pod",
@@ -218,16 +212,13 @@ func TestDeploymentInfo_GetPods(t *testing.T) {
 		},
 	}
 
-	
 	fakeClientset := fake.NewSimpleClientset(deployment, matchingPod, nonMatchingPod)
 
-	
 	client := Client{
 		Clientset: fakeClientset,
 		Namespace: "default",
 	}
 
-	
 	deploymentInfo := &DeploymentInfo{
 		Name:      "test-deployment",
 		Namespace: "default",
@@ -235,13 +226,11 @@ func TestDeploymentInfo_GetPods(t *testing.T) {
 		Raw:       deployment,
 	}
 
-	
 	pods, err := deploymentInfo.GetPods()
 	if err != nil {
 		t.Errorf("GetPods failed: %v", err)
 	}
 
-	
 	if len(pods) != 1 {
 		t.Errorf("Expected 1 pod, got %d", len(pods))
 	}
@@ -252,24 +241,22 @@ func TestDeploymentInfo_GetPods(t *testing.T) {
 }
 
 func TestDeploymentInfo_GetPods_NoSelector(t *testing.T) {
-	
+
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-deployment",
 			Namespace: "default",
 		},
 		Spec: appsv1.DeploymentSpec{
-			Selector: nil, 
+			Selector: nil,
 		},
 	}
 
-	
 	client := Client{
 		Clientset: fake.NewSimpleClientset(deployment),
 		Namespace: "default",
 	}
 
-	
 	deploymentInfo := &DeploymentInfo{
 		Name:      "test-deployment",
 		Namespace: "default",
@@ -277,7 +264,6 @@ func TestDeploymentInfo_GetPods_NoSelector(t *testing.T) {
 		Raw:       deployment,
 	}
 
-	
 	_, err := deploymentInfo.GetPods()
 	if err == nil {
 		t.Error("Expected error when deployment has no selector")
@@ -285,27 +271,24 @@ func TestDeploymentInfo_GetPods_NoSelector(t *testing.T) {
 }
 
 func TestDeploymentInfo_GetPods_NoRawData(t *testing.T) {
-	
+
 	client := Client{
 		Clientset: fake.NewSimpleClientset(),
 		Namespace: "default",
 	}
 
-	
 	deploymentInfo := &DeploymentInfo{
 		Name:      "test-deployment",
 		Namespace: "default",
 		Client:    client,
-		Raw:       nil, 
+		Raw:       nil,
 	}
 
-	
 	_, err := deploymentInfo.GetPods()
 	if err == nil {
 		t.Error("Expected error when deployment has no raw data")
 	}
 }
-
 
 func int32Ptr(i int32) *int32 {
 	return &i

@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"fmt"
+
 	k8s "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 )
@@ -145,16 +146,16 @@ func (cm *ConfigManager) SetConfig(key string, value interface{}) {
 }
 
 type PluginAPIImpl struct {
-	currentNamespace   string
-	uiManager          *UIManager
-	commandManager     *CommandManager
-	cliArgumentManager *CLIArgumentManager
-	eventManager       *EventManager
-	configManager      *ConfigManager
-	resourceRegistry   *ResourceRegistry
-	client             k8s.Client
-	tabGetter          func() ([]TabInfo, error)
-	tabRestorer        func(tabs []TabInfo) error
+	currentNamespace     string
+	uiManager            *UIManager
+	commandManager       *CommandManager
+	cliArgumentManager   *CLIArgumentManager
+	eventManager         *EventManager
+	configManager        *ConfigManager
+	resourceRegistry     *ResourceRegistry
+	client               k8s.Client
+	tabGetter            func() ([]TabInfo, error)
+	tabRestorer          func(tabs []TabInfo) error
 	setNamespaceCallback func(namespace string)
 	setStatusCallback    func(message string)
 }
@@ -219,7 +220,6 @@ func (api *PluginAPIImpl) ExecuteCommand(name string, args []string) (string, er
 }
 
 func (api *PluginAPIImpl) RegisterCLIArgument(name, description string, handler func(value string) error) {
-	fmt.Printf("DEBUG: Registering CLI argument: %s\n", name)
 	api.cliArgumentManager.RegisterArgument(name, description, handler)
 }
 

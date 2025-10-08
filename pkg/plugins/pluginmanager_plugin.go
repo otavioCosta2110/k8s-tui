@@ -277,7 +277,7 @@ func (p *PluginmanagerStyleLuaPlugin) callLuaFunction(functionName string, args 
 
 	if err := p.L.CallByParam(lua.P{
 		Fn:      p.L.GetGlobal(functionName),
-		NRet:    2, 
+		NRet:    2,
 		Protect: true,
 	}, luaArgs...); err != nil {
 		logger.PluginError(p.pluginName, fmt.Sprintf("Error calling Lua function %s: %v", functionName, err))

@@ -10,12 +10,9 @@ import (
 )
 
 type secretDetailsModel struct {
+	baseDetailsModel
 	secret     *k8s.SecretInfo
-	k8sClient  *k8s.Client
-	loading    bool
-	err        error
 	showValues bool
-	yamlViewer *components.YAMLViewer
 }
 
 type secretDetailsLoadedMsg struct {
@@ -25,17 +22,14 @@ type secretDetailsLoadedMsg struct {
 
 func NewSecretDetails(k k8s.Client, namespace, secretName string) *secretDetailsModel {
 	return &secretDetailsModel{
-		secret:     k8s.NewSecret(secretName, namespace, k),
-		k8sClient:  &k,
-		yamlViewer: components.NewYAMLViewerWithHelp("Secret: "+secretName+" (VALUES HIDDEN)", "Loading...", "↑/↓: Scroll • v: Toggle Values • q: Quit"),
-		loading:    true,
-		err:        nil,
-		showValues: false,
+		baseDetailsModel: newBaseDetailsModel("Secret: "+secretName, "Loading secret details..."),
+		secret:           k8s.NewSecret(secretName, namespace, k),
+		showValues:       false,
 	}
 }
 
 func (s *secretDetailsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
-	s.k8sClient = k
+	s.setClient(k)
 	return s, nil
 }
 
@@ -47,7 +41,7 @@ func (s *secretDetailsModel) fetchSecretDetails() tea.Cmd {
 }
 
 func (s *secretDetailsModel) Init() tea.Cmd {
-	return tea.Batch(s.yamlViewer.Init(), s.fetchSecretDetails())
+	return s.initCommon(s.fetchSecretDetails())
 }
 
 func (s *secretDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -59,11 +53,6 @@ func (s *secretDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			s.yamlViewer.SetContent("Error loading secret details: " + msg.err.Error())
 		} else {
 			title := "Secret: " + s.secret.Name
-			if s.showValues {
-				title += " (VALUES VISIBLE)"
-			} else {
-				title += " (VALUES HIDDEN)"
-			}
 			s.yamlViewer = components.NewYAMLViewerWithHelp(title, msg.content, "↑/↓: Scroll • v: Toggle Values • q: Quit")
 		}
 		return s, s.yamlViewer.Init()
@@ -74,15 +63,14 @@ func (s *secretDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return s, s.fetchSecretDetails()
 		case "q", "esc":
 			return s, tea.Quit
+		default:
+			cmd, _ := s.updateCommon(msg)
+			return s, cmd
 		}
+	default:
+		cmd, _ := s.updateCommon(msg)
+		return s, cmd
 	}
-
-	var cmd tea.Cmd
-	updatedModel, cmd := s.yamlViewer.Update(msg)
-	if viewer, ok := updatedModel.(*components.YAMLViewer); ok {
-		s.yamlViewer = viewer
-	}
-	return s, cmd
 }
 
 func (s *secretDetailsModel) View() string {
@@ -97,6 +85,5 @@ func (s *secretDetailsModel) View() string {
 			Background(lipgloss.Color(customstyles.BackgroundColor)).
 			Render("Loading...")
 	}
-
-	return s.yamlViewer.View()
+	return s.baseDetailsModel.View()
 }

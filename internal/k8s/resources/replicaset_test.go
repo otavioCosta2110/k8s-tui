@@ -98,7 +98,7 @@ func TestReplicaSetInfo_GetLabelSelector(t *testing.T) {
 }
 
 func TestReplicaSetInfo_Fetch(t *testing.T) {
-	
+
 	replicaSet := &appsv1.ReplicaSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-replicaset",
@@ -139,29 +139,24 @@ func TestReplicaSetInfo_Fetch(t *testing.T) {
 		},
 	}
 
-	
 	fakeClientset := fake.NewSimpleClientset(replicaSet)
 
-	
 	client := Client{
 		Clientset: fakeClientset,
 		Namespace: "default",
 	}
 
-	
 	replicaSetInfo := &ReplicaSetInfo{
 		Name:      "test-replicaset",
 		Namespace: "default",
 		Client:    client,
 	}
 
-	
 	err := replicaSetInfo.Fetch()
 	if err != nil {
 		t.Errorf("Fetch failed: %v", err)
 	}
 
-	
 	if replicaSetInfo.Raw == nil {
 		t.Error("Expected Raw to be populated after Fetch")
 	}
@@ -176,7 +171,7 @@ func TestReplicaSetInfo_Fetch(t *testing.T) {
 }
 
 func TestReplicaSetInfo_GetPods(t *testing.T) {
-	
+
 	replicaSet := &appsv1.ReplicaSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-replicaset",
@@ -191,7 +186,6 @@ func TestReplicaSetInfo_GetPods(t *testing.T) {
 		},
 	}
 
-	
 	matchingPod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "matching-pod",
@@ -218,16 +212,13 @@ func TestReplicaSetInfo_GetPods(t *testing.T) {
 		},
 	}
 
-	
 	fakeClientset := fake.NewSimpleClientset(replicaSet, matchingPod, nonMatchingPod)
 
-	
 	client := Client{
 		Clientset: fakeClientset,
 		Namespace: "default",
 	}
 
-	
 	replicaSetInfo := &ReplicaSetInfo{
 		Name:      "test-replicaset",
 		Namespace: "default",
@@ -235,13 +226,11 @@ func TestReplicaSetInfo_GetPods(t *testing.T) {
 		Raw:       replicaSet,
 	}
 
-	
 	pods, err := replicaSetInfo.GetPods()
 	if err != nil {
 		t.Errorf("GetPods failed: %v", err)
 	}
 
-	
 	if len(pods) != 1 {
 		t.Errorf("Expected 1 pod, got %d", len(pods))
 	}
@@ -252,24 +241,22 @@ func TestReplicaSetInfo_GetPods(t *testing.T) {
 }
 
 func TestReplicaSetInfo_GetPods_NoSelector(t *testing.T) {
-	
+
 	replicaSet := &appsv1.ReplicaSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-replicaset",
 			Namespace: "default",
 		},
 		Spec: appsv1.ReplicaSetSpec{
-			Selector: nil, 
+			Selector: nil,
 		},
 	}
 
-	
 	client := Client{
 		Clientset: fake.NewSimpleClientset(replicaSet),
 		Namespace: "default",
 	}
 
-	
 	replicaSetInfo := &ReplicaSetInfo{
 		Name:      "test-replicaset",
 		Namespace: "default",
@@ -277,7 +264,6 @@ func TestReplicaSetInfo_GetPods_NoSelector(t *testing.T) {
 		Raw:       replicaSet,
 	}
 
-	
 	_, err := replicaSetInfo.GetPods()
 	if err == nil {
 		t.Error("Expected error when replicaset has no selector")
@@ -285,21 +271,19 @@ func TestReplicaSetInfo_GetPods_NoSelector(t *testing.T) {
 }
 
 func TestReplicaSetInfo_GetPods_NoRawData(t *testing.T) {
-	
+
 	client := Client{
 		Clientset: fake.NewSimpleClientset(),
 		Namespace: "default",
 	}
 
-	
 	replicaSetInfo := &ReplicaSetInfo{
 		Name:      "test-replicaset",
 		Namespace: "default",
 		Client:    client,
-		Raw:       nil, 
+		Raw:       nil,
 	}
 
-	
 	_, err := replicaSetInfo.GetPods()
 	if err == nil {
 		t.Error("Expected error when replicaset has no raw data")
