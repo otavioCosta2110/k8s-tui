@@ -20,52 +20,52 @@ type cmDetailsModel struct {
 	isEditing  bool
 }
 
+type cmDetailsLoadedMsg struct {
+	content string
+	err     error
+}
+
 func NewConfigmapDetails(k resources.Client, namespace, cmName string) *cmDetailsModel {
 	return &cmDetailsModel{
-		cm:        resources.NewConfigmap(cmName, namespace, k),
-		k8sClient: &k,
-		loading:   false,
-		err:       nil,
-		isEditing: false,
+		cm:         resources.NewConfigmap(cmName, namespace, k),
+		k8sClient:  &k,
+		yamlViewer: components.NewYAMLViewerWithHelp("Configmap: "+cmName, "Loading...", "↑/↓: Scroll • e: Edit • q: Quit"),
+		loading:    true,
+		err:        nil,
+		isEditing:  false,
 	}
 }
 
 func (c *cmDetailsModel) InitComponent(k *resources.Client) (tea.Model, error) {
 	c.k8sClient = k
-
-	var desc string
-	var err error
-
-	pm := plugins.GetGlobalPluginManager()
-	api := pm.GetAPI()
-	api.SetClient(*k)
-	desc, err = api.DescribeConfigMap(c.cm.Namespace, c.cm.Name)
-
-	if err != nil {
-		return nil, err
-	}
-
-	c.yamlViewer = components.NewYAMLViewerWithHelp(
-		"Configmap: "+c.cm.Name,
-		desc,
-		"↑/↓: Scroll • e: Edit • q: Quit",
-	)
-
 	return c, nil
 }
 
+func (c *cmDetailsModel) fetchConfigmapDetails() tea.Cmd {
+	return func() tea.Msg {
+		pm := plugins.GetGlobalPluginManager()
+		api := pm.GetAPI()
+		api.SetClient(*c.k8sClient)
+		desc, err := api.DescribeConfigMap(c.cm.Namespace, c.cm.Name)
+		return cmDetailsLoadedMsg{content: desc, err: err}
+	}
+}
+
 func (c *cmDetailsModel) Init() tea.Cmd {
-	if c.yamlViewer != nil {
-		return c.yamlViewer.Init()
-	}
-	if c.editor != nil {
-		return c.editor.Init()
-	}
-	return nil
+	return tea.Batch(c.yamlViewer.Init(), c.fetchConfigmapDetails())
 }
 
 func (c *cmDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case cmDetailsLoadedMsg:
+		c.loading = false
+		if msg.err != nil {
+			c.err = msg.err
+			c.yamlViewer.SetContent("Error loading configmap details: " + msg.err.Error())
+		} else {
+			c.yamlViewer.SetContent(msg.content)
+		}
+		return c, nil
 	case components.EditMsg:
 		c.isEditing = true
 		c.editor = components.NewYAMLEditorWithHelp(

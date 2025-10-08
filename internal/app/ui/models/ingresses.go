@@ -2,11 +2,11 @@ package models
 
 import (
 	"fmt"
-	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	ui "github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
-	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
 	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -47,10 +47,6 @@ func NewIngresses(k k8s.Client, namespace string) (*ingressesModel, error) {
 func (i *ingressesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	i.k8sClient = k
 
-	if err := i.fetchData(); err != nil {
-		return nil, err
-	}
-
 	onSelect := func(selected string) tea.Msg {
 		ingressDetails, err := NewIngressDetails(*k, i.namespace, selected).InitComponent(k)
 		if err != nil {
@@ -71,7 +67,7 @@ func (i *ingressesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return i.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(i.config.Columns, i.config.ColumnWidths, i.dataToRows(), i.config.Title, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(i.config.Columns, i.config.ColumnWidths, []table.Row{}, i.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": i.createDeleteAction(tableModel),

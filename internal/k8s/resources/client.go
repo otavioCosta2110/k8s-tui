@@ -66,6 +66,9 @@ func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
 		return nil, err
 	}
 
+	config.QPS = 50
+	config.Burst = 100
+
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err

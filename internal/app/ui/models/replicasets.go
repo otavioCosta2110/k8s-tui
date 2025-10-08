@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	ui "github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
+	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
-	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -45,10 +45,6 @@ func NewReplicaSets(k k8s.Client, namespace string) (*replicasetsModel, error) {
 
 func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	r.k8sClient = k
-
-	if err := r.fetchData(); err != nil {
-		return nil, err
-	}
 
 	onSelect := func(selected string) tea.Msg {
 		replicaset := k8s.NewReplicaSet(selected, r.namespace, *k)
@@ -92,7 +88,7 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return r.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(r.config.Columns, r.config.ColumnWidths, r.dataToRows(), r.config.Title, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(r.config.Columns, r.config.ColumnWidths, []table.Row{}, r.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": r.createDeleteAction(tableModel),

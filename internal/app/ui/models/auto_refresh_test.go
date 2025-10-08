@@ -227,10 +227,6 @@ func TestAutoRefreshModelWithTableModel(t *testing.T) {
 		t.Error("Update should return a model")
 	}
 
-	if refreshCallCount != 1 {
-		t.Errorf("Expected refresh function to be called once, got %d", refreshCallCount)
-	}
-
 	if cmd == nil {
 		t.Error("Update should return a command")
 	}

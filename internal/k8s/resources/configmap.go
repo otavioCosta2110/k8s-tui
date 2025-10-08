@@ -50,31 +50,22 @@ func FetchConfigmaps(client Client, namespace string, selector string) ([]Config
 	}
 	cms, err := client.Clientset.CoreV1().ConfigMaps(namespace).List(context.Background(), listOptions)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch pods: %v", err)
+		return nil, fmt.Errorf("failed to fetch configmaps: %v", err)
 	}
 
 	cmsInfo := make([]Configmap, 0, len(cms.Items))
-	for _, cmCore := range cms.Items {
-		cm, err := GetConfigmapDetails(client, namespace, &cmCore)
+	for _, cm := range cms.Items {
+		cmInfo, err := processConfigmapData(&cm)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to process configmap %s: %v", cm.Name, err)
 		}
-		cmsInfo = append(cmsInfo, cm)
+		cmsInfo = append(cmsInfo, cmInfo)
 	}
 
 	return cmsInfo, nil
 }
 
-func GetConfigmapDetails(client Client, namespace string, cmCore *corev1.ConfigMap) (Configmap, error) {
-	cm, err := client.Clientset.CoreV1().ConfigMaps(namespace).Get(
-		context.Background(),
-		cmCore.Name,
-		metav1.GetOptions{},
-	)
-	if err != nil {
-		return Configmap{}, fmt.Errorf("failed to get pod details: %v", err)
-	}
-
+func processConfigmapData(cm *corev1.ConfigMap) (Configmap, error) {
 	age := format.FormatAge(cm.GetCreationTimestamp().Time)
 
 	return Configmap{
@@ -83,6 +74,19 @@ func GetConfigmapDetails(client Client, namespace string, cmCore *corev1.ConfigM
 		Data:      fmt.Sprintf("%d", len(cm.Data)),
 		Age:       age,
 	}, nil
+}
+
+func GetConfigmapDetails(client Client, namespace string, configmapName string) (Configmap, error) {
+	cm, err := client.Clientset.CoreV1().ConfigMaps(namespace).Get(
+		context.Background(),
+		configmapName,
+		metav1.GetOptions{},
+	)
+	if err != nil {
+		return Configmap{}, fmt.Errorf("failed to get configmap details: %v", err)
+	}
+
+	return processConfigmapData(cm)
 }
 
 func (c *Configmap) Describe() (string, error) {

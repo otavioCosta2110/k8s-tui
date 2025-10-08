@@ -21,39 +21,30 @@ type PodInfo struct {
 }
 
 func FetchPods(client Client, namespace string, selector string) ([]PodInfo, error) {
-	logger.Debug("selector 5" + selector)
+	logger.Debug("Fetching pods with selector: " + selector)
 	listOptions := metav1.ListOptions{}
 	if selector != "" {
 		listOptions.LabelSelector = selector
 	}
-	logger.Debug("selector " + listOptions.LabelSelector + selector)
+
 	pods, err := client.Clientset.CoreV1().Pods(namespace).List(context.Background(), listOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch pods: %v", err)
 	}
 
 	podsInfo := make([]PodInfo, 0, len(pods.Items))
-	for _, podCore := range pods.Items {
-		pod, err := GetPodDetails(client, namespace, &podCore)
+	for _, pod := range pods.Items {
+		podInfo, err := processPodData(&pod)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to process pod %s: %v", pod.Name, err)
 		}
-		podsInfo = append(podsInfo, pod)
+		podsInfo = append(podsInfo, podInfo)
 	}
 
 	return podsInfo, nil
 }
 
-func GetPodDetails(client Client, namespace string, podCore *corev1.Pod) (PodInfo, error) {
-	pod, err := client.Clientset.CoreV1().Pods(namespace).Get(
-		context.Background(),
-		podCore.Name,
-		metav1.GetOptions{},
-	)
-	if err != nil {
-		return PodInfo{}, fmt.Errorf("failed to get pod details: %v", err)
-	}
-
+func processPodData(pod *corev1.Pod) (PodInfo, error) {
 	readyContainers := 0
 	totalContainers := len(pod.Spec.Containers)
 	for _, cs := range pod.Status.ContainerStatuses {
@@ -80,6 +71,19 @@ func GetPodDetails(client Client, namespace string, podCore *corev1.Pod) (PodInf
 		Restarts:  restarts,
 		Age:       age,
 	}, nil
+}
+
+func GetPodDetails(client Client, namespace string, podName string) (PodInfo, error) {
+	pod, err := client.Clientset.CoreV1().Pods(namespace).Get(
+		context.Background(),
+		podName,
+		metav1.GetOptions{},
+	)
+	if err != nil {
+		return PodInfo{}, fmt.Errorf("failed to get pod details: %v", err)
+	}
+
+	return processPodData(pod)
 }
 
 func DeletePod(client Client, namespace string, podName string) error {

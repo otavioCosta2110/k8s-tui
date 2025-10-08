@@ -2,11 +2,11 @@ package models
 
 import (
 	"fmt"
-	ui "github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
-	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
-	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
+	ui "github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -45,10 +45,6 @@ func NewJobs(k k8s.Client, namespace string) (*jobsModel, error) {
 func (j *jobsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	j.k8sClient = k
 
-	if err := j.fetchData(); err != nil {
-		return nil, err
-	}
-
 	onSelect := func(selected string) tea.Msg {
 		jobDetails, err := NewJobDetails(*k, j.namespace, selected).InitComponent(k)
 		if err != nil {
@@ -69,7 +65,7 @@ func (j *jobsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return j.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(j.config.Columns, j.config.ColumnWidths, j.dataToRows(), j.config.Title, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(j.config.Columns, j.config.ColumnWidths, []table.Row{}, j.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": j.createDeleteAction(tableModel),

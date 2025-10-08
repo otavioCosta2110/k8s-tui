@@ -1,10 +1,10 @@
 package models
 
 import (
-	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
-	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
+	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -18,42 +18,52 @@ type serviceaccountDetailsModel struct {
 	yamlViewer     *components.YAMLViewer
 }
 
+type serviceaccountDetailsLoadedMsg struct {
+	content string
+	err     error
+}
+
 func NewServiceAccountDetails(k k8s.Client, namespace, serviceaccountName string) *serviceaccountDetailsModel {
 	return &serviceaccountDetailsModel{
 		serviceaccount: k8s.NewServiceAccount(serviceaccountName, namespace, k),
 		k8sClient:      &k,
-		loading:        false,
+		yamlViewer:     components.NewYAMLViewerWithHelp("ServiceAccount: "+serviceaccountName, "Loading...", "↑/↓: Scroll • q: Quit"),
+		loading:        true,
 		err:            nil,
 	}
 }
 
 func (s *serviceaccountDetailsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	s.k8sClient = k
-
-	var desc string
-	var err error
-
-	pm := plugins.GetGlobalPluginManager()
-	api := pm.GetAPI()
-	api.SetClient(*k)
-	desc, err = api.DescribeServiceAccount(s.serviceaccount.Namespace, s.serviceaccount.Name)
-
-	if err != nil {
-		return nil, err
-	}
-
-	title := "ServiceAccount: " + s.serviceaccount.Name
-
-	s.yamlViewer = components.NewYAMLViewerWithHelp(title, desc, "↑/↓: Scroll • q: Quit")
 	return s, nil
 }
 
+func (s *serviceaccountDetailsModel) fetchServiceAccountDetails() tea.Cmd {
+	return func() tea.Msg {
+		pm := plugins.GetGlobalPluginManager()
+		api := pm.GetAPI()
+		api.SetClient(*s.k8sClient)
+		desc, err := api.DescribeServiceAccount(s.serviceaccount.Namespace, s.serviceaccount.Name)
+		return serviceaccountDetailsLoadedMsg{content: desc, err: err}
+	}
+}
+
 func (s *serviceaccountDetailsModel) Init() tea.Cmd {
-	return s.yamlViewer.Init()
+	return tea.Batch(s.yamlViewer.Init(), s.fetchServiceAccountDetails())
 }
 
 func (s *serviceaccountDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case serviceaccountDetailsLoadedMsg:
+		s.loading = false
+		if msg.err != nil {
+			s.err = msg.err
+			s.yamlViewer.SetContent("Error loading serviceaccount details: " + msg.err.Error())
+		} else {
+			title := "ServiceAccount: " + s.serviceaccount.Name
+			s.yamlViewer = components.NewYAMLViewerWithHelp(title, msg.content, "↑/↓: Scroll • q: Quit")
+		}
+		return s, s.yamlViewer.Init()
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "esc":

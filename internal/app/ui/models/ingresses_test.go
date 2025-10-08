@@ -1,9 +1,9 @@
 package models
 
 import (
+	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
-	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"testing"
 	"time"
 )
@@ -207,8 +207,8 @@ func TestNewIngressDetails(t *testing.T) {
 	if model.ingress.Namespace != "default" {
 		t.Error("Expected ingress namespace to be 'default'")
 	}
-	if model.loading != false {
-		t.Error("Expected loading to be false")
+	if model.loading != true {
+		t.Error("Expected loading to be true")
 	}
 	if model.err != nil {
 		t.Error("Expected error to be nil")

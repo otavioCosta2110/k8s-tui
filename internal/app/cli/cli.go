@@ -25,13 +25,13 @@ func ParseFlags() Config {
 		defaultPluginDir = appConfig.PluginDir
 	}
 
-	args := os.Args[1:] // Skip program name
+	args := os.Args[1:] 
 	cfg.PluginArgs = make(map[string]string)
 
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
-		if strings.HasPrefix(arg, "--") {
-			flagName := strings.TrimPrefix(arg, "--")
+		if after, ok :=strings.CutPrefix(arg, "--"); ok  {
+			flagName := after
 			if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
 				flagValue := args[i+1]
 				switch flagName {
@@ -44,7 +44,7 @@ func ParseFlags() Config {
 				default:
 					cfg.PluginArgs[flagName] = flagValue
 				}
-				i++ // Skip the value
+				i++ 
 			} else {
 				switch flagName {
 				case "help", "h":

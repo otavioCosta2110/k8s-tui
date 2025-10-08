@@ -9,7 +9,6 @@ import (
 	styles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	resources "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
-	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -48,10 +47,6 @@ func NewDeployments(k resources.Client, namespace string) (*deploymentsModel, er
 func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error) {
 	d.k8sClient = k
 
-	if err := d.fetchData(); err != nil {
-		return nil, err
-	}
-
 	onSelect := func(selected string) tea.Msg {
 		deployment := resources.NewDeployment(selected, d.namespace, *k)
 		err := deployment.Fetch()
@@ -63,10 +58,8 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 		}
 		selector, err := deployment.GetLabelSelector()
 		if err != nil {
-			logger.Debug(fmt.Sprintf("Failed to get label selector for deployment %s: %v, using fallback", deployment.Name, err))
 			selector = fmt.Sprintf("app=%s", deployment.Name)
 		}
-		logger.Debug(fmt.Sprintf("Using selector for deployment %s: %s", deployment.Name, selector))
 		pods, err := NewPods(*k, d.namespace, selector)
 		if err != nil {
 			return components.NavigateMsg{
@@ -96,7 +89,7 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 		return d.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(d.config.Columns, d.config.ColumnWidths, d.dataToRows(), d.config.Title, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(d.config.Columns, d.config.ColumnWidths, []table.Row{}, d.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": d.createDeleteAction(tableModel),

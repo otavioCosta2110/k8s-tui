@@ -67,17 +67,8 @@ func GetDeploymentsTableData(client Client, namespace string) ([]DeploymentInfo,
 
 	var deploymentInfos []DeploymentInfo
 	for _, deployment := range deployments.Items {
-		freshDeployment, err := client.Clientset.AppsV1().Deployments(namespace).Get(
-			context.Background(),
-			deployment.Name,
-			metav1.GetOptions{},
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get fresh status for deployment %s: %v", deployment.Name, err)
-		}
-
-		status := freshDeployment.Status
-		spec := freshDeployment.Spec
+		status := deployment.Status
+		spec := deployment.Spec
 
 		var desiredReplicas int32
 		if spec.Replicas != nil {
@@ -87,13 +78,13 @@ func GetDeploymentsTableData(client Client, namespace string) ([]DeploymentInfo,
 		readyStr := fmt.Sprintf("%d/%d", status.ReadyReplicas, desiredReplicas)
 
 		deploymentInfos = append(deploymentInfos, DeploymentInfo{
-			Namespace: freshDeployment.Namespace,
-			Name:      freshDeployment.Name,
+			Namespace: deployment.Namespace,
+			Name:      deployment.Name,
 			Ready:     readyStr,
 			UpToDate:  fmt.Sprintf("%d", status.UpdatedReplicas),
 			Available: fmt.Sprintf("%d", status.AvailableReplicas),
-			Age:       format.FormatAge(freshDeployment.CreationTimestamp.Time),
-			Raw:       freshDeployment.DeepCopy(),
+			Age:       format.FormatAge(deployment.CreationTimestamp.Time),
+			Raw:       deployment.DeepCopy(),
 			Client:    client,
 		})
 	}
@@ -122,7 +113,6 @@ func (d *DeploymentInfo) GetLabelSelector() (string, error) {
 		return "", fmt.Errorf("deployment has no selector")
 	}
 
-	
 	requirements, err := metav1.LabelSelectorAsSelector(d.Raw.Spec.Selector)
 	if err != nil {
 		return "", fmt.Errorf("failed to convert label selector: %v", err)

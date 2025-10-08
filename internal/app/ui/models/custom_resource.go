@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	styles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles"
+	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
+	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
-	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
-	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -66,12 +66,7 @@ func NewCustomResourceModel(k k8s.Client, namespace string, resourceType string)
 	}
 	logger.Debug("Custom resource model instance created")
 
-	logger.Info("Fetching initial data")
-	if err := cr.fetchData(); err != nil {
-		logger.Error(fmt.Sprintf("Error fetching initial data: %v", err))
-		return nil, err
-	}
-	logger.Info(fmt.Sprintf("Initial data fetched successfully: %d items", len(cr.resourceData)))
+	logger.Info("Skipping initial data fetch - will be loaded asynchronously")
 
 	logger.Debug("Creating view model based on display component")
 	var viewModel tea.Model
@@ -419,7 +414,7 @@ func (cc *CustomResourceChartModel) renderChart() string {
 			status := columns[1]
 			age := columns[2]
 
-			bar := strings.Repeat("█", 20) 
+			bar := strings.Repeat("█", 20)
 			line := fmt.Sprintf("%s: %s (%s, %s)", name, bar, status, age)
 
 			chartStyle := lipgloss.NewStyle().
@@ -511,7 +506,7 @@ func NewCustomResourceTableModel(cr *customResourceModel, resourceName, icon, na
 			}
 			itemColumns := item.GetColumns()
 			if len(itemColumns) >= 4 {
-				rows = append(rows, itemColumns[:4]) 
+				rows = append(rows, itemColumns[:4])
 				logger.Debug(fmt.Sprintf("Row %d: %v", i, itemColumns[:4]))
 			} else if len(itemColumns) > 0 {
 				paddedRow := make(table.Row, 4)
@@ -538,10 +533,10 @@ func NewCustomResourceTableModel(cr *customResourceModel, resourceName, icon, na
 	tableModel := components.NewTable(
 		columns,
 		colWidths,
-		rows,
+		[]table.Row{},
 		title,
-		nil, 
-		0,   
+		nil,
+		0,
 		func() ([]table.Row, error) {
 			logger.Debug("Refreshing table data")
 			if err := cr.fetchData(); err != nil {
@@ -568,7 +563,7 @@ func NewCustomResourceTableModel(cr *customResourceModel, resourceName, icon, na
 			logger.Debug(fmt.Sprintf("Refreshed to %d rows", len(newRows)))
 			return newRows, nil
 		},
-		nil, 
+		nil,
 	)
 
 	logger.Info("Table model created successfully")

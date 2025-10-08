@@ -16,6 +16,11 @@ type UpdateActionsMsg struct {
 	action func() tea.Cmd
 }
 
+type fetchResultMsg struct {
+	rows []table.Row
+	err  error
+}
+
 type TableModel struct {
 	Table           table.Model
 	OnSelected      func(selected string) tea.Msg
@@ -47,10 +52,9 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 	checkboxColumn := table.Column{Title: "✓", Width: 3}
 	columns = append([]table.Column{checkboxColumn}, columns...)
 
-	
 	normalizedDataWeights := normalizeColumnPercentages(colPercent)
 	newColPercent := make([]float64, len(normalizedDataWeights)+1)
-	newColPercent[0] = 0 
+	newColPercent[0] = 0
 	for i, p := range normalizedDataWeights {
 		newColPercent[i+1] = p
 	}
@@ -94,6 +98,12 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case loadedTableMsg:
 		m.loading = false
 		m.initialized = true
+		return m, nil
+	case fetchResultMsg:
+		if msg.err != nil {
+			return m, nil
+		}
+		m.UpdateRows(msg.rows)
 		return m, nil
 	case tea.WindowSizeMsg:
 		m.updateColumnWidths(msg.Width)
@@ -176,18 +186,18 @@ func (m *TableModel) View() string {
 func (m *TableModel) updateColumnWidths(totalWidth int) {
 	columns := m.Table.Columns()
 	widths := make([]int, len(columns))
-	
+
 	checkboxWidth := 3
 	widths[0] = checkboxWidth
 	remainingWidth := totalWidth + checkboxWidth
 	totalAssigned := checkboxWidth + len(columns)*2
-	
+
 	for i := 1; i < len(columns); i++ {
 		width := int(float64(remainingWidth) * m.colPercent[i])
 		widths[i] = width
 		totalAssigned += width
 	}
-	
+
 	if len(widths) > 1 {
 		widths[len(widths)-1] += totalWidth - totalAssigned
 	}
@@ -196,7 +206,6 @@ func (m *TableModel) updateColumnWidths(totalWidth int) {
 	}
 	m.Table.SetColumns(columns)
 }
-
 
 func normalizeColumnPercentages(percentages []float64) []float64 {
 	if len(percentages) == 0 {
@@ -209,7 +218,7 @@ func normalizeColumnPercentages(percentages []float64) []float64 {
 	}
 
 	if total == 0 {
-		
+
 		evenPercent := 1.0 / float64(len(percentages))
 		normalized := make([]float64, len(percentages))
 		for i := range normalized {
@@ -218,7 +227,6 @@ func normalizeColumnPercentages(percentages []float64) []float64 {
 		return normalized
 	}
 
-	
 	normalized := make([]float64, len(percentages))
 	for i, p := range percentages {
 		normalized[i] = p / total
@@ -273,14 +281,7 @@ func (m *TableModel) UpdateColumns(columns []table.Column) {
 }
 
 func (m *TableModel) refreshData() tea.Cmd {
-	return func() tea.Msg {
-		rows, err := m.refreshFunc()
-		if err != nil {
-			return err
-		}
-		m.UpdateRows(rows)
-		return nil
-	}
+	return m.fetchDataCmd()
 }
 
 func (t *TableModel) Refresh() (tea.Model, tea.Cmd) {
@@ -288,11 +289,12 @@ func (t *TableModel) Refresh() (tea.Model, tea.Cmd) {
 		return t, nil
 	}
 
-	rows, err := t.refreshFunc()
-	if err != nil {
-		return t, nil
-	}
+	return t, t.fetchDataCmd()
+}
 
-	t.UpdateRows(rows)
-	return t, nil
+func (t *TableModel) fetchDataCmd() tea.Cmd {
+	return tea.Cmd(func() tea.Msg {
+		rows, err := t.refreshFunc()
+		return fetchResultMsg{rows: rows, err: err}
+	})
 }

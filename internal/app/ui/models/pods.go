@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
@@ -9,7 +8,6 @@ import (
 	styles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
-	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -40,7 +38,6 @@ func NewPods(k k8s.Client, namespace string, selector ...string) (*podsModel, er
 	if len(selector) > 0 {
 		selectorStr = selector[0]
 	}
-	logger.Debug("Pods selector: " + selectorStr)
 
 	genericModel := NewGenericResourceModel(k, namespace, config)
 
@@ -54,10 +51,6 @@ func NewPods(k k8s.Client, namespace string, selector ...string) (*podsModel, er
 
 func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	p.k8sClient = k
-
-	if err := p.fetchData(p.selector); err != nil {
-		return nil, err
-	}
 
 	onSelect := func(selected string) tea.Msg {
 		podDetails, err := NewPodDetails(*k, p.namespace, selected).InitComponent(k)
@@ -80,7 +73,7 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return p.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(p.config.Columns, p.config.ColumnWidths, p.dataToRows(), p.config.Title, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(p.config.Columns, p.config.ColumnWidths, []table.Row{}, p.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": p.createDeleteAction(tableModel),
@@ -94,7 +87,6 @@ func (p *podsModel) fetchData(selector string) error {
 	var podsInfo []k8s.PodInfo
 	var err error
 
-	logger.Debug(fmt.Sprintf("Pods fetchData: namespace=%s, selector=%s", p.namespace, selector))
 	podsInfo, err = p.pluginAPI.GetPods(p.namespace, selector)
 
 	if err != nil {

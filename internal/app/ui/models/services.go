@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	ui "github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
+	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
-	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -47,10 +47,6 @@ func NewServices(k k8s.Client, namespace string) (*servicesModel, error) {
 func (s *servicesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	s.k8sClient = k
 
-	if err := s.fetchData(); err != nil {
-		return nil, err
-	}
-
 	onSelect := func(selected string) tea.Msg {
 		serviceDetails, err := NewServiceDetails(*k, s.namespace, selected).InitComponent(k)
 		if err != nil {
@@ -71,7 +67,7 @@ func (s *servicesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		return s.dataToRows(), nil
 	}
 
-	tableModel := ui.NewTable(s.config.Columns, s.config.ColumnWidths, s.dataToRows(), s.config.Title, onSelect, 1, fetchFunc, nil)
+	tableModel := ui.NewTable(s.config.Columns, s.config.ColumnWidths, []table.Row{}, s.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
 		"d": s.createDeleteAction(tableModel),

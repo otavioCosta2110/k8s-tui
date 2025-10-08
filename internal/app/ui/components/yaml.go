@@ -86,6 +86,14 @@ func (m *YAMLViewer) GetOriginalContent() string {
 	return m.originalContent
 }
 
+func (m *YAMLViewer) SetContent(content string) {
+	m.originalContent = content
+	m.content = highlightYAML(content)
+	if m.ready {
+		m.viewport.SetContent(m.content)
+	}
+}
+
 func (m *YAMLViewer) Init() tea.Cmd {
 	contentWidth := styles.ScreenWidth
 	m.viewport = viewport.New(contentWidth, styles.ScreenHeight-1)

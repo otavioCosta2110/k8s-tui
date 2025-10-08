@@ -8,11 +8,15 @@ import (
 	resources "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
+	"io"
+	"k8s.io/klog/v2"
 	"os"
 	"runtime/debug"
 )
 
 func main() {
+	klog.SetOutput(io.Discard)
+
 	cfg := ui.ParseFlags()
 	pluginManager := plugins.NewPluginManager(cfg.PluginDir)
 	if err := pluginManager.LoadPlugins(); err != nil {

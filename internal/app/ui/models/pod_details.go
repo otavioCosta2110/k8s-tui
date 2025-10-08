@@ -9,35 +9,66 @@ import (
 )
 
 type podDetailsModel struct {
-	pod       *k8s.Pod
-	k8sClient *k8s.Client
-	loading   bool
-	err       error
+	pod        *k8s.Pod
+	k8sClient  *k8s.Client
+	yamlViewer *components.YAMLViewer
+	loading    bool
+	err        error
+}
+
+type podDetailsLoadedMsg struct {
+	content string
+	err     error
 }
 
 func NewPodDetails(k k8s.Client, namespace, podName string) *podDetailsModel {
 	return &podDetailsModel{
-		pod:       k8s.NewPod(podName, namespace, k),
-		k8sClient: &k,
-		loading:   false,
-		err:       nil,
+		pod:        k8s.NewPod(podName, namespace, k),
+		k8sClient:  &k,
+		yamlViewer: components.NewYAMLViewer("Pod: "+podName, "Loading..."),
+		loading:    true,
+		err:        nil,
 	}
 }
 
 func (p *podDetailsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	p.k8sClient = k
+	return p, nil
+}
 
-	var desc string
-	var err error
-
-	pm := plugins.GetGlobalPluginManager()
-	api := pm.GetAPI()
-	api.SetClient(*k)
-	desc, err = api.DescribePod(p.pod.Namespace, p.pod.Name)
-
-	if err != nil {
-		return nil, err
+func (p *podDetailsModel) fetchPodDetails() tea.Cmd {
+	return func() tea.Msg {
+		pm := plugins.GetGlobalPluginManager()
+		api := pm.GetAPI()
+		api.SetClient(*p.k8sClient)
+		desc, err := api.DescribePod(p.pod.Namespace, p.pod.Name)
+		return podDetailsLoadedMsg{content: desc, err: err}
 	}
+}
 
-	return components.NewYAMLViewer("Pod: "+p.pod.Name, desc), nil
+func (p *podDetailsModel) Init() tea.Cmd {
+	return tea.Batch(p.yamlViewer.Init(), p.fetchPodDetails())
+}
+
+func (p *podDetailsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case podDetailsLoadedMsg:
+		p.loading = false
+		if msg.err != nil {
+			p.err = msg.err
+			p.yamlViewer.SetContent("Error loading pod details: " + msg.err.Error())
+		} else {
+			p.yamlViewer.SetContent(msg.content)
+		}
+		return p, nil
+	default:
+		var cmd tea.Cmd
+		updatedViewer, cmd := p.yamlViewer.Update(msg)
+		p.yamlViewer = updatedViewer.(*components.YAMLViewer)
+		return p, cmd
+	}
+}
+
+func (p *podDetailsModel) View() string {
+	return p.yamlViewer.View()
 }
