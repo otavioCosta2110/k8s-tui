@@ -288,5 +288,7 @@ type PluginAPI interface {
 
 	GetTabs() ([]TabInfo, error)
 
-	RestoreTabs(tabs []TabInfo) error
+	SetTabs(tabs []TabInfo) error
+
+	SetTabSetterCallback(callback func())
 }

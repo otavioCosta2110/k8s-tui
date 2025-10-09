@@ -71,6 +71,14 @@ func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.
 		return tabInfos, nil
 	})
 
+	pluginManager.GetAPI().SetTabSetter(func(tabInfos []plugins.TabInfo) error {
+		return tabManager.RestoreTabs(tabInfos)
+	})
+
+	pluginManager.GetAPI().SetTabSetterCallback(func() {
+		appModel.updateHeaderTabs()
+	})
+
 	pluginManager.GetAPI().SetNamespaceCallback(func(namespace string) {
 		logger.Info(fmt.Sprintf("DEBUG: SetNamespaceCallback called with namespace: %s", namespace))
 		appModel.header.SetNamespace(namespace)

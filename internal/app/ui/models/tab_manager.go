@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -36,6 +37,7 @@ type TabManagerMsg struct {
 }
 
 func NewTabManager(kubeClient *k8s.Client, namespace string, keyBindings map[string]string) *TabManager {
+	logger.Info("DEBUG: Creating new TabManager")
 	tm := &TabManager{
 		tabs:        []TabData{},
 		activeIndex: 0,
@@ -45,6 +47,7 @@ func NewTabManager(kubeClient *k8s.Client, namespace string, keyBindings map[str
 	}
 
 	tm.createInitialTab()
+	logger.Info(fmt.Sprintf("DEBUG: TabManager created with %d tabs", len(tm.tabs)))
 
 	return tm
 }
@@ -168,10 +171,13 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
+	logger.Info(fmt.Sprintf("DEBUG: Restoring %d tabs", len(tabInfos)))
 	tm.tabs = []TabData{}
 	tm.activeIndex = 0
 
-	for _, tabInfo := range tabInfos {
+	for i, tabInfo := range tabInfos {
+		logger.Info(fmt.Sprintf("DEBUG: Restoring tab %d: ID=%s, Title=%s, ResourceType=%s, Breadcrumb=%v",
+			i, tabInfo.ID, tabInfo.Title, tabInfo.ResourceType, tabInfo.Breadcrumb))
 		var model tea.Model
 		var err error
 
@@ -182,6 +188,7 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 			resourceList := NewResourceList(*tm.kubeClient, tm.namespace, tabInfo.ResourceType)
 			model, err = resourceList.InitComponent(*tm.kubeClient)
 			if err != nil {
+				logger.Error(fmt.Sprintf("Failed to create %s model: %v", tabInfo.ResourceType, err))
 				return fmt.Errorf("failed to create %s model: %v", tabInfo.ResourceType, err)
 			}
 		}
@@ -201,6 +208,7 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 
 	if len(tm.tabs) > 0 {
 		tm.activeIndex = 0
+		logger.Info(fmt.Sprintf("DEBUG: Set active tab to index 0, total tabs: %d", len(tm.tabs)))
 	}
 
 	return nil

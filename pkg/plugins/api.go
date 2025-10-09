@@ -155,7 +155,8 @@ type PluginAPIImpl struct {
 	resourceRegistry     *ResourceRegistry
 	client               k8s.Client
 	tabGetter            func() ([]TabInfo, error)
-	tabRestorer          func(tabs []TabInfo) error
+	tabSetter            func(tabs []TabInfo) error
+	setTabSetterCallback func()
 	setNamespaceCallback func(namespace string)
 	setStatusCallback    func(message string)
 }
@@ -544,26 +545,30 @@ func (api *PluginAPIImpl) GetTabs() ([]TabInfo, error) {
 	return nil, fmt.Errorf("tab getter not set")
 }
 
-func (api *PluginAPIImpl) RestoreTabs(tabs []TabInfo) error {
-	logger.Info(fmt.Sprintf("DEBUG: API RestoreTabs called with %d tabs", len(tabs)))
-	if api.tabRestorer != nil {
-		logger.Info("DEBUG: Calling tabRestorer")
-		return api.tabRestorer(tabs)
+func (api *PluginAPIImpl) SetTabs(tabs []TabInfo) error {
+	if api.tabSetter != nil {
+		err := api.tabSetter(tabs)
+		if err != nil {
+			return err
+		}
+		if api.setTabSetterCallback != nil {
+			api.setTabSetterCallback()
+		}
+		return nil
 	}
-	logger.Info("DEBUG: tabRestorer is nil")
-	return fmt.Errorf("tab restorer not set")
+	return fmt.Errorf("tab setter not set")
 }
 
 func (api *PluginAPIImpl) SetTabGetter(getter func() ([]TabInfo, error)) {
 	api.tabGetter = getter
 }
 
-func (api *PluginAPIImpl) SetTabRestorer(restorer func(tabs []TabInfo) error) {
-	api.tabRestorer = restorer
+func (api *PluginAPIImpl) SetTabSetter(setter func(tabs []TabInfo) error) {
+	api.tabSetter = setter
 }
 
-func (api *PluginAPIImpl) GetTabRestorer() func(tabs []TabInfo) error {
-	return api.tabRestorer
+func (api *PluginAPIImpl) GetTabSetter() func(tabs []TabInfo) error {
+	return api.tabSetter
 }
 
 func (api *PluginAPIImpl) SetNamespaceCallback(callback func(namespace string)) {
@@ -572,4 +577,8 @@ func (api *PluginAPIImpl) SetNamespaceCallback(callback func(namespace string)) 
 
 func (api *PluginAPIImpl) SetStatusCallback(callback func(message string)) {
 	api.setStatusCallback = callback
+}
+
+func (api *PluginAPIImpl) SetTabSetterCallback(callback func()) {
+	api.setTabSetterCallback = callback
 }

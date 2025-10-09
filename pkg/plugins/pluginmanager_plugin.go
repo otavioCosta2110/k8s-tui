@@ -289,6 +289,13 @@ func (p *PluginmanagerStyleLuaPlugin) callLuaFunction(functionName string, args 
 	p.L.Pop(2)
 
 	if errorValue.Type() == lua.LTString && errorValue.String() != "" {
+		return result.String(), fmt.Errorf("%s", errorValue.String())
+	}
+
+	return result.String(), nil
+	p.L.Pop(2)
+
+	if errorValue.Type() == lua.LTString && errorValue.String() != "" {
 		return "", fmt.Errorf("%s", errorValue.String())
 	}
 
@@ -398,6 +405,7 @@ func (p *PluginmanagerStyleLuaPlugin) SetupLuaAPI() {
 	p.L.SetField(apiTable, "register_command", p.L.NewFunction(p.luaRegisterCommand))
 	p.L.SetField(apiTable, "register_cli_argument", p.L.NewFunction(p.luaRegisterCLIArgument))
 	p.L.SetField(apiTable, "get_tabs", p.L.NewFunction(p.luaGetTabs))
+	p.L.SetField(apiTable, "set_tabs", p.L.NewFunction(p.luaSetTabs))
 	p.L.SetField(apiTable, "restore_tabs", p.L.NewFunction(p.luaRestoreTabs))
 
 	p.L.SetField(apiTable, "log", p.L.NewFunction(func(L *lua.LState) int {
@@ -483,6 +491,31 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetTabs(L *lua.LState) int {
 	return 1
 }
 
+func (p *PluginmanagerStyleLuaPlugin) luaSetTabs(L *lua.LState) int {
+	logger.Info("DEBUG: luaSetTabs called")
+	tabsTable := L.CheckTable(1)
+
+	var tabs []TabInfo
+	tabsTable.ForEach(func(key, value lua.LValue) {
+		if value.Type() == lua.LTTable {
+			tab := p.parseTabInfo(value.(*lua.LTable))
+			tabs = append(tabs, tab)
+		}
+	})
+
+	logger.Info(fmt.Sprintf("DEBUG: Parsed %d tabs, calling p.api.SetTabs", len(tabs)))
+	err := p.api.SetTabs(tabs)
+	if err != nil {
+		logger.Info(fmt.Sprintf("DEBUG: p.api.SetTabs failed: %v", err))
+		L.Push(lua.LString(fmt.Sprintf("failed to set tabs: %v", err)))
+		return 1
+	}
+
+	logger.Info("DEBUG: luaSetTabs completed successfully")
+	L.Push(lua.LString("tabs set successfully"))
+	return 1
+}
+
 func (p *PluginmanagerStyleLuaPlugin) luaRestoreTabs(L *lua.LState) int {
 	logger.Info("DEBUG: luaRestoreTabs called")
 	tabsTable := L.CheckTable(1)
@@ -495,10 +528,10 @@ func (p *PluginmanagerStyleLuaPlugin) luaRestoreTabs(L *lua.LState) int {
 		}
 	})
 
-	logger.Info(fmt.Sprintf("DEBUG: Parsed %d tabs, calling p.api.RestoreTabs", len(tabs)))
-	err := p.api.RestoreTabs(tabs)
+	logger.Info(fmt.Sprintf("DEBUG: Parsed %d tabs, calling p.api.SetTabs", len(tabs)))
+	err := p.api.SetTabs(tabs)
 	if err != nil {
-		logger.Info(fmt.Sprintf("DEBUG: p.api.RestoreTabs failed: %v", err))
+		logger.Info(fmt.Sprintf("DEBUG: p.api.SetTabs failed: %v", err))
 		L.Push(lua.LString(fmt.Sprintf("failed to restore tabs: %v", err)))
 		return 1
 	}

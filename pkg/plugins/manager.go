@@ -94,16 +94,16 @@ func (pm *PluginManager) LoadPlugins() error {
 }
 
 func (pm *PluginManager) setupBasicLuaAPI(L *lua.LState) {
-	print("DEBUG: Setting up basic k8s_tui API for Lua plugin")
-
 	apiTable := L.NewTable()
 
 	plugin := &basicLuaPlugin{api: pm.api}
 
 	L.SetField(apiTable, "get_namespace", L.NewFunction(plugin.luaGetNamespace))
+	L.SetField(apiTable, "get_tabs", L.NewFunction(plugin.luaGetTabs))
 	L.SetField(apiTable, "set_namespace", L.NewFunction(plugin.luaSetNamespace))
 	L.SetField(apiTable, "set_status", L.NewFunction(plugin.luaSetStatus))
 	L.SetField(apiTable, "restore_tabs", L.NewFunction(plugin.luaRestoreTabs))
+	L.SetField(apiTable, "set_tabs", L.NewFunction(plugin.luaSetTabs))
 
 	L.SetField(apiTable, "log", L.NewFunction(func(L *lua.LState) int {
 		message := L.CheckString(1)
@@ -122,6 +122,32 @@ type basicLuaPlugin struct {
 func (p *basicLuaPlugin) luaGetNamespace(L *lua.LState) int {
 	namespace := p.api.GetCurrentNamespace()
 	L.Push(lua.LString(namespace))
+	return 1
+}
+
+func (p *basicLuaPlugin) luaGetTabs(L *lua.LState) int {
+	tabs, err := p.api.GetTabs()
+	if err != nil {
+		L.Push(lua.LString(fmt.Sprintf("failed to get tabs: %v", err)))
+		return 1
+	}
+
+	resultTable := L.NewTable()
+	for i, tab := range tabs {
+		tabTable := L.NewTable()
+		L.SetField(tabTable, "ID", lua.LString(tab.ID))
+		L.SetField(tabTable, "Title", lua.LString(tab.Title))
+		L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+
+		breadcrumbTable := L.NewTable()
+		for j, crumb := range tab.Breadcrumb {
+			L.RawSetInt(breadcrumbTable, j+1, lua.LString(crumb))
+		}
+		L.SetField(tabTable, "Breadcrumb", breadcrumbTable)
+
+		L.RawSetInt(resultTable, i+1, tabTable)
+	}
+	L.Push(resultTable)
 	return 1
 }
 
@@ -151,16 +177,41 @@ func (p *basicLuaPlugin) luaRestoreTabs(L *lua.LState) int {
 		}
 	})
 
-	logger.Info(fmt.Sprintf("DEBUG: basic Parsed %d tabs, calling p.api.RestoreTabs", len(tabs)))
-	err := p.api.RestoreTabs(tabs)
+	logger.Info(fmt.Sprintf("DEBUG: basic Parsed %d tabs, calling p.api.SetTabs", len(tabs)))
+	err := p.api.SetTabs(tabs)
 	if err != nil {
-		logger.Info(fmt.Sprintf("DEBUG: basic p.api.RestoreTabs failed: %v", err))
+		logger.Info(fmt.Sprintf("DEBUG: basic p.api.SetTabs failed: %v", err))
 		L.Push(lua.LString(fmt.Sprintf("failed to restore tabs: %v", err)))
 		return 1
 	}
 
 	logger.Info("DEBUG: basic luaRestoreTabs completed successfully")
 	L.Push(lua.LString("ok"))
+	return 1
+}
+
+func (p *basicLuaPlugin) luaSetTabs(L *lua.LState) int {
+	logger.Info("DEBUG: basic luaSetTabs called")
+	tabsTable := L.CheckTable(1)
+
+	var tabs []TabInfo
+	tabsTable.ForEach(func(key, value lua.LValue) {
+		if value.Type() == lua.LTTable {
+			tab := parseTabInfo(value.(*lua.LTable))
+			tabs = append(tabs, tab)
+		}
+	})
+
+	logger.Info(fmt.Sprintf("DEBUG: basic Parsed %d tabs, calling p.api.SetTabs", len(tabs)))
+	err := p.api.SetTabs(tabs)
+	if err != nil {
+		logger.Info(fmt.Sprintf("DEBUG: basic p.api.SetTabs failed: %v", err))
+		L.Push(lua.LString(fmt.Sprintf("failed to set tabs: %v", err)))
+		return 1
+	}
+
+	logger.Info("DEBUG: basic luaSetTabs completed successfully")
+	L.Push(lua.LString("tabs set successfully"))
 	return 1
 }
 
@@ -215,266 +266,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		return fmt.Errorf("failed to load Lua script: %v", err)
 	}
 
-	print(fmt.Sprintf("DEBUG: Setting up basic k8s_tui API for plugin: %s", pluginName))
 	pm.setupBasicLuaAPI(L)
-
-	if L.GetGlobal("CLIArguments").Type() != lua.LTFunction {
-		cliArgsCode := `
-function CLIArguments()
-    return {
-        {
-            name = "session",
-            description = "Load session from JSON file",
-            handler = "load_session_cli_handler"
-        }
-    }
-end
-
-function load_session_cli_handler(value)
-    if k8s_tui and k8s_tui.log then
-        k8s_tui.log("DEBUG: load_session_cli_handler called with value: " .. tostring(value))
-    end
-
-    -- Read the session file
-    local file = io.open(value, "r")
-    if not file then
-        if k8s_tui and k8s_tui.log then
-            k8s_tui.log("DEBUG: Failed to open session file: " .. value)
-        end
-        return nil, "Failed to open session file: " .. value
-    end
-
-    local content = file:read("*all")
-    file:close()
-
-    if k8s_tui and k8s_tui.log then
-        k8s_tui.log("DEBUG: Session file content: " .. content)
-    end
-
-    -- Simple JSON parsing for namespace
-    -- Look for "namespace":"value"
-    local namespace_pattern = '"namespace"%s*:%s*"([^"]+)"'
-    if k8s_tui and k8s_tui.log then
-        k8s_tui.log("DEBUG: Looking for namespace with pattern: " .. namespace_pattern)
-    end
-    local namespace = content:match(namespace_pattern)
-    if k8s_tui and k8s_tui.log then
-        k8s_tui.log("DEBUG: Namespace match result: " .. (namespace or "nil"))
-    end
-    if namespace then
-        if k8s_tui and k8s_tui.log then
-            k8s_tui.log("DEBUG: Found namespace: '" .. namespace .. "'")
-        end
-    else
-        if k8s_tui and k8s_tui.log then
-            k8s_tui.log("DEBUG: No namespace found in content")
-        end
-    end
-
-    -- Parse tabs array with proper bracket matching
-    local tabs = {}
-    -- Find the position after "tabs":[
-    local tabs_start = content:find('"tabs"%s*:%s*%[')
-    local tabs_content = nil
-    if tabs_start then
-        -- Find the matching closing bracket
-        local bracket_count = 0
-        local in_string = false
-        local escape_next = false
-        local end_pos = tabs_start - 1
-
-        for i = tabs_start, #content do
-            local char = content:sub(i, i)
-            if escape_next then
-                escape_next = false
-            elseif char == '\\' then
-                escape_next = true
-            elseif char == '"' then
-                in_string = not in_string
-            elseif not in_string then
-                if char == '[' then
-                    bracket_count = bracket_count + 1
-                elseif char == ']' then
-                    bracket_count = bracket_count - 1
-                    if bracket_count == 0 then
-                        end_pos = i
-                        break
-                    end
-                end
-            end
-        end
-
-        if end_pos > tabs_start then
-            -- Extract content between brackets
-            local start_bracket = content:find('%[', tabs_start)
-            if start_bracket then
-                tabs_content = content:sub(start_bracket + 1, end_pos - 1)
-            end
-        end
-    end
-
-    if k8s_tui and k8s_tui.log then
-        k8s_tui.log("DEBUG: Tabs content extraction result: " .. (tabs_content or "nil"))
-    end
-    if tabs_content then
-        if k8s_tui and k8s_tui.log then
-            k8s_tui.log("DEBUG: Found tabs_content: '" .. tabs_content .. "'")
-            k8s_tui.log("DEBUG: Starting to parse individual tab objects from tabs_content")
-        end
-        for tab_str in tabs_content:gmatch('{%s*([^}]+)%s*}') do
-            if k8s_tui and k8s_tui.log then
-                k8s_tui.log("DEBUG: Processing tab_str: '" .. tab_str .. "'")
-            end
-            local tab = {}
-
-            -- Extract ID
-            local id = tab_str:match('"id"%s*:%s*"([^"]+)"') or tab_str:match('"ID"%s*:%s*"([^"]+)"')
-
-            -- Extract title
-            local title = tab_str:match('"title"%s*:%s*"([^"]+)"') or tab_str:match('"Title"%s*:%s*"([^"]+)"')
-
-            -- Extract resourceType
-            local resourceType = tab_str:match('"resourceType"%s*:%s*"([^"]+)"') or tab_str:match('"ResourceType"%s*:%s*"([^"]+)"')
-            if resourceType then tab.ResourceType = resourceType end
-
-            -- Extract breadcrumb array with proper bracket matching
-            if k8s_tui and k8s_tui.log then
-                k8s_tui.log("DEBUG: Looking for breadcrumb in tab_str")
-            end
-            local breadcrumb_start = tab_str:find('"breadcrumb"%s*:%s*%[') or tab_str:find('"Breadcrumb"%s*:%s*%[')
-            if k8s_tui and k8s_tui.log then
-                k8s_tui.log("DEBUG: breadcrumb_start: " .. (breadcrumb_start or "nil"))
-            end
-            local breadcrumb_content = nil
-            if breadcrumb_start then
-                if k8s_tui and k8s_tui.log then
-                    k8s_tui.log("DEBUG: Found breadcrumb start, parsing brackets")
-                end
-                local bracket_count = 0
-                local in_string = false
-                local escape_next = false
-                local end_pos = breadcrumb_start - 1
-
-                for i = breadcrumb_start, #tab_str do
-                    local char = tab_str:sub(i, i)
-                    if escape_next then
-                        escape_next = false
-                    elseif char == '\\' then
-                        escape_next = true
-                    elseif char == '"' then
-                        in_string = not in_string
-                    elseif not in_string then
-                        if char == '[' then
-                            bracket_count = bracket_count + 1
-                        elseif char == ']' then
-                            bracket_count = bracket_count - 1
-                            if bracket_count == 0 then
-                                end_pos = i
-                                break
-                            end
-                        end
-                    end
-                end
-
-                if k8s_tui and k8s_tui.log then
-                    k8s_tui.log("DEBUG: breadcrumb end_pos: " .. end_pos)
-                end
-                if end_pos > breadcrumb_start then
-                    local start_bracket = tab_str:find('%[', breadcrumb_start)
-                    if k8s_tui and k8s_tui.log then
-                        k8s_tui.log("DEBUG: breadcrumb start_bracket: " .. (start_bracket or "nil"))
-                    end
-                    if start_bracket then
-                        breadcrumb_content = tab_str:sub(start_bracket + 1, end_pos - 1)
-                        if k8s_tui and k8s_tui.log then
-                            k8s_tui.log("DEBUG: breadcrumb_content: '" .. breadcrumb_content .. "'")
-                        end
-                    end
-                end
-            end
-
-            if breadcrumb_content then
-                if k8s_tui and k8s_tui.log then
-                    k8s_tui.log("DEBUG: Parsing breadcrumb crumbs")
-                end
-                tab.Breadcrumb = {}
-                for crumb in breadcrumb_content:gmatch('"([^"]+)"') do
-                    if k8s_tui and k8s_tui.log then
-                        k8s_tui.log("DEBUG: Found crumb: '" .. crumb .. "'")
-                    end
-                    table.insert(tab.Breadcrumb, crumb)
-                end
-                if k8s_tui and k8s_tui.log then
-                    k8s_tui.log("DEBUG: Breadcrumb array has " .. #tab.Breadcrumb .. " elements")
-                end
-            else
-                if k8s_tui and k8s_tui.log then
-                    k8s_tui.log("DEBUG: No breadcrumb content found")
-                end
-                tab.Breadcrumb = {}
-            end
-
-            if tab.ID and tab.Title and tab.ResourceType then
-                table.insert(tabs, tab)
-            end
-        end
-    end
-
-    -- Set namespace if found
-    if namespace then
-        if k8s_tui and k8s_tui.log then
-            k8s_tui.log("DEBUG: Calling k8s_tui.set_namespace with: " .. namespace)
-        end
-        k8s_tui.set_namespace(namespace)
-        if k8s_tui and k8s_tui.log then
-            k8s_tui.log("DEBUG: k8s_tui.set_namespace called successfully")
-        end
-    else
-        if k8s_tui and k8s_tui.log then
-            k8s_tui.log("DEBUG: No namespace found, skipping set_namespace")
-        end
-    end
-
-    -- Restore tabs if found
-    if #tabs > 0 then
-        if k8s_tui and k8s_tui.log then
-            k8s_tui.log("DEBUG: Calling k8s_tui.restore_tabs with " .. #tabs .. " tabs")
-        end
-        for i, tab in ipairs(tabs) do
-            if k8s_tui and k8s_tui.log then
-                k8s_tui.log("DEBUG: Tab " .. i .. ": ID=" .. (tab.ID or "nil") .. ", Title=" .. (tab.Title or "nil") .. ", ResourceType=" .. (tab.ResourceType or "nil"))
-                if tab.Breadcrumb then
-                    k8s_tui.log("DEBUG: Tab " .. i .. " Breadcrumb: " .. table.concat(tab.Breadcrumb, " > "))
-                end
-            end
-        end
-        k8s_tui.restore_tabs(tabs)
-        if k8s_tui and k8s_tui.log then
-            k8s_tui.log("DEBUG: k8s_tui.restore_tabs called")
-        end
-    else
-        if k8s_tui and k8s_tui.log then
-            k8s_tui.log("DEBUG: No tabs found, skipping restore_tabs")
-        end
-    end
-
-    -- Set status
-    local status_msg = "Session loaded from " .. value
-    if namespace then
-        status_msg = status_msg .. " (namespace: " .. namespace .. ")"
-    end
-    if #tabs > 0 then
-        status_msg = status_msg .. " (" .. #tabs .. " tabs restored)"
-    end
-    k8s_tui.set_status(status_msg)
-
-    return "Session loaded successfully", nil
-end
-`
-		if err := L.DoString(cliArgsCode); err != nil {
-			logger.Error(fmt.Sprintf("🔌 Plugin Manager: Failed to execute CLI args code for %s: %v", pluginName, err))
-		}
-	}
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Available functions in %s:", pluginName))
 	for _, funcName := range []string{"Name", "Version", "Description", "Initialize", "Setup", "Config", "Commands", "Hooks", "GetResourceTypes", "GetUIExtensions"} {
@@ -592,12 +384,10 @@ end
 				}
 			})
 
-			if pm.api.GetTabRestorer() != nil {
-				err := pm.api.GetTabRestorer()(tabInfos)
-				if err != nil {
-					L.Push(lua.LString(fmt.Sprintf("failed to set tabs: %v", err)))
-					return 1
-				}
+			err := pm.api.SetTabs(tabInfos)
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to set tabs: %v", err)))
+				return 1
 			}
 
 			L.Push(lua.LString("tabs set successfully"))
@@ -1396,6 +1186,7 @@ end
 
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Initializing plugin %s (%s v%s)", pluginDisplayName, pluginName, pluginVersion))
 
+	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Calling Initialize for %s", pluginName))
 	if err := luaPlugin.Initialize(); err != nil {
 		L.Close()
 		logger.Error(fmt.Sprintf("🔌 Plugin Manager: Plugin %s initialization failed: %v", pluginDisplayName, err))
@@ -1410,25 +1201,33 @@ end
 	if isNeovimStyle {
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: %s", pluginDisplayName))
 
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for %s", pluginName))
 		pluginmanagerPlugin := NewPluginmanagerStyleLuaPlugin(L, pluginName, pm.api)
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for %s", pluginName))
 
 		pluginmanagerPlugin.SetupLuaAPI()
 
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: Getting default config for %s", pluginName))
 		defaultConfig := pluginmanagerPlugin.Config()
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: Calling Setup for %s", pluginName))
 
 		if err := pluginmanagerPlugin.Setup(defaultConfig); err != nil {
 			logger.Error(fmt.Sprintf("🔌 Plugin Manager: Failed to setup Neovim-style plugin %s: %v", pluginDisplayName, err))
 			L.Close()
 			return fmt.Errorf("failed to setup Neovim-style plugin: %v", err)
 		}
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: Setup completed for %s", pluginName))
 
 		commands := pluginmanagerPlugin.Commands()
 		for _, cmd := range commands {
 			pm.api.RegisterCommand(cmd.Name, cmd.Description, cmd.Handler)
 		}
 
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: Processing CLI arguments for %s", pluginDisplayName))
 		cliArgs := pluginmanagerPlugin.CLIArguments()
+		logger.Info(fmt.Sprintf("🔌 Plugin Manager: Found %d CLI arguments", len(cliArgs)))
 		for _, arg := range cliArgs {
+			logger.Info(fmt.Sprintf("🔌 Plugin Manager: Registering CLI argument: %s -> %s", arg.Name, arg.Description))
 			pm.api.RegisterCLIArgument(arg.Name, arg.Description, arg.Handler)
 		}
 
