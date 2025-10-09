@@ -78,7 +78,7 @@ func (c *configmapsModel) fetchData() error {
 	var cms []k8s.Configmap
 	var err error
 
-	cms, err = c.pluginAPI.GetConfigMaps(c.namespace)
+	cms, err = c.pluginAPI.GetConfigMaps("")
 
 	if err != nil {
 		return err

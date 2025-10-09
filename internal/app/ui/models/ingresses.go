@@ -81,7 +81,7 @@ func (i *ingressesModel) fetchData() error {
 	var ingressInfo []k8s.IngressInfo
 	var err error
 
-	ingressInfo, err = i.pluginAPI.GetIngresses(i.namespace)
+	ingressInfo, err = i.pluginAPI.GetIngresses("")
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch ingresses: %v", err)

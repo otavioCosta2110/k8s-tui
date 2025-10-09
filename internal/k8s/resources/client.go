@@ -81,3 +81,7 @@ func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
 		KubeconfigPath: kubeconfigPath,
 	}, nil
 }
+
+func (c *Client) SetNamespace(namespace string) {
+	c.Namespace = namespace
+}

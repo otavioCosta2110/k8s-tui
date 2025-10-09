@@ -206,6 +206,10 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 	return nil
 }
 
+func (tm *TabManager) SetNamespace(namespace string) {
+	tm.namespace = namespace
+}
+
 func (tm *TabManager) View() string {
 	if tm.activeIndex >= 0 && tm.activeIndex < len(tm.tabs) {
 		return tm.tabs[tm.activeIndex].Model.View()

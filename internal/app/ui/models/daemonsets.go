@@ -83,7 +83,7 @@ func (ds *daemonsetsModel) fetchData() error {
 	var daemonsetInfo []k8s.DaemonSetInfo
 	var err error
 
-	daemonsetInfo, err = ds.pluginAPI.GetDaemonSets(ds.namespace)
+	daemonsetInfo, err = ds.pluginAPI.GetDaemonSets("")
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch daemonsets: %v", err)

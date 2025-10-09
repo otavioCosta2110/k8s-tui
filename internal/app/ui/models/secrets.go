@@ -79,7 +79,7 @@ func (s *secretsModel) fetchData() error {
 	var secretInfo []k8s.SecretInfo
 	var err error
 
-	secretInfo, err = s.pluginAPI.GetSecrets(s.namespace)
+	secretInfo, err = s.pluginAPI.GetSecrets("")
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch secrets: %v", err)

@@ -81,7 +81,7 @@ func (s *servicesModel) fetchData() error {
 	var serviceInfo []k8s.ServiceInfo
 	var err error
 
-	serviceInfo, err = s.pluginAPI.GetServices(s.namespace)
+	serviceInfo, err = s.pluginAPI.GetServices("")
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch services: %v", err)

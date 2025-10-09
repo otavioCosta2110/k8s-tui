@@ -79,7 +79,7 @@ func (j *jobsModel) fetchData() error {
 	var jobInfo []k8s.JobInfo
 	var err error
 
-	jobInfo, err = j.pluginAPI.GetJobs(j.namespace)
+	jobInfo, err = j.pluginAPI.GetJobs("")
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch jobs: %v", err)

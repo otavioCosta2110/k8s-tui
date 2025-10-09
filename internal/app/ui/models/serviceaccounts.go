@@ -78,7 +78,7 @@ func (s *serviceaccountsModel) fetchData() error {
 	var serviceaccountInfo []k8s.ServiceAccountInfo
 	var err error
 
-	serviceaccountInfo, err = s.pluginAPI.GetServiceAccounts(s.namespace)
+	serviceaccountInfo, err = s.pluginAPI.GetServiceAccounts("")
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch serviceaccounts: %v", err)

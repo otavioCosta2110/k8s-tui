@@ -264,6 +264,10 @@ func (api *PluginAPIImpl) SetClient(client k8s.Client) {
 }
 
 func (api *PluginAPIImpl) GetPods(namespace string, selector ...string) ([]k8s.PodInfo, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
+
 	selectorStr := ""
 	if len(selector) > 0 && selector[0] != "" {
 		selectorStr = selector[0]
@@ -288,6 +292,9 @@ func (api *PluginAPIImpl) GetPods(namespace string, selector ...string) ([]k8s.P
 }
 
 func (api *PluginAPIImpl) GetServices(namespace string) ([]k8s.ServiceInfo, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypeService, namespace)
 	if err != nil {
 		return nil, err
@@ -296,6 +303,9 @@ func (api *PluginAPIImpl) GetServices(namespace string) ([]k8s.ServiceInfo, erro
 }
 
 func (api *PluginAPIImpl) GetDeployments(namespace string) ([]k8s.DeploymentInfo, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypeDeployment, namespace)
 	if err != nil {
 		return nil, err
@@ -304,6 +314,9 @@ func (api *PluginAPIImpl) GetDeployments(namespace string) ([]k8s.DeploymentInfo
 }
 
 func (api *PluginAPIImpl) GetConfigMaps(namespace string) ([]k8s.Configmap, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypeConfigMap, namespace)
 	if err != nil {
 		return nil, err
@@ -312,6 +325,9 @@ func (api *PluginAPIImpl) GetConfigMaps(namespace string) ([]k8s.Configmap, erro
 }
 
 func (api *PluginAPIImpl) GetSecrets(namespace string) ([]k8s.SecretInfo, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypeSecret, namespace)
 	if err != nil {
 		return nil, err
@@ -320,6 +336,9 @@ func (api *PluginAPIImpl) GetSecrets(namespace string) ([]k8s.SecretInfo, error)
 }
 
 func (api *PluginAPIImpl) GetIngresses(namespace string) ([]k8s.IngressInfo, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypeIngress, namespace)
 	if err != nil {
 		return nil, err
@@ -328,6 +347,9 @@ func (api *PluginAPIImpl) GetIngresses(namespace string) ([]k8s.IngressInfo, err
 }
 
 func (api *PluginAPIImpl) GetJobs(namespace string) ([]k8s.JobInfo, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypeJob, namespace)
 	if err != nil {
 		return nil, err
@@ -336,6 +358,9 @@ func (api *PluginAPIImpl) GetJobs(namespace string) ([]k8s.JobInfo, error) {
 }
 
 func (api *PluginAPIImpl) GetCronJobs(namespace string) ([]k8s.CronJobInfo, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypeCronJob, namespace)
 	if err != nil {
 		return nil, err
@@ -344,6 +369,9 @@ func (api *PluginAPIImpl) GetCronJobs(namespace string) ([]k8s.CronJobInfo, erro
 }
 
 func (api *PluginAPIImpl) GetDaemonSets(namespace string) ([]k8s.DaemonSetInfo, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypeDaemonSet, namespace)
 	if err != nil {
 		return nil, err
@@ -352,6 +380,9 @@ func (api *PluginAPIImpl) GetDaemonSets(namespace string) ([]k8s.DaemonSetInfo, 
 }
 
 func (api *PluginAPIImpl) GetStatefulSets(namespace string) ([]k8s.StatefulSetInfo, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypeStatefulSet, namespace)
 	if err != nil {
 		return nil, err
@@ -360,6 +391,9 @@ func (api *PluginAPIImpl) GetStatefulSets(namespace string) ([]k8s.StatefulSetIn
 }
 
 func (api *PluginAPIImpl) GetReplicaSets(namespace string) ([]k8s.ReplicaSetInfo, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypeReplicaSet, namespace)
 	if err != nil {
 		return nil, err
@@ -380,6 +414,9 @@ func (api *PluginAPIImpl) GetNamespaces() ([]string, error) {
 }
 
 func (api *PluginAPIImpl) GetServiceAccounts(namespace string) ([]k8s.ServiceAccountInfo, error) {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
 	result, err := api.resourceRegistry.GetResource(api.client, k8s.ResourceTypeServiceAccount, namespace)
 	if err != nil {
 		return nil, err
@@ -523,6 +560,10 @@ func (api *PluginAPIImpl) SetTabGetter(getter func() ([]TabInfo, error)) {
 
 func (api *PluginAPIImpl) SetTabRestorer(restorer func(tabs []TabInfo) error) {
 	api.tabRestorer = restorer
+}
+
+func (api *PluginAPIImpl) GetTabRestorer() func(tabs []TabInfo) error {
+	return api.tabRestorer
 }
 
 func (api *PluginAPIImpl) SetNamespaceCallback(callback func(namespace string)) {

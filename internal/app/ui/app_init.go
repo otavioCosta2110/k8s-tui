@@ -55,6 +55,8 @@ func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.
 		return
 	}
 
+	pluginManager.GetAPI().SetCurrentNamespace(cfg.Namespace)
+
 	pluginManager.GetAPI().SetTabGetter(func() ([]plugins.TabInfo, error) {
 		tabs := tabManager.GetTabsForComponent()
 		var tabInfos []plugins.TabInfo
@@ -72,7 +74,13 @@ func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.
 	pluginManager.GetAPI().SetNamespaceCallback(func(namespace string) {
 		logger.Info(fmt.Sprintf("DEBUG: SetNamespaceCallback called with namespace: %s", namespace))
 		appModel.header.SetNamespace(namespace)
-		logger.Info("DEBUG: Called header.SetNamespace, now calling UpdateContent")
+		if tabManager != nil {
+			tabManager.SetNamespace(namespace)
+		}
+		if appModel.kube.Clientset != nil {
+			appModel.kube.SetNamespace(namespace)
+		}
+		logger.Info("DEBUG: Called header.SetNamespace, tabManager.SetNamespace, and kube.SetNamespace, now calling UpdateContent")
 		appModel.header.UpdateContent()
 		logger.Info(fmt.Sprintf("Plugin changed namespace to: %s", namespace))
 	})
@@ -121,6 +129,8 @@ func createAppModelWithoutKubeClient(appConfig config.AppConfig, pluginManager *
 }
 
 func setupPluginManagerForNoKubeClient(appModel *AppModel, pluginManager *plugins.PluginManager) {
+	pluginManager.GetAPI().SetCurrentNamespace("default")
+
 	pluginManager.GetAPI().SetNamespaceCallback(func(namespace string) {
 		logger.Info(fmt.Sprintf("DEBUG: SetNamespaceCallback called with namespace: %s", namespace))
 		appModel.header.SetNamespace(namespace)

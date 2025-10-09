@@ -102,7 +102,7 @@ func (r *replicasetsModel) fetchData() error {
 	var replicasetInfo []k8s.ReplicaSetInfo
 	var err error
 
-	replicasetInfo, err = r.pluginAPI.GetReplicaSets(r.namespace)
+	replicasetInfo, err = r.pluginAPI.GetReplicaSets("")
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch replicasets: %v", err)

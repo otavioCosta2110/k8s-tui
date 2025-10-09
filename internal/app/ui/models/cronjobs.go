@@ -81,7 +81,7 @@ func (cj *cronjobsModel) fetchData() error {
 	var cronjobInfo []k8s.CronJobInfo
 	var err error
 
-	cronjobInfo, err = cj.pluginAPI.GetCronJobs(cj.namespace)
+	cronjobInfo, err = cj.pluginAPI.GetCronJobs("")
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch cronjobs: %v", err)

@@ -78,7 +78,7 @@ func (ss *statefulsetsModel) fetchData() error {
 	var statefulsetInfo []k8s.StatefulSetInfo
 	var err error
 
-	statefulsetInfo, err = ss.pluginAPI.GetStatefulSets(ss.namespace)
+	statefulsetInfo, err = ss.pluginAPI.GetStatefulSets("")
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch statefulsets: %v", err)

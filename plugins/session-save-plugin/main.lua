@@ -57,10 +57,16 @@ end
 
 function load_session_cli_handler(value)
 
+    -- Determine the full path
+    local full_path = value
+    if not string.match(value, "^/") then
+        full_path = os.getenv("PWD") .. "/" .. value
+    end
+
     -- Read the session file
-    local file = io.open(value, "r")
+    local file = io.open(full_path, "r")
     if not file then
-        return nil, "Failed to open session file: " .. value
+        return nil, "Failed to open session file: " .. full_path
     end
 
     local content = file:read("*all")
@@ -161,9 +167,9 @@ function load_session_cli_handler(value)
         k8s_tui.set_namespace(namespace)
     end
 
-    -- Restore tabs if found
+    -- Set tabs if found
     if #tabs > 0 and k8s_tui and k8s_tui.restore_tabs then
-        local result, err = k8s_tui.restore_tabs(tabs)
+        local result, err =         k8s_tui.set_tabs(tabs)
         if err then
             k8s_tui.set_status("Failed to restore tabs: " .. tostring(err))
             return nil, "Failed to restore tabs: " .. tostring(err)

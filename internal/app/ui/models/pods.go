@@ -87,7 +87,7 @@ func (p *podsModel) fetchData(selector string) error {
 	var podsInfo []k8s.PodInfo
 	var err error
 
-	podsInfo, err = p.pluginAPI.GetPods(p.namespace, selector)
+	podsInfo, err = p.pluginAPI.GetPods("", selector)
 
 	if err != nil {
 		return err

@@ -529,6 +529,80 @@ end
 			pm.api.SetCurrentNamespace(namespace)
 			return 0
 		}))
+		L.SetField(apiTable, "get_tabs", L.NewFunction(func(L *lua.LState) int {
+			tabs, err := pm.api.GetTabs()
+			if err != nil {
+				L.Push(lua.LString(fmt.Sprintf("failed to get tabs: %v", err)))
+				return 1
+			}
+
+			resultTable := L.NewTable()
+			for i, tab := range tabs {
+				tabTable := L.NewTable()
+				L.SetField(tabTable, "ID", lua.LString(tab.ID))
+				L.SetField(tabTable, "Title", lua.LString(tab.Title))
+				L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+				breadcrumbTable := L.NewTable()
+				for j, crumb := range tab.Breadcrumb {
+					L.RawSetInt(breadcrumbTable, j+1, lua.LString(crumb))
+				}
+				L.SetField(tabTable, "Breadcrumb", breadcrumbTable)
+				L.RawSetInt(resultTable, i+1, tabTable)
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+		L.SetField(apiTable, "set_tabs", L.NewFunction(func(L *lua.LState) int {
+			if L.GetTop() < 1 || L.Get(1).Type() != lua.LTTable {
+				L.Push(lua.LString("expected table argument"))
+				return 1
+			}
+
+			tabsTable := L.CheckTable(1)
+			var tabInfos []TabInfo
+
+			tabsTable.ForEach(func(key, value lua.LValue) {
+				if value.Type() == lua.LTTable {
+					tabTable := value.(*lua.LTable)
+					tabInfo := TabInfo{}
+
+					if id := tabTable.RawGetString("ID"); id.Type() == lua.LTString {
+						tabInfo.ID = id.String()
+					}
+					if title := tabTable.RawGetString("Title"); title.Type() == lua.LTString {
+						tabInfo.Title = title.String()
+					}
+					if resourceType := tabTable.RawGetString("ResourceType"); resourceType.Type() == lua.LTString {
+						tabInfo.ResourceType = resourceType.String()
+					}
+					if breadcrumb := tabTable.RawGetString("Breadcrumb"); breadcrumb.Type() == lua.LTTable {
+						breadcrumbTable := breadcrumb.(*lua.LTable)
+						var crumbs []string
+						breadcrumbTable.ForEach(func(_, crumb lua.LValue) {
+							if crumb.Type() == lua.LTString {
+								crumbs = append(crumbs, crumb.String())
+							}
+						})
+						tabInfo.Breadcrumb = crumbs
+					}
+
+					if tabInfo.ID != "" && tabInfo.Title != "" {
+						tabInfos = append(tabInfos, tabInfo)
+					}
+				}
+			})
+
+			if pm.api.GetTabRestorer() != nil {
+				err := pm.api.GetTabRestorer()(tabInfos)
+				if err != nil {
+					L.Push(lua.LString(fmt.Sprintf("failed to set tabs: %v", err)))
+					return 1
+				}
+			}
+
+			L.Push(lua.LString("tabs set successfully"))
+			return 1
+		}))
 		L.SetField(apiTable, "set_status", L.NewFunction(func(L *lua.LState) int {
 			message := L.CheckString(1)
 			pm.api.SetStatusMessage(message)
@@ -598,6 +672,9 @@ end
 
 		L.SetField(apiTable, "get_pods", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
@@ -625,6 +702,9 @@ end
 
 		L.SetField(apiTable, "get_services", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
@@ -653,6 +733,9 @@ end
 
 		L.SetField(apiTable, "get_deployments", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
@@ -680,6 +763,9 @@ end
 
 		L.SetField(apiTable, "get_configmaps", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
@@ -705,6 +791,9 @@ end
 
 		L.SetField(apiTable, "get_secrets", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
@@ -731,6 +820,9 @@ end
 
 		L.SetField(apiTable, "get_ingresses", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
@@ -759,6 +851,9 @@ end
 
 		L.SetField(apiTable, "get_jobs", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
@@ -785,6 +880,9 @@ end
 
 		L.SetField(apiTable, "get_cronjobs", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
@@ -813,6 +911,9 @@ end
 
 		L.SetField(apiTable, "get_daemonsets", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
@@ -842,6 +943,9 @@ end
 
 		L.SetField(apiTable, "get_statefulsets", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
@@ -867,6 +971,9 @@ end
 
 		L.SetField(apiTable, "get_replicasets", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))
@@ -938,6 +1045,9 @@ end
 
 		L.SetField(apiTable, "get_serviceaccounts", L.NewFunction(func(L *lua.LState) int {
 			namespace := L.CheckString(1)
+			if namespace == "" {
+				namespace = pm.api.GetCurrentNamespace()
+			}
 			client := pm.api.GetClient()
 			if client.Clientset == nil {
 				L.Push(lua.LString("no kubernetes client available"))

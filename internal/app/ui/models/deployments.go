@@ -103,7 +103,7 @@ func (d *deploymentsModel) fetchData() error {
 	var deploymentInfo []resources.DeploymentInfo
 	var err error
 
-	deploymentInfo, err = d.pluginAPI.GetDeployments(d.namespace)
+	deploymentInfo, err = d.pluginAPI.GetDeployments("")
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch deployments: %v", err)
