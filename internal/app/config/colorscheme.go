@@ -138,14 +138,15 @@ func DefaultAppConfig() AppConfig {
 		DefaultNamespace: "default",
 		PluginDir:        "~/.local/share/k8s-tui/plugins",
 		KeyBindings: map[string]string{
-			"quit":      "q",
-			"help":      "?",
-			"refresh":   "r",
-			"back":      "[",
-			"forward":   "]",
-			"new_tab":   "ctrl+t",
-			"close_tab": "ctrl+w",
-			"quick_nav": "g",
+			"quit":         "q",
+			"help":         "?",
+			"refresh":      "r",
+			"back":         "[",
+			"forward":      "]",
+			"new_tab":      "ctrl+t",
+			"close_tab":    "ctrl+w",
+			"quick_nav":    "g",
+			"session:save": "ctrl+s",
 		},
 	}
 }

@@ -146,19 +146,20 @@ func (cm *ConfigManager) SetConfig(key string, value interface{}) {
 }
 
 type PluginAPIImpl struct {
-	currentNamespace     string
-	uiManager            *UIManager
-	commandManager       *CommandManager
-	cliArgumentManager   *CLIArgumentManager
-	eventManager         *EventManager
-	configManager        *ConfigManager
-	resourceRegistry     *ResourceRegistry
-	client               k8s.Client
-	tabGetter            func() ([]TabInfo, error)
-	tabSetter            func(tabs []TabInfo) error
-	setTabSetterCallback func()
-	setNamespaceCallback func(namespace string)
-	setStatusCallback    func(message string)
+	currentNamespace        string
+	uiManager               *UIManager
+	commandManager          *CommandManager
+	cliArgumentManager      *CLIArgumentManager
+	eventManager            *EventManager
+	configManager           *ConfigManager
+	resourceRegistry        *ResourceRegistry
+	client                  k8s.Client
+	tabGetter               func() ([]TabInfo, error)
+	tabSetter               func(tabs []TabInfo) error
+	setTabSetterCallback    func()
+	setNamespaceCallback    func(namespace string)
+	setStatusCallback       func(message string)
+	showInputDialogCallback func(title, placeholder, submitCommand, cancelCommand string)
 }
 
 func NewPluginAPI() *PluginAPIImpl {
@@ -581,4 +582,14 @@ func (api *PluginAPIImpl) SetStatusCallback(callback func(message string)) {
 
 func (api *PluginAPIImpl) SetTabSetterCallback(callback func()) {
 	api.setTabSetterCallback = callback
+}
+
+func (api *PluginAPIImpl) ShowInputDialog(title, placeholder, submitCommand, cancelCommand string) {
+	if api.showInputDialogCallback != nil {
+		api.showInputDialogCallback(title, placeholder, submitCommand, cancelCommand)
+	}
+}
+
+func (api *PluginAPIImpl) SetShowInputDialogCallback(callback func(title, placeholder, submitCommand, cancelCommand string)) {
+	api.showInputDialogCallback = callback
 }

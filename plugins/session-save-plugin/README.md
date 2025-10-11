@@ -6,36 +6,21 @@ A k8s-tui plugin that allows saving the current session (opened tabs) to a JSON 
 
 - Saves current namespace
 - Saves all opened tabs with their details (ID, title, resource type, breadcrumb)
-- Saves timestamp
-- Outputs to a configurable JSON file
+- Prompts user for custom filename
+- Outputs to a JSON file in the current directory
 
 ## Installation
 
 1. Place the `session-save-plugin` directory in your k8s-tui plugins directory (usually `~/.local/share/k8s-tui/plugins/` or as configured)
 2. Restart k8s-tui
 
-## Configuration
-
-The plugin can be configured in your k8s-tui config file:
-
-```json
-{
-  "plugins": {
-    "session-save-plugin": {
-      "enabled": true,
-      "session_file": "session.json",
-      "save_namespace": true,
-      "save_timestamp": true
-    }
-  }
-}
-```
-
 ## Usage
 
 1. Open some tabs in k8s-tui
 2. Press Ctrl+S to save the current session
-3. The session will be saved to `session.json` (or configured file)
+3. Enter a filename for the session (e.g., "my-session" or "my-session.json")
+4. Press Enter to save, or Esc to cancel
+5. The session will be saved to the specified file in the current directory
 
 ## Key Binding
 
@@ -55,14 +40,13 @@ The saved JSON file contains:
 
 ```json
 {
-  "timestamp": "2023-10-06 14:30:00",
   "namespace": "default",
   "tabs": [
     {
-      "id": "tab-1",
-      "title": "Pods",
-      "resourceType": "pods",
-      "breadcrumb": ["Resource List", "Pods"]
+      "ID": "tab-1",
+      "Title": "Pods",
+      "ResourceType": "pods",
+      "Breadcrumb": ["Resource List", "Pods"]
     }
   ]
 }

@@ -407,6 +407,7 @@ func (p *PluginmanagerStyleLuaPlugin) SetupLuaAPI() {
 	p.L.SetField(apiTable, "get_tabs", p.L.NewFunction(p.luaGetTabs))
 	p.L.SetField(apiTable, "set_tabs", p.L.NewFunction(p.luaSetTabs))
 	p.L.SetField(apiTable, "restore_tabs", p.L.NewFunction(p.luaRestoreTabs))
+	p.L.SetField(apiTable, "show_input_dialog", p.L.NewFunction(p.luaShowInputDialog))
 
 	p.L.SetField(apiTable, "log", p.L.NewFunction(func(L *lua.LState) int {
 		message := L.CheckString(1)
@@ -539,6 +540,15 @@ func (p *PluginmanagerStyleLuaPlugin) luaRestoreTabs(L *lua.LState) int {
 	logger.Info("DEBUG: luaRestoreTabs completed successfully")
 	L.Push(lua.LString("ok"))
 	return 1
+}
+
+func (p *PluginmanagerStyleLuaPlugin) luaShowInputDialog(L *lua.LState) int {
+	title := L.CheckString(1)
+	placeholder := L.CheckString(2)
+	submitCommand := L.CheckString(3)
+	cancelCommand := L.OptString(4, "")
+	p.api.ShowInputDialog(title, placeholder, submitCommand, cancelCommand)
+	return 0
 }
 
 func (p *PluginmanagerStyleLuaPlugin) luaSetStatus(L *lua.LState) int {

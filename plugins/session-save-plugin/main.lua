@@ -50,6 +50,16 @@ function Commands()
       name = "session:save",
       description = "Save current session to JSON file",
       handler = "session_save"
+    },
+    {
+      name = "session:save_submit",
+      description = "Internal command to save session with provided filename",
+      handler = "session_save_submit"
+    },
+    {
+      name = "session:save_cancel",
+      description = "Internal command to cancel session save",
+      handler = "session_save_cancel"
     }
   }
 end
@@ -182,24 +192,54 @@ function load_session_cli_handler(value)
 end
 
 function session_save()
-  if k8s_tui and k8s_tui.log then
-    k8s_tui.log("DEBUG: session_save called")
-  end
   if not k8s_tui then
-    if k8s_tui and k8s_tui.log then
-      k8s_tui.log("DEBUG: k8s_tui not available")
-    end
     return
   end
 
+  -- Show input dialog for filename
+  k8s_tui.show_input_dialog("Save Session", "session.json", "session:save_submit", "session:save_cancel")
+end
+
+function session_save_submit(filename)
+  if k8s_tui and k8s_tui.log then
+    k8s_tui.log("DEBUG: session_save_submit called with filename: " .. (filename or "nil"))
+  end
+  -- For debugging, set status with the received filename
+  if k8s_tui and k8s_tui.set_status then
+    k8s_tui.set_status("DEBUG: Received filename: '" .. (filename or "nil") .. "'")
+  end
+  save_session_to_file(filename or "session.json")
+  return "Session saved", nil
+end
+
+function session_save_cancel()
+  -- Cancel callback: do nothing
+  return "Session save cancelled", nil
+end
+
+function save_session_to_file(filename)
+  if not k8s_tui then
+    return
+  end
+
+  -- Use provided filename or default
+  local path = filename or "session.json"
+  -- Ensure it has .json extension if not present
+  if not path:match("%.json$") then
+    path = path .. ".json"
+  end
+
+  if k8s_tui and k8s_tui.log then
+    k8s_tui.log("DEBUG: save_session_to_file using path: " .. path)
+  end
+
+  -- Debug: show what we're saving to
+  if k8s_tui and k8s_tui.set_status then
+    k8s_tui.set_status("DEBUG: Saving to: " .. path)
+  end
+
   local namespace = k8s_tui.get_namespace and k8s_tui.get_namespace() or ""
-  if k8s_tui and k8s_tui.log then
-    k8s_tui.log("DEBUG: Got namespace: " .. namespace)
-  end
   local tabs = k8s_tui.get_tabs and k8s_tui.get_tabs() or {}
-  if k8s_tui and k8s_tui.log then
-    k8s_tui.log("DEBUG: Got tabs: " .. (tabs and tostring(#tabs) or "nil"))
-  end
 
   -- Generate simple JSON
   local json = '{"namespace":"' .. namespace .. '","tabs":['
@@ -219,26 +259,13 @@ function session_save()
   end
   json = json .. ']}'
 
-  local path = "session.json"
   local full_path = os.getenv("PWD") .. "/" .. path
   local file = io.open(full_path, "w")
   if file then
     file:write(json)
     file:close()
-    if k8s_tui and k8s_tui.set_status then
-      k8s_tui.set_status("Session saved to " .. path)
-    else
-      if k8s_tui and k8s_tui.log then
-        k8s_tui.log("DEBUG: k8s_tui.set_status not available in session_save")
-      end
-    end
+    k8s_tui.set_status("Session saved to " .. path)
   else
-    if k8s_tui and k8s_tui.set_status then
-      k8s_tui.set_status("Failed to save session")
-    else
-      if k8s_tui and k8s_tui.log then
-        k8s_tui.log("DEBUG: k8s_tui.set_status not available in session_save")
-      end
-    end
+    k8s_tui.set_status("Failed to save session")
   end
 end

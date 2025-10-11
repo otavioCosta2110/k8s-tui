@@ -14,6 +14,15 @@ import (
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 )
 
+type InputDialogRequest struct {
+	Title         string
+	Placeholder   string
+	SubmitCommand string
+	CancelCommand string
+}
+
+type ClearTextInputMsg struct{}
+
 type AppModel struct {
 	tabManager          *models.TabManager
 	header              models.HeaderModel
@@ -22,6 +31,8 @@ type AppModel struct {
 	configSelected      bool
 	errorPopup          *models.ErrorModel
 	quickNav            tea.Model
+	textInput           tea.Model
+	pendingInputDialog  *InputDialogRequest
 	currentResourceType string
 	breadcrumbTrail     []string
 	pluginManager       *plugins.PluginManager
@@ -76,6 +87,13 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleHeaderRefreshMsg(msg)
 	case models.CloseQuickNavMsg:
 		return m.handleCloseQuickNavMsg(msg)
+	case components.TextInputSubmitMsg:
+		return m, nil
+	case components.TextInputCancelMsg:
+		return m, nil
+	case ClearTextInputMsg:
+		m.textInput = nil
+		return m, nil
 	default:
 		if m.tabManager != nil {
 			updatedManager, cmd := m.tabManager.Update(msg)
@@ -89,6 +107,10 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *AppModel) View() string {
+	if m.textInput != nil {
+		return m.textInput.View()
+	}
+
 	if m.quickNav != nil {
 		return m.quickNav.View()
 	}

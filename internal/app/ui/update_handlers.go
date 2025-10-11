@@ -53,6 +53,18 @@ func (m *AppModel) handleWindowSizeMsg(msg tea.WindowSizeMsg) (tea.Model, tea.Cm
 }
 
 func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if m.textInput != nil {
+		switch msg.String() {
+		case "esc":
+			m.textInput = nil
+			return m, nil
+		default:
+			var cmd tea.Cmd
+			m.textInput, cmd = m.textInput.Update(msg)
+			return m, cmd
+		}
+	}
+
 	if m.quickNav != nil {
 		switch msg.String() {
 		case "esc", m.getKeyBinding("quick_nav"):
@@ -145,6 +157,27 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 					logger.Error(fmt.Sprintf("Failed to execute command %s: %v", command, err))
 				} else {
 					logger.Info(fmt.Sprintf("Executed command %s: %s", command, result))
+				}
+				if m.pendingInputDialog != nil {
+					request := m.pendingInputDialog
+					m.pendingInputDialog = nil
+
+					onSubmit := func(value string) tea.Msg {
+						if m.pluginManager != nil {
+							m.pluginManager.GetAPI().ExecuteCommand(request.SubmitCommand, []string{value})
+						}
+						return ClearTextInputMsg{}
+					}
+
+					onCancel := func() tea.Msg {
+						if m.pluginManager != nil && request.CancelCommand != "" {
+							m.pluginManager.GetAPI().ExecuteCommand(request.CancelCommand, []string{})
+						}
+						return ClearTextInputMsg{}
+					}
+
+					m.textInput = components.NewTextInput(request.Title, "", onSubmit, onCancel)
+					return m, m.textInput.Init()
 				}
 				return m, nil
 			}

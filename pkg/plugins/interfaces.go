@@ -291,4 +291,6 @@ type PluginAPI interface {
 	SetTabs(tabs []TabInfo) error
 
 	SetTabSetterCallback(callback func())
+
+	ShowInputDialog(title, placeholder, submitCommand, cancelCommand string)
 }

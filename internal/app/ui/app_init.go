@@ -97,6 +97,15 @@ func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.
 		logger.Info(fmt.Sprintf("Plugin status: %s", message))
 	})
 
+	pluginManager.GetAPI().SetShowInputDialogCallback(func(title, placeholder, submitCommand, cancelCommand string) {
+		appModel.pendingInputDialog = &InputDialogRequest{
+			Title:         title,
+			Placeholder:   placeholder,
+			SubmitCommand: submitCommand,
+			CancelCommand: cancelCommand,
+		}
+	})
+
 	appModel.loadPluginUIExtensions()
 
 	if err := cli.HandlePluginArgs(pluginManager, cfg.PluginArgs); err != nil {
@@ -149,6 +158,15 @@ func setupPluginManagerForNoKubeClient(appModel *AppModel, pluginManager *plugin
 
 	pluginManager.GetAPI().SetStatusCallback(func(message string) {
 		logger.Info(fmt.Sprintf("Plugin status: %s", message))
+	})
+
+	pluginManager.GetAPI().SetShowInputDialogCallback(func(title, placeholder, submitCommand, cancelCommand string) {
+		appModel.pendingInputDialog = &InputDialogRequest{
+			Title:         title,
+			Placeholder:   placeholder,
+			SubmitCommand: submitCommand,
+			CancelCommand: cancelCommand,
+		}
 	})
 
 	appModel.loadPluginUIExtensions()

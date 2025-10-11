@@ -104,6 +104,7 @@ func (pm *PluginManager) setupBasicLuaAPI(L *lua.LState) {
 	L.SetField(apiTable, "set_status", L.NewFunction(plugin.luaSetStatus))
 	L.SetField(apiTable, "restore_tabs", L.NewFunction(plugin.luaRestoreTabs))
 	L.SetField(apiTable, "set_tabs", L.NewFunction(plugin.luaSetTabs))
+	L.SetField(apiTable, "show_input_dialog", L.NewFunction(plugin.luaShowInputDialog))
 
 	L.SetField(apiTable, "log", L.NewFunction(func(L *lua.LState) int {
 		message := L.CheckString(1)
@@ -213,6 +214,15 @@ func (p *basicLuaPlugin) luaSetTabs(L *lua.LState) int {
 	logger.Info("DEBUG: basic luaSetTabs completed successfully")
 	L.Push(lua.LString("tabs set successfully"))
 	return 1
+}
+
+func (p *basicLuaPlugin) luaShowInputDialog(L *lua.LState) int {
+	title := L.CheckString(1)
+	placeholder := L.CheckString(2)
+	submitCommand := L.CheckString(3)
+	cancelCommand := L.OptString(4, "")
+	p.api.ShowInputDialog(title, placeholder, submitCommand, cancelCommand)
+	return 0
 }
 
 func parseTabInfo(tbl *lua.LTable) TabInfo {
