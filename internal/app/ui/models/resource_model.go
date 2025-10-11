@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	ui "github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
@@ -163,11 +164,35 @@ func (g *GenericResourceModel) dataToRows() []table.Row {
 					nameIndex = 0
 				}
 				if len(row) > nameIndex {
-					row[nameIndex] = icon + " " + row[nameIndex]
+					// Check health status
+					isHealthy := g.isResourceHealthy(rd)
+					displayIcon := icon
+					if !isHealthy {
+						displayIcon = "✗"
+					}
+					row[nameIndex] = displayIcon + " " + row[nameIndex]
 				}
 			}
 		}
 		rows[i] = row
 	}
 	return rows
+}
+
+// isResourceHealthy checks if a resource is in a healthy state
+func (g *GenericResourceModel) isResourceHealthy(rd types.ResourceData) bool {
+	switch g.config.ResourceType {
+	case k8s.ResourceTypePod:
+		if podData, ok := rd.(PodData); ok {
+			return podData.Status == "Running"
+		}
+	case k8s.ResourceTypeDeployment:
+		if depData, ok := rd.(DeploymentData); ok {
+			if parts := strings.Split(depData.Ready, "/"); len(parts) == 2 {
+				return parts[0] == parts[1]
+			}
+		}
+	}
+	// Default to healthy for other resource types
+	return true
 }
