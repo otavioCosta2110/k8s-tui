@@ -5,6 +5,7 @@ import (
 	"time"
 
 	ui "github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
+	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
@@ -134,9 +135,39 @@ func (g *GenericResourceModel) GetNamespace() string {
 }
 
 func (g *GenericResourceModel) dataToRows() []table.Row {
+	resourceTypeToDisplay := map[k8s.ResourceType]string{
+		k8s.ResourceTypePod:                   "Pods",
+		k8s.ResourceTypeDeployment:            "Deployments",
+		k8s.ResourceTypeService:               "Services",
+		k8s.ResourceTypeIngress:               "Ingresses",
+		k8s.ResourceTypeConfigMap:             "ConfigMaps",
+		k8s.ResourceTypeSecret:                "Secrets",
+		k8s.ResourceTypeReplicaSet:            "ReplicaSets",
+		k8s.ResourceTypeJob:                   "Jobs",
+		k8s.ResourceTypeCronJob:               "CronJobs",
+		k8s.ResourceTypeDaemonSet:             "DaemonSets",
+		k8s.ResourceTypeStatefulSet:           "StatefulSets",
+		k8s.ResourceTypeNode:                  "Nodes",
+		k8s.ResourceTypePersistentVolume:      "PersistentVolumes",
+		k8s.ResourceTypePersistentVolumeClaim: "PersistentVolumeClaims",
+		k8s.ResourceTypeServiceAccount:        "ServiceAccounts",
+	}
+
 	rows := make([]table.Row, len(g.resourceData))
 	for i, rd := range g.resourceData {
-		rows[i] = rd.GetColumns()
+		row := rd.GetColumns()
+		if displayName, exists := resourceTypeToDisplay[g.config.ResourceType]; exists {
+			if icon, iconExists := customstyles.ResourceIcons[displayName]; iconExists {
+				nameIndex := 1
+				if g.config.ResourceType == k8s.ResourceTypeNode {
+					nameIndex = 0
+				}
+				if len(row) > nameIndex {
+					row[nameIndex] = icon + " " + row[nameIndex]
+				}
+			}
+		}
+		rows[i] = row
 	}
 	return rows
 }
