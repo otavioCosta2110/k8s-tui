@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/yuin/gopher-lua"
 )
 
 type Plugin interface {
@@ -161,8 +162,16 @@ func (pr *PluginRegistry) GetCustomResourceTypes() []CustomResourceType {
 	return types
 }
 
-type PluginmanagerStylePlugin interface {
+type LuaPluginInterface interface {
 	Plugin
+
+	GetLuaState() *lua.LState
+
+	SetupAPI(api PluginAPI) error
+}
+
+type PluginmanagerStylePlugin interface {
+	LuaPluginInterface
 
 	Setup(opts map[string]interface{}) error
 

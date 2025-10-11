@@ -24,6 +24,10 @@ function Config()
     }
 end
 
+function CLIArguments()
+    return {}
+end
+
 -- Setup function (called with user configuration)
 function Setup(opts)
     print("Setting up Neovim Header Plugin with options:")

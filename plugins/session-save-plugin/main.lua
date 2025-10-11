@@ -202,13 +202,20 @@ end
 
 function session_save_submit(filename)
   if k8s_tui and k8s_tui.log then
-    k8s_tui.log("DEBUG: session_save_submit called with filename: " .. (filename or "nil"))
+    k8s_tui.log("DEBUG: session_save_submit called with filename: '" .. (filename or "nil") .. "' (type: " .. type(filename) .. ")")
   end
   -- For debugging, set status with the received filename
   if k8s_tui and k8s_tui.set_status then
-    k8s_tui.set_status("DEBUG: Received filename: '" .. (filename or "nil") .. "'")
+    k8s_tui.set_status("DEBUG: Received filename: '" .. (filename or "nil") .. "' (len: " .. string.len(filename or "") .. ")")
   end
-  save_session_to_file(filename or "session.json")
+  local actual_filename = filename
+  if not filename or filename == "" then
+    actual_filename = "session.json"
+    if k8s_tui and k8s_tui.log then
+      k8s_tui.log("DEBUG: Using default filename: session.json")
+    end
+  end
+  save_session_to_file(actual_filename)
   return "Session saved", nil
 end
 
@@ -222,15 +229,15 @@ function save_session_to_file(filename)
     return
   end
 
-  -- Use provided filename or default
-  local path = filename or "session.json"
+  -- Use provided filename
+  local path = filename
   -- Ensure it has .json extension if not present
   if not path:match("%.json$") then
     path = path .. ".json"
   end
 
   if k8s_tui and k8s_tui.log then
-    k8s_tui.log("DEBUG: save_session_to_file using path: " .. path)
+    k8s_tui.log("DEBUG: save_session_to_file called with filename: '" .. (filename or "nil") .. "', using path: '" .. path .. "'")
   end
 
   -- Debug: show what we're saving to

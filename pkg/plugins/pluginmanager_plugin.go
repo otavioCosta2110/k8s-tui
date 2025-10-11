@@ -16,6 +16,7 @@ type PluginmanagerStyleLuaPlugin struct {
 	pluginName string
 	config     map[string]interface{}
 	api        PluginAPI
+	luaUtils   *LuaUtils
 }
 
 func NewPluginmanagerStyleLuaPlugin(L *lua.LState, pluginName string, api PluginAPI) *PluginmanagerStyleLuaPlugin {
@@ -24,6 +25,7 @@ func NewPluginmanagerStyleLuaPlugin(L *lua.LState, pluginName string, api Plugin
 		pluginName: pluginName,
 		config:     make(map[string]interface{}),
 		api:        api,
+		luaUtils:   NewLuaUtils(),
 	}
 }
 
@@ -99,6 +101,16 @@ func (p *PluginmanagerStyleLuaPlugin) Initialize() error {
 		logger.PluginError(p.pluginName, fmt.Sprintf("Initialize() returned error: %s", errorMsg))
 		return fmt.Errorf("%s", errorMsg)
 	}
+	return nil
+}
+
+func (p *PluginmanagerStyleLuaPlugin) GetLuaState() *lua.LState {
+	return p.L
+}
+
+func (p *PluginmanagerStyleLuaPlugin) SetupAPI(api PluginAPI) error {
+	p.api = api
+	p.SetupLuaAPI()
 	return nil
 }
 
@@ -266,40 +278,7 @@ func (p *PluginmanagerStyleLuaPlugin) Hooks() []PluginHook {
 }
 
 func (p *PluginmanagerStyleLuaPlugin) callLuaFunction(functionName string, args []string) (string, error) {
-	if p.L.GetGlobal(functionName).Type() != lua.LTFunction {
-		return "", fmt.Errorf("Lua function %s not found", functionName)
-	}
-
-	luaArgs := make([]lua.LValue, len(args))
-	for i, arg := range args {
-		luaArgs[i] = lua.LString(arg)
-	}
-
-	if err := p.L.CallByParam(lua.P{
-		Fn:      p.L.GetGlobal(functionName),
-		NRet:    2,
-		Protect: true,
-	}, luaArgs...); err != nil {
-		logger.PluginError(p.pluginName, fmt.Sprintf("Error calling Lua function %s: %v", functionName, err))
-		return "", err
-	}
-
-	result := p.L.Get(-2)
-	errorValue := p.L.Get(-1)
-	p.L.Pop(2)
-
-	if errorValue.Type() == lua.LTString && errorValue.String() != "" {
-		return result.String(), fmt.Errorf("%s", errorValue.String())
-	}
-
-	return result.String(), nil
-	p.L.Pop(2)
-
-	if errorValue.Type() == lua.LTString && errorValue.String() != "" {
-		return "", fmt.Errorf("%s", errorValue.String())
-	}
-
-	return result.String(), nil
+	return p.luaUtils.CallLuaFunction(p.L, functionName, args)
 }
 
 func (p *PluginmanagerStyleLuaPlugin) parsePluginCommand(tbl *lua.LTable) PluginCommand {
@@ -394,7 +373,7 @@ func (p *PluginmanagerStyleLuaPlugin) getStringField(tbl *lua.LTable, key string
 }
 
 func (p *PluginmanagerStyleLuaPlugin) SetupLuaAPI() {
-	logger.Info("DEBUG: PluginmanagerStyle SetupLuaAPI called")
+	logger.PluginDebug(p.pluginName, "Setting up Lua API")
 
 	apiTable := p.L.NewTable()
 
@@ -415,7 +394,7 @@ func (p *PluginmanagerStyleLuaPlugin) SetupLuaAPI() {
 		return 0
 	}))
 
-	logger.Info("DEBUG: API functions registered")
+	logger.PluginDebug(p.pluginName, "API functions registered")
 
 	p.L.SetField(apiTable, "get_pods", p.L.NewFunction(p.luaGetPods))
 	p.L.SetField(apiTable, "get_services", p.L.NewFunction(p.luaGetServices))
@@ -448,8 +427,7 @@ func (p *PluginmanagerStyleLuaPlugin) SetupLuaAPI() {
 	p.L.SetField(apiTable, "get_endpoints", p.L.NewFunction(p.luaGetEndpoints))
 
 	p.L.SetGlobal("k8s_tui", apiTable)
-	logger.Info("DEBUG: PluginmanagerStyle k8s_tui table set")
-	logger.Info("DEBUG: k8s_tui table set as global")
+	logger.PluginDebug(p.pluginName, "k8s_tui table set as global")
 }
 
 func (p *PluginmanagerStyleLuaPlugin) luaGetNamespace(L *lua.LState) int {
@@ -460,9 +438,8 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetNamespace(L *lua.LState) int {
 
 func (p *PluginmanagerStyleLuaPlugin) luaSetNamespace(L *lua.LState) int {
 	namespace := L.CheckString(1)
-	logger.Info(fmt.Sprintf("DEBUG: luaSetNamespace called with: %s", namespace))
+	logger.PluginDebug(p.pluginName, fmt.Sprintf("Setting namespace to: %s", namespace))
 	p.api.SetCurrentNamespace(namespace)
-	logger.Info("DEBUG: luaSetNamespace completed")
 	return 0
 }
 
@@ -493,7 +470,7 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetTabs(L *lua.LState) int {
 }
 
 func (p *PluginmanagerStyleLuaPlugin) luaSetTabs(L *lua.LState) int {
-	logger.Info("DEBUG: luaSetTabs called")
+	logger.PluginDebug(p.pluginName, "Setting tabs")
 	tabsTable := L.CheckTable(1)
 
 	var tabs []TabInfo
@@ -504,21 +481,21 @@ func (p *PluginmanagerStyleLuaPlugin) luaSetTabs(L *lua.LState) int {
 		}
 	})
 
-	logger.Info(fmt.Sprintf("DEBUG: Parsed %d tabs, calling p.api.SetTabs", len(tabs)))
+	logger.PluginDebug(p.pluginName, fmt.Sprintf("Parsed %d tabs, calling SetTabs", len(tabs)))
 	err := p.api.SetTabs(tabs)
 	if err != nil {
-		logger.Info(fmt.Sprintf("DEBUG: p.api.SetTabs failed: %v", err))
+		logger.PluginError(p.pluginName, fmt.Sprintf("Failed to set tabs: %v", err))
 		L.Push(lua.LString(fmt.Sprintf("failed to set tabs: %v", err)))
 		return 1
 	}
 
-	logger.Info("DEBUG: luaSetTabs completed successfully")
+	logger.PluginDebug(p.pluginName, "Tabs set successfully")
 	L.Push(lua.LString("tabs set successfully"))
 	return 1
 }
 
 func (p *PluginmanagerStyleLuaPlugin) luaRestoreTabs(L *lua.LState) int {
-	logger.Info("DEBUG: luaRestoreTabs called")
+	logger.PluginDebug(p.pluginName, "Restoring tabs")
 	tabsTable := L.CheckTable(1)
 
 	var tabs []TabInfo
@@ -529,15 +506,15 @@ func (p *PluginmanagerStyleLuaPlugin) luaRestoreTabs(L *lua.LState) int {
 		}
 	})
 
-	logger.Info(fmt.Sprintf("DEBUG: Parsed %d tabs, calling p.api.SetTabs", len(tabs)))
+	logger.PluginDebug(p.pluginName, fmt.Sprintf("Parsed %d tabs, calling SetTabs", len(tabs)))
 	err := p.api.SetTabs(tabs)
 	if err != nil {
-		logger.Info(fmt.Sprintf("DEBUG: p.api.SetTabs failed: %v", err))
+		logger.PluginError(p.pluginName, fmt.Sprintf("Failed to restore tabs: %v", err))
 		L.Push(lua.LString(fmt.Sprintf("failed to restore tabs: %v", err)))
 		return 1
 	}
 
-	logger.Info("DEBUG: luaRestoreTabs completed successfully")
+	logger.PluginDebug(p.pluginName, "Tabs restored successfully")
 	L.Push(lua.LString("ok"))
 	return 1
 }
