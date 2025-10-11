@@ -197,7 +197,7 @@ function session_save()
   end
 
   -- Show input dialog for filename
-  k8s_tui.show_input_dialog("Save Session", "session.json", "session:save_submit", "session:save_cancel")
+  k8s_tui.show_input_dialog("Enter Session name:", "session.json", "session:save_submit", "session:save_cancel")
 end
 
 function session_save_submit(filename)

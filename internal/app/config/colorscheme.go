@@ -146,7 +146,6 @@ func DefaultAppConfig() AppConfig {
 			"new_tab":      "ctrl+t",
 			"close_tab":    "ctrl+w",
 			"quick_nav":    "g",
-			"session:save": "ctrl+s",
 		},
 	}
 }
