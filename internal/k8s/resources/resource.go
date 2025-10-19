@@ -391,6 +391,9 @@ func DescribeResource(client Client, resourceType ResourceType, namespace, name 
 	case ResourceTypeNode:
 		node := NewNode(name, client)
 		return node.Describe()
+	case ResourceTypeDeployment:
+		deployment := NewDeployment(name, namespace, client)
+		return deployment.Describe()
 	case ResourceTypeServiceAccount:
 		serviceaccount := NewServiceAccount(name, namespace, client)
 		return serviceaccount.Describe()

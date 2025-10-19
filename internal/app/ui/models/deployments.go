@@ -48,37 +48,15 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 	d.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		deployment := resources.NewDeployment(selected, d.namespace, *k)
-		err := deployment.Fetch()
-		if err != nil {
-			return components.NavigateMsg{
-				Error:   fmt.Errorf("failed to fetch deployment: %v", err),
-				Cluster: *k,
-			}
-		}
-		selector, err := deployment.GetLabelSelector()
-		if err != nil {
-			selector = fmt.Sprintf("app=%s", deployment.Name)
-		}
-		pods, err := NewPods(*k, d.namespace, selector)
+		deploymentDetails, err := NewDeploymentDetails(*k, d.namespace, selected).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
 				Cluster: *k,
 			}
 		}
-
-		podsComponent, err := pods.InitComponent(k)
-		if err != nil {
-			return components.NavigateMsg{
-				Error:   err,
-				Cluster: *k,
-			}
-		}
-
 		return components.NavigateMsg{
-			NewScreen:  podsComponent,
-			Breadcrumb: "Pods",
+			NewScreen: deploymentDetails,
 		}
 	}
 

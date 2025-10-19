@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/otavioCosta2110/k8s-tui/pkg/format"
+	"gopkg.in/yaml.v3"
 
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -119,6 +120,43 @@ func (d *DeploymentInfo) GetLabelSelector() (string, error) {
 	}
 
 	return requirements.String(), nil
+}
+
+func (d *DeploymentInfo) Describe() (string, error) {
+	if d.Raw == nil {
+		if err := d.Fetch(); err != nil {
+			return "", fmt.Errorf("failed to fetch deployment: %v", err)
+		}
+	}
+
+	yamlData, err := yaml.Marshal(d.Raw)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal deployment to YAML: %v", err)
+	}
+
+	return string(yamlData), nil
+}
+
+func (d *DeploymentInfo) Apply(yamlContent string) error {
+	var deployment appsv1.Deployment
+	if err := yaml.Unmarshal([]byte(yamlContent), &deployment); err != nil {
+		return fmt.Errorf("failed to unmarshal YAML: %v", err)
+	}
+
+	// Ensure the name and namespace match the current deployment
+	deployment.Name = d.Name
+	deployment.Namespace = d.Namespace
+
+	_, err := d.Client.Clientset.AppsV1().Deployments(d.Namespace).Update(
+		context.Background(),
+		&deployment,
+		metav1.UpdateOptions{},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update deployment: %v", err)
+	}
+
+	return nil
 }
 
 func DeleteDeployment(client Client, namespace string, deploymentName string) error {

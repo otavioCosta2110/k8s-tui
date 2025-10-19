@@ -4,6 +4,7 @@ import (
 	styles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles"
 	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -131,6 +132,17 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.loading && m.OnSelected != nil {
 				if len(m.Table.SelectedRow()) > 0 {
 					selected := m.Table.SelectedRow()[m.selectColumn]
+					// Strip icon prefix if present (format: "icon name")
+					if strings.Contains(selected, " ") {
+						parts := strings.SplitN(selected, " ", 2)
+						if len(parts) == 2 && len(parts[0]) > 0 {
+							// Check if first part looks like an icon (contains non-ASCII or is a known icon)
+							firstPart := parts[0]
+							if len(firstPart) > 1 || (len(firstPart) == 1 && firstPart[0] > 127) {
+								selected = parts[1]
+							}
+						}
+					}
 					return m, func() tea.Msg {
 						return m.OnSelected(selected)
 					}
@@ -176,7 +188,7 @@ func (m *TableModel) View() string {
 
 	m.updateColumnWidths(styles.ScreenWidth)
 
-	tableHeight := styles.ScreenHeight 
+	tableHeight := styles.ScreenHeight
 	m.Table.SetHeight(tableHeight)
 	m.Table.SetWidth(styles.ScreenWidth)
 

@@ -59,7 +59,7 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		if err != nil {
 			selector = fmt.Sprintf("app=%s", replicaset.Name)
 		}
-		pods, err := NewPods(*k, r.namespace, selector)
+		pods, err := NewPodsWithParent(*k, r.namespace, selected, selector)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,

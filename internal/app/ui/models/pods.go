@@ -15,10 +15,15 @@ import (
 
 type podsModel struct {
 	*GenericResourceModel
-	selector string
+	selector         string
+	parentDeployment string
 }
 
 func NewPods(k k8s.Client, namespace string, selector ...string) (*podsModel, error) {
+	return NewPodsWithParent(k, namespace, "", selector...)
+}
+
+func NewPodsWithParent(k k8s.Client, namespace, parentDeployment string, selector ...string) (*podsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypePod,
 		Title:           styles.ResourceIcons["Pods"] + " Pods in " + namespace,
@@ -44,6 +49,7 @@ func NewPods(k k8s.Client, namespace string, selector ...string) (*podsModel, er
 	model := &podsModel{
 		GenericResourceModel: genericModel,
 		selector:             selectorStr,
+		parentDeployment:     parentDeployment,
 	}
 
 	return model, nil
@@ -78,9 +84,34 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	actions := map[string]func() tea.Cmd{
 		"d": p.createDeleteAction(tableModel),
 	}
+
+	if p.parentDeployment != "" {
+		actions["v"] = p.createViewManifestAction(tableModel)
+	}
+
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, p.refreshInterval, p.k8sClient, "Pods"), nil
+}
+
+func (p *podsModel) createViewManifestAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		deploymentDetails, err := NewDeploymentDetails(*p.k8sClient, p.namespace, p.parentDeployment).InitComponent(p.k8sClient)
+		if err != nil {
+			return func() tea.Msg {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *p.k8sClient,
+				}
+			}
+		}
+		return func() tea.Msg {
+			return components.NavigateMsg{
+				NewScreen:  deploymentDetails,
+				Breadcrumb: p.parentDeployment,
+			}
+		}
+	}
 }
 
 func (p *podsModel) fetchData(selector string) error {

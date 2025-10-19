@@ -10,9 +10,12 @@ import (
 type baseDetailsModel struct {
 	k8sClient  *k8s.Client
 	yamlViewer *components.YAMLViewer
+	yamlEditor *components.YAMLEditor
 	spinner    components.SpinnerModel
 	loading    bool
 	err        error
+	editing    bool
+	title      string
 }
 
 func newBaseDetailsModel(title, loadingText string) baseDetailsModel {
@@ -21,6 +24,8 @@ func newBaseDetailsModel(title, loadingText string) baseDetailsModel {
 		spinner:    components.NewSpinner(loadingText),
 		loading:    true,
 		err:        nil,
+		editing:    false,
+		title:      title,
 	}
 }
 
@@ -33,14 +38,28 @@ func (b *baseDetailsModel) initCommon(fetchCmd tea.Cmd) tea.Cmd {
 }
 
 func (b *baseDetailsModel) updateCommon(msg tea.Msg) (tea.Cmd, bool) {
-	var cmd tea.Cmd
-	updatedViewer, cmd := b.yamlViewer.Update(msg)
-	b.yamlViewer = updatedViewer.(*components.YAMLViewer)
+	switch msg.(type) {
+	case components.SaveMsg:
+		// Handle save - this should be overridden by subclasses
+		return nil, true
+	case components.CancelMsg:
+		// Handle cancel - switch back to view mode
+		b.editing = false
+		return nil, true
+	}
 
-	var spinnerCmd tea.Cmd
-	b.spinner, spinnerCmd = b.spinner.Update(msg)
-
-	return tea.Batch(cmd, spinnerCmd), false
+	if b.editing && b.yamlEditor != nil {
+		var cmd tea.Cmd
+		updatedEditor, cmd := b.yamlEditor.Update(msg)
+		b.yamlEditor = updatedEditor.(*components.YAMLEditor)
+		return cmd, false
+	} else if b.yamlViewer != nil {
+		var cmd tea.Cmd
+		updatedViewer, cmd := b.yamlViewer.Update(msg)
+		b.yamlViewer = updatedViewer.(*components.YAMLViewer)
+		return cmd, false
+	}
+	return nil, false
 }
 
 func (b *baseDetailsModel) setLoadedContent(content string, err error) {
@@ -53,9 +72,20 @@ func (b *baseDetailsModel) setLoadedContent(content string, err error) {
 	}
 }
 
+func (b *baseDetailsModel) startEditing() {
+	if b.yamlViewer != nil {
+		content := b.yamlViewer.GetContent()
+		b.yamlEditor = components.NewYAMLEditor(b.title, content)
+		b.editing = true
+	}
+}
+
 func (b *baseDetailsModel) View() string {
 	if b.loading {
 		return b.spinner.CenteredScreenView()
+	}
+	if b.editing && b.yamlEditor != nil {
+		return b.yamlEditor.View()
 	}
 	return b.yamlViewer.View()
 }

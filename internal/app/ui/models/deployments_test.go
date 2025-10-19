@@ -191,3 +191,18 @@ func TestDeploymentsModelConfig(t *testing.T) {
 		t.Error("Config RefreshInterval not set correctly")
 	}
 }
+
+func TestNewDeploymentDetails(t *testing.T) {
+	client := k8s.Client{Namespace: "test-namespace"}
+	model := NewDeploymentDetails(client, "test-namespace", "test-deployment")
+
+	if model.deployment.Name != "test-deployment" {
+		t.Errorf("Expected deployment name 'test-deployment', got %s", model.deployment.Name)
+	}
+	if model.deployment.Namespace != "test-namespace" {
+		t.Errorf("Expected deployment namespace 'test-namespace', got %s", model.deployment.Namespace)
+	}
+	if model.isEditing {
+		t.Error("Expected isEditing to be false initially")
+	}
+}

@@ -34,6 +34,8 @@ func (m *AppModel) createResourceDetailsModel(resourceType, resourceName string)
 	switch resourceType {
 	case "Pods", "pods":
 		return models.NewPodDetails(m.kube, m.config.DefaultNamespace, resourceName).InitComponent(&m.kube)
+	case "Deployments", "deployments":
+		return models.NewDeploymentDetails(m.kube, m.config.DefaultNamespace, resourceName).InitComponent(&m.kube)
 	case "Services", "services":
 		return models.NewServiceDetails(m.kube, m.config.DefaultNamespace, resourceName).InitComponent(&m.kube)
 	case "ConfigMaps", "configmaps":
