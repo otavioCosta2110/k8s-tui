@@ -1,0 +1,799 @@
+[2025-10-19 18:56:07] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:56:07] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:56:37] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:56:37] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:56:37] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:56:37] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:07] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:07] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:07] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:07] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:37] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:37] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:37] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:37] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:39] INFO: Application completed successfully
+[2025-10-19 18:57:39] INFO: 🔌 Plugin Manager: Shutting down 3 loaded plugins
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Shutting down plugin: example-plugin
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Calling Shutdown() for plugin: example-plugin
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Plugin example-plugin shutdown completed successfully
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Lua state closed for plugin: example-plugin
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Shutting down plugin: pluginmanager-header
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Calling Shutdown() for plugin: pluginmanager-header
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Plugin pluginmanager-header shutdown completed successfully
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Lua state closed for plugin: pluginmanager-header
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Shutting down plugin: session-save-plugin
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Calling Shutdown() for plugin: session-save-plugin
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Plugin session-save-plugin shutdown completed successfully
+[2025-10-19 18:57:39] DEBUG: 🔌 Plugin Manager: Lua state closed for plugin: session-save-plugin
+[2025-10-19 18:57:39] INFO: 🔌 Plugin Manager: Shutdown complete - 3 plugins shut down, 0 errors
+[2025-10-19 18:57:39] INFO: Application shutting down
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: .
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: .
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/example-plugin/main.lua
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/pluginmanager-header/main.lua
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/session-save-plugin/main.lua
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Found 3 potential plugin files
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: File 1: plugins/example-plugin/main.lua
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: File 2: plugins/pluginmanager-header/main.lua
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: File 3: plugins/session-save-plugin/main.lua
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Attempting to load plugin: example-plugin from plugins/example-plugin/main.lua
+[2025-10-19 18:57:40] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: example-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Available functions in example-plugin:
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   GetResourceTypes: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   GetUIExtensions: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Validating required functions for plugin: example-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: example-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: example-plugin
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Name() returned: example-lua-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Initializing plugin example-lua-plugin (example-plugin v2.0.0)
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Calling Initialize for example-plugin
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-19 18:57:40] INFO: 📢 Plugin Status: Example plugin ready
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Plugin example-lua-plugin initialized successfully
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Function types for example-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-lua-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for example-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for example-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Getting default config for example-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Calling Setup for example-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Setup completed for example-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Processing CLI arguments for example-lua-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: example-lua-plugin v2.0.0
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 📊 Also registered as legacy resource plugin: example-lua-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎨 Also registered as legacy UI plugin: example-lua-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎉 Plugin example-lua-plugin loaded and registered successfully
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: example-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Attempting to load plugin: pluginmanager-header from plugins/pluginmanager-header/main.lua
+[2025-10-19 18:57:40] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: pluginmanager-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Available functions in pluginmanager-header:
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Validating required functions for plugin: pluginmanager-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: pluginmanager-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: pluginmanager-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: pluginmanager-header
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Name() returned: neovim-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Initializing plugin neovim-header (pluginmanager-header v1.0.0)
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Calling Initialize for pluginmanager-header
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-19 18:57:40] INFO: 📢 Plugin Status: Neovim-style plugin loaded!
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Plugin neovim-header initialized successfully
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Function types for pluginmanager-header - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: neovim-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for pluginmanager-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for pluginmanager-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Getting default config for pluginmanager-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Calling Setup for pluginmanager-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Setup completed for pluginmanager-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Processing CLI arguments for neovim-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: neovim-header v1.0.0
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎉 Plugin neovim-header loaded and registered successfully
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: pluginmanager-header
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from plugins/session-save-plugin/main.lua
+[2025-10-19 18:57:40] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-19 18:57:40] INFO: 🔌 Plugin Manager: Plugin loading complete - 3 loaded, 0 failed
+[2025-10-19 18:57:40] INFO: Plugins loaded successfully
+[2025-10-19 18:57:40] INFO: 📢 Plugin Status: Example plugin initialized
+[2025-10-19 18:57:40] INFO: 📢 Plugin Status: Header plugin ready!
+[2025-10-19 18:57:40] INFO: DEBUG: Creating new TabManager
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-19 18:57:40] INFO: 🔌 Plugin manager available, found 1 custom resource types
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-19 18:57:40] INFO: 🔌 Loading custom resource type: ExampleResources (type: exampleresource)
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-19 18:57:40] INFO: 🔌 UI: Found plugin icon for ExampleResources: '󰐧'
+[2025-10-19 18:57:40] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-19 18:57:40] INFO: DEBUG: SetCurrentNamespace called with: default
+[2025-10-19 18:57:40] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-19 18:57:40] INFO: 📢 Plugin Status: Example plugin active in namespace: default
+[2025-10-19 18:57:40] INFO: 📢 Plugin Status: Switched to namespace: default
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'example-status'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'ui_injection'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('KeyBinding') = empty (type: nil)
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Location') = 'header'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Position') = 'right'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getNumberField('Priority') = 10.000000
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('DataSource') = 'static'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getNumberField('UpdateInterval') = 0.000000
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'text'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getNumberField('Width') not found or not a number, returning 0
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getNumberField('Height') not found or not a number, returning 0
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('Border') = empty (type: nil)
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('ForegroundColor') = '#00FF00'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('BackgroundColor') = '#000000'
+[2025-10-19 18:57:40] DEBUG: 🔌 Lua Plugin: getStringField('BorderColor') = empty (type: nil)
+[2025-10-19 18:57:40] INFO: Starting Bubbletea program
+[2025-10-19 18:57:40] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:40] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:40] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:40] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:41] INFO: DEBUG: updateHeaderTabs called
+[2025-10-19 18:57:41] INFO: DEBUG: Got 1 tabs from tabManager
+[2025-10-19 18:57:41] INFO: DEBUG: Tab 0: ID=initial, Title=Pods, ResourceType=Pods, IsActive=true
+[2025-10-19 18:57:41] INFO: DEBUG: Cleared header tabs
+[2025-10-19 18:57:41] INFO: DEBUG: Adding tab 0 to header: ID=initial, Title=Pods, ResourceType=Pods
+[2025-10-19 18:57:41] INFO: DEBUG: Tab 0 is active
+[2025-10-19 18:57:41] INFO: DEBUG: Setting active tab to index 0
+[2025-10-19 18:57:41] INFO: DEBUG: updateHeaderTabs completed
+[2025-10-19 18:57:41] DEBUG: PluginAPI GetPods called with namespace=default, selector=
+[2025-10-19 18:57:41] DEBUG: Pod handler exists: true, handler: &{pod}
+[2025-10-19 18:57:41] DEBUG: Using custom handler (no selector provided)
+[2025-10-19 18:57:41] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:46] DEBUG: PluginAPI GetPods called with namespace=default, selector=
+[2025-10-19 18:57:46] DEBUG: Pod handler exists: true, handler: &{pod}
+[2025-10-19 18:57:46] DEBUG: Using custom handler (no selector provided)
+[2025-10-19 18:57:46] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:51] DEBUG: PluginAPI GetPods called with namespace=default, selector=
+[2025-10-19 18:57:51] DEBUG: Pod handler exists: true, handler: &{pod}
+[2025-10-19 18:57:51] DEBUG: Using custom handler (no selector provided)
+[2025-10-19 18:57:51] DEBUG: Fetching pods with selector: 
+[2025-10-19 18:57:55] INFO: Application completed successfully
+[2025-10-19 18:57:55] INFO: 🔌 Plugin Manager: Shutting down 3 loaded plugins
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Shutting down plugin: example-plugin
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Calling Shutdown() for plugin: example-plugin
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Plugin example-plugin shutdown completed successfully
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Lua state closed for plugin: example-plugin
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Shutting down plugin: pluginmanager-header
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Calling Shutdown() for plugin: pluginmanager-header
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Plugin pluginmanager-header shutdown completed successfully
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Lua state closed for plugin: pluginmanager-header
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Shutting down plugin: session-save-plugin
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Calling Shutdown() for plugin: session-save-plugin
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Plugin session-save-plugin shutdown completed successfully
+[2025-10-19 18:57:55] DEBUG: 🔌 Plugin Manager: Lua state closed for plugin: session-save-plugin
+[2025-10-19 18:57:55] INFO: 🔌 Plugin Manager: Shutdown complete - 3 plugins shut down, 0 errors
+[2025-10-19 18:57:55] INFO: Application shutting down
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: .
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: .
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/example-plugin/main.lua
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/pluginmanager-header/main.lua
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/session-save-plugin/main.lua
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Found 3 potential plugin files
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: File 1: plugins/example-plugin/main.lua
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: File 2: plugins/pluginmanager-header/main.lua
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: File 3: plugins/session-save-plugin/main.lua
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Attempting to load plugin: example-plugin from plugins/example-plugin/main.lua
+[2025-10-19 19:00:07] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: example-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Available functions in example-plugin:
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   GetResourceTypes: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   GetUIExtensions: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Validating required functions for plugin: example-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: example-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: example-plugin
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Name() returned: example-lua-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Initializing plugin example-lua-plugin (example-plugin v2.0.0)
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Calling Initialize for example-plugin
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-19 19:00:07] INFO: 📢 Plugin Status: Example plugin ready
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Plugin example-lua-plugin initialized successfully
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Function types for example-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-lua-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for example-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for example-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Getting default config for example-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Calling Setup for example-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Setup completed for example-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Processing CLI arguments for example-lua-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: example-lua-plugin v2.0.0
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 📊 Also registered as legacy resource plugin: example-lua-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎨 Also registered as legacy UI plugin: example-lua-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎉 Plugin example-lua-plugin loaded and registered successfully
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: example-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Attempting to load plugin: pluginmanager-header from plugins/pluginmanager-header/main.lua
+[2025-10-19 19:00:07] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: pluginmanager-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Available functions in pluginmanager-header:
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Validating required functions for plugin: pluginmanager-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: pluginmanager-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: pluginmanager-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: pluginmanager-header
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Name() returned: neovim-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Initializing plugin neovim-header (pluginmanager-header v1.0.0)
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Calling Initialize for pluginmanager-header
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-19 19:00:07] INFO: 📢 Plugin Status: Neovim-style plugin loaded!
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Plugin neovim-header initialized successfully
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Function types for pluginmanager-header - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: neovim-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for pluginmanager-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for pluginmanager-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Getting default config for pluginmanager-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Calling Setup for pluginmanager-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Setup completed for pluginmanager-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Processing CLI arguments for neovim-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: neovim-header v1.0.0
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎉 Plugin neovim-header loaded and registered successfully
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: pluginmanager-header
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from plugins/session-save-plugin/main.lua
+[2025-10-19 19:00:07] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-19 19:00:07] INFO: 🔌 Plugin Manager: Plugin loading complete - 3 loaded, 0 failed
+[2025-10-19 19:00:07] INFO: Plugins loaded successfully
+[2025-10-19 19:00:07] INFO: 📢 Plugin Status: Example plugin initialized
+[2025-10-19 19:00:07] INFO: 📢 Plugin Status: Header plugin ready!
+[2025-10-19 19:00:07] INFO: DEBUG: Creating new TabManager
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-19 19:00:07] INFO: 🔌 Plugin manager available, found 1 custom resource types
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-19 19:00:07] INFO: 🔌 Loading custom resource type: ExampleResources (type: exampleresource)
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-19 19:00:07] INFO: 🔌 UI: Found plugin icon for ExampleResources: '󰐧'
+[2025-10-19 19:00:07] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-19 19:00:07] INFO: DEBUG: SetCurrentNamespace called with: default
+[2025-10-19 19:00:07] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-19 19:00:07] INFO: 📢 Plugin Status: Example plugin active in namespace: default
+[2025-10-19 19:00:07] INFO: 📢 Plugin Status: Switched to namespace: default
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'example-status'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'ui_injection'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('KeyBinding') = empty (type: nil)
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Location') = 'header'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Position') = 'right'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getNumberField('Priority') = 10.000000
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('DataSource') = 'static'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getNumberField('UpdateInterval') = 0.000000
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'text'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getNumberField('Width') not found or not a number, returning 0
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getNumberField('Height') not found or not a number, returning 0
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('Border') = empty (type: nil)
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('ForegroundColor') = '#00FF00'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('BackgroundColor') = '#000000'
+[2025-10-19 19:00:07] DEBUG: 🔌 Lua Plugin: getStringField('BorderColor') = empty (type: nil)
+[2025-10-19 19:00:07] INFO: Starting Bubbletea program
+[2025-10-19 19:00:07] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:00:07] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:00:07] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:00:07] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:00:07] INFO: DEBUG: updateHeaderTabs called
+[2025-10-19 19:00:07] INFO: DEBUG: Got 1 tabs from tabManager
+[2025-10-19 19:00:07] INFO: DEBUG: Tab 0: ID=initial, Title=Deployments, ResourceType=Deployments, IsActive=true
+[2025-10-19 19:00:07] INFO: DEBUG: Cleared header tabs
+[2025-10-19 19:00:07] INFO: DEBUG: Adding tab 0 to header: ID=initial, Title=Deployments, ResourceType=Deployments
+[2025-10-19 19:00:07] INFO: DEBUG: Tab 0 is active
+[2025-10-19 19:00:07] INFO: DEBUG: Setting active tab to index 0
+[2025-10-19 19:00:07] INFO: DEBUG: updateHeaderTabs completed
+[2025-10-19 19:00:08] INFO: DEBUG: updateHeaderTabs called
+[2025-10-19 19:00:08] INFO: DEBUG: Got 1 tabs from tabManager
+[2025-10-19 19:00:08] INFO: DEBUG: Tab 0: ID=initial, Title=Deployments, ResourceType=Deployments, IsActive=true
+[2025-10-19 19:00:08] INFO: DEBUG: Cleared header tabs
+[2025-10-19 19:00:08] INFO: DEBUG: Adding tab 0 to header: ID=initial, Title=Deployments, ResourceType=Deployments
+[2025-10-19 19:00:08] INFO: DEBUG: Tab 0 is active
+[2025-10-19 19:00:08] INFO: DEBUG: Setting active tab to index 0
+[2025-10-19 19:00:08] INFO: DEBUG: updateHeaderTabs completed
+[2025-10-19 19:00:08] DEBUG: Fetching deployment details for default/example-app
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 19:00:08] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-19 19:00:08] DEBUG: DeploymentInfo.Describe() called for default/example-app
+[2025-10-19 19:00:08] DEBUG: DeploymentInfo.Raw is nil, fetching deployment default/example-app
+[2025-10-19 19:00:08] DEBUG: Fetching deployment default/example-app from Kubernetes API
+[2025-10-19 19:00:08] DEBUG: Successfully fetched deployment default/example-app from API
+[2025-10-19 19:00:08] DEBUG: Successfully fetched deployment default/example-app
+[2025-10-19 19:00:08] DEBUG: Marshalling deployment default/example-app to YAML
+[2025-10-19 19:00:08] DEBUG: Successfully marshalled deployment default/example-app to YAML, length: 37065
+[2025-10-19 19:00:08] DEBUG: Successfully fetched deployment details for default/example-app, content length: 37065
+[2025-10-19 19:00:08] DEBUG: Deployment details loaded successfully, content length: 37065
+[2025-10-19 19:00:28] DEBUG: Attempting to save deployment default/example-app
+[2025-10-19 19:00:28] DEBUG: Successfully applied deployment changes for default/example-app
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 19:00:28] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-19 19:00:28] DEBUG: DeploymentInfo.Describe() called for default/example-app
+[2025-10-19 19:00:28] DEBUG: DeploymentInfo.Raw is nil, fetching deployment default/example-app
+[2025-10-19 19:00:28] DEBUG: Fetching deployment default/example-app from Kubernetes API
+[2025-10-19 19:00:28] DEBUG: Successfully fetched deployment default/example-app from API
+[2025-10-19 19:00:28] DEBUG: Successfully fetched deployment default/example-app
+[2025-10-19 19:00:28] DEBUG: Marshalling deployment default/example-app to YAML
+[2025-10-19 19:00:28] DEBUG: Successfully marshalled deployment default/example-app to YAML, length: 39885
+[2025-10-19 19:00:28] DEBUG: Refreshed deployment details after save, content length: 39885
+[2025-10-19 19:00:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:00:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:00:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:00:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:01:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:01:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:01:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:01:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:01:32] DEBUG: Fetching deployment default/test-deployment from Kubernetes API
+[2025-10-19 19:01:32] DEBUG: Successfully fetched deployment default/test-deployment from API
+[2025-10-19 19:01:32] DEBUG: Fetching pods with selector: app=test
+[2025-10-19 19:01:32] DEBUG: Fetching pods with selector: app=test
+[2025-10-19 19:01:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:01:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:01:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:01:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:02:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:02:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:02:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:02:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:02:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:02:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:02:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:02:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:08] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:38] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:50] INFO: Application completed successfully
+[2025-10-19 19:03:50] INFO: 🔌 Plugin Manager: Shutting down 3 loaded plugins
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Shutting down plugin: example-plugin
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Calling Shutdown() for plugin: example-plugin
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Plugin example-plugin shutdown completed successfully
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Lua state closed for plugin: example-plugin
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Shutting down plugin: pluginmanager-header
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Calling Shutdown() for plugin: pluginmanager-header
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Plugin pluginmanager-header shutdown completed successfully
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Lua state closed for plugin: pluginmanager-header
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Shutting down plugin: session-save-plugin
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Calling Shutdown() for plugin: session-save-plugin
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Plugin session-save-plugin shutdown completed successfully
+[2025-10-19 19:03:50] DEBUG: 🔌 Plugin Manager: Lua state closed for plugin: session-save-plugin
+[2025-10-19 19:03:50] INFO: 🔌 Plugin Manager: Shutdown complete - 3 plugins shut down, 0 errors
+[2025-10-19 19:03:50] INFO: Application shutting down
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: .
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: .
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/example-plugin/main.lua
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/pluginmanager-header/main.lua
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/session-save-plugin/main.lua
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Found 3 potential plugin files
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: File 1: plugins/example-plugin/main.lua
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: File 2: plugins/pluginmanager-header/main.lua
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: File 3: plugins/session-save-plugin/main.lua
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Attempting to load plugin: example-plugin from plugins/example-plugin/main.lua
+[2025-10-19 19:03:53] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: example-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Available functions in example-plugin:
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   GetResourceTypes: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   GetUIExtensions: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Validating required functions for plugin: example-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: example-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: example-plugin
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Name() returned: example-lua-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Initializing plugin example-lua-plugin (example-plugin v2.0.0)
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Calling Initialize for example-plugin
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-19 19:03:53] INFO: 📢 Plugin Status: Example plugin ready
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Plugin example-lua-plugin initialized successfully
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Function types for example-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-lua-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for example-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for example-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Getting default config for example-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Calling Setup for example-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Setup completed for example-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Processing CLI arguments for example-lua-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: example-lua-plugin v2.0.0
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 📊 Also registered as legacy resource plugin: example-lua-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎨 Also registered as legacy UI plugin: example-lua-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎉 Plugin example-lua-plugin loaded and registered successfully
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: example-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Attempting to load plugin: pluginmanager-header from plugins/pluginmanager-header/main.lua
+[2025-10-19 19:03:53] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: pluginmanager-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Available functions in pluginmanager-header:
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Validating required functions for plugin: pluginmanager-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: pluginmanager-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: pluginmanager-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: pluginmanager-header
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Name() returned: neovim-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Initializing plugin neovim-header (pluginmanager-header v1.0.0)
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Calling Initialize for pluginmanager-header
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-19 19:03:53] INFO: 📢 Plugin Status: Neovim-style plugin loaded!
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Plugin neovim-header initialized successfully
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Function types for pluginmanager-header - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: neovim-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for pluginmanager-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for pluginmanager-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Getting default config for pluginmanager-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Calling Setup for pluginmanager-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Setup completed for pluginmanager-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Processing CLI arguments for neovim-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: neovim-header v1.0.0
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎉 Plugin neovim-header loaded and registered successfully
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: pluginmanager-header
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from plugins/session-save-plugin/main.lua
+[2025-10-19 19:03:53] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-19 19:03:53] INFO: 🔌 Plugin Manager: Plugin loading complete - 3 loaded, 0 failed
+[2025-10-19 19:03:53] INFO: Plugins loaded successfully
+[2025-10-19 19:03:53] INFO: 📢 Plugin Status: Example plugin initialized
+[2025-10-19 19:03:53] INFO: 📢 Plugin Status: Header plugin ready!
+[2025-10-19 19:03:53] INFO: DEBUG: Creating new TabManager
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-19 19:03:53] INFO: 🔌 Plugin manager available, found 1 custom resource types
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-19 19:03:53] INFO: 🔌 Loading custom resource type: ExampleResources (type: exampleresource)
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-19 19:03:53] INFO: 🔌 UI: Found plugin icon for ExampleResources: '󰐧'
+[2025-10-19 19:03:53] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-19 19:03:53] INFO: DEBUG: SetCurrentNamespace called with: default
+[2025-10-19 19:03:53] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-19 19:03:53] INFO: 📢 Plugin Status: Example plugin active in namespace: default
+[2025-10-19 19:03:53] INFO: 📢 Plugin Status: Switched to namespace: default
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'example-status'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'ui_injection'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('KeyBinding') = empty (type: nil)
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Location') = 'header'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Position') = 'right'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getNumberField('Priority') = 10.000000
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('DataSource') = 'static'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getNumberField('UpdateInterval') = 0.000000
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'text'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getNumberField('Width') not found or not a number, returning 0
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getNumberField('Height') not found or not a number, returning 0
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('Border') = empty (type: nil)
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('ForegroundColor') = '#00FF00'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('BackgroundColor') = '#000000'
+[2025-10-19 19:03:53] DEBUG: 🔌 Lua Plugin: getStringField('BorderColor') = empty (type: nil)
+[2025-10-19 19:03:53] INFO: Starting Bubbletea program
+[2025-10-19 19:03:53] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:53] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:53] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:03:53] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:04:23] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:04:23] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:04:23] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:04:23] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:04:53] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:04:53] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:04:53] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:04:53] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:05:23] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:05:23] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:05:23] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:05:23] DEBUG: Fetching pods with selector: 
+[2025-10-19 19:05:25] INFO: DEBUG: updateHeaderTabs called
+[2025-10-19 19:05:25] INFO: DEBUG: Got 1 tabs from tabManager
+[2025-10-19 19:05:25] INFO: DEBUG: Tab 0: ID=initial, Title=Deployments, ResourceType=Deployments, IsActive=true
+[2025-10-19 19:05:25] INFO: DEBUG: Cleared header tabs
+[2025-10-19 19:05:25] INFO: DEBUG: Adding tab 0 to header: ID=initial, Title=Deployments, ResourceType=Deployments
+[2025-10-19 19:05:25] INFO: DEBUG: Tab 0 is active
+[2025-10-19 19:05:25] INFO: DEBUG: Setting active tab to index 0
+[2025-10-19 19:05:25] INFO: DEBUG: updateHeaderTabs completed
+[2025-10-19 19:05:27] INFO: DEBUG: updateHeaderTabs called
+[2025-10-19 19:05:27] INFO: DEBUG: Got 1 tabs from tabManager
+[2025-10-19 19:05:27] INFO: DEBUG: Tab 0: ID=initial, Title=Deployments, ResourceType=Deployments, IsActive=true
+[2025-10-19 19:05:27] INFO: DEBUG: Cleared header tabs
+[2025-10-19 19:05:27] INFO: DEBUG: Adding tab 0 to header: ID=initial, Title=Deployments, ResourceType=Deployments
+[2025-10-19 19:05:27] INFO: DEBUG: Tab 0 is active
+[2025-10-19 19:05:27] INFO: DEBUG: Setting active tab to index 0
+[2025-10-19 19:05:27] INFO: DEBUG: updateHeaderTabs completed
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-19 19:05:27] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)

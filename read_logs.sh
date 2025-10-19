@@ -1,0 +1,2 @@
+#!/bin/bash
+tail -f /home/otavio/.local/state/k8s-tui/logs/k8s-tui-2025-10-19.log > log
