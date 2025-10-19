@@ -48,15 +48,43 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 	d.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		deploymentDetails, err := NewDeploymentDetails(*k, d.namespace, selected).InitComponent(k)
+		// Get deployment to fetch its label selector
+		deployment := resources.NewDeployment(selected, d.namespace, *k)
+		if err := deployment.Fetch(); err != nil {
+			return components.NavigateMsg{
+				Error:   err,
+				Cluster: *k,
+			}
+		}
+
+		selector, err := deployment.GetLabelSelector()
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
 				Cluster: *k,
 			}
 		}
+
+		// Create pods model filtered by deployment selector
+		podsModel, err := NewPodsWithParent(*k, d.namespace, selected, selector)
+		if err != nil {
+			return components.NavigateMsg{
+				Error:   err,
+				Cluster: *k,
+			}
+		}
+
+		podsScreen, err := podsModel.InitComponent(k)
+		if err != nil {
+			return components.NavigateMsg{
+				Error:   err,
+				Cluster: *k,
+			}
+		}
+
 		return components.NavigateMsg{
-			NewScreen: deploymentDetails,
+			NewScreen:  podsScreen,
+			Breadcrumb: selected + " pods",
 		}
 	}
 
@@ -71,10 +99,39 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 
 	actions := map[string]func() tea.Cmd{
 		"d": d.createDeleteAction(tableModel),
+		"v": d.createViewDetailsAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, d.refreshInterval, d.k8sClient, "Deployments"), nil
+}
+
+func (d *deploymentsModel) createViewDetailsAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(d.deploymentsInfo) {
+			return nil
+		}
+
+		deploymentName := d.deploymentsInfo[selected].Name
+
+		return func() tea.Msg {
+			deploymentDetails, err := NewDeploymentDetails(*d.k8sClient, d.namespace, deploymentName).InitComponent(d.k8sClient)
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *d.k8sClient,
+				}
+			}
+			return components.NavigateMsg{
+				NewScreen: deploymentDetails,
+			}
+		}
+	}
 }
 
 func (d *deploymentsModel) fetchData() error {

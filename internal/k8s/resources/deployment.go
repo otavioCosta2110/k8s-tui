@@ -416,26 +416,31 @@ func (d *DeploymentInfo) filterContainer(container corev1.Container) map[string]
 		containerMap["workingDir"] = container.WorkingDir
 	}
 	if len(container.Ports) > 0 {
-		// Filter ports to exclude empty fields
+		// Filter ports to exclude invalid entries
 		ports := make([]map[string]interface{}, 0, len(container.Ports))
 		for _, port := range container.Ports {
-			portMap := make(map[string]interface{})
-			if port.Name != "" {
-				portMap["name"] = port.Name
+			// Only include ports with valid containerPort (> 0)
+			if port.ContainerPort > 0 {
+				portMap := make(map[string]interface{})
+				if port.Name != "" {
+					portMap["name"] = port.Name
+				}
+				if port.HostPort != 0 {
+					portMap["hostPort"] = port.HostPort
+				}
+				portMap["containerPort"] = port.ContainerPort
+				if port.Protocol != "" && port.Protocol != corev1.ProtocolTCP {
+					portMap["protocol"] = port.Protocol
+				}
+				if port.HostIP != "" {
+					portMap["hostIP"] = port.HostIP
+				}
+				ports = append(ports, portMap)
 			}
-			if port.HostPort != 0 {
-				portMap["hostPort"] = port.HostPort
-			}
-			portMap["containerPort"] = port.ContainerPort
-			if port.Protocol != "" && port.Protocol != corev1.ProtocolTCP {
-				portMap["protocol"] = port.Protocol
-			}
-			if port.HostIP != "" {
-				portMap["hostIP"] = port.HostIP
-			}
-			ports = append(ports, portMap)
 		}
-		containerMap["ports"] = ports
+		if len(ports) > 0 {
+			containerMap["ports"] = ports
+		}
 	}
 	if len(container.EnvFrom) > 0 {
 		containerMap["envFrom"] = container.EnvFrom
@@ -471,21 +476,33 @@ func (d *DeploymentInfo) filterContainer(container corev1.Container) map[string]
 		if !d.isEmptyResourceList(container.Resources.Limits) {
 			limits := make(map[string]interface{})
 			for k, v := range container.Resources.Limits {
-				limits[string(k)] = v.String()
+				// Only include non-zero resource quantities
+				if !v.IsZero() {
+					limits[string(k)] = v.String()
+				}
 			}
-			resources["limits"] = limits
+			if len(limits) > 0 {
+				resources["limits"] = limits
+			}
 		}
 		if !d.isEmptyResourceList(container.Resources.Requests) {
 			requests := make(map[string]interface{})
 			for k, v := range container.Resources.Requests {
-				requests[string(k)] = v.String()
+				// Only include non-zero resource quantities
+				if !v.IsZero() {
+					requests[string(k)] = v.String()
+				}
 			}
-			resources["requests"] = requests
+			if len(requests) > 0 {
+				resources["requests"] = requests
+			}
 		}
 		if len(container.Resources.Claims) > 0 {
 			resources["claims"] = container.Resources.Claims
 		}
-		containerMap["resources"] = resources
+		if len(resources) > 0 {
+			containerMap["resources"] = resources
+		}
 	}
 
 	if len(container.ResizePolicy) > 0 {
@@ -515,7 +532,16 @@ func (d *DeploymentInfo) isEmptyResourceRequirements(rr corev1.ResourceRequireme
 }
 
 func (d *DeploymentInfo) isEmptyResourceList(rl corev1.ResourceList) bool {
-	return rl == nil || len(rl) == 0
+	if rl == nil || len(rl) == 0 {
+		return true
+	}
+	// Check if all quantities are zero
+	for _, quantity := range rl {
+		if !quantity.IsZero() {
+			return false
+		}
+	}
+	return true
 }
 
 func (d *DeploymentInfo) Apply(yamlContent string) error {
@@ -527,6 +553,19 @@ func (d *DeploymentInfo) Apply(yamlContent string) error {
 	// Ensure the name and namespace match the current deployment
 	deployment.Name = d.Name
 	deployment.Namespace = d.Namespace
+
+	// Validate and fix container ports to prevent Kubernetes validation errors
+	for i := range deployment.Spec.Template.Spec.Containers {
+		container := &deployment.Spec.Template.Spec.Containers[i]
+		// Filter out invalid ports (containerPort must be > 0)
+		validPorts := make([]corev1.ContainerPort, 0, len(container.Ports))
+		for _, port := range container.Ports {
+			if port.ContainerPort > 0 {
+				validPorts = append(validPorts, port)
+			}
+		}
+		container.Ports = validPorts
+	}
 
 	// Validate that selector matches template labels to prevent Kubernetes validation errors
 	if deployment.Spec.Selector != nil && deployment.Spec.Selector.MatchLabels != nil {
