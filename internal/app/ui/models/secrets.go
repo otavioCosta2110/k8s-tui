@@ -42,6 +42,28 @@ func NewSecrets(k k8s.Client, namespace string) (*secretsModel, error) {
 	return model, nil
 }
 
+func (s *secretsModel) Help() (string, string) {
+	return "Secrets Help", `Secrets store sensitive information.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate secrets
+• enter: View secret details
+• d: Delete selected secrets
+• r: Refresh
+• /: Search secrets
+• esc: Go back
+
+Secret Types:
+• Opaque: Generic secret data
+• TLS: Certificate/key pairs
+• Docker: Docker registry credentials
+
+Common Actions:
+• View data: See secret contents (use caution)
+• Rotate secrets: Update sensitive data
+• Check usage: See which pods reference this secret`
+}
+
 func (s *secretsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	s.k8sClient = k
 

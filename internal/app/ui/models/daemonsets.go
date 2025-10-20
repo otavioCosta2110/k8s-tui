@@ -22,7 +22,7 @@ func NewDaemonSets(k k8s.Client, namespace string) (*daemonsetsModel, error) {
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypeDaemonSet,
 		Title:           customstyles.ResourceIcons["DaemonSets"] + " DaemonSets in " + namespace,
-		ColumnWidths:    []float64{0.15, 0.20, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10},
+		ColumnWidths:    []float64{0.15, 0.20, 0.05, 0.05, 0.05, 0.10, 0.10, 0.10, 0.10},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),
@@ -44,6 +44,29 @@ func NewDaemonSets(k k8s.Client, namespace string) (*daemonsetsModel, error) {
 	}
 
 	return model, nil
+}
+
+func (ds *daemonsetsModel) Help() (string, string) {
+	return "DaemonSets Help", `DaemonSets ensure that all (or some) nodes run a copy of a pod.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate daemonsets
+• enter: View daemonset details
+• d: Delete selected daemonsets
+• r: Refresh
+• /: Search daemonsets
+• esc: Go back
+
+DaemonSet Status:
+• Desired: Number of desired pods
+• Current: Number of current pods
+• Ready: Number of ready pods
+• Available: Number of available pods
+
+Common Actions:
+• View pods: See pods running on each node
+• Check node selectors: See which nodes run the pods
+• Update daemonset: Modify pod template`
 }
 
 func (ds *daemonsetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {

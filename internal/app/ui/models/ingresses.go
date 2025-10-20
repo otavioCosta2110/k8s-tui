@@ -44,6 +44,23 @@ func NewIngresses(k k8s.Client, namespace string) (*ingressesModel, error) {
 	return model, nil
 }
 
+func (i *ingressesModel) Help() (string, string) {
+	return "Ingresses Help", `Ingresses manage external access to services.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate ingresses
+• enter: View ingress details
+• d: Delete selected ingresses
+• r: Refresh
+• /: Search ingresses
+• esc: Go back
+
+Common Actions:
+• View rules: See routing rules
+• Check TLS: View SSL certificates
+• Test routing: Verify external access`
+}
+
 func (i *ingressesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	i.k8sClient = k
 

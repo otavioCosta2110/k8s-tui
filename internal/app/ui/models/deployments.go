@@ -44,11 +44,32 @@ func NewDeployments(k resources.Client, namespace string) (*deploymentsModel, er
 	return model, nil
 }
 
+func (d *deploymentsModel) Help() (string, string) {
+	return "Deployments Help", `Deployments manage the deployment and scaling of applications.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate deployments
+• enter: View deployment details
+• d: Delete selected deployments
+• r: Refresh
+• /: Search deployments
+• esc: Go back
+
+Deployment Status:
+• Ready: Shows ready/desired replicas
+• Updated: Shows updated replicas
+• Available: Shows available replicas
+
+Common Actions:
+• Scale deployment: Enter to view details and scale
+• Update image: Use deployment details view
+• View pods: See associated pods in details`
+}
+
 func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error) {
 	d.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		// Get deployment to fetch its label selector
 		deployment := resources.NewDeployment(selected, d.namespace, *k)
 		if err := deployment.Fetch(); err != nil {
 			return components.NavigateMsg{
@@ -65,7 +86,6 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 			}
 		}
 
-		// Create pods model filtered by deployment selector
 		podsModel, err := NewPodsWithParent(*k, d.namespace, selected, selector)
 		if err != nil {
 			return components.NavigateMsg{

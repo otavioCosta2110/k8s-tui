@@ -132,11 +132,9 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.loading && m.OnSelected != nil {
 				if len(m.Table.SelectedRow()) > 0 {
 					selected := m.Table.SelectedRow()[m.selectColumn]
-					// Strip icon prefix if present (format: "icon name")
 					if strings.Contains(selected, " ") {
 						parts := strings.SplitN(selected, " ", 2)
 						if len(parts) == 2 && len(parts[0]) > 0 {
-							// Check if first part looks like an icon (contains non-ASCII or is a known icon)
 							firstPart := parts[0]
 							if len(firstPart) > 1 || (len(firstPart) == 1 && firstPart[0] > 127) {
 								selected = parts[1]

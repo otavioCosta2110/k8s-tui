@@ -44,6 +44,28 @@ func NewServices(k k8s.Client, namespace string) (*servicesModel, error) {
 	return model, nil
 }
 
+func (s *servicesModel) Help() (string, string) {
+	return "Services Help", `Services expose applications running on pods.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate services
+• enter: View service details
+• d: Delete selected services
+• r: Refresh
+• /: Search services
+• esc: Go back
+
+Service Types:
+• ClusterIP: Internal cluster access
+• NodePort: External access via node port
+• LoadBalancer: Cloud load balancer
+• ExternalName: DNS alias
+
+Common Actions:
+• View endpoints: See pods backing the service
+• Check connectivity: Use service details`
+}
+
 func (s *servicesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	s.k8sClient = k
 

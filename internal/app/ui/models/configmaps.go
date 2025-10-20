@@ -41,6 +41,23 @@ func NewConfigmaps(k k8s.Client, namespace string) (*configmapsModel, error) {
 	return model, nil
 }
 
+func (c *configmapsModel) Help() (string, string) {
+	return "ConfigMaps Help", `ConfigMaps store configuration data.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate configmaps
+• enter: View configmap details
+• d: Delete selected configmaps
+• r: Refresh
+• /: Search configmaps
+• esc: Go back
+
+Common Actions:
+• View data: See configuration key-value pairs
+• Edit values: Modify configuration data
+• Check usage: See which pods use this config`
+}
+
 func (c *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	c.k8sClient = k
 

@@ -77,17 +77,50 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 		}
 
 		r.resourceType = resourceType
-		newResourceList, err := NewResourceList(r.kube, r.namespace, resourceType).InitComponent(k)
+		resourceList := NewResourceList(r.kube, r.namespace, resourceType)
+		newResourceList, err := resourceList.InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error: err,
 			}
 		}
 		return components.NavigateMsg{
-			NewScreen:  newResourceList,
-			Breadcrumb: resourceType,
+			NewScreen:     newResourceList,
+			ResourceModel: resourceList,
+			Breadcrumb:    resourceType,
 		}
 	}
 
 	return components.NewListWithItems(listItems, customstyles.ResourceIcons["ResourceList"]+" Resource Types", onSelect)
+}
+
+func (r Resource) Help() (string, string) {
+	return "Resource List Help", `Resource List shows available Kubernetes resources.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate resources
+• enter: Select resource type
+• /: Search resources
+• esc: Go back
+
+Resource Categories:
+• Workloads: Pods, Deployments, Jobs, etc.
+• Networking: Services, Ingresses
+• Configuration: ConfigMaps, Secrets
+• Infrastructure: Nodes
+
+Quick Navigation:
+• p: Pods
+• d: Deployments
+• s: Services
+• i: Ingresses
+• c: ConfigMaps
+• e: Secrets
+• n: Nodes
+• j: Jobs
+• k: CronJobs
+• m: DaemonSets
+• t: StatefulSets
+• r: ReplicaSets
+• a: ServiceAccounts`
 }

@@ -44,6 +44,27 @@ func NewCronJobs(k k8s.Client, namespace string) (*cronjobsModel, error) {
 	return model, nil
 }
 
+func (cj *cronjobsModel) Help() (string, string) {
+	return "CronJobs Help", `CronJobs run jobs on a schedule.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate cronjobs
+• enter: View cronjob details
+• d: Delete selected cronjobs
+• r: Refresh
+• /: Search cronjobs
+• esc: Go back
+
+Schedule Format:
+• Uses standard cron syntax
+• Example: "0 0 * * *" = daily at midnight
+
+Common Actions:
+• View schedule: See execution schedule
+• Check history: View past job executions
+• Manual trigger: Run job immediately`
+}
+
 func (cj *cronjobsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	cj.k8sClient = k
 

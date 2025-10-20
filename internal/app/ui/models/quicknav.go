@@ -70,12 +70,14 @@ func (m QuickNavModel) navigateToResource(resourceType string) tea.Cmd {
 			resourceScreen := NewResource(m.kube, m.namespace)
 			resourceComponent := resourceScreen.InitComponent(m.kube)
 			return components.NavigateMsg{
-				NewScreen:  resourceComponent,
-				Breadcrumb: "Resource List",
+				NewScreen:     resourceComponent,
+				ResourceModel: resourceScreen,
+				Breadcrumb:    "Resource List",
 			}
 		}
 
-		resourceList, err := NewResourceList(m.kube, m.namespace, resourceType).InitComponent(m.kube)
+		resourceModel := NewResourceList(m.kube, m.namespace, resourceType)
+		resourceList, err := resourceModel.InitComponent(m.kube)
 		if err != nil {
 			return components.NavigateMsg{
 				Error: err,
@@ -83,8 +85,9 @@ func (m QuickNavModel) navigateToResource(resourceType string) tea.Cmd {
 		}
 
 		return components.NavigateMsg{
-			NewScreen:  resourceList,
-			Breadcrumb: resourceType,
+			NewScreen:     resourceList,
+			ResourceModel: resourceModel,
+			Breadcrumb:    resourceType,
 		}
 	}
 }
@@ -292,7 +295,7 @@ func (m QuickNavModel) View() string {
 	)
 
 	return lipgloss.NewStyle().
-		Width(styles.ScreenWidth).
+		Width(styles.ScreenWidth + styles.Margin).
 		Height(styles.ScreenHeight / 2).
 		Align(lipgloss.Center).
 		Background(lipgloss.Color(customstyles.BackgroundColor)).

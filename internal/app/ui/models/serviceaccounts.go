@@ -41,6 +41,28 @@ func NewServiceAccounts(k k8s.Client, namespace string) (*serviceaccountsModel, 
 	return model, nil
 }
 
+func (s *serviceaccountsModel) Help() (string, string) {
+	return "ServiceAccounts Help", `ServiceAccounts provide identity for processes running in pods.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate serviceaccounts
+• enter: View serviceaccount details
+• d: Delete selected serviceaccounts
+• r: Refresh
+• /: Search serviceaccounts
+• esc: Go back
+
+ServiceAccount Features:
+• Automatic token mounting
+• RBAC permissions
+• Image pull secrets
+
+Common Actions:
+• View secrets: See associated tokens and secrets
+• Check RBAC: View role bindings
+• Manage permissions: Update service account access`
+}
+
 func (s *serviceaccountsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	s.k8sClient = k
 

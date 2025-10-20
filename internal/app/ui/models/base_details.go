@@ -40,10 +40,8 @@ func (b *baseDetailsModel) initCommon(fetchCmd tea.Cmd) tea.Cmd {
 func (b *baseDetailsModel) updateCommon(msg tea.Msg) (tea.Cmd, bool) {
 	switch msg.(type) {
 	case components.SaveMsg:
-		// Handle save - this should be overridden by subclasses
 		return nil, true
 	case components.CancelMsg:
-		// Handle cancel - switch back to view mode
 		b.editing = false
 		return nil, true
 	}

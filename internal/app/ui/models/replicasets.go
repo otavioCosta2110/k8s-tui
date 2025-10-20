@@ -43,6 +43,28 @@ func NewReplicaSets(k k8s.Client, namespace string) (*replicasetsModel, error) {
 	return model, nil
 }
 
+func (r *replicasetsModel) Help() (string, string) {
+	return "ReplicaSets Help", `ReplicaSets ensure a specified number of pod replicas are running.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate replicasets
+• enter: View replicaset details
+• d: Delete selected replicasets
+• r: Refresh
+• /: Search replicasets
+• esc: Go back
+
+ReplicaSet Status:
+• Desired: Number of desired pods
+• Current: Number of current pods
+• Ready: Number of ready pods
+
+Common Actions:
+• View pods: See pods managed by this replicaset
+• Check owner: See which deployment owns this replicaset
+• Manual scaling: Adjust replica count`
+}
+
 func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	r.k8sClient = k
 

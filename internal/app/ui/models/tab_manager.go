@@ -11,21 +11,23 @@ import (
 )
 
 type TabData struct {
-	ID           string
-	Title        string
-	ResourceType string
-	Model        tea.Model
-	Breadcrumb   []string
-	ScreenStack  []tea.Model
-	CurrentIndex int
+	ID            string
+	Title         string
+	ResourceType  string
+	Model         tea.Model
+	ResourceModel interface{} 
+	Breadcrumb    []string
+	ScreenStack   []tea.Model
+	CurrentIndex  int
 }
 
 type TabManager struct {
-	tabs        []TabData
-	activeIndex int
-	kubeClient  *k8s.Client
-	namespace   string
-	keyBindings map[string]string
+	tabs                 []TabData
+	activeIndex          int
+	kubeClient           *k8s.Client
+	namespace            string
+	keyBindings          map[string]string
+	resourceTypeCallback func(resourceType string)
 }
 
 type TabManagerMsg struct {
@@ -70,13 +72,14 @@ func (tm *TabManager) createInitialTab() {
 	resourceComponent := resourceModel.InitComponent(*tm.kubeClient)
 
 	initialTab := TabData{
-		ID:           "initial",
-		Title:        "Resources",
-		ResourceType: "ResourceList",
-		Model:        resourceComponent,
-		Breadcrumb:   []string{"Resource List"},
-		ScreenStack:  []tea.Model{resourceComponent},
-		CurrentIndex: 0,
+		ID:            "initial",
+		Title:         "Resources",
+		ResourceType:  "ResourceList",
+		Model:         resourceComponent,
+		ResourceModel: resourceModel,
+		Breadcrumb:    []string{"Resource List"},
+		ScreenStack:   []tea.Model{resourceComponent},
+		CurrentIndex:  0,
 	}
 
 	tm.tabs = append(tm.tabs, initialTab)
@@ -118,6 +121,10 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			activeTab.CurrentIndex = len(activeTab.ScreenStack) - 1
 			activeTab.Model = msg.NewScreen
 
+			if msg.ResourceModel != nil {
+				activeTab.ResourceModel = msg.ResourceModel
+			}
+
 			if msg.Breadcrumb != "" {
 				activeTab.Breadcrumb = append(activeTab.Breadcrumb, msg.Breadcrumb)
 			}
@@ -125,6 +132,9 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(activeTab.Breadcrumb) > 0 {
 				activeTab.Title = activeTab.Breadcrumb[len(activeTab.Breadcrumb)-1]
 				activeTab.ResourceType = activeTab.Title
+				if tm.resourceTypeCallback != nil {
+					tm.resourceTypeCallback(activeTab.ResourceType)
+				}
 			}
 
 			return tm, msg.NewScreen.Init()
@@ -181,9 +191,10 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 		var model tea.Model
 		var err error
 
+		var resourceModel interface{}
 		if tabInfo.ResourceType == "ResourceList" || tabInfo.ResourceType == "Resources" {
-			resourceModel := NewResource(*tm.kubeClient, tm.namespace)
-			model = resourceModel.InitComponent(*tm.kubeClient)
+			resourceModel = NewResource(*tm.kubeClient, tm.namespace)
+			model = resourceModel.(Resource).InitComponent(*tm.kubeClient)
 		} else {
 			resourceList := NewResourceList(*tm.kubeClient, tm.namespace, tabInfo.ResourceType)
 			model, err = resourceList.InitComponent(*tm.kubeClient)
@@ -191,16 +202,18 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 				logger.Error(fmt.Sprintf("Failed to create %s model: %v", tabInfo.ResourceType, err))
 				return fmt.Errorf("failed to create %s model: %v", tabInfo.ResourceType, err)
 			}
+			resourceModel = resourceList
 		}
 
 		tabData := TabData{
-			ID:           tabInfo.ID,
-			Title:        tabInfo.Title,
-			ResourceType: tabInfo.ResourceType,
-			Model:        model,
-			Breadcrumb:   tabInfo.Breadcrumb,
-			ScreenStack:  []tea.Model{model},
-			CurrentIndex: 0,
+			ID:            tabInfo.ID,
+			Title:         tabInfo.Title,
+			ResourceType:  tabInfo.ResourceType,
+			Model:         model,
+			ResourceModel: resourceModel,
+			Breadcrumb:    tabInfo.Breadcrumb,
+			ScreenStack:   []tea.Model{model},
+			CurrentIndex:  0,
 		}
 
 		tm.tabs = append(tm.tabs, tabData)
@@ -216,6 +229,10 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 
 func (tm *TabManager) SetNamespace(namespace string) {
 	tm.namespace = namespace
+}
+
+func (tm *TabManager) SetResourceTypeCallback(callback func(resourceType string)) {
+	tm.resourceTypeCallback = callback
 }
 
 func (tm *TabManager) View() string {
@@ -234,13 +251,14 @@ func (tm *TabManager) CreateNewTab(model tea.Model, breadcrumb string) (tea.Mode
 	tabID := fmt.Sprintf("tab-%d", len(tm.tabs)+1)
 
 	newTab := TabData{
-		ID:           tabID,
-		Title:        breadcrumb,
-		ResourceType: resourceType,
-		Model:        model,
-		Breadcrumb:   []string{breadcrumb},
-		ScreenStack:  []tea.Model{model},
-		CurrentIndex: 0,
+		ID:            tabID,
+		Title:         breadcrumb,
+		ResourceType:  resourceType,
+		Model:         model,
+		ResourceModel: nil, 
+		Breadcrumb:    []string{breadcrumb},
+		ScreenStack:   []tea.Model{model},
+		CurrentIndex:  0,
 	}
 
 	tm.tabs = append(tm.tabs, newTab)
@@ -253,13 +271,28 @@ func (tm *TabManager) CreateNewResourceTab() (tea.Model, tea.Cmd) {
 	resourceModel := NewResource(*tm.kubeClient, tm.namespace)
 	resourceComponent := resourceModel.InitComponent(*tm.kubeClient)
 
-	return tm.CreateNewTab(resourceComponent, "Resource List")
+	tm.tabs = append(tm.tabs, TabData{
+		ID:            fmt.Sprintf("tab-%d", len(tm.tabs)+1),
+		Title:         "Resource List",
+		ResourceType:  "ResourceList",
+		Model:         resourceComponent,
+		ResourceModel: resourceModel,
+		Breadcrumb:    []string{"Resource List"},
+		ScreenStack:   []tea.Model{resourceComponent},
+		CurrentIndex:  0,
+	})
+	tm.activeIndex = len(tm.tabs) - 1
+
+	return tm, resourceComponent.Init()
 }
 
 func (tm *TabManager) switchToTab(tabID string) (tea.Model, tea.Cmd) {
 	for i, tab := range tm.tabs {
 		if tab.ID == tabID {
 			tm.activeIndex = i
+			if tm.resourceTypeCallback != nil {
+				tm.resourceTypeCallback(tm.tabs[i].ResourceType)
+			}
 			return tm, nil
 		}
 	}
@@ -367,6 +400,9 @@ func (tm *TabManager) navigateForward() (tea.Model, tea.Cmd) {
 			if len(activeTab.Breadcrumb) > 0 && activeTab.CurrentIndex < len(activeTab.Breadcrumb) {
 				activeTab.Title = activeTab.Breadcrumb[activeTab.CurrentIndex]
 				activeTab.ResourceType = activeTab.Title
+				if tm.resourceTypeCallback != nil {
+					tm.resourceTypeCallback(activeTab.ResourceType)
+				}
 			}
 			return tm, activeTab.Model.Init()
 		}

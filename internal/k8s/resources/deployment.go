@@ -139,10 +139,8 @@ func (d *DeploymentInfo) Describe() (string, error) {
 		return "", fmt.Errorf("deployment raw data is nil")
 	}
 
-	// Create a map-based description that filters out empty/null values like kubectl does
-	desc := make(map[string]interface{})
+	desc := make(map[string]any)
 
-	// apiVersion and kind
 	apiVersion := d.Raw.APIVersion
 	if apiVersion == "" {
 		apiVersion = "apps/v1"
@@ -155,7 +153,6 @@ func (d *DeploymentInfo) Describe() (string, error) {
 	}
 	desc["kind"] = kind
 
-	// Metadata - filter out empty fields
 	metadata := make(map[string]interface{})
 	objMeta := d.Raw.ObjectMeta
 
@@ -201,11 +198,9 @@ func (d *DeploymentInfo) Describe() (string, error) {
 	if len(objMeta.Finalizers) > 0 {
 		metadata["finalizers"] = objMeta.Finalizers
 	}
-	// Skip managedFields as kubectl doesn't show them
 
 	desc["metadata"] = metadata
 
-	// Spec
 	spec := make(map[string]interface{})
 	deploymentSpec := d.Raw.Spec
 
@@ -215,12 +210,10 @@ func (d *DeploymentInfo) Describe() (string, error) {
 	if deploymentSpec.Selector != nil {
 		spec["selector"] = deploymentSpec.Selector
 	}
-	// Always include template if it has a spec, and ensure metadata is properly structured
 	if deploymentSpec.Template.Spec.Containers != nil || len(deploymentSpec.Template.Spec.Containers) > 0 {
 		template := make(map[string]interface{})
 		templateMeta := make(map[string]interface{})
 
-		// Always include labels if selector exists to prevent validation errors
 		if deploymentSpec.Selector != nil && deploymentSpec.Selector.MatchLabels != nil {
 			templateMeta["labels"] = deploymentSpec.Selector.MatchLabels
 		} else if len(deploymentSpec.Template.ObjectMeta.Labels) > 0 {
@@ -235,7 +228,6 @@ func (d *DeploymentInfo) Describe() (string, error) {
 			template["metadata"] = templateMeta
 		}
 
-		// Filter the pod spec to exclude empty fields
 		podSpec := d.filterPodSpec(deploymentSpec.Template.Spec)
 		template["spec"] = podSpec
 		spec["template"] = template
@@ -267,7 +259,6 @@ func (d *DeploymentInfo) Describe() (string, error) {
 
 	desc["spec"] = spec
 
-	// Status
 	status := make(map[string]interface{})
 	deploymentStatus := d.Raw.Status
 
@@ -313,7 +304,6 @@ func (d *DeploymentInfo) filterPodSpec(podSpec corev1.PodSpec) map[string]interf
 		spec["initContainers"] = podSpec.InitContainers
 	}
 	if len(podSpec.Containers) > 0 {
-		// Filter containers to exclude empty fields
 		containers := make([]map[string]interface{}, 0, len(podSpec.Containers))
 		for _, container := range podSpec.Containers {
 			containerMap := d.filterContainer(container)
@@ -401,7 +391,7 @@ func (d *DeploymentInfo) filterPodSpec(podSpec corev1.PodSpec) map[string]interf
 }
 
 func (d *DeploymentInfo) filterContainer(container corev1.Container) map[string]interface{} {
-	containerMap := make(map[string]interface{})
+	containerMap := make(map[string]any)
 
 	containerMap["name"] = container.Name
 	containerMap["image"] = container.Image
@@ -416,10 +406,8 @@ func (d *DeploymentInfo) filterContainer(container corev1.Container) map[string]
 		containerMap["workingDir"] = container.WorkingDir
 	}
 	if len(container.Ports) > 0 {
-		// Filter ports to exclude invalid entries
-		ports := make([]map[string]interface{}, 0, len(container.Ports))
+		ports := make([]map[string]any, 0, len(container.Ports))
 		for _, port := range container.Ports {
-			// Only include ports with valid containerPort (> 0)
 			if port.ContainerPort > 0 {
 				portMap := make(map[string]interface{})
 				if port.Name != "" {
@@ -470,13 +458,11 @@ func (d *DeploymentInfo) filterContainer(container corev1.Container) map[string]
 		containerMap["tty"] = container.TTY
 	}
 
-	// Resources - filter out empty resource requirements
 	if !d.isEmptyResourceRequirements(container.Resources) {
 		resources := make(map[string]interface{})
 		if !d.isEmptyResourceList(container.Resources.Limits) {
 			limits := make(map[string]interface{})
 			for k, v := range container.Resources.Limits {
-				// Only include non-zero resource quantities
 				if !v.IsZero() {
 					limits[string(k)] = v.String()
 				}
@@ -488,7 +474,6 @@ func (d *DeploymentInfo) filterContainer(container corev1.Container) map[string]
 		if !d.isEmptyResourceList(container.Resources.Requests) {
 			requests := make(map[string]interface{})
 			for k, v := range container.Resources.Requests {
-				// Only include non-zero resource quantities
 				if !v.IsZero() {
 					requests[string(k)] = v.String()
 				}
@@ -535,7 +520,6 @@ func (d *DeploymentInfo) isEmptyResourceList(rl corev1.ResourceList) bool {
 	if rl == nil || len(rl) == 0 {
 		return true
 	}
-	// Check if all quantities are zero
 	for _, quantity := range rl {
 		if !quantity.IsZero() {
 			return false
@@ -550,14 +534,11 @@ func (d *DeploymentInfo) Apply(yamlContent string) error {
 		return fmt.Errorf("failed to unmarshal YAML: %v", err)
 	}
 
-	// Ensure the name and namespace match the current deployment
 	deployment.Name = d.Name
 	deployment.Namespace = d.Namespace
 
-	// Validate and fix container ports to prevent Kubernetes validation errors
 	for i := range deployment.Spec.Template.Spec.Containers {
 		container := &deployment.Spec.Template.Spec.Containers[i]
-		// Filter out invalid ports (containerPort must be > 0)
 		validPorts := make([]corev1.ContainerPort, 0, len(container.Ports))
 		for _, port := range container.Ports {
 			if port.ContainerPort > 0 {
@@ -567,12 +548,10 @@ func (d *DeploymentInfo) Apply(yamlContent string) error {
 		container.Ports = validPorts
 	}
 
-	// Validate that selector matches template labels to prevent Kubernetes validation errors
 	if deployment.Spec.Selector != nil && deployment.Spec.Selector.MatchLabels != nil {
 		if deployment.Spec.Template.ObjectMeta.Labels == nil {
 			deployment.Spec.Template.ObjectMeta.Labels = make(map[string]string)
 		}
-		// Ensure template labels include selector labels
 		for key, value := range deployment.Spec.Selector.MatchLabels {
 			if _, exists := deployment.Spec.Template.ObjectMeta.Labels[key]; !exists {
 				deployment.Spec.Template.ObjectMeta.Labels[key] = value

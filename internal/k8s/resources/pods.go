@@ -63,10 +63,8 @@ func processPodData(pod *corev1.Pod) (PodInfo, error) {
 		age = format.FormatAge(pod.Status.StartTime.Time)
 	}
 
-	// Determine status similar to kubectl
 	status := string(pod.Status.Phase)
 	if pod.Status.Phase == corev1.PodRunning {
-		// Check for CrashLoopBackOff or other waiting reasons
 		for _, cs := range pod.Status.ContainerStatuses {
 			if cs.State.Waiting != nil && cs.State.Waiting.Reason != "" {
 				status = cs.State.Waiting.Reason

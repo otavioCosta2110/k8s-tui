@@ -5,6 +5,7 @@ import (
 
 	"github.com/otavioCosta2110/k8s-tui/internal/app/cli"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/config"
+	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/models"
 	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	resources "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
@@ -31,6 +32,13 @@ func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pl
 
 	tabManager := models.NewTabManager(kubeClient, cfg.Namespace, appConfig.KeyBindings)
 
+	if pluginManager != nil {
+		pluginManager.GetAPI().SetCurrentResourceType("ResourceList")
+		tabManager.SetResourceTypeCallback(func(resourceType string) {
+			pluginManager.GetAPI().SetCurrentResourceType(resourceType)
+		})
+	}
+
 	uiInjector := NewUIInjector()
 
 	appModel := &AppModel{
@@ -39,6 +47,7 @@ func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pl
 		kube:           *kubeClient,
 		config:         appConfig,
 		configSelected: true,
+		helpScreen:     components.NewHelpModel(),
 		pluginManager:  pluginManager,
 		uiInjector:     uiInjector,
 	}
@@ -134,6 +143,7 @@ func createAppModelWithoutKubeClient(appConfig config.AppConfig, pluginManager *
 		header:        models.NewHeader("K8s TUI", nil),
 		config:        appConfig,
 		errorPopup:    &popup,
+		helpScreen:    components.NewHelpModel(),
 		pluginManager: pluginManager,
 		uiInjector:    uiInjector,
 	}
@@ -177,6 +187,7 @@ func createFallbackAppModel(appConfig config.AppConfig, pluginManager *plugins.P
 	appModel := &AppModel{
 		header:        models.NewHeader("K8s TUI", nil),
 		config:        appConfig,
+		helpScreen:    components.NewHelpModel(),
 		pluginManager: pluginManager,
 		uiInjector:    uiInjector,
 	}

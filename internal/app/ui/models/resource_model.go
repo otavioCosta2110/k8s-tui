@@ -135,6 +135,43 @@ func (g *GenericResourceModel) GetNamespace() string {
 	return g.namespace
 }
 
+func (g *GenericResourceModel) Help() (string, string) {
+	resourceTypeToDisplay := map[k8s.ResourceType]string{
+		k8s.ResourceTypePod:                   "Pods",
+		k8s.ResourceTypeDeployment:            "Deployments",
+		k8s.ResourceTypeService:               "Services",
+		k8s.ResourceTypeIngress:               "Ingresses",
+		k8s.ResourceTypeConfigMap:             "ConfigMaps",
+		k8s.ResourceTypeSecret:                "Secrets",
+		k8s.ResourceTypeReplicaSet:            "ReplicaSets",
+		k8s.ResourceTypeJob:                   "Jobs",
+		k8s.ResourceTypeCronJob:               "CronJobs",
+		k8s.ResourceTypeDaemonSet:             "DaemonSets",
+		k8s.ResourceTypeStatefulSet:           "StatefulSets",
+		k8s.ResourceTypeNode:                  "Nodes",
+		k8s.ResourceTypePersistentVolume:      "PersistentVolumes",
+		k8s.ResourceTypePersistentVolumeClaim: "PersistentVolumeClaims",
+		k8s.ResourceTypeServiceAccount:        "ServiceAccounts",
+	}
+
+	displayName, exists := resourceTypeToDisplay[g.resourceType]
+	if !exists {
+		displayName = string(g.resourceType)
+	}
+
+	return fmt.Sprintf("%s Help", displayName), fmt.Sprintf(`Help for %s
+
+Key Bindings:
+• ↑/↓/j/k: Navigate items
+• enter: View details
+• d: Delete selected items (if supported)
+• r: Refresh
+• /: Search
+• esc: Go back
+
+For more specific help, check the resource documentation.`, displayName)
+}
+
 func (g *GenericResourceModel) dataToRows() []table.Row {
 	resourceTypeToDisplay := map[k8s.ResourceType]string{
 		k8s.ResourceTypePod:                   "Pods",
@@ -164,7 +201,6 @@ func (g *GenericResourceModel) dataToRows() []table.Row {
 					nameIndex = 0
 				}
 				if len(row) > nameIndex {
-					// Check health status
 					isHealthy := g.isResourceHealthy(rd)
 					displayIcon := icon
 					if !isHealthy {
@@ -179,7 +215,6 @@ func (g *GenericResourceModel) dataToRows() []table.Row {
 	return rows
 }
 
-// isResourceHealthy checks if a resource is in a healthy state
 func (g *GenericResourceModel) isResourceHealthy(rd types.ResourceData) bool {
 	switch g.config.ResourceType {
 	case k8s.ResourceTypePod:
@@ -193,6 +228,5 @@ func (g *GenericResourceModel) isResourceHealthy(rd types.ResourceData) bool {
 			}
 		}
 	}
-	// Default to healthy for other resource types
 	return true
 }

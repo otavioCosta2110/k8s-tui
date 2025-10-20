@@ -55,6 +55,29 @@ func NewPodsWithParent(k k8s.Client, namespace, parentDeployment string, selecto
 	return model, nil
 }
 
+func (p *podsModel) Help() (string, string) {
+	return "Pods Help", `Pods are the smallest deployable units in Kubernetes.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate pods
+• enter: View pod details
+• d: Delete selected pods
+• r: Refresh
+• /: Search pods
+• esc: Go back
+
+Pod Status:
+• Running: Pod is running successfully
+• Pending: Pod is being scheduled
+• Failed: Pod has failed
+• Succeeded: Pod completed successfully
+
+Common Actions:
+• View logs: Enter on a pod to see details
+• Delete pod: Select with space, then press 'd'
+• Refresh: Press 'r' to update the list`
+}
+
 func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	p.k8sClient = k
 

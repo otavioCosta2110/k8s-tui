@@ -42,6 +42,28 @@ func NewJobs(k k8s.Client, namespace string) (*jobsModel, error) {
 	return model, nil
 }
 
+func (j *jobsModel) Help() (string, string) {
+	return "Jobs Help", `Jobs create and manage batch processing tasks.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate jobs
+• enter: View job details
+• d: Delete selected jobs
+• r: Refresh
+• /: Search jobs
+• esc: Go back
+
+Job Status:
+• Complete: Job finished successfully
+• Failed: Job failed
+• Active: Job is running
+
+Common Actions:
+• View pods: See job execution pods
+• Check logs: Examine job output
+• Retry failed jobs: Delete and recreate`
+}
+
 func (j *jobsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	j.k8sClient = k
 

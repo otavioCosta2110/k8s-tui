@@ -41,6 +41,27 @@ func NewStatefulSets(k k8s.Client, namespace string) (*statefulsetsModel, error)
 	return model, nil
 }
 
+func (ss *statefulsetsModel) Help() (string, string) {
+	return "StatefulSets Help", `StatefulSets manage stateful applications with persistent storage.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate statefulsets
+• enter: View statefulset details
+• d: Delete selected statefulsets
+• r: Refresh
+• /: Search statefulsets
+• esc: Go back
+
+StatefulSet Status:
+• Ready: Shows ready/desired replicas
+• Each pod has a stable identity and storage
+
+Common Actions:
+• Scale statefulset: Change replica count
+• View persistent volumes: See attached storage
+• Check pod ordering: StatefulSets maintain pod identity`
+}
+
 func (ss *statefulsetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	ss.k8sClient = k
 

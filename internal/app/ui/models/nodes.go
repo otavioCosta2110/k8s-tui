@@ -45,6 +45,27 @@ func NewNodes(k k8s.Client, namespace string) (*nodesModel, error) {
 	return model, nil
 }
 
+func (n *nodesModel) Help() (string, string) {
+	return "Nodes Help", `Nodes are the worker machines in the cluster.
+
+Key Bindings:
+• ↑/↓/j/k: Navigate nodes
+• enter: View node details
+• r: Refresh
+• /: Search nodes
+• esc: Go back
+
+Node Status:
+• Ready: Node is healthy and schedulable
+• NotReady: Node has issues
+• SchedulingDisabled: Node won't accept new pods
+
+Common Actions:
+• View capacity: See CPU/memory resources
+• Check conditions: View node health status
+• View pods: See pods running on node`
+}
+
 func (n *nodesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	n.k8sClient = k
 

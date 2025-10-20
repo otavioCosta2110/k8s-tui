@@ -77,6 +77,21 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	if m.helpScreen != nil && m.helpScreen.IsVisible() {
+		switch msg.String() {
+		case "esc", "q", "?":
+			m.helpScreen.Close()
+			return m, nil
+		default:
+			var cmd tea.Cmd
+			updatedHelp, cmd := m.helpScreen.Update(msg)
+			if help, ok := updatedHelp.(*components.HelpModel); ok {
+				m.helpScreen = help
+			}
+			return m, cmd
+		}
+	}
+
 	switch msg.String() {
 	case "esc":
 		if m.errorPopup != nil {
@@ -103,6 +118,13 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		m.quickNav = models.NewQuickNavModel(m.kube, m.kube.Namespace)
 		return m, m.quickNav.Init()
+	case m.getKeyBinding("help"):
+		if m.helpScreen != nil && m.pluginManager != nil {
+			resourceType := m.pluginManager.GetAPI().GetCurrentResourceType()
+			title, content := m.pluginManager.GetAPI().GetHelp(resourceType)
+			m.helpScreen.SetContent(title, content)
+		}
+		return m, nil
 	case m.getKeyBinding("new_tab"):
 		if m.tabManager != nil {
 			updatedManager, cmd := m.tabManager.Update(msg)

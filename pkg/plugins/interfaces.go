@@ -302,4 +302,10 @@ type PluginAPI interface {
 	SetTabSetterCallback(callback func())
 
 	ShowInputDialog(title, placeholder, submitCommand, cancelCommand string)
+
+	GetCurrentResourceType() string
+
+	GetHelp(resourceType string) (title, content string)
+
+	RegisterHelp(resourceType string, title, content string)
 }

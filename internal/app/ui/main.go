@@ -32,6 +32,7 @@ type AppModel struct {
 	errorPopup          *models.ErrorModel
 	quickNav            tea.Model
 	textInput           tea.Model
+	helpScreen          *components.HelpModel
 	pendingInputDialog  *InputDialogRequest
 	currentResourceType string
 	breadcrumbTrail     []string
@@ -87,6 +88,8 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleHeaderRefreshMsg(msg)
 	case models.CloseQuickNavMsg:
 		return m.handleCloseQuickNavMsg(msg)
+	case components.CloseHelpMsg:
+		return m, nil
 	case components.TextInputSubmitMsg:
 		return m, nil
 	case components.TextInputCancelMsg:
@@ -117,6 +120,10 @@ func (m *AppModel) View() string {
 
 	if m.errorPopup != nil {
 		return m.errorPopup.View()
+	}
+
+	if m.helpScreen != nil && m.helpScreen.IsVisible() {
+		return m.helpScreen.View()
 	}
 
 	if m.tabManager == nil {
