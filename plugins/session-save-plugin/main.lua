@@ -74,10 +74,58 @@ function load_session_cli_handler(value)
   local content = file:read("*all")
   file:close()
 
-  -- Simple JSON parsing for namespace
-  -- Look for "namespace":"value"
-  local namespace_pattern = '"namespace"%s*:%s*"([^"]+)"'
-  local namespace = content:match(namespace_pattern)
+   -- Simple JSON parsing for namespace
+   -- Look for "namespace":"value"
+   local namespace_pattern = '"namespace"%s*:%s*"([^"]+)"'
+   local namespace = content:match(namespace_pattern)
+
+   -- Parse breadcrumb array
+   -- Look for "breadcrumb": [ ... ] and extract the array content
+   local breadcrumb_start = content:find('"breadcrumb"%s*:%s*%[')
+   local breadcrumb_content = nil
+   if breadcrumb_start then
+     -- Find the position after "breadcrumb":[
+     local bracket_count = 0
+     local in_string = false
+     local escape_next = false
+     local end_pos = breadcrumb_start - 1
+
+     for i = breadcrumb_start, #content do
+       local char = content:sub(i, i)
+       if escape_next then
+         escape_next = false
+       elseif char == '\\' then
+         escape_next = true
+       elseif char == '"' then
+         in_string = not in_string
+       elseif not in_string then
+         if char == '[' then
+           bracket_count = bracket_count + 1
+         elseif char == ']' then
+           bracket_count = bracket_count - 1
+           if bracket_count == 0 then
+             end_pos = i
+             break
+           end
+         end
+       end
+     end
+
+     if end_pos > breadcrumb_start then
+       -- Extract content between brackets
+       local start_bracket = content:find('%[', breadcrumb_start)
+       if start_bracket then
+         breadcrumb_content = content:sub(start_bracket + 1, end_pos - 1)
+       end
+     end
+   end
+
+   local breadcrumb = {}
+   if breadcrumb_content then
+     for crumb in breadcrumb_content:gmatch('"([^"]+)"') do
+       table.insert(breadcrumb, crumb)
+     end
+   end
 
   -- Parse tabs array
   -- Look for "tabs": [ ... ] and extract the array content
@@ -128,20 +176,25 @@ function load_session_cli_handler(value)
     for tab_str in tabs_content:gmatch('{%s*([^}]+)%s*}') do
       local tab = {}
 
-      -- Extract ID
-      local id_pattern = '"ID"%s*:%s*"([^"]+)"'
-      local id = tab_str:match(id_pattern)
-      if id then tab.ID = id end
+       -- Extract ID
+       local id_pattern = '"ID"%s*:%s*"([^"]+)"'
+       local id = tab_str:match(id_pattern)
+       if id then tab.ID = id end
 
-      -- Extract title
-      local title_pattern = '"Title"%s*:%s*"([^"]+)"'
-      local title = tab_str:match(title_pattern)
-      if title then tab.Title = title end
+       -- Extract title
+       local title_pattern = '"Title"%s*:%s*"([^"]+)"'
+       local title = tab_str:match(title_pattern)
+       if title then tab.Title = title end
 
-      -- Extract resourceType
-      local resourceType_pattern = '"ResourceType"%s*:%s*"([^"]+)"'
-      local resourceType = tab_str:match(resourceType_pattern)
-      if resourceType then tab.ResourceType = resourceType end
+       -- Extract resourceType
+       local resourceType_pattern = '"ResourceType"%s*:%s*"([^"]+)"'
+       local resourceType = tab_str:match(resourceType_pattern)
+       if resourceType then tab.ResourceType = resourceType end
+
+       -- Extract currentIndex
+       local currentIndex_pattern = '"CurrentIndex"%s*:%s*(%d+)'
+       local currentIndex = tab_str:match(currentIndex_pattern)
+       if currentIndex then tab.CurrentIndex = tonumber(currentIndex) end
 
       -- Extract breadcrumb array
       local breadcrumb_pattern = '"Breadcrumb"%s*:%s*%[([^]]*)%]'
@@ -169,24 +222,32 @@ function load_session_cli_handler(value)
     k8s_tui.set_namespace(namespace)
   end
 
-  -- Restore tabs if found
-  if #tabs > 0 and k8s_tui and k8s_tui.set_tabs then
-    local result, err = k8s_tui.set_tabs(tabs)
-    if err then
-      k8s_tui.set_status("Failed to restore tabs: " .. tostring(err))
-      return nil, "Failed to restore tabs: " .. tostring(err)
-    end
-  end
+   -- Restore tabs if found
+   if #tabs > 0 and k8s_tui and k8s_tui.set_tabs then
+     local result, err = k8s_tui.set_tabs(tabs)
+     if err then
+       k8s_tui.set_status("Failed to restore tabs: " .. tostring(err))
+       return nil, "Failed to restore tabs: " .. tostring(err)
+     end
+   end
 
-  -- Set status
-  local status_msg = "Session loaded from " .. value
-  if namespace then
-    status_msg = status_msg .. " (namespace: " .. namespace .. ")"
-  end
-  if #tabs > 0 then
-    status_msg = status_msg .. " (tabs: " .. #tabs .. ")"
-  end
-  k8s_tui.set_status(status_msg)
+   -- Restore breadcrumb if found
+   if #breadcrumb > 0 and k8s_tui and k8s_tui.set_breadcrumb_trail then
+     k8s_tui.set_breadcrumb_trail(breadcrumb)
+   end
+
+   -- Set status
+   local status_msg = "Session loaded from " .. value
+   if namespace then
+     status_msg = status_msg .. " (namespace: " .. namespace .. ")"
+   end
+   if #tabs > 0 then
+     status_msg = status_msg .. " (tabs: " .. #tabs .. ")"
+   end
+   if #breadcrumb > 0 then
+     status_msg = status_msg .. " (breadcrumb: " .. table.concat(breadcrumb, " > ") .. ")"
+   end
+   k8s_tui.set_status(status_msg)
 
   return "Session loaded successfully", nil
 end
@@ -245,26 +306,32 @@ function save_session_to_file(filename)
     k8s_tui.set_status("DEBUG: Saving to: " .. path)
   end
 
-  local namespace = k8s_tui.get_namespace and k8s_tui.get_namespace() or ""
-  local tabs = k8s_tui.get_tabs and k8s_tui.get_tabs() or {}
+   local namespace = k8s_tui.get_namespace and k8s_tui.get_namespace() or ""
+   local tabs = k8s_tui.get_tabs and k8s_tui.get_tabs() or {}
+   local breadcrumb = k8s_tui.get_breadcrumb_trail and k8s_tui.get_breadcrumb_trail() or {}
 
-  -- Generate simple JSON
-  local json = '{"namespace":"' .. namespace .. '","tabs":['
-  for i, tab in ipairs(tabs) do
-    if i > 1 then json = json .. ',' end
-    json = json ..
-        '{"ID":"' ..
-        (tab.ID or "") ..
-        '","Title":"' .. (tab.Title or "") .. '","ResourceType":"' .. (tab.ResourceType or "") .. '","Breadcrumb":['
-    if tab.Breadcrumb then
-      for j, crumb in ipairs(tab.Breadcrumb) do
-        if j > 1 then json = json .. ',' end
-        json = json .. '"' .. crumb .. '"'
+   -- Generate simple JSON
+   local json = '{"namespace":"' .. namespace .. '","breadcrumb":['
+   for i, crumb in ipairs(breadcrumb) do
+     if i > 1 then json = json .. ',' end
+     json = json .. '"' .. crumb .. '"'
+   end
+   json = json .. '],"tabs":['
+   for i, tab in ipairs(tabs) do
+     if i > 1 then json = json .. ',' end
+      json = json ..
+          '{"ID":"' ..
+          (tab.ID or "") ..
+          '","Title":"' .. (tab.Title or "") .. '","ResourceType":"' .. (tab.ResourceType or "") .. '","CurrentIndex":' .. (tab.CurrentIndex or 0) .. ',"Breadcrumb":['
+      if tab.Breadcrumb then
+        for j, crumb in ipairs(tab.Breadcrumb) do
+          if j > 1 then json = json .. ',' end
+          json = json .. '"' .. crumb .. '"'
+        end
       end
-    end
-    json = json .. ']}'
-  end
-  json = json .. ']}'
+      json = json .. ']}'
+   end
+   json = json .. ']}'
 
   local full_path = os.getenv("PWD") .. "/" .. path
   local file = io.open(full_path, "w")

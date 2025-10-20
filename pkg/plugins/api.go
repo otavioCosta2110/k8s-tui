@@ -162,6 +162,8 @@ type PluginAPIImpl struct {
 	setTabSetterCallback    func()
 	setNamespaceCallback    func(namespace string)
 	setStatusCallback       func(message string)
+	setBreadcrumbCallback   func(breadcrumb []string)
+	getBreadcrumbCallback   func() []string
 	showInputDialogCallback func(title, placeholder, submitCommand, cancelCommand string)
 	customHelp              map[string]struct {
 		title   string
@@ -593,6 +595,27 @@ func (api *PluginAPIImpl) SetStatusCallback(callback func(message string)) {
 
 func (api *PluginAPIImpl) SetTabSetterCallback(callback func()) {
 	api.setTabSetterCallback = callback
+}
+
+func (api *PluginAPIImpl) SetBreadcrumbCallback(callback func(breadcrumb []string)) {
+	api.setBreadcrumbCallback = callback
+}
+
+func (api *PluginAPIImpl) GetBreadcrumbCallback(callback func() []string) {
+	api.getBreadcrumbCallback = callback
+}
+
+func (api *PluginAPIImpl) GetBreadcrumbTrail() []string {
+	if api.getBreadcrumbCallback != nil {
+		return api.getBreadcrumbCallback()
+	}
+	return []string{}
+}
+
+func (api *PluginAPIImpl) SetBreadcrumbTrail(breadcrumb []string) {
+	if api.setBreadcrumbCallback != nil {
+		api.setBreadcrumbCallback(breadcrumb)
+	}
 }
 
 func (api *PluginAPIImpl) ShowInputDialog(title, placeholder, submitCommand, cancelCommand string) {

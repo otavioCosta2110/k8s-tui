@@ -6,6 +6,7 @@ import (
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -15,7 +16,7 @@ type TabData struct {
 	Title         string
 	ResourceType  string
 	Model         tea.Model
-	ResourceModel interface{} 
+	ResourceModel interface{}
 	Breadcrumb    []string
 	ScreenStack   []tea.Model
 	CurrentIndex  int
@@ -131,7 +132,8 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if len(activeTab.Breadcrumb) > 0 {
 				activeTab.Title = activeTab.Breadcrumb[len(activeTab.Breadcrumb)-1]
-				activeTab.ResourceType = activeTab.Title
+				// Set ResourceType based on the actual resource type, not the breadcrumb text
+				activeTab.ResourceType = tm.inferResourceTypeFromBreadcrumb(activeTab.Title)
 				if tm.resourceTypeCallback != nil {
 					tm.resourceTypeCallback(activeTab.ResourceType)
 				}
@@ -188,32 +190,113 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 	for i, tabInfo := range tabInfos {
 		logger.Info(fmt.Sprintf("DEBUG: Restoring tab %d: ID=%s, Title=%s, ResourceType=%s, Breadcrumb=%v",
 			i, tabInfo.ID, tabInfo.Title, tabInfo.ResourceType, tabInfo.Breadcrumb))
-		var model tea.Model
-		var err error
 
-		var resourceModel interface{}
-		if tabInfo.ResourceType == "ResourceList" || tabInfo.ResourceType == "Resources" {
-			resourceModel = NewResource(*tm.kubeClient, tm.namespace)
-			model = resourceModel.(Resource).InitComponent(*tm.kubeClient)
-		} else {
-			resourceList := NewResourceList(*tm.kubeClient, tm.namespace, tabInfo.ResourceType)
-			model, err = resourceList.InitComponent(*tm.kubeClient)
-			if err != nil {
-				logger.Error(fmt.Sprintf("Failed to create %s model: %v", tabInfo.ResourceType, err))
-				return fmt.Errorf("failed to create %s model: %v", tabInfo.ResourceType, err)
+		// Build the screen stack from the breadcrumb
+		var screenStack []tea.Model
+		var finalResourceModel interface{}
+		var finalModel tea.Model
+
+		for j, crumb := range tabInfo.Breadcrumb {
+			var model tea.Model
+			var resourceModel interface{}
+			var err error
+
+			if j == 0 && crumb == "Resource List" {
+				resourceModel = NewResource(*tm.kubeClient, tm.namespace)
+				model = resourceModel.(Resource).InitComponent(*tm.kubeClient)
+			} else {
+				// Determine the resource type for this crumb
+				resourceType := crumb
+				var parentResource string
+
+				// Check for deployment-specific pod views (e.g., "example-app pods")
+				if strings.HasSuffix(strings.ToLower(crumb), " pods") && j > 0 && tabInfo.Breadcrumb[j-1] == "Deployments" {
+					resourceType = "Pods"
+					// Extract deployment name from "deployment-name pods"
+					parentResource = strings.TrimSuffix(crumb, " pods")
+				} else {
+					// Infer standard resource types
+					if strings.Contains(strings.ToLower(crumb), "pods") && !strings.Contains(strings.ToLower(crumb), "deployments") {
+						resourceType = "Pods"
+					} else if strings.Contains(strings.ToLower(crumb), "deployments") {
+						resourceType = "Deployments"
+					} else if strings.Contains(strings.ToLower(crumb), "services") {
+						resourceType = "Services"
+					} else if strings.Contains(strings.ToLower(crumb), "configmaps") {
+						resourceType = "ConfigMaps"
+					} else if strings.Contains(strings.ToLower(crumb), "secrets") {
+						resourceType = "Secrets"
+					} else if strings.Contains(strings.ToLower(crumb), "ingresses") {
+						resourceType = "Ingresses"
+					} else if strings.Contains(strings.ToLower(crumb), "jobs") {
+						resourceType = "Jobs"
+					} else if strings.Contains(strings.ToLower(crumb), "cronjobs") {
+						resourceType = "CronJobs"
+					} else if strings.Contains(strings.ToLower(crumb), "daemonsets") {
+						resourceType = "DaemonSets"
+					} else if strings.Contains(strings.ToLower(crumb), "statefulsets") {
+						resourceType = "StatefulSets"
+					} else if strings.Contains(strings.ToLower(crumb), "replicasets") {
+						resourceType = "ReplicaSets"
+					} else if strings.Contains(strings.ToLower(crumb), "nodes") {
+						resourceType = "Nodes"
+					} else if strings.Contains(strings.ToLower(crumb), "serviceaccounts") {
+						resourceType = "ServiceAccounts"
+					}
+				}
+
+				// Create the appropriate model based on resource type
+				if resourceType == "Pods" && parentResource != "" {
+					// Create pods model with parent deployment
+					podsModel, err := NewPodsWithParent(*tm.kubeClient, tm.namespace, parentResource)
+					if err != nil {
+						logger.Error(fmt.Sprintf("Failed to create pods model for crumb %s (parent %s): %v", crumb, parentResource, err))
+						continue // Skip this crumb
+					}
+					model, err = podsModel.InitComponent(tm.kubeClient)
+					if err != nil {
+						logger.Error(fmt.Sprintf("Failed to init pods model for crumb %s: %v", crumb, err))
+						continue // Skip this crumb
+					}
+					resourceModel = podsModel
+				} else {
+					// Create generic resource list
+					resourceList := NewResourceList(*tm.kubeClient, tm.namespace, resourceType)
+					model, err = resourceList.InitComponent(*tm.kubeClient)
+					if err != nil {
+						logger.Error(fmt.Sprintf("Failed to create model for crumb %s (type %s): %v", crumb, resourceType, err))
+						continue // Skip this crumb
+					}
+					resourceModel = resourceList
+				}
 			}
-			resourceModel = resourceList
+
+			screenStack = append(screenStack, model)
+			if j == len(tabInfo.Breadcrumb)-1 {
+				finalResourceModel = resourceModel
+				finalModel = model
+			}
+		}
+
+		if len(screenStack) == 0 {
+			logger.Error("No models created for tab, skipping")
+			continue
+		}
+
+		currentIndex := 0
+		if len(tabInfo.Breadcrumb) > 0 {
+			currentIndex = len(tabInfo.Breadcrumb) - 1
 		}
 
 		tabData := TabData{
 			ID:            tabInfo.ID,
 			Title:         tabInfo.Title,
 			ResourceType:  tabInfo.ResourceType,
-			Model:         model,
-			ResourceModel: resourceModel,
+			Model:         finalModel,
+			ResourceModel: finalResourceModel,
 			Breadcrumb:    tabInfo.Breadcrumb,
-			ScreenStack:   []tea.Model{model},
-			CurrentIndex:  0,
+			ScreenStack:   screenStack,
+			CurrentIndex:  currentIndex,
 		}
 
 		tm.tabs = append(tm.tabs, tabData)
@@ -243,7 +326,7 @@ func (tm *TabManager) View() string {
 }
 
 func (tm *TabManager) CreateNewTab(model tea.Model, breadcrumb string) (tea.Model, tea.Cmd) {
-	resourceType := breadcrumb
+	resourceType := tm.inferResourceTypeFromBreadcrumb(breadcrumb)
 	if resourceType == "" {
 		resourceType = "Unknown"
 	}
@@ -255,7 +338,7 @@ func (tm *TabManager) CreateNewTab(model tea.Model, breadcrumb string) (tea.Mode
 		Title:         breadcrumb,
 		ResourceType:  resourceType,
 		Model:         model,
-		ResourceModel: nil, 
+		ResourceModel: nil,
 		Breadcrumb:    []string{breadcrumb},
 		ScreenStack:   []tea.Model{model},
 		CurrentIndex:  0,
@@ -383,7 +466,7 @@ func (tm *TabManager) navigateBack() (tea.Model, tea.Cmd) {
 			activeTab.Model = activeTab.ScreenStack[activeTab.CurrentIndex]
 			if len(activeTab.Breadcrumb) > 0 && activeTab.CurrentIndex < len(activeTab.Breadcrumb) {
 				activeTab.Title = activeTab.Breadcrumb[activeTab.CurrentIndex]
-				activeTab.ResourceType = activeTab.Title
+				activeTab.ResourceType = tm.inferResourceTypeFromBreadcrumb(activeTab.Title)
 			}
 			return tm, activeTab.Model.Init()
 		}
@@ -399,7 +482,7 @@ func (tm *TabManager) navigateForward() (tea.Model, tea.Cmd) {
 			activeTab.Model = activeTab.ScreenStack[activeTab.CurrentIndex]
 			if len(activeTab.Breadcrumb) > 0 && activeTab.CurrentIndex < len(activeTab.Breadcrumb) {
 				activeTab.Title = activeTab.Breadcrumb[activeTab.CurrentIndex]
-				activeTab.ResourceType = activeTab.Title
+				activeTab.ResourceType = tm.inferResourceTypeFromBreadcrumb(activeTab.Title)
 				if tm.resourceTypeCallback != nil {
 					tm.resourceTypeCallback(activeTab.ResourceType)
 				}
@@ -408,4 +491,41 @@ func (tm *TabManager) navigateForward() (tea.Model, tea.Cmd) {
 		}
 	}
 	return tm, nil
+}
+
+func (tm *TabManager) inferResourceTypeFromBreadcrumb(breadcrumb string) string {
+	// Check for deployment-specific pod views (e.g., "example-app pods")
+	if strings.HasSuffix(strings.ToLower(breadcrumb), " pods") {
+		return "Pods"
+	}
+
+	// Check for other resource types
+	if strings.Contains(strings.ToLower(breadcrumb), "deployments") {
+		return "Deployments"
+	} else if strings.Contains(strings.ToLower(breadcrumb), "services") {
+		return "Services"
+	} else if strings.Contains(strings.ToLower(breadcrumb), "configmaps") {
+		return "ConfigMaps"
+	} else if strings.Contains(strings.ToLower(breadcrumb), "secrets") {
+		return "Secrets"
+	} else if strings.Contains(strings.ToLower(breadcrumb), "ingresses") {
+		return "Ingresses"
+	} else if strings.Contains(strings.ToLower(breadcrumb), "jobs") {
+		return "Jobs"
+	} else if strings.Contains(strings.ToLower(breadcrumb), "cronjobs") {
+		return "CronJobs"
+	} else if strings.Contains(strings.ToLower(breadcrumb), "daemonsets") {
+		return "DaemonSets"
+	} else if strings.Contains(strings.ToLower(breadcrumb), "statefulsets") {
+		return "StatefulSets"
+	} else if strings.Contains(strings.ToLower(breadcrumb), "replicasets") {
+		return "ReplicaSets"
+	} else if strings.Contains(strings.ToLower(breadcrumb), "nodes") {
+		return "Nodes"
+	} else if strings.Contains(strings.ToLower(breadcrumb), "serviceaccounts") {
+		return "ServiceAccounts"
+	}
+
+	// Default fallback
+	return breadcrumb
 }

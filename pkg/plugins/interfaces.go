@@ -206,6 +206,7 @@ type TabInfo struct {
 	Title        string
 	ResourceType string
 	Breadcrumb   []string
+	CurrentIndex int
 }
 
 type PluginEvent string
@@ -300,6 +301,10 @@ type PluginAPI interface {
 	SetTabs(tabs []TabInfo) error
 
 	SetTabSetterCallback(callback func())
+
+	GetBreadcrumbTrail() []string
+
+	SetBreadcrumbTrail(breadcrumb []string)
 
 	ShowInputDialog(title, placeholder, submitCommand, cancelCommand string)
 

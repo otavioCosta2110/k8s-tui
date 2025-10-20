@@ -52,14 +52,14 @@ func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pl
 		uiInjector:     uiInjector,
 	}
 
-	setupPluginManagerForKubeClient(appModel, pluginManager, cfg, tabManager, header)
+	setupPluginManagerForKubeClient(appModel, pluginManager, cfg, tabManager)
 
-	initializeTabs(appModel, tabManager, header)
+	initializeTabs(tabManager, header)
 
 	return appModel
 }
 
-func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.PluginManager, cfg cli.Config, tabManager *models.TabManager, header models.HeaderModel) {
+func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.PluginManager, cfg cli.Config, tabManager *models.TabManager) {
 	if pluginManager == nil {
 		return
 	}
@@ -86,6 +86,14 @@ func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.
 
 	pluginManager.GetAPI().SetTabSetterCallback(func() {
 		appModel.updateHeaderTabs()
+	})
+
+	pluginManager.GetAPI().SetBreadcrumbCallback(func(breadcrumb []string) {
+		appModel.breadcrumbTrail = breadcrumb
+	})
+
+	pluginManager.GetAPI().GetBreadcrumbCallback(func() []string {
+		return appModel.breadcrumbTrail
 	})
 
 	pluginManager.GetAPI().SetNamespaceCallback(func(namespace string) {
@@ -122,7 +130,7 @@ func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.
 	}
 }
 
-func initializeTabs(appModel *AppModel, tabManager *models.TabManager, header models.HeaderModel) {
+func initializeTabs(tabManager *models.TabManager, header models.HeaderModel) {
 	tabs := tabManager.GetTabsForComponent()
 	activeIndex := -1
 	for i, tab := range tabs {

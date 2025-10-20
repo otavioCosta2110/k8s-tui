@@ -104,6 +104,8 @@ func (pm *PluginManager) setupBasicLuaAPI(L *lua.LState) {
 	L.SetField(apiTable, "set_status", L.NewFunction(plugin.luaSetStatus))
 	L.SetField(apiTable, "restore_tabs", L.NewFunction(plugin.luaRestoreTabs))
 	L.SetField(apiTable, "set_tabs", L.NewFunction(plugin.luaSetTabs))
+	L.SetField(apiTable, "get_breadcrumb_trail", L.NewFunction(plugin.luaGetBreadcrumbTrail))
+	L.SetField(apiTable, "set_breadcrumb_trail", L.NewFunction(plugin.luaSetBreadcrumbTrail))
 	L.SetField(apiTable, "show_input_dialog", L.NewFunction(plugin.luaShowInputDialog))
 
 	L.SetField(apiTable, "log", L.NewFunction(func(L *lua.LState) int {
@@ -139,6 +141,7 @@ func (p *basicLuaPlugin) luaGetTabs(L *lua.LState) int {
 		L.SetField(tabTable, "ID", lua.LString(tab.ID))
 		L.SetField(tabTable, "Title", lua.LString(tab.Title))
 		L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+		L.SetField(tabTable, "CurrentIndex", lua.LNumber(tab.CurrentIndex))
 
 		breadcrumbTable := L.NewTable()
 		for j, crumb := range tab.Breadcrumb {
@@ -225,10 +228,33 @@ func (p *basicLuaPlugin) luaShowInputDialog(L *lua.LState) int {
 	return 0
 }
 
+func (p *basicLuaPlugin) luaGetBreadcrumbTrail(L *lua.LState) int {
+	breadcrumb := p.api.GetBreadcrumbTrail()
+	resultTable := L.NewTable()
+	for i, crumb := range breadcrumb {
+		L.RawSetInt(resultTable, i+1, lua.LString(crumb))
+	}
+	L.Push(resultTable)
+	return 1
+}
+
+func (p *basicLuaPlugin) luaSetBreadcrumbTrail(L *lua.LState) int {
+	breadcrumbTable := L.CheckTable(1)
+	var breadcrumb []string
+	breadcrumbTable.ForEach(func(key, value lua.LValue) {
+		if value.Type() == lua.LTString {
+			breadcrumb = append(breadcrumb, value.String())
+		}
+	})
+	p.api.SetBreadcrumbTrail(breadcrumb)
+	return 0
+}
+
 func parseTabInfo(tbl *lua.LTable) TabInfo {
 	id := getStringField(tbl, "ID")
 	title := getStringField(tbl, "Title")
 	resourceType := getStringField(tbl, "ResourceType")
+	currentIndex := getNumberField(tbl, "CurrentIndex")
 
 	var breadcrumb []string
 	if breadcrumbTable := tbl.RawGetString("Breadcrumb"); breadcrumbTable.Type() == lua.LTTable {
@@ -244,6 +270,7 @@ func parseTabInfo(tbl *lua.LTable) TabInfo {
 		Title:        title,
 		ResourceType: resourceType,
 		Breadcrumb:   breadcrumb,
+		CurrentIndex: int(currentIndex),
 	}
 }
 
@@ -252,6 +279,13 @@ func getStringField(tbl *lua.LTable, key string) string {
 		return val.String()
 	}
 	return ""
+}
+
+func getNumberField(tbl *lua.LTable, key string) float64 {
+	if val := tbl.RawGetString(key); val.Type() == lua.LTNumber {
+		return float64(val.(lua.LNumber))
+	}
+	return 0
 }
 
 func (pm *PluginManager) loadLuaPlugin(path string) error {
