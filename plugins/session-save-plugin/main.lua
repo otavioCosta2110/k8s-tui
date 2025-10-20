@@ -196,20 +196,31 @@ function load_session_cli_handler(value)
        local currentIndex = tab_str:match(currentIndex_pattern)
        if currentIndex then tab.CurrentIndex = tonumber(currentIndex) end
 
-      -- Extract breadcrumb array
-      local breadcrumb_pattern = '"Breadcrumb"%s*:%s*%[([^]]*)%]'
-      local breadcrumb_str = tab_str:match(breadcrumb_pattern)
-      if breadcrumb_str then
-        local breadcrumb = {}
-        for crumb in breadcrumb_str:gmatch('"([^"]+)"') do
-          table.insert(breadcrumb, crumb)
+        -- Extract breadcrumb array
+        local breadcrumb_pattern = '"Breadcrumb"%s*:%s*%[([^]]*)%]'
+        local breadcrumb_str = tab_str:match(breadcrumb_pattern)
+        if breadcrumb_str then
+          local breadcrumb = {}
+          for crumb in breadcrumb_str:gmatch('"([^"]+)"') do
+            table.insert(breadcrumb, crumb)
+          end
+          tab.Breadcrumb = breadcrumb
         end
-        tab.Breadcrumb = breadcrumb
-      end
 
-      if tab.ID and tab.Title and tab.ResourceType then
-        table.insert(tabs, tab)
-      end
+        -- Extract metadata object
+        local metadata_pattern = '"Metadata"%s*:%s*{([^}]*)}'
+        local metadata_str = tab_str:match(metadata_pattern)
+        if metadata_str then
+          local metadata = {}
+          for k, v in metadata_str:gmatch('"([^"]+)"%s*:%s*"([^"]+)"') do
+            metadata[k] = v
+          end
+          tab.Metadata = metadata
+        end
+
+        if tab.ID and tab.Title and tab.ResourceType then
+          table.insert(tabs, tab)
+        end
     end
   end
 
@@ -318,18 +329,28 @@ function save_session_to_file(filename)
    end
    json = json .. '],"tabs":['
    for i, tab in ipairs(tabs) do
-     if i > 1 then json = json .. ',' end
-      json = json ..
-          '{"ID":"' ..
-          (tab.ID or "") ..
-          '","Title":"' .. (tab.Title or "") .. '","ResourceType":"' .. (tab.ResourceType or "") .. '","CurrentIndex":' .. (tab.CurrentIndex or 0) .. ',"Breadcrumb":['
-      if tab.Breadcrumb then
-        for j, crumb in ipairs(tab.Breadcrumb) do
-          if j > 1 then json = json .. ',' end
-          json = json .. '"' .. crumb .. '"'
+      if i > 1 then json = json .. ',' end
+        json = json ..
+            '{"ID":"' ..
+            (tab.ID or "") ..
+            '","Title":"' .. (tab.Title or "") .. '","ResourceType":"' .. (tab.ResourceType or "") .. '","CurrentIndex":' .. (tab.CurrentIndex or 0) .. ',"Breadcrumb":['
+        if tab.Breadcrumb then
+          for j, crumb in ipairs(tab.Breadcrumb) do
+            if j > 1 then json = json .. ',' end
+            json = json .. '"' .. crumb .. '"'
+          end
         end
-      end
-      json = json .. ']}'
+        json = json .. '],"Metadata":{'
+        if tab.Metadata then
+          local first = true
+          for k, v in pairs(tab.Metadata) do
+            if not first then json = json .. ',' end
+            json = json .. '"' .. k .. '":"' .. tostring(v) .. '"'
+            first = false
+          end
+        end
+        json = json .. '}'
+        json = json .. '}'
    end
    json = json .. ']}'
 

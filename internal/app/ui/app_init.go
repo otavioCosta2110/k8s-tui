@@ -67,17 +67,7 @@ func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.
 	pluginManager.GetAPI().SetCurrentNamespace(cfg.Namespace)
 
 	pluginManager.GetAPI().SetTabGetter(func() ([]plugins.TabInfo, error) {
-		tabs := tabManager.GetTabsForComponent()
-		var tabInfos []plugins.TabInfo
-		for _, tab := range tabs {
-			tabInfos = append(tabInfos, plugins.TabInfo{
-				ID:           tab.ID,
-				Title:        tab.Title,
-				ResourceType: tab.ResourceType,
-				Breadcrumb:   tab.Breadcrumb,
-			})
-		}
-		return tabInfos, nil
+		return tabManager.GetTabsInfo(), nil
 	})
 
 	pluginManager.GetAPI().SetTabSetter(func(tabInfos []plugins.TabInfo) error {

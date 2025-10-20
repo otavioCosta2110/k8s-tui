@@ -12,6 +12,7 @@ type NavigateMsg struct {
 	Cluster       resources.Client
 	Error         error
 	Breadcrumb    string
+	Metadata      map[string]interface{}
 }
 
 type RefreshMsg struct{}

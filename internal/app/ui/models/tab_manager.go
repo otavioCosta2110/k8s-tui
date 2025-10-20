@@ -20,6 +20,7 @@ type TabData struct {
 	Breadcrumb    []string
 	ScreenStack   []tea.Model
 	CurrentIndex  int
+	Metadata      map[string]interface{}
 }
 
 type TabManager struct {
@@ -81,6 +82,7 @@ func (tm *TabManager) createInitialTab() {
 		Breadcrumb:    []string{"Resource List"},
 		ScreenStack:   []tea.Model{resourceComponent},
 		CurrentIndex:  0,
+		Metadata:      make(map[string]interface{}),
 	}
 
 	tm.tabs = append(tm.tabs, initialTab)
@@ -128,6 +130,17 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if msg.Breadcrumb != "" {
 				activeTab.Breadcrumb = append(activeTab.Breadcrumb, msg.Breadcrumb)
+			}
+
+			if msg.Metadata != nil {
+				logger.Info(fmt.Sprintf("DEBUG: Received metadata in NavigateMsg: %v", msg.Metadata))
+				if activeTab.Metadata == nil {
+					activeTab.Metadata = make(map[string]interface{})
+				}
+				for k, v := range msg.Metadata {
+					activeTab.Metadata[k] = v
+				}
+				logger.Info(fmt.Sprintf("DEBUG: Stored metadata in activeTab: %v", activeTab.Metadata))
 			}
 
 			if len(activeTab.Breadcrumb) > 0 {
@@ -207,13 +220,10 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 			} else {
 				// Determine the resource type for this crumb
 				resourceType := crumb
-				var parentResource string
 
 				// Check for deployment-specific pod views (e.g., "example-app pods")
 				if strings.HasSuffix(strings.ToLower(crumb), " pods") && j > 0 && tabInfo.Breadcrumb[j-1] == "Deployments" {
 					resourceType = "Pods"
-					// Extract deployment name from "deployment-name pods"
-					parentResource = strings.TrimSuffix(crumb, " pods")
 				} else {
 					// Infer standard resource types
 					if strings.Contains(strings.ToLower(crumb), "pods") && !strings.Contains(strings.ToLower(crumb), "deployments") {
@@ -246,19 +256,59 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 				}
 
 				// Create the appropriate model based on resource type
-				if resourceType == "Pods" && parentResource != "" {
-					// Create pods model with parent deployment
-					podsModel, err := NewPodsWithParent(*tm.kubeClient, tm.namespace, parentResource)
-					if err != nil {
-						logger.Error(fmt.Sprintf("Failed to create pods model for crumb %s (parent %s): %v", crumb, parentResource, err))
-						continue // Skip this crumb
+				if resourceType == "Pods" {
+					var selector string
+					var parentResource string
+
+					// Check if we have saved metadata with selector
+					if tabInfo.Metadata != nil {
+						if s, ok := tabInfo.Metadata["selector"].(string); ok {
+							selector = s
+						}
+						if p, ok := tabInfo.Metadata["parent"].(string); ok {
+							parentResource = p
+						}
 					}
-					model, err = podsModel.InitComponent(tm.kubeClient)
-					if err != nil {
-						logger.Error(fmt.Sprintf("Failed to init pods model for crumb %s: %v", crumb, err))
-						continue // Skip this crumb
+
+					// Fallback to breadcrumb inference if no metadata
+					if selector == "" && strings.HasSuffix(strings.ToLower(crumb), " pods") && j > 0 && tabInfo.Breadcrumb[j-1] == "Deployments" {
+						parentResource = strings.TrimSuffix(crumb, " pods")
+						logger.Info(fmt.Sprintf("DEBUG: Inferring selector for deployment %s from breadcrumb", parentResource))
+						deployment := k8s.NewDeployment(parentResource, tm.namespace, *tm.kubeClient)
+						if err := deployment.Fetch(); err != nil {
+							logger.Error(fmt.Sprintf("Failed to fetch deployment %s for selector: %v", parentResource, err))
+							continue // Skip this crumb
+						}
+						selector, err = deployment.GetLabelSelector()
+						if err != nil {
+							logger.Error(fmt.Sprintf("Failed to get label selector for deployment %s: %v", parentResource, err))
+							continue // Skip this crumb
+						}
 					}
-					resourceModel = podsModel
+
+					if selector != "" {
+						logger.Info(fmt.Sprintf("DEBUG: Creating pods model with selector '%s' for parent '%s'", selector, parentResource))
+						podsModel, err := NewPodsWithParent(*tm.kubeClient, tm.namespace, parentResource, selector)
+						if err != nil {
+							logger.Error(fmt.Sprintf("Failed to create pods model for crumb %s: %v", crumb, err))
+							continue // Skip this crumb
+						}
+						model, err = podsModel.InitComponent(tm.kubeClient)
+						if err != nil {
+							logger.Error(fmt.Sprintf("Failed to init pods model for crumb %s: %v", crumb, err))
+							continue // Skip this crumb
+						}
+						resourceModel = podsModel
+					} else {
+						// Create generic pods model
+						resourceList := NewResourceList(*tm.kubeClient, tm.namespace, resourceType)
+						model, err = resourceList.InitComponent(*tm.kubeClient)
+						if err != nil {
+							logger.Error(fmt.Sprintf("Failed to create model for crumb %s (type %s): %v", crumb, resourceType, err))
+							continue // Skip this crumb
+						}
+						resourceModel = resourceList
+					}
 				} else {
 					// Create generic resource list
 					resourceList := NewResourceList(*tm.kubeClient, tm.namespace, resourceType)
@@ -297,6 +347,7 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 			Breadcrumb:    tabInfo.Breadcrumb,
 			ScreenStack:   screenStack,
 			CurrentIndex:  currentIndex,
+			Metadata:      tabInfo.Metadata,
 		}
 
 		tm.tabs = append(tm.tabs, tabData)
@@ -342,6 +393,7 @@ func (tm *TabManager) CreateNewTab(model tea.Model, breadcrumb string) (tea.Mode
 		Breadcrumb:    []string{breadcrumb},
 		ScreenStack:   []tea.Model{model},
 		CurrentIndex:  0,
+		Metadata:      make(map[string]interface{}),
 	}
 
 	tm.tabs = append(tm.tabs, newTab)
@@ -363,6 +415,7 @@ func (tm *TabManager) CreateNewResourceTab() (tea.Model, tea.Cmd) {
 		Breadcrumb:    []string{"Resource List"},
 		ScreenStack:   []tea.Model{resourceComponent},
 		CurrentIndex:  0,
+		Metadata:      make(map[string]interface{}),
 	})
 	tm.activeIndex = len(tm.tabs) - 1
 
@@ -447,6 +500,22 @@ func (tm *TabManager) GetTabsForComponent() []components.Tab {
 			IsModified:   false,
 			Breadcrumb:   tab.Breadcrumb,
 			CurrentIndex: tab.CurrentIndex,
+		})
+	}
+	return tabs
+}
+
+func (tm *TabManager) GetTabsInfo() []plugins.TabInfo {
+	var tabs []plugins.TabInfo
+	for _, tab := range tm.tabs {
+		logger.Info(fmt.Sprintf("DEBUG: GetTabsInfo - tab %s has metadata: %v", tab.ID, tab.Metadata))
+		tabs = append(tabs, plugins.TabInfo{
+			ID:           tab.ID,
+			Title:        tab.Title,
+			ResourceType: tab.ResourceType,
+			Breadcrumb:   tab.Breadcrumb,
+			CurrentIndex: tab.CurrentIndex,
+			Metadata:     tab.Metadata,
 		})
 	}
 	return tabs

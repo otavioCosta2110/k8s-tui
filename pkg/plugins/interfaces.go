@@ -207,6 +207,7 @@ type TabInfo struct {
 	ResourceType string
 	Breadcrumb   []string
 	CurrentIndex int
+	Metadata     map[string]interface{}
 }
 
 type PluginEvent string

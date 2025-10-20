@@ -9,6 +9,7 @@ import (
 	styles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	resources "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -102,9 +103,15 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 			}
 		}
 
+		logger.Info(fmt.Sprintf("DEBUG: Creating NavigateMsg with selector '%s' for deployment '%s'", selector, selected))
+		logger.Info(fmt.Sprintf("DEBUG: Creating NavigateMsg with selector '%s' for deployment '%s'", selector, selected))
 		return components.NavigateMsg{
 			NewScreen:  podsScreen,
 			Breadcrumb: selected + " pods",
+			Metadata: map[string]interface{}{
+				"selector": selector,
+				"parent":   selected,
+			},
 		}
 	}
 

@@ -149,6 +149,12 @@ func (p *basicLuaPlugin) luaGetTabs(L *lua.LState) int {
 		}
 		L.SetField(tabTable, "Breadcrumb", breadcrumbTable)
 
+		metadataTable := L.NewTable()
+		for k, v := range tab.Metadata {
+			L.SetField(metadataTable, k, lua.LString(fmt.Sprintf("%v", v)))
+		}
+		L.SetField(tabTable, "Metadata", metadataTable)
+
 		L.RawSetInt(resultTable, i+1, tabTable)
 	}
 	L.Push(resultTable)
@@ -265,12 +271,23 @@ func parseTabInfo(tbl *lua.LTable) TabInfo {
 		})
 	}
 
+	var metadata map[string]interface{}
+	if metadataTable := tbl.RawGetString("Metadata"); metadataTable.Type() == lua.LTTable {
+		metadata = make(map[string]interface{})
+		metadataTable.(*lua.LTable).ForEach(func(key, value lua.LValue) {
+			if key.Type() == lua.LTString && value.Type() == lua.LTString {
+				metadata[key.String()] = value.String()
+			}
+		})
+	}
+
 	return TabInfo{
 		ID:           id,
 		Title:        title,
 		ResourceType: resourceType,
 		Breadcrumb:   breadcrumb,
 		CurrentIndex: int(currentIndex),
+		Metadata:     metadata,
 	}
 }
 
