@@ -30,6 +30,42 @@ func NewStatefulSet(name, namespace string, k Client) *StatefulSetInfo {
 	}
 }
 
+func (s *StatefulSetInfo) Create(name, image, replicas, namespace string) error {
+	replicasInt := parseInt32(replicas)
+	statefulset := &appsv1.StatefulSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: appsv1.StatefulSetSpec{
+			Replicas: &replicasInt,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": name,
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": name,
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  name,
+							Image: image,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	_, err := s.Client.Clientset.AppsV1().StatefulSets(namespace).Create(context.Background(), statefulset, metav1.CreateOptions{})
+	return err
+}
+
 func FetchStatefulSetList(client Client, namespace string) ([]string, error) {
 	statefulsets, err := client.Clientset.AppsV1().StatefulSets(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {

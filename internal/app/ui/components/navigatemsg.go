@@ -24,3 +24,7 @@ type EditMsg struct {
 	ResourceName string
 	Namespace    string
 }
+
+type OpenCreateFormMsg struct {
+	ResourceType string
+}

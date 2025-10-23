@@ -32,6 +32,38 @@ func NewCronJob(name, namespace string, k Client) *CronJobInfo {
 	}
 }
 
+func (c *CronJobInfo) Create(name, image, schedule, suspend, namespace string) error {
+	suspendBool := suspend == "true"
+	cronjob := &batchv1.CronJob{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: batchv1.CronJobSpec{
+			Schedule: schedule,
+			Suspend:  &suspendBool,
+			JobTemplate: batchv1.JobTemplateSpec{
+				Spec: batchv1.JobSpec{
+					Template: corev1.PodTemplateSpec{
+						Spec: corev1.PodSpec{
+							Containers: []corev1.Container{
+								{
+									Name:  name,
+									Image: image,
+								},
+							},
+							RestartPolicy: corev1.RestartPolicyNever,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	_, err := c.Client.Clientset.BatchV1().CronJobs(namespace).Create(context.Background(), cronjob, metav1.CreateOptions{})
+	return err
+}
+
 func FetchCronJobList(client Client, namespace string) ([]string, error) {
 	cronjobs, err := client.Clientset.BatchV1().CronJobs(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {

@@ -32,6 +32,43 @@ func NewIngress(name, namespace string, k Client) *IngressInfo {
 	}
 }
 
+func (i *IngressInfo) Create(name, host, path, serviceName, servicePort, namespace string) error {
+	ingress := &networkingv1.Ingress{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: networkingv1.IngressSpec{
+			Rules: []networkingv1.IngressRule{
+				{
+					Host: host,
+					IngressRuleValue: networkingv1.IngressRuleValue{
+						HTTP: &networkingv1.HTTPIngressRuleValue{
+							Paths: []networkingv1.HTTPIngressPath{
+								{
+									Path:     path,
+									PathType: &[]networkingv1.PathType{networkingv1.PathTypePrefix}[0],
+									Backend: networkingv1.IngressBackend{
+										Service: &networkingv1.IngressServiceBackend{
+											Name: serviceName,
+											Port: networkingv1.ServiceBackendPort{
+												Number: parseInt32(servicePort),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	_, err := i.Client.Clientset.NetworkingV1().Ingresses(namespace).Create(context.Background(), ingress, metav1.CreateOptions{})
+	return err
+}
+
 func FetchIngressList(client Client, namespace string) ([]string, error) {
 	ingresses, err := client.Clientset.NetworkingV1().Ingresses(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {

@@ -94,6 +94,10 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case components.TextInputCancelMsg:
 		return m, nil
+	case components.CreateSubmitMsg:
+		return m.handleCreateSubmitMsg(msg)
+	case components.OpenCreateFormMsg:
+		return m.handleOpenCreateFormMsg(msg)
 	case ClearTextInputMsg:
 		m.textInput = nil
 		return m, nil

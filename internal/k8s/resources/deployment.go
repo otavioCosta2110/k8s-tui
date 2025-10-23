@@ -111,6 +111,42 @@ func (d *DeploymentInfo) GetPods() ([]PodInfo, error) {
 	return pods, nil
 }
 
+func (d *DeploymentInfo) Create(name, image, replicas, namespace string) error {
+	replicasInt := parseInt32(replicas)
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicasInt,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": name,
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": name,
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  name,
+							Image: image,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	_, err := d.Client.Clientset.AppsV1().Deployments(namespace).Create(context.Background(), deployment, metav1.CreateOptions{})
+	return err
+}
+
 func (d *DeploymentInfo) GetLabelSelector() (string, error) {
 	if d.Raw == nil {
 		return "", fmt.Errorf("deployment raw data not available")

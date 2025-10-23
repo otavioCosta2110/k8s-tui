@@ -62,6 +62,7 @@ Key Bindings:
 • ↑/↓/j/k: Navigate pods
 • enter: View pod details
 • d: Delete selected pods
+• n: Create new pod
 • r: Refresh
 • /: Search pods
 • esc: Go back
@@ -75,6 +76,7 @@ Pod Status:
 Common Actions:
 • View logs: Enter on a pod to see details
 • Delete pod: Select with space, then press 'd'
+• Create pod: Press 'n' to open create form
 • Refresh: Press 'r' to update the list`
 }
 
@@ -106,6 +108,7 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": p.createDeleteAction(tableModel),
+		"n": p.createNewPodAction(),
 	}
 
 	if p.parentDeployment != "" {
@@ -133,6 +136,14 @@ func (p *podsModel) createViewManifestAction(tableModel *ui.TableModel) func() t
 				NewScreen:  deploymentDetails,
 				Breadcrumb: p.parentDeployment,
 			}
+		}
+	}
+}
+
+func (p *podsModel) createNewPodAction() func() tea.Cmd {
+	return func() tea.Cmd {
+		return func() tea.Msg {
+			return components.OpenCreateFormMsg{ResourceType: "pod"}
 		}
 	}
 }

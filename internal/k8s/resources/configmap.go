@@ -34,6 +34,19 @@ func NewConfigmap(name, namespace string, k Client) *Configmap {
 	}
 }
 
+func (c *Configmap) Create(name, namespace string) error {
+	configmap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Data: map[string]string{},
+	}
+
+	_, err := c.Client.CoreV1().ConfigMaps(namespace).Create(context.Background(), configmap, metav1.CreateOptions{})
+	return err
+}
+
 func (c *Configmap) Fetch() error {
 	cm, err := c.Client.CoreV1().ConfigMaps(c.Namespace).Get(context.Background(), c.Name, metav1.GetOptions{})
 	if err != nil {

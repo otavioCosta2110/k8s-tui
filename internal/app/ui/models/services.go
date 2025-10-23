@@ -51,19 +51,21 @@ Key Bindings:
 • ↑/↓/j/k: Navigate services
 • enter: View service details
 • d: Delete selected services
+• n: Create new service
 • r: Refresh
 • /: Search services
 • esc: Go back
 
 Service Types:
 • ClusterIP: Internal cluster access
-• NodePort: External access via node port
-• LoadBalancer: Cloud load balancer
-• ExternalName: DNS alias
+• NodePort: External access via node IP
+• LoadBalancer: Cloud provider load balancer
 
 Common Actions:
-• View endpoints: See pods backing the service
-• Check connectivity: Use service details`
+• View endpoints: Enter to see pods backing the service
+• Update service: Use service details view
+• Scale backing resources: Check deployments or statefulsets
+• Create service: Press 'n' to open create form`
 }
 
 func (s *servicesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
@@ -93,10 +95,19 @@ func (s *servicesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": s.createDeleteAction(tableModel),
+		"n": s.createNewServiceAction(),
 	}
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, s.refreshInterval, s.k8sClient, "Services"), nil
+}
+
+func (s *servicesModel) createNewServiceAction() func() tea.Cmd {
+	return func() tea.Cmd {
+		return func() tea.Msg {
+			return components.OpenCreateFormMsg{ResourceType: "service"}
+		}
+	}
 }
 
 func (s *servicesModel) fetchData() error {

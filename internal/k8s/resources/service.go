@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/pkg/format"
+	"strconv"
 	"time"
 
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type ServiceInfo struct {
@@ -29,6 +31,40 @@ func NewService(name, namespace string, k Client) *ServiceInfo {
 		Namespace: namespace,
 		Client:    k,
 	}
+}
+
+func (s *ServiceInfo) Create(name, svcType, port, targetPort, namespace string) error {
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: corev1.ServiceSpec{
+			Type: corev1.ServiceType(svcType),
+			Ports: []corev1.ServicePort{
+				{
+					Port:       parseInt32(port),
+					TargetPort: parseIntOrString(targetPort),
+				},
+			},
+		},
+	}
+
+	_, err := s.Client.Clientset.CoreV1().Services(namespace).Create(context.Background(), service, metav1.CreateOptions{})
+	return err
+}
+
+func parseInt32(s string) int32 {
+	var i int32
+	fmt.Sscanf(s, "%d", &i)
+	return i
+}
+
+func parseIntOrString(s string) intstr.IntOrString {
+	if i, err := strconv.Atoi(s); err == nil {
+		return intstr.FromInt(i)
+	}
+	return intstr.FromString(s)
 }
 
 func FetchServiceList(client Client, namespace string) ([]string, error) {

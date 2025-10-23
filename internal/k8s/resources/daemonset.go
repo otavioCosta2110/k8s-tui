@@ -34,6 +34,40 @@ func NewDaemonSet(name, namespace string, k Client) *DaemonSetInfo {
 	}
 }
 
+func (d *DaemonSetInfo) Create(name, image, namespace string) error {
+	daemonset := &appsv1.DaemonSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: appsv1.DaemonSetSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": name,
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": name,
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  name,
+							Image: image,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	_, err := d.Client.Clientset.AppsV1().DaemonSets(namespace).Create(context.Background(), daemonset, metav1.CreateOptions{})
+	return err
+}
+
 func FetchDaemonSetList(client Client, namespace string) ([]string, error) {
 	daemonsets, err := client.Clientset.AppsV1().DaemonSets(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {

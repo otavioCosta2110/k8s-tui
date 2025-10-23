@@ -48,6 +48,7 @@ Key Bindings:
 • ↑/↓/j/k: Navigate configmaps
 • enter: View configmap details
 • d: Delete selected configmaps
+• n: Create new configmap
 • r: Refresh
 • /: Search configmaps
 • esc: Go back
@@ -55,7 +56,8 @@ Key Bindings:
 Common Actions:
 • View data: See configuration key-value pairs
 • Edit values: Modify configuration data
-• Check usage: See which pods use this config`
+• Check usage: See which pods use this config
+• Create configmap: Press 'n' to open create form`
 }
 
 func (c *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
@@ -85,10 +87,19 @@ func (c *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": c.createDeleteAction(tableModel),
+		"n": c.createNewConfigMapAction(),
 	}
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, c.refreshInterval, c.k8sClient, "ConfigMaps"), nil
+}
+
+func (c *configmapsModel) createNewConfigMapAction() func() tea.Cmd {
+	return func() tea.Cmd {
+		return func() tea.Msg {
+			return components.OpenCreateFormMsg{ResourceType: "configmap"}
+		}
+	}
 }
 
 func (c *configmapsModel) fetchData() error {

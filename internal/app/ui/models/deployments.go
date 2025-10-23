@@ -52,6 +52,7 @@ Key Bindings:
 • ↑/↓/j/k: Navigate deployments
 • enter: View deployment details
 • d: Delete selected deployments
+• n: Create new deployment
 • r: Refresh
 • /: Search deployments
 • esc: Go back
@@ -64,7 +65,8 @@ Deployment Status:
 Common Actions:
 • Scale deployment: Enter to view details and scale
 • Update image: Use deployment details view
-• View pods: See associated pods in details`
+• View pods: See associated pods in details
+• Create deployment: Press 'n' to open create form`
 }
 
 func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error) {
@@ -127,10 +129,19 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 	actions := map[string]func() tea.Cmd{
 		"d": d.createDeleteAction(tableModel),
 		"v": d.createViewDetailsAction(tableModel),
+		"n": d.createNewDeploymentAction(),
 	}
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, d.refreshInterval, d.k8sClient, "Deployments"), nil
+}
+
+func (d *deploymentsModel) createNewDeploymentAction() func() tea.Cmd {
+	return func() tea.Cmd {
+		return func() tea.Msg {
+			return components.OpenCreateFormMsg{ResourceType: "deployment"}
+		}
+	}
 }
 
 func (d *deploymentsModel) createViewDetailsAction(tableModel *ui.TableModel) func() tea.Cmd {

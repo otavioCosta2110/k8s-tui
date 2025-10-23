@@ -49,6 +49,7 @@ Key Bindings:
 • ↑/↓/j/k: Navigate secrets
 • enter: View secret details
 • d: Delete selected secrets
+• n: Create new secret
 • r: Refresh
 • /: Search secrets
 • esc: Go back
@@ -59,9 +60,10 @@ Secret Types:
 • Docker: Docker registry credentials
 
 Common Actions:
-• View data: See secret contents (use caution)
-• Rotate secrets: Update sensitive data
-• Check usage: See which pods reference this secret`
+• View data: See secret key-value pairs (base64 encoded)
+• Update values: Modify secret data
+• Check usage: See which pods reference this secret
+• Create secret: Press 'n' to open create form`
 }
 
 func (s *secretsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
@@ -91,10 +93,19 @@ func (s *secretsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": s.createDeleteAction(tableModel),
+		"n": s.createNewSecretAction(),
 	}
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, s.refreshInterval, s.k8sClient, "Secrets"), nil
+}
+
+func (s *secretsModel) createNewSecretAction() func() tea.Cmd {
+	return func() tea.Cmd {
+		return func() tea.Msg {
+			return components.OpenCreateFormMsg{ResourceType: "secret"}
+		}
+	}
 }
 
 func (s *secretsModel) fetchData() error {

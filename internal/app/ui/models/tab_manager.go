@@ -1,6 +1,7 @@
 package models
 
 import (
+	"maps"
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
@@ -137,15 +138,12 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if activeTab.Metadata == nil {
 					activeTab.Metadata = make(map[string]interface{})
 				}
-				for k, v := range msg.Metadata {
-					activeTab.Metadata[k] = v
-				}
+				maps.Copy(activeTab.Metadata, msg.Metadata)
 				logger.Info(fmt.Sprintf("DEBUG: Stored metadata in activeTab: %v", activeTab.Metadata))
 			}
 
 			if len(activeTab.Breadcrumb) > 0 {
 				activeTab.Title = activeTab.Breadcrumb[len(activeTab.Breadcrumb)-1]
-				// Set ResourceType based on the actual resource type, not the breadcrumb text
 				activeTab.ResourceType = tm.inferResourceTypeFromBreadcrumb(activeTab.Title)
 				if tm.resourceTypeCallback != nil {
 					tm.resourceTypeCallback(activeTab.ResourceType)
@@ -204,28 +202,24 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 		logger.Info(fmt.Sprintf("DEBUG: Restoring tab %d: ID=%s, Title=%s, ResourceType=%s, Breadcrumb=%v",
 			i, tabInfo.ID, tabInfo.Title, tabInfo.ResourceType, tabInfo.Breadcrumb))
 
-		// Build the screen stack from the breadcrumb
 		var screenStack []tea.Model
-		var finalResourceModel interface{}
+		var finalResourceModel any
 		var finalModel tea.Model
 
 		for j, crumb := range tabInfo.Breadcrumb {
 			var model tea.Model
-			var resourceModel interface{}
+			var resourceModel any
 			var err error
 
 			if j == 0 && crumb == "Resource List" {
 				resourceModel = NewResource(*tm.kubeClient, tm.namespace)
 				model = resourceModel.(Resource).InitComponent(*tm.kubeClient)
 			} else {
-				// Determine the resource type for this crumb
 				resourceType := crumb
 
-				// Check for deployment-specific pod views (e.g., "example-app pods")
 				if strings.HasSuffix(strings.ToLower(crumb), " pods") && j > 0 && tabInfo.Breadcrumb[j-1] == "Deployments" {
 					resourceType = "Pods"
 				} else {
-					// Infer standard resource types
 					if strings.Contains(strings.ToLower(crumb), "pods") && !strings.Contains(strings.ToLower(crumb), "deployments") {
 						resourceType = "Pods"
 					} else if strings.Contains(strings.ToLower(crumb), "deployments") {
@@ -255,12 +249,10 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 					}
 				}
 
-				// Create the appropriate model based on resource type
 				if resourceType == "Pods" {
 					var selector string
 					var parentResource string
 
-					// Check if we have saved metadata with selector
 					if tabInfo.Metadata != nil {
 						if s, ok := tabInfo.Metadata["selector"].(string); ok {
 							selector = s
@@ -270,19 +262,18 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 						}
 					}
 
-					// Fallback to breadcrumb inference if no metadata
 					if selector == "" && strings.HasSuffix(strings.ToLower(crumb), " pods") && j > 0 && tabInfo.Breadcrumb[j-1] == "Deployments" {
 						parentResource = strings.TrimSuffix(crumb, " pods")
 						logger.Info(fmt.Sprintf("DEBUG: Inferring selector for deployment %s from breadcrumb", parentResource))
 						deployment := k8s.NewDeployment(parentResource, tm.namespace, *tm.kubeClient)
 						if err := deployment.Fetch(); err != nil {
 							logger.Error(fmt.Sprintf("Failed to fetch deployment %s for selector: %v", parentResource, err))
-							continue // Skip this crumb
+							continue 
 						}
 						selector, err = deployment.GetLabelSelector()
 						if err != nil {
 							logger.Error(fmt.Sprintf("Failed to get label selector for deployment %s: %v", parentResource, err))
-							continue // Skip this crumb
+							continue 
 						}
 					}
 
@@ -291,31 +282,29 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 						podsModel, err := NewPodsWithParent(*tm.kubeClient, tm.namespace, parentResource, selector)
 						if err != nil {
 							logger.Error(fmt.Sprintf("Failed to create pods model for crumb %s: %v", crumb, err))
-							continue // Skip this crumb
+							continue 
 						}
 						model, err = podsModel.InitComponent(tm.kubeClient)
 						if err != nil {
 							logger.Error(fmt.Sprintf("Failed to init pods model for crumb %s: %v", crumb, err))
-							continue // Skip this crumb
+							continue 
 						}
 						resourceModel = podsModel
 					} else {
-						// Create generic pods model
 						resourceList := NewResourceList(*tm.kubeClient, tm.namespace, resourceType)
 						model, err = resourceList.InitComponent(*tm.kubeClient)
 						if err != nil {
 							logger.Error(fmt.Sprintf("Failed to create model for crumb %s (type %s): %v", crumb, resourceType, err))
-							continue // Skip this crumb
+							continue 
 						}
 						resourceModel = resourceList
 					}
 				} else {
-					// Create generic resource list
 					resourceList := NewResourceList(*tm.kubeClient, tm.namespace, resourceType)
 					model, err = resourceList.InitComponent(*tm.kubeClient)
 					if err != nil {
 						logger.Error(fmt.Sprintf("Failed to create model for crumb %s (type %s): %v", crumb, resourceType, err))
-						continue // Skip this crumb
+						continue 
 					}
 					resourceModel = resourceList
 				}
@@ -563,12 +552,10 @@ func (tm *TabManager) navigateForward() (tea.Model, tea.Cmd) {
 }
 
 func (tm *TabManager) inferResourceTypeFromBreadcrumb(breadcrumb string) string {
-	// Check for deployment-specific pod views (e.g., "example-app pods")
 	if strings.HasSuffix(strings.ToLower(breadcrumb), " pods") {
 		return "Pods"
 	}
 
-	// Check for other resource types
 	if strings.Contains(strings.ToLower(breadcrumb), "deployments") {
 		return "Deployments"
 	} else if strings.Contains(strings.ToLower(breadcrumb), "services") {
@@ -595,6 +582,5 @@ func (tm *TabManager) inferResourceTypeFromBreadcrumb(breadcrumb string) string 
 		return "ServiceAccounts"
 	}
 
-	// Default fallback
 	return breadcrumb
 }

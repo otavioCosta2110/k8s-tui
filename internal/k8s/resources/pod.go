@@ -319,6 +319,26 @@ func (p *Pod) GetStatus() (corev1.PodStatus, error) {
 	return p.Raw.Status, nil
 }
 
+func (p *Pod) Create(name, image, namespace string) error {
+	pod := &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: corev1.PodSpec{
+			Containers: []corev1.Container{
+				{
+					Name:  name,
+					Image: image,
+				},
+			},
+		},
+	}
+
+	_, err := p.Client.CoreV1().Pods(namespace).Create(context.Background(), pod, metav1.CreateOptions{})
+	return err
+}
+
 func (p *Pod) Delete() error {
 	return p.Client.CoreV1().Pods(p.Namespace).Delete(context.Background(), p.Name, metav1.DeleteOptions{})
 }

@@ -30,6 +30,20 @@ func NewSecret(name, namespace string, k Client) *SecretInfo {
 	}
 }
 
+func (s *SecretInfo) Create(name, secretType, namespace string) error {
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Type: corev1.SecretType(secretType),
+		Data: map[string][]byte{},
+	}
+
+	_, err := s.Client.Clientset.CoreV1().Secrets(namespace).Create(context.Background(), secret, metav1.CreateOptions{})
+	return err
+}
+
 func FetchSecretList(client Client, namespace string) ([]string, error) {
 	secrets, err := client.Clientset.CoreV1().Secrets(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {

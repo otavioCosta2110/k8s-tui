@@ -51,6 +51,7 @@ Key Bindings:
 • ↑/↓/j/k: Navigate ingresses
 • enter: View ingress details
 • d: Delete selected ingresses
+• n: Create new ingress
 • r: Refresh
 • /: Search ingresses
 • esc: Go back
@@ -58,7 +59,8 @@ Key Bindings:
 Common Actions:
 • View rules: See routing rules
 • Check TLS: View SSL certificates
-• Test routing: Verify external access`
+• Update rules: Modify routing configuration
+• Create ingress: Press 'n' to open create form`
 }
 
 func (i *ingressesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
@@ -88,10 +90,19 @@ func (i *ingressesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": i.createDeleteAction(tableModel),
+		"n": i.createNewIngressAction(),
 	}
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, i.refreshInterval, i.k8sClient, "Ingresses"), nil
+}
+
+func (i *ingressesModel) createNewIngressAction() func() tea.Cmd {
+	return func() tea.Cmd {
+		return func() tea.Msg {
+			return components.OpenCreateFormMsg{ResourceType: "ingress"}
+		}
+	}
 }
 
 func (i *ingressesModel) fetchData() error {

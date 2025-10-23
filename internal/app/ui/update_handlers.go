@@ -8,6 +8,7 @@ import (
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/models"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles"
+	resources "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 )
 
@@ -285,4 +286,139 @@ func (m *AppModel) handleHeaderRefreshMsg(msg models.HeaderRefreshMsg) (tea.Mode
 func (m *AppModel) handleCloseQuickNavMsg(msg models.CloseQuickNavMsg) (tea.Model, tea.Cmd) {
 	m.quickNav = nil
 	return m, nil
+}
+
+func (m *AppModel) handleCreateSubmitMsg(msg components.CreateSubmitMsg) (tea.Model, tea.Cmd) {
+	var err error
+	switch msg.ResourceType {
+	case "pod":
+		pod := resources.NewPod("", "", m.kube)
+		err = pod.Create(msg.Values["name"], msg.Values["image"], msg.Values["namespace"])
+	case "deployment":
+		deployment := resources.NewDeployment("", "", m.kube)
+		err = deployment.Create(msg.Values["name"], msg.Values["image"], msg.Values["replicas"], msg.Values["namespace"])
+	case "service":
+		service := resources.NewService("", "", m.kube)
+		err = service.Create(msg.Values["name"], msg.Values["type"], msg.Values["port"], msg.Values["targetPort"], msg.Values["namespace"])
+	case "configmap":
+		configmap := resources.NewConfigmap("", "", m.kube)
+		err = configmap.Create(msg.Values["name"], msg.Values["namespace"])
+	case "secret":
+		secret := resources.NewSecret("", "", m.kube)
+		err = secret.Create(msg.Values["name"], msg.Values["type"], msg.Values["namespace"])
+	case "ingress":
+		ingress := resources.NewIngress("", "", m.kube)
+		err = ingress.Create(msg.Values["name"], msg.Values["host"], msg.Values["path"], msg.Values["serviceName"], msg.Values["servicePort"], msg.Values["namespace"])
+	case "job":
+		job := resources.NewJob("", "", m.kube)
+		err = job.Create(msg.Values["name"], msg.Values["image"], msg.Values["backoffLimit"], msg.Values["namespace"])
+	case "cronjob":
+		cronjob := resources.NewCronJob("", "", m.kube)
+		err = cronjob.Create(msg.Values["name"], msg.Values["image"], msg.Values["schedule"], msg.Values["suspend"], msg.Values["namespace"])
+	case "daemonset":
+		daemonset := resources.NewDaemonSet("", "", m.kube)
+		err = daemonset.Create(msg.Values["name"], msg.Values["image"], msg.Values["namespace"])
+	case "statefulset":
+		statefulset := resources.NewStatefulSet("", "", m.kube)
+		err = statefulset.Create(msg.Values["name"], msg.Values["image"], msg.Values["replicas"], msg.Values["namespace"])
+	case "namespace":
+		namespace := resources.NewNamespaces(m.kube)
+		err = namespace.Create(msg.Values["name"])
+	case "node":
+		err = fmt.Errorf("creating nodes is not supported")
+	default:
+		err = fmt.Errorf("unknown resource type: %s", msg.ResourceType)
+	}
+	if err != nil {
+		logger.Error(fmt.Sprintf("Failed to create %s: %v", msg.ResourceType, err))
+	}
+	m.textInput = nil
+	return m, nil
+}
+
+func (m *AppModel) handleOpenCreateFormMsg(msg components.OpenCreateFormMsg) (tea.Model, tea.Cmd) {
+	var fields []components.Field
+	switch msg.ResourceType {
+	case "pod":
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+			{Name: "image", Placeholder: "Image", DefaultValue: "", Row: 1},
+			{Name: "namespace", Placeholder: "Namespace", DefaultValue: m.kube.Namespace, Row: 2},
+		}
+	case "deployment":
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+			{Name: "image", Placeholder: "Image", DefaultValue: "", Row: 1},
+			{Name: "replicas", Placeholder: "Replicas", DefaultValue: "1", Row: 1},
+			{Name: "namespace", Placeholder: "Namespace", DefaultValue: m.kube.Namespace, Row: 2},
+		}
+	case "service":
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+			{Name: "type", Placeholder: "Type", DefaultValue: "ClusterIP", Row: 1},
+			{Name: "port", Placeholder: "Port", DefaultValue: "", Row: 2},
+			{Name: "targetPort", Placeholder: "Target Port", DefaultValue: "", Row: 2},
+			{Name: "namespace", Placeholder: "Namespace", DefaultValue: m.kube.Namespace, Row: 3},
+		}
+	case "configmap":
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+			{Name: "namespace", Placeholder: "Namespace", DefaultValue: m.kube.Namespace, Row: 1},
+		}
+	case "secret":
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+			{Name: "type", Placeholder: "Type", DefaultValue: "Opaque", Row: 1},
+			{Name: "namespace", Placeholder: "Namespace", DefaultValue: m.kube.Namespace, Row: 2},
+		}
+	case "ingress":
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+			{Name: "host", Placeholder: "Host", DefaultValue: "", Row: 1},
+			{Name: "path", Placeholder: "Path", DefaultValue: "/", Row: 2},
+			{Name: "serviceName", Placeholder: "Service Name", DefaultValue: "", Row: 3},
+			{Name: "servicePort", Placeholder: "Service Port", DefaultValue: "", Row: 3},
+			{Name: "namespace", Placeholder: "Namespace", DefaultValue: m.kube.Namespace, Row: 4},
+		}
+	case "job":
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+			{Name: "image", Placeholder: "Image", DefaultValue: "", Row: 1},
+			{Name: "backoffLimit", Placeholder: "Backoff Limit", DefaultValue: "6", Row: 2},
+			{Name: "namespace", Placeholder: "Namespace", DefaultValue: m.kube.Namespace, Row: 3},
+		}
+	case "cronjob":
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+			{Name: "image", Placeholder: "Image", DefaultValue: "", Row: 1},
+			{Name: "schedule", Placeholder: "Schedule", DefaultValue: "*/5 * * * *", Row: 2},
+			{Name: "suspend", Placeholder: "Suspend", DefaultValue: "false", Row: 3},
+			{Name: "namespace", Placeholder: "Namespace", DefaultValue: m.kube.Namespace, Row: 4},
+		}
+	case "daemonset":
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+			{Name: "image", Placeholder: "Image", DefaultValue: "", Row: 1},
+			{Name: "namespace", Placeholder: "Namespace", DefaultValue: m.kube.Namespace, Row: 2},
+		}
+	case "statefulset":
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+			{Name: "image", Placeholder: "Image", DefaultValue: "", Row: 1},
+			{Name: "replicas", Placeholder: "Replicas", DefaultValue: "1", Row: 1},
+			{Name: "namespace", Placeholder: "Namespace", DefaultValue: m.kube.Namespace, Row: 2},
+		}
+	case "namespace":
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+		}
+	default:
+		fields = []components.Field{
+			{Name: "name", Placeholder: "Name", DefaultValue: "", Row: 0},
+			{Name: "namespace", Placeholder: "Namespace", DefaultValue: m.kube.Namespace, Row: 1},
+		}
+	}
+	title := "Create New " + msg.ResourceType
+	m.textInput = components.NewCreateForm(title, msg.ResourceType, fields)
+	return m, m.textInput.Init()
 }

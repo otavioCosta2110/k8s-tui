@@ -30,6 +30,33 @@ func NewJob(name, namespace string, k Client) *JobInfo {
 	}
 }
 
+func (j *JobInfo) Create(name, image, backoffLimit, namespace string) error {
+	backoffLimitInt := parseInt32(backoffLimit)
+	job := &batchv1.Job{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: batchv1.JobSpec{
+			BackoffLimit: &backoffLimitInt,
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  name,
+							Image: image,
+						},
+					},
+					RestartPolicy: corev1.RestartPolicyNever,
+				},
+			},
+		},
+	}
+
+	_, err := j.Client.Clientset.BatchV1().Jobs(namespace).Create(context.Background(), job, metav1.CreateOptions{})
+	return err
+}
+
 func FetchJobList(client Client, namespace string) ([]string, error) {
 	jobs, err := client.Clientset.BatchV1().Jobs(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
