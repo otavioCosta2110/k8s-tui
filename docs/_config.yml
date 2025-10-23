@@ -1,0 +1,34 @@
+title: "k8s-tui Documentation"
+description: "Comprehensive documentation for the Kubernetes Terminal User Interface"
+url: "https://otaviocosta2110.github.io/k8s-tui"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor/
+
+# Include files
+include:
+  - _pages
+
+# Collections
+collections:
+  user-guide:
+    output: true
+    permalink: /user-guide/:name/
+  developer:
+    output: true
+    permalink: /developer/:name/
+  api:
+    output: true
+    permalink: /api/:name/
