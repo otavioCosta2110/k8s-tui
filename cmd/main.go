@@ -40,7 +40,7 @@ func main() {
 			return false
 		},
 	)
-	m := ui.NewAppModel(cfg, pluginManager)
+	m := ui.NewMultiClusterModel(cfg, pluginManager)
 
 	if err := cli.HandlePluginArgs(pluginManager, cfg.PluginArgs); err != nil {
 		logger.Error(fmt.Sprintf("Plugin CLI argument handling error: %v", err))

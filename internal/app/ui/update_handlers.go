@@ -14,7 +14,7 @@ import (
 
 func (m *AppModel) handleWindowSizeMsg(msg tea.WindowSizeMsg) (tea.Model, tea.Cmd) {
 	styles.ScreenWidth = msg.Width - styles.Margin
-	styles.ScreenHeight = msg.Height - 1
+	styles.ScreenHeight = msg.Height - 2
 	if !styles.IsHeaderActive {
 		styles.HeaderSize = styles.ScreenHeight/4 - (styles.Margin * 2)
 		styles.IsHeaderActive = true

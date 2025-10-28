@@ -33,7 +33,7 @@ type HeaderModel struct {
 
 func NewHeader(headerText string, kubeconfig *k8s.Client) HeaderModel {
 	return HeaderModel{
-		content:      "",
+		content:      headerText,
 		kubeconfig:   kubeconfig,
 		headerStyle:  lipgloss.NewStyle().Height(styles.HeaderSize).Background(lipgloss.Color(customstyles.BackgroundColor)),
 		tabComponent: components.NewTabComponent(),

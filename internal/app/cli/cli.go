@@ -9,10 +9,10 @@ import (
 )
 
 type Config struct {
-	KubeconfigPath string
-	Namespace      string
-	PluginDir      string
-	PluginArgs     map[string]string
+	KubeconfigPaths []string
+	Namespace       string
+	PluginDir       string
+	PluginArgs      map[string]string
 }
 
 func ParseFlags() Config {
@@ -35,7 +35,7 @@ func ParseFlags() Config {
 				flagValue := args[i+1]
 				switch flagName {
 				case "kubeconfig":
-					cfg.KubeconfigPath = flagValue
+					cfg.KubeconfigPaths = append(cfg.KubeconfigPaths, flagValue)
 				case "namespace":
 					cfg.Namespace = flagValue
 				case "plugin-dir":

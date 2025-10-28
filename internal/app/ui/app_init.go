@@ -138,12 +138,13 @@ func createAppModelWithoutKubeClient(appConfig config.AppConfig, pluginManager *
 	popup := models.NewErrorScreen(err, "Failed to initialize Kubernetes config", "")
 	uiInjector := NewUIInjector()
 	appModel := &AppModel{
-		header:        models.NewHeader("K8s TUI", nil),
-		config:        appConfig,
-		errorPopup:    &popup,
-		helpScreen:    components.NewHelpModel(),
-		pluginManager: pluginManager,
-		uiInjector:    uiInjector,
+		header:         models.NewHeader("K8s TUI", nil),
+		config:         appConfig,
+		configSelected: true,
+		errorPopup:     &popup,
+		helpScreen:     components.NewHelpModel(),
+		pluginManager:  pluginManager,
+		uiInjector:     uiInjector,
 	}
 
 	if pluginManager != nil {
@@ -183,11 +184,12 @@ func setupPluginManagerForNoKubeClient(appModel *AppModel, pluginManager *plugin
 func createFallbackAppModel(appConfig config.AppConfig, pluginManager *plugins.PluginManager) *AppModel {
 	uiInjector := NewUIInjector()
 	appModel := &AppModel{
-		header:        models.NewHeader("K8s TUI", nil),
-		config:        appConfig,
-		helpScreen:    components.NewHelpModel(),
-		pluginManager: pluginManager,
-		uiInjector:    uiInjector,
+		header:         models.NewHeader("K8s TUI", nil),
+		config:         appConfig,
+		configSelected: true,
+		helpScreen:     components.NewHelpModel(),
+		pluginManager:  pluginManager,
+		uiInjector:     uiInjector,
 	}
 
 	if pluginManager != nil {

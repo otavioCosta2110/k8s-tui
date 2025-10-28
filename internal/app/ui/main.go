@@ -12,6 +12,7 @@ import (
 	resources "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
+	"strconv"
 )
 
 type InputDialogRequest struct {
@@ -40,10 +41,22 @@ type AppModel struct {
 	uiInjector          *UIInjector
 }
 
+type MultiClusterModel struct {
+	clusters            []*AppModel
+	currentCluster      int
+	clusterTabComponent *components.TabComponent
+}
+
 func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel {
 	appConfig := initializeAppConfigAndColors()
 
-	kubeClient, err := resources.NewClient(cfg.KubeconfigPath, cfg.Namespace)
+	// For multi-cluster, we'll handle in MultiClusterModel
+	// For now, use first kubeconfig or default
+	kubeconfig := ""
+	if len(cfg.KubeconfigPaths) > 0 {
+		kubeconfig = cfg.KubeconfigPaths[0]
+	}
+	kubeClient, err := resources.NewClient(kubeconfig, cfg.Namespace)
 	if err == nil && kubeClient != nil {
 		return createAppModelWithKubeClient(cfg, appConfig, pluginManager, kubeClient)
 	}
@@ -183,4 +196,107 @@ func (m *AppModel) updateHeaderTabs() {
 		logger.Info("DEBUG: tabManager is nil")
 	}
 	logger.Info("DEBUG: updateHeaderTabs completed")
+}
+
+func NewMultiClusterModel(cfg cli.Config, pluginManager *plugins.PluginManager) *MultiClusterModel {
+	// If no kubeconfigs provided, use default
+	if len(cfg.KubeconfigPaths) == 0 {
+		cfg.KubeconfigPaths = []string{""}
+	}
+
+	clusters := make([]*AppModel, len(cfg.KubeconfigPaths))
+	clusterTabComponent := components.NewTabComponent()
+	for i, kubeconfig := range cfg.KubeconfigPaths {
+		// Create a copy of cfg with single kubeconfig
+		singleCfg := cfg
+		singleCfg.KubeconfigPaths = []string{kubeconfig}
+		clusters[i] = NewAppModel(singleCfg, pluginManager)
+		// Add cluster tab
+		title := fmt.Sprintf("Cluster %d", i+1)
+		clusterTabComponent.AddTab(fmt.Sprintf("%d", i), title, "cluster")
+	}
+
+	// Set active tab
+	if len(cfg.KubeconfigPaths) > 0 {
+		clusterTabComponent.SetActiveTab(0)
+	}
+
+	return &MultiClusterModel{
+		clusters:            clusters,
+		currentCluster:      0,
+		clusterTabComponent: clusterTabComponent,
+	}
+}
+
+func (m *MultiClusterModel) Init() tea.Cmd {
+	if len(m.clusters) > 0 && m.clusters[m.currentCluster] != nil {
+		return m.clusters[m.currentCluster].Init()
+	}
+	return nil
+}
+
+func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		// Set width for cluster tab component
+		if m.clusterTabComponent != nil {
+			m.clusterTabComponent.Width = msg.Width
+		}
+	case tea.KeyMsg:
+		// Handle cluster switching, e.g., f1, f2, f3
+		if msg.String() == "f1" && len(m.clusters) > 0 {
+			m.currentCluster = 0
+			m.clusterTabComponent.SetActiveTab(0)
+			return m, nil
+		}
+		if msg.String() == "f2" && len(m.clusters) > 1 {
+			m.currentCluster = 1
+			m.clusterTabComponent.SetActiveTab(1)
+			return m, nil
+		}
+		if msg.String() == "f3" && len(m.clusters) > 2 {
+			m.currentCluster = 2
+			m.clusterTabComponent.SetActiveTab(2)
+			return m, nil
+		}
+		// Add more as needed
+	case components.TabMsg:
+		// Handle cluster tab switching
+		if msg.ResourceType == "cluster" && msg.Action == "switch" {
+			if index, err := strconv.Atoi(msg.TabID); err == nil && index >= 0 && index < len(m.clusters) {
+				m.currentCluster = index
+				m.clusterTabComponent.SetActiveTab(index)
+				return m, nil
+			}
+		}
+	}
+
+	// Delegate to current cluster
+	if len(m.clusters) > 0 && m.clusters[m.currentCluster] != nil {
+		updated, cmd := m.clusters[m.currentCluster].Update(msg)
+		if appModel, ok := updated.(*AppModel); ok {
+			m.clusters[m.currentCluster] = appModel
+		}
+		return m, cmd
+	}
+	return m, nil
+}
+
+func (m *MultiClusterModel) View() string {
+	if len(m.clusters) == 0 || m.clusters[m.currentCluster] == nil {
+		return "No clusters configured"
+	}
+
+	// Delegate view to current cluster
+	content := m.clusters[m.currentCluster].View()
+
+	// Render cluster tabs only if more than one cluster
+	if len(m.clusters) > 1 && m.clusterTabComponent != nil {
+		clusterTabView := m.clusterTabComponent.View()
+		if clusterTabView != "" {
+			return lipgloss.JoinVertical(lipgloss.Top, clusterTabView, content)
+		}
+	}
+
+	return content
 }
