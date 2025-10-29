@@ -410,8 +410,8 @@ func (m *MultiClusterModel) View() string {
 	// Delegate view to current cluster
 	content := m.clusters[m.currentCluster].View()
 
-	// Render cluster tabs only if more than one cluster
-	if len(m.clusters) > 1 && m.clusterTabComponent != nil {
+	// Render cluster tabs
+	if m.clusterTabComponent != nil {
 		clusterTabView := m.clusterTabComponent.View()
 		if clusterTabView != "" {
 			return lipgloss.JoinVertical(lipgloss.Top, clusterTabView, content)
