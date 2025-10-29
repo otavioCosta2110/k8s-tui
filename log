@@ -3394,3 +3394,142 @@
 [2025-10-28 21:55:06] INFO: DEBUG: updateHeaderTabs completed
 [2025-10-28 21:55:07] INFO: Application completed successfully
 [2025-10-28 21:55:07] INFO: Application shutting down
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Found 2 potential plugin files
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: File 1: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: File 2: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Attempting to load plugin: cluster-tab-test-plugin from /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:56:57] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: cluster-tab-test-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Available functions in cluster-tab-test-plugin:
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Name: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Version: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Description: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Initialize: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Setup: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Config: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Commands: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Hooks: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Validating required functions for plugin: cluster-tab-test-plugin
+[2025-10-28 21:56:57] ERROR: 🔌 Plugin Manager: Plugin cluster-tab-test-plugin missing required Name() function
+[2025-10-28 21:56:57] ERROR: 🔌 Plugin Manager: ❌ Failed to load plugin cluster-tab-test-plugin: Lua plugin must define a Name function
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:56:57] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:56:57] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:56:57] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:56:57] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:56:57] INFO: 🔌 Plugin Manager: Plugin loading complete - 1 loaded, 1 failed
+[2025-10-28 21:56:57] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:56:57] INFO: 🔌 Plugin manager available, found 0 custom resource types
+[2025-10-28 21:56:57] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:56:57] INFO: DEBUG: SetCurrentNamespace called with: default
+[2025-10-28 21:56:57] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:56:57] INFO: Starting Bubbletea program
+[2025-10-28 21:56:57] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:56:57] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:56:57] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:56:57] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Found 2 potential plugin files
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: File 1: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: File 2: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Attempting to load plugin: cluster-tab-test-plugin from /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:57:02] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: cluster-tab-test-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Available functions in cluster-tab-test-plugin:
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Name: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Version: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Description: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Initialize: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Setup: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Config: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Commands: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Hooks: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Validating required functions for plugin: cluster-tab-test-plugin
+[2025-10-28 21:57:02] ERROR: 🔌 Plugin Manager: Plugin cluster-tab-test-plugin missing required Name() function
+[2025-10-28 21:57:02] ERROR: 🔌 Plugin Manager: ❌ Failed to load plugin cluster-tab-test-plugin: Lua plugin must define a Name function
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:57:02] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:57:02] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:57:02] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:57:02] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:57:02] INFO: 🔌 Plugin Manager: Plugin loading complete - 1 loaded, 1 failed
+[2025-10-28 21:57:02] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:57:02] INFO: 🔌 Plugin manager available, found 0 custom resource types
+[2025-10-28 21:57:02] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:57:02] INFO: DEBUG: SetCurrentNamespace called with: otavio
+[2025-10-28 21:57:02] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:57:12] INFO: Application completed successfully
+[2025-10-28 21:57:12] INFO: Application shutting down

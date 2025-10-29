@@ -50,6 +50,7 @@ type MultiClusterModel struct {
 	pendingKubeconfig   string
 	width               int
 	height              int
+	pluginDir           string
 }
 
 func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel {
@@ -242,6 +243,7 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 		clusters:            clusters,
 		currentCluster:      0,
 		clusterTabComponent: clusterTabComponent,
+		pluginDir:           cfg.PluginDir,
 	}
 }
 
@@ -332,7 +334,7 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		singleCfg := cli.Config{
 			KubeconfigPaths: []string{m.pendingKubeconfig},
 			Namespace:       msg.Namespace,
-			PluginDir:       "./plugins",
+			PluginDir:       m.pluginDir,
 		}
 		// Create separate plugin manager for the new cluster
 		pluginManager := plugins.NewPluginManager(singleCfg.PluginDir)
