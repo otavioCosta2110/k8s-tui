@@ -48,6 +48,8 @@ type MultiClusterModel struct {
 	kubeconfigSelector  tea.Model
 	namespaceSelector   tea.Model
 	pendingKubeconfig   string
+	width               int
+	height              int
 }
 
 func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel {
@@ -258,31 +260,51 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.clusterTabComponent != nil {
 			m.clusterTabComponent.Width = msg.Width
 		}
+		m.width = msg.Width
+		m.height = msg.Height
 	case tea.KeyMsg:
 		// Handle cluster switching, e.g., f1, f2, f3
 		if msg.String() == "f1" && len(m.clusters) > 0 {
 			m.currentCluster = 0
 			m.clusterTabComponent.SetActiveTab(0)
 			plugins.SetGlobalPluginManager(m.clusters[0].pluginManager)
+			if m.width > 0 {
+				updated, _ := m.clusters[0].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+				if appModel, ok := updated.(*AppModel); ok {
+					m.clusters[0] = appModel
+				}
+			}
 			return m, nil
 		}
 		if msg.String() == "f2" && len(m.clusters) > 1 {
 			m.currentCluster = 1
 			m.clusterTabComponent.SetActiveTab(1)
 			plugins.SetGlobalPluginManager(m.clusters[1].pluginManager)
+			if m.width > 0 {
+				updated, _ := m.clusters[1].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+				if appModel, ok := updated.(*AppModel); ok {
+					m.clusters[1] = appModel
+				}
+			}
 			return m, nil
 		}
 		if msg.String() == "f3" && len(m.clusters) > 2 {
 			m.currentCluster = 2
 			m.clusterTabComponent.SetActiveTab(2)
 			plugins.SetGlobalPluginManager(m.clusters[2].pluginManager)
+			if m.width > 0 {
+				updated, _ := m.clusters[2].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+				if appModel, ok := updated.(*AppModel); ok {
+					m.clusters[2] = appModel
+				}
+			}
 			return m, nil
 		}
 		if msg.String() == "ctrl+n" {
 			m.kubeconfigSelector = models.NewKubeconfigSelectorModel()
 			return m, m.kubeconfigSelector.Init()
 		}
-	// Add more as needed
+		// Add more as needed
 	case components.TabMsg:
 		// Handle cluster tab switching
 		if msg.ResourceType == "cluster" && msg.Action == "switch" {
@@ -290,6 +312,12 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.currentCluster = index
 				m.clusterTabComponent.SetActiveTab(index)
 				plugins.SetGlobalPluginManager(m.clusters[index].pluginManager)
+				if m.width > 0 {
+					updated, _ := m.clusters[index].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+					if appModel, ok := updated.(*AppModel); ok {
+						m.clusters[index] = appModel
+					}
+				}
 				return m, nil
 			}
 		}
@@ -321,6 +349,13 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.clusterTabComponent.AddTab(fmt.Sprintf("%d", newIndex), title, "cluster")
 		m.currentCluster = newIndex
 		m.clusterTabComponent.SetActiveTab(newIndex)
+		plugins.SetGlobalPluginManager(m.clusters[newIndex].pluginManager)
+		if m.width > 0 {
+			updated, _ := m.clusters[newIndex].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+			if appModel, ok := updated.(*AppModel); ok {
+				m.clusters[newIndex] = appModel
+			}
+		}
 		m.namespaceSelector = nil
 		m.pendingKubeconfig = ""
 		return m, nil

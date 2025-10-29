@@ -15,7 +15,7 @@ func main() {
 
 	cfg := ui.ParseFlags()
 	m := ui.NewMultiClusterModel(cfg)
-	p := tea.NewProgram(m)
+	p := tea.NewProgram(m, tea.WithAltScreen())
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Error(fmt.Sprintf("Panic recovered: %v", r))

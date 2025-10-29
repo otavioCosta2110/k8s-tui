@@ -1283,3 +1283,2114 @@
 [2025-10-28 21:48:14] DEBUG: m.Table.View() returned
 [2025-10-28 21:48:14] INFO: Application completed successfully
 [2025-10-28 21:48:14] INFO: Application shutting down
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Found 2 potential plugin files
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: File 1: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: File 2: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Attempting to load plugin: cluster-tab-test-plugin from /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:50:10] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: cluster-tab-test-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Available functions in cluster-tab-test-plugin:
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Name: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Version: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Description: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Initialize: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Setup: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Config: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Commands: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Hooks: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Validating required functions for plugin: cluster-tab-test-plugin
+[2025-10-28 21:50:10] ERROR: 🔌 Plugin Manager: Plugin cluster-tab-test-plugin missing required Name() function
+[2025-10-28 21:50:10] ERROR: 🔌 Plugin Manager: ❌ Failed to load plugin cluster-tab-test-plugin: Lua plugin must define a Name function
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:50:10] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:50:10] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:50:10] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:50:10] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:50:10] INFO: 🔌 Plugin Manager: Plugin loading complete - 1 loaded, 1 failed
+[2025-10-28 21:50:10] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:50:10] INFO: 🔌 Plugin manager available, found 0 custom resource types
+[2025-10-28 21:50:10] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:50:10] INFO: DEBUG: SetCurrentNamespace called with: default
+[2025-10-28 21:50:10] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:50:10] INFO: Starting Bubbletea program
+[2025-10-28 21:50:10] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:50:10] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:50:10] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:50:10] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:50:10] INFO: DEBUG: updateHeaderTabs called
+[2025-10-28 21:50:10] INFO: DEBUG: Got 1 tabs from tabManager
+[2025-10-28 21:50:10] INFO: DEBUG: Tab 0: ID=initial, Title=Pods, ResourceType=Pods, IsActive=true
+[2025-10-28 21:50:10] INFO: DEBUG: Cleared header tabs
+[2025-10-28 21:50:10] INFO: DEBUG: Adding tab 0 to header: ID=initial, Title=Pods, ResourceType=Pods
+[2025-10-28 21:50:10] INFO: DEBUG: Tab 0 is active
+[2025-10-28 21:50:10] INFO: DEBUG: Setting active tab to index 0
+[2025-10-28 21:50:10] INFO: DEBUG: updateHeaderTabs completed
+[2025-10-28 21:50:10] DEBUG: Table View called
+[2025-10-28 21:50:10] DEBUG: PluginAPI GetPods called with namespace=default, selector=
+[2025-10-28 21:50:10] DEBUG: Pod handler exists: true, handler: &{pod}
+[2025-10-28 21:50:10] DEBUG: Using custom handler (no selector provided)
+[2025-10-28 21:50:10] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:50:10] DEBUG: Table View called
+[2025-10-28 21:50:10] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:10] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:10] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:10] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:10] DEBUG: Table View called
+[2025-10-28 21:50:10] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:10] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:10] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:10] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:10] DEBUG: Table View called
+[2025-10-28 21:50:10] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:10] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:10] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:10] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:11] DEBUG: Table View called
+[2025-10-28 21:50:11] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:11] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:11] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:11] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:11] DEBUG: Table View called
+[2025-10-28 21:50:11] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:11] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:11] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:11] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:11] DEBUG: Table View called
+[2025-10-28 21:50:11] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:11] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:11] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:11] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:11] DEBUG: Table View called
+[2025-10-28 21:50:11] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:11] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:11] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:11] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:11] DEBUG: Table View called
+[2025-10-28 21:50:11] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:11] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:11] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:11] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:11] DEBUG: Table View called
+[2025-10-28 21:50:11] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:11] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:11] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:11] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:11] DEBUG: Table View called
+[2025-10-28 21:50:11] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:11] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:11] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:11] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:11] DEBUG: Table View called
+[2025-10-28 21:50:11] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:11] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:11] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:11] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:11] DEBUG: Table View called
+[2025-10-28 21:50:11] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:11] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:11] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:11] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:11] DEBUG: Table View called
+[2025-10-28 21:50:11] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:11] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:11] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:11] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:11] DEBUG: Table View called
+[2025-10-28 21:50:11] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:11] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:11] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:11] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:12] DEBUG: Table View called
+[2025-10-28 21:50:12] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:12] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:12] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:12] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:12] DEBUG: Table View called
+[2025-10-28 21:50:12] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:12] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:12] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:12] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:12] DEBUG: Table View called
+[2025-10-28 21:50:12] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:12] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:12] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:12] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:12] DEBUG: Table View called
+[2025-10-28 21:50:12] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:12] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:12] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:12] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:12] DEBUG: Table View called
+[2025-10-28 21:50:12] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:12] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:12] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:12] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:12] DEBUG: Table View called
+[2025-10-28 21:50:12] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:12] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:12] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:12] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:12] DEBUG: Table View called
+[2025-10-28 21:50:12] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:12] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:12] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:12] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:12] DEBUG: Table View called
+[2025-10-28 21:50:12] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:12] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:12] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:12] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:12] DEBUG: Table View called
+[2025-10-28 21:50:12] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:12] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:12] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:12] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:12] DEBUG: Table View called
+[2025-10-28 21:50:12] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:12] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:12] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:12] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:13] DEBUG: Table View called
+[2025-10-28 21:50:13] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:13] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:13] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:13] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:13] DEBUG: Table View called
+[2025-10-28 21:50:13] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:13] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:13] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:13] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:13] DEBUG: Table View called
+[2025-10-28 21:50:13] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:13] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:13] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:13] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:13] DEBUG: Table View called
+[2025-10-28 21:50:13] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:13] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:13] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:13] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:13] DEBUG: Table View called
+[2025-10-28 21:50:13] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:13] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:13] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:13] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:13] DEBUG: Table View called
+[2025-10-28 21:50:13] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:13] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:13] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:13] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:13] DEBUG: Table View called
+[2025-10-28 21:50:13] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:13] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:13] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:13] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:13] DEBUG: Table View called
+[2025-10-28 21:50:13] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:13] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:13] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:13] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:13] DEBUG: Table View called
+[2025-10-28 21:50:13] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:13] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:13] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:13] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:13] DEBUG: Table View called
+[2025-10-28 21:50:13] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:13] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:14] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:14] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:14] DEBUG: Table View called
+[2025-10-28 21:50:14] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:14] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:14] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:14] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:14] DEBUG: Table View called
+[2025-10-28 21:50:14] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:14] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:14] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:14] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:14] DEBUG: Table View called
+[2025-10-28 21:50:14] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:14] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:14] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:14] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:14] DEBUG: Table View called
+[2025-10-28 21:50:14] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:14] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:14] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:14] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:14] DEBUG: Table View called
+[2025-10-28 21:50:14] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:14] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:14] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:14] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:14] DEBUG: Table View called
+[2025-10-28 21:50:14] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:14] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:14] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:14] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:14] DEBUG: Table View called
+[2025-10-28 21:50:14] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:14] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:14] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:14] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:14] DEBUG: Table View called
+[2025-10-28 21:50:14] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:14] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:14] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:14] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:14] DEBUG: Table View called
+[2025-10-28 21:50:14] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:14] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:14] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:14] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: PluginAPI GetPods called with namespace=default, selector=
+[2025-10-28 21:50:15] DEBUG: Pod handler exists: true, handler: &{pod}
+[2025-10-28 21:50:15] DEBUG: Using custom handler (no selector provided)
+[2025-10-28 21:50:15] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:15] DEBUG: Table View called
+[2025-10-28 21:50:15] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:15] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:15] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:15] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:16] DEBUG: Table View called
+[2025-10-28 21:50:16] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:16] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:16] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:16] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:16] DEBUG: Table View called
+[2025-10-28 21:50:16] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:16] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:16] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:16] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:16] DEBUG: Table View called
+[2025-10-28 21:50:16] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:16] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:16] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:16] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:16] DEBUG: Table View called
+[2025-10-28 21:50:16] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:16] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:16] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:16] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:16] DEBUG: Table View called
+[2025-10-28 21:50:16] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:16] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:16] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:16] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:16] DEBUG: Table View called
+[2025-10-28 21:50:16] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:16] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:16] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:16] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:16] DEBUG: Table View called
+[2025-10-28 21:50:16] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:16] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:16] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:16] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:16] DEBUG: Table View called
+[2025-10-28 21:50:16] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:16] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:16] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:16] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:16] DEBUG: Table View called
+[2025-10-28 21:50:16] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:16] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:16] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:16] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:16] DEBUG: Table View called
+[2025-10-28 21:50:16] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:16] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:16] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:16] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:17] DEBUG: Table View called
+[2025-10-28 21:50:17] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:17] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:17] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:17] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:17] DEBUG: Table View called
+[2025-10-28 21:50:17] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:17] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:17] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:17] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:17] DEBUG: Table View called
+[2025-10-28 21:50:17] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:17] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:17] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:17] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:17] DEBUG: Table View called
+[2025-10-28 21:50:17] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:17] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:17] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:17] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:17] DEBUG: Table View called
+[2025-10-28 21:50:17] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:17] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:17] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:17] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:17] DEBUG: Table View called
+[2025-10-28 21:50:17] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:17] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:17] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:17] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:17] DEBUG: Table View called
+[2025-10-28 21:50:17] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:17] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:17] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:17] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:17] DEBUG: Table View called
+[2025-10-28 21:50:17] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:17] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:17] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:17] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:17] DEBUG: Table View called
+[2025-10-28 21:50:17] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:17] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:17] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:17] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:17] DEBUG: Table View called
+[2025-10-28 21:50:17] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:17] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:17] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:17] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:18] DEBUG: Table View called
+[2025-10-28 21:50:18] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:18] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:18] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:18] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:18] DEBUG: Table View called
+[2025-10-28 21:50:18] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:18] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:18] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:18] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:18] DEBUG: Table View called
+[2025-10-28 21:50:18] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:18] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:18] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:18] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:18] DEBUG: Table View called
+[2025-10-28 21:50:18] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:18] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:18] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:18] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:18] DEBUG: Table View called
+[2025-10-28 21:50:18] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:18] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:18] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:18] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:18] DEBUG: Table View called
+[2025-10-28 21:50:18] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:18] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:18] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:18] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:18] DEBUG: Table View called
+[2025-10-28 21:50:18] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:18] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:18] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:18] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:18] DEBUG: Table View called
+[2025-10-28 21:50:18] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:18] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:18] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:18] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:18] DEBUG: Table View called
+[2025-10-28 21:50:18] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:18] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:18] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:18] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:18] DEBUG: Table View called
+[2025-10-28 21:50:18] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:18] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:18] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:18] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:19] DEBUG: Table View called
+[2025-10-28 21:50:19] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:19] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:19] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:19] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:19] DEBUG: Table View called
+[2025-10-28 21:50:19] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:19] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:19] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:19] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:19] DEBUG: Table View called
+[2025-10-28 21:50:19] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:19] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:19] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:19] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:19] DEBUG: Table View called
+[2025-10-28 21:50:19] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:19] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:19] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:19] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:19] DEBUG: Table View called
+[2025-10-28 21:50:19] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:19] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:19] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:19] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:19] DEBUG: Table View called
+[2025-10-28 21:50:19] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:19] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:19] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:19] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:19] DEBUG: Table View called
+[2025-10-28 21:50:19] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:19] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:19] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:19] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:19] DEBUG: Table View called
+[2025-10-28 21:50:19] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:19] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:19] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:19] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:19] DEBUG: Table View called
+[2025-10-28 21:50:19] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:19] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:19] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:19] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:19] DEBUG: Table View called
+[2025-10-28 21:50:19] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:19] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:19] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:19] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: PluginAPI GetPods called with namespace=default, selector=
+[2025-10-28 21:50:20] DEBUG: Pod handler exists: true, handler: &{pod}
+[2025-10-28 21:50:20] DEBUG: Using custom handler (no selector provided)
+[2025-10-28 21:50:20] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:20] DEBUG: Table View called
+[2025-10-28 21:50:20] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:20] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:20] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:20] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:21] DEBUG: Table View called
+[2025-10-28 21:50:21] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:21] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:21] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:21] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:21] DEBUG: Table View called
+[2025-10-28 21:50:21] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:21] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:21] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:21] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:21] DEBUG: Table View called
+[2025-10-28 21:50:21] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:21] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:21] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:21] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:21] DEBUG: Table View called
+[2025-10-28 21:50:21] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:21] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:21] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:21] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:21] DEBUG: Table View called
+[2025-10-28 21:50:21] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:21] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:21] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:21] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:21] DEBUG: Table View called
+[2025-10-28 21:50:21] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:21] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:21] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:21] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:21] DEBUG: Table View called
+[2025-10-28 21:50:21] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:21] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:21] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:21] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:21] DEBUG: Table View called
+[2025-10-28 21:50:21] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:21] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:21] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:21] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:21] DEBUG: Table View called
+[2025-10-28 21:50:21] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:21] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:21] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:21] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:21] DEBUG: Table View called
+[2025-10-28 21:50:21] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:21] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:21] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:21] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:22] DEBUG: Table View called
+[2025-10-28 21:50:22] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:22] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:22] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:22] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:22] DEBUG: Table View called
+[2025-10-28 21:50:22] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:22] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:22] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:22] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:22] DEBUG: Table View called
+[2025-10-28 21:50:22] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:22] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:22] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:22] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:22] DEBUG: Table View called
+[2025-10-28 21:50:22] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:22] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:22] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:22] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:22] DEBUG: Table View called
+[2025-10-28 21:50:22] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:22] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:22] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:22] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:22] DEBUG: Table View called
+[2025-10-28 21:50:22] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:22] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:22] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:22] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:22] DEBUG: Table View called
+[2025-10-28 21:50:22] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:22] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:22] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:22] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:22] DEBUG: Table View called
+[2025-10-28 21:50:22] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:22] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:22] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:22] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:22] DEBUG: Table View called
+[2025-10-28 21:50:22] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:22] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:22] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:22] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:22] DEBUG: Table View called
+[2025-10-28 21:50:22] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:22] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:22] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:22] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:23] DEBUG: Table View called
+[2025-10-28 21:50:23] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:23] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:23] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:23] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:23] DEBUG: Table View called
+[2025-10-28 21:50:23] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:23] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:23] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:23] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:23] DEBUG: Table View called
+[2025-10-28 21:50:23] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:23] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:23] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:23] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:23] DEBUG: Table View called
+[2025-10-28 21:50:23] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:23] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:23] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:23] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:23] DEBUG: Table View called
+[2025-10-28 21:50:23] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:23] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:23] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:23] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:23] DEBUG: Table View called
+[2025-10-28 21:50:23] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:23] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:23] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:23] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:23] DEBUG: Table View called
+[2025-10-28 21:50:23] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:23] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:23] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:23] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:23] DEBUG: Table View called
+[2025-10-28 21:50:23] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:23] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:23] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:23] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:23] DEBUG: Table View called
+[2025-10-28 21:50:23] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:23] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:23] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:23] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:23] DEBUG: Table View called
+[2025-10-28 21:50:23] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:23] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:23] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:23] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:24] DEBUG: Table View called
+[2025-10-28 21:50:24] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:24] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:24] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:24] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:24] DEBUG: Table View called
+[2025-10-28 21:50:24] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:24] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:24] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:24] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:24] DEBUG: Table View called
+[2025-10-28 21:50:24] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:24] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:24] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:24] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:24] DEBUG: Table View called
+[2025-10-28 21:50:24] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:24] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:24] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:24] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:24] DEBUG: Table View called
+[2025-10-28 21:50:24] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:24] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:24] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:24] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:24] DEBUG: Table View called
+[2025-10-28 21:50:24] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:24] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:24] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:24] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:24] DEBUG: Table View called
+[2025-10-28 21:50:24] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:24] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:24] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:24] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:24] DEBUG: Table View called
+[2025-10-28 21:50:24] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:50:24] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:50:24] DEBUG: About to call m.Table.View()
+[2025-10-28 21:50:24] DEBUG: m.Table.View() returned
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: ./plugins
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: ./plugins
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/example-plugin/main.lua
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/pluginmanager-header/main.lua
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/session-save-plugin/main.lua
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Found 3 potential plugin files
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: File 1: plugins/example-plugin/main.lua
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: File 2: plugins/pluginmanager-header/main.lua
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: File 3: plugins/session-save-plugin/main.lua
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Attempting to load plugin: example-plugin from plugins/example-plugin/main.lua
+[2025-10-28 21:50:27] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: example-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Available functions in example-plugin:
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   GetResourceTypes: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   GetUIExtensions: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Validating required functions for plugin: example-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: example-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: example-plugin
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Name() returned: example-lua-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Initializing plugin example-lua-plugin (example-plugin v2.0.0)
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Calling Initialize for example-plugin
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:50:27] INFO: 📢 Plugin Status: Example plugin ready
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Plugin example-lua-plugin initialized successfully
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Function types for example-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-lua-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for example-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for example-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Getting default config for example-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Calling Setup for example-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Setup completed for example-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Processing CLI arguments for example-lua-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: example-lua-plugin v2.0.0
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 📊 Also registered as legacy resource plugin: example-lua-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎨 Also registered as legacy UI plugin: example-lua-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎉 Plugin example-lua-plugin loaded and registered successfully
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: example-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Attempting to load plugin: pluginmanager-header from plugins/pluginmanager-header/main.lua
+[2025-10-28 21:50:27] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: pluginmanager-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Available functions in pluginmanager-header:
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Validating required functions for plugin: pluginmanager-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: pluginmanager-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: pluginmanager-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: pluginmanager-header
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Name() returned: neovim-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Initializing plugin neovim-header (pluginmanager-header v1.0.0)
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Calling Initialize for pluginmanager-header
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:50:27] INFO: 📢 Plugin Status: Neovim-style plugin loaded!
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Plugin neovim-header initialized successfully
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Function types for pluginmanager-header - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: neovim-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for pluginmanager-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for pluginmanager-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Getting default config for pluginmanager-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Calling Setup for pluginmanager-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Setup completed for pluginmanager-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Processing CLI arguments for neovim-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: neovim-header v1.0.0
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎉 Plugin neovim-header loaded and registered successfully
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: pluginmanager-header
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from plugins/session-save-plugin/main.lua
+[2025-10-28 21:50:27] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:50:27] INFO: 🔌 Plugin Manager: Plugin loading complete - 3 loaded, 0 failed
+[2025-10-28 21:50:27] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:50:27] INFO: 🔌 Plugin manager available, found 1 custom resource types
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:50:27] INFO: 🔌 Loading custom resource type: ExampleResources (type: exampleresource)
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:50:27] INFO: 🔌 UI: Found plugin icon for ExampleResources: '󰐧'
+[2025-10-28 21:50:27] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:50:27] INFO: DEBUG: SetCurrentNamespace called with: otavio
+[2025-10-28 21:50:27] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:50:27] INFO: 📢 Plugin Status: Example plugin active in namespace: otavio
+[2025-10-28 21:50:27] INFO: 📢 Plugin Status: Switched to namespace: otavio
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'example-status'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'ui_injection'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('KeyBinding') = empty (type: nil)
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Location') = 'header'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Position') = 'right'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getNumberField('Priority') = 10.000000
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('DataSource') = 'static'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getNumberField('UpdateInterval') = 0.000000
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'text'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getNumberField('Width') not found or not a number, returning 0
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getNumberField('Height') not found or not a number, returning 0
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('Border') = empty (type: nil)
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('ForegroundColor') = '#00FF00'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('BackgroundColor') = '#000000'
+[2025-10-28 21:50:27] DEBUG: 🔌 Lua Plugin: getStringField('BorderColor') = empty (type: nil)
+[2025-10-28 21:53:36] INFO: Application completed successfully
+[2025-10-28 21:53:36] INFO: Application shutting down
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Found 2 potential plugin files
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: File 1: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: File 2: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Attempting to load plugin: cluster-tab-test-plugin from /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:53:39] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: cluster-tab-test-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Available functions in cluster-tab-test-plugin:
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Name: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Version: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Description: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Initialize: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Setup: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Config: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Commands: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Hooks: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Validating required functions for plugin: cluster-tab-test-plugin
+[2025-10-28 21:53:39] ERROR: 🔌 Plugin Manager: Plugin cluster-tab-test-plugin missing required Name() function
+[2025-10-28 21:53:39] ERROR: 🔌 Plugin Manager: ❌ Failed to load plugin cluster-tab-test-plugin: Lua plugin must define a Name function
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:39] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:53:39] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:53:39] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:53:39] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:53:39] INFO: 🔌 Plugin Manager: Plugin loading complete - 1 loaded, 1 failed
+[2025-10-28 21:53:39] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:53:39] INFO: 🔌 Plugin manager available, found 0 custom resource types
+[2025-10-28 21:53:39] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:53:39] INFO: DEBUG: SetCurrentNamespace called with: default
+[2025-10-28 21:53:39] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:53:39] INFO: Starting Bubbletea program
+[2025-10-28 21:53:39] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:53:39] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:53:39] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:53:39] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: ./plugins
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: ./plugins
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/example-plugin/main.lua
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/pluginmanager-header/main.lua
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Found 3 potential plugin files
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: File 1: plugins/example-plugin/main.lua
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: File 2: plugins/pluginmanager-header/main.lua
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: File 3: plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Attempting to load plugin: example-plugin from plugins/example-plugin/main.lua
+[2025-10-28 21:53:44] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: example-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Available functions in example-plugin:
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   GetResourceTypes: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   GetUIExtensions: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Validating required functions for plugin: example-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: example-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: example-plugin
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Name() returned: example-lua-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Initializing plugin example-lua-plugin (example-plugin v2.0.0)
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Calling Initialize for example-plugin
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:53:44] INFO: 📢 Plugin Status: Example plugin ready
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Plugin example-lua-plugin initialized successfully
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Function types for example-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-lua-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for example-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for example-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Getting default config for example-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Calling Setup for example-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Setup completed for example-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Processing CLI arguments for example-lua-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: example-lua-plugin v2.0.0
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 📊 Also registered as legacy resource plugin: example-lua-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎨 Also registered as legacy UI plugin: example-lua-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎉 Plugin example-lua-plugin loaded and registered successfully
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: example-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Attempting to load plugin: pluginmanager-header from plugins/pluginmanager-header/main.lua
+[2025-10-28 21:53:44] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: pluginmanager-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Available functions in pluginmanager-header:
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Validating required functions for plugin: pluginmanager-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: pluginmanager-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: pluginmanager-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: pluginmanager-header
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Name() returned: neovim-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Initializing plugin neovim-header (pluginmanager-header v1.0.0)
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Calling Initialize for pluginmanager-header
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:53:44] INFO: 📢 Plugin Status: Neovim-style plugin loaded!
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Plugin neovim-header initialized successfully
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Function types for pluginmanager-header - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: neovim-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for pluginmanager-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for pluginmanager-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Getting default config for pluginmanager-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Calling Setup for pluginmanager-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Setup completed for pluginmanager-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Processing CLI arguments for neovim-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: neovim-header v1.0.0
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎉 Plugin neovim-header loaded and registered successfully
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: pluginmanager-header
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:44] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:53:44] INFO: 🔌 Plugin Manager: Plugin loading complete - 3 loaded, 0 failed
+[2025-10-28 21:53:44] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:53:44] INFO: 🔌 Plugin manager available, found 1 custom resource types
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:53:44] INFO: 🔌 Loading custom resource type: ExampleResources (type: exampleresource)
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:53:44] INFO: 🔌 UI: Found plugin icon for ExampleResources: '󰐧'
+[2025-10-28 21:53:44] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:53:44] INFO: DEBUG: SetCurrentNamespace called with: otavio
+[2025-10-28 21:53:44] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:53:44] INFO: 📢 Plugin Status: Example plugin active in namespace: otavio
+[2025-10-28 21:53:44] INFO: 📢 Plugin Status: Switched to namespace: otavio
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'example-status'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'ui_injection'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('KeyBinding') = empty (type: nil)
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Location') = 'header'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Position') = 'right'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getNumberField('Priority') = 10.000000
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('DataSource') = 'static'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getNumberField('UpdateInterval') = 0.000000
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'text'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getNumberField('Width') not found or not a number, returning 0
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getNumberField('Height') not found or not a number, returning 0
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('Border') = empty (type: nil)
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('ForegroundColor') = '#00FF00'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('BackgroundColor') = '#000000'
+[2025-10-28 21:53:44] DEBUG: 🔌 Lua Plugin: getStringField('BorderColor') = empty (type: nil)
+[2025-10-28 21:53:49] INFO: Application completed successfully
+[2025-10-28 21:53:49] INFO: Application shutting down
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Found 2 potential plugin files
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: File 1: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: File 2: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Attempting to load plugin: cluster-tab-test-plugin from /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:53:50] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: cluster-tab-test-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Available functions in cluster-tab-test-plugin:
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Name: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Version: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Description: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Initialize: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Setup: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Config: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Commands: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Hooks: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Validating required functions for plugin: cluster-tab-test-plugin
+[2025-10-28 21:53:50] ERROR: 🔌 Plugin Manager: Plugin cluster-tab-test-plugin missing required Name() function
+[2025-10-28 21:53:50] ERROR: 🔌 Plugin Manager: ❌ Failed to load plugin cluster-tab-test-plugin: Lua plugin must define a Name function
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:50] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:53:50] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:53:50] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:53:50] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:53:50] INFO: 🔌 Plugin Manager: Plugin loading complete - 1 loaded, 1 failed
+[2025-10-28 21:53:50] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:53:50] INFO: 🔌 Plugin manager available, found 0 custom resource types
+[2025-10-28 21:53:50] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:53:50] INFO: DEBUG: SetCurrentNamespace called with: default
+[2025-10-28 21:53:50] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:53:50] INFO: Starting Bubbletea program
+[2025-10-28 21:53:50] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:53:50] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:53:50] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:53:50] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: ./plugins
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: ./plugins
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/example-plugin/main.lua
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/pluginmanager-header/main.lua
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Found 3 potential plugin files
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: File 1: plugins/example-plugin/main.lua
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: File 2: plugins/pluginmanager-header/main.lua
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: File 3: plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Attempting to load plugin: example-plugin from plugins/example-plugin/main.lua
+[2025-10-28 21:53:58] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: example-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Available functions in example-plugin:
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   GetResourceTypes: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   GetUIExtensions: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Validating required functions for plugin: example-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: example-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: example-plugin
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Name() returned: example-lua-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Initializing plugin example-lua-plugin (example-plugin v2.0.0)
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Calling Initialize for example-plugin
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:53:58] INFO: 📢 Plugin Status: Example plugin ready
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Plugin example-lua-plugin initialized successfully
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Function types for example-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-lua-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for example-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for example-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Getting default config for example-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Calling Setup for example-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Setup completed for example-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Processing CLI arguments for example-lua-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: example-lua-plugin v2.0.0
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 📊 Also registered as legacy resource plugin: example-lua-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎨 Also registered as legacy UI plugin: example-lua-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎉 Plugin example-lua-plugin loaded and registered successfully
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: example-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Attempting to load plugin: pluginmanager-header from plugins/pluginmanager-header/main.lua
+[2025-10-28 21:53:58] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: pluginmanager-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Available functions in pluginmanager-header:
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Validating required functions for plugin: pluginmanager-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: pluginmanager-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: pluginmanager-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: pluginmanager-header
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Name() returned: neovim-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Initializing plugin neovim-header (pluginmanager-header v1.0.0)
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Calling Initialize for pluginmanager-header
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:53:58] INFO: 📢 Plugin Status: Neovim-style plugin loaded!
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Plugin neovim-header initialized successfully
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Function types for pluginmanager-header - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: neovim-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for pluginmanager-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for pluginmanager-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Getting default config for pluginmanager-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Calling Setup for pluginmanager-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Setup completed for pluginmanager-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Processing CLI arguments for neovim-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: neovim-header v1.0.0
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎉 Plugin neovim-header loaded and registered successfully
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: pluginmanager-header
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from plugins/session-save-plugin/main.lua
+[2025-10-28 21:53:58] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:53:58] INFO: 🔌 Plugin Manager: Plugin loading complete - 3 loaded, 0 failed
+[2025-10-28 21:53:58] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:53:58] INFO: 🔌 Plugin manager available, found 1 custom resource types
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:53:58] INFO: 🔌 Loading custom resource type: ExampleResources (type: exampleresource)
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:53:58] INFO: 🔌 UI: Found plugin icon for ExampleResources: '󰐧'
+[2025-10-28 21:53:58] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:53:58] INFO: DEBUG: SetCurrentNamespace called with: otavio
+[2025-10-28 21:53:58] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:53:58] INFO: 📢 Plugin Status: Example plugin active in namespace: otavio
+[2025-10-28 21:53:58] INFO: 📢 Plugin Status: Switched to namespace: otavio
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'example-status'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'ui_injection'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('KeyBinding') = empty (type: nil)
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Location') = 'header'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Position') = 'right'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getNumberField('Priority') = 10.000000
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('DataSource') = 'static'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getNumberField('UpdateInterval') = 0.000000
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'text'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getNumberField('Width') not found or not a number, returning 0
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getNumberField('Height') not found or not a number, returning 0
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('Border') = empty (type: nil)
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('ForegroundColor') = '#00FF00'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('BackgroundColor') = '#000000'
+[2025-10-28 21:53:58] DEBUG: 🔌 Lua Plugin: getStringField('BorderColor') = empty (type: nil)
+[2025-10-28 21:54:20] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:54:20] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:54:20] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:54:20] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:54:30] INFO: Application completed successfully
+[2025-10-28 21:54:30] INFO: Application shutting down
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Found 2 potential plugin files
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: File 1: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: File 2: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Attempting to load plugin: cluster-tab-test-plugin from /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:54:32] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: cluster-tab-test-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Available functions in cluster-tab-test-plugin:
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Name: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Version: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Description: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Initialize: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Setup: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Config: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Commands: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Hooks: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Validating required functions for plugin: cluster-tab-test-plugin
+[2025-10-28 21:54:32] ERROR: 🔌 Plugin Manager: Plugin cluster-tab-test-plugin missing required Name() function
+[2025-10-28 21:54:32] ERROR: 🔌 Plugin Manager: ❌ Failed to load plugin cluster-tab-test-plugin: Lua plugin must define a Name function
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:54:32] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:54:32] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:54:32] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:54:32] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:54:32] INFO: 🔌 Plugin Manager: Plugin loading complete - 1 loaded, 1 failed
+[2025-10-28 21:54:32] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:54:32] INFO: 🔌 Plugin manager available, found 0 custom resource types
+[2025-10-28 21:54:32] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:54:32] INFO: DEBUG: SetCurrentNamespace called with: default
+[2025-10-28 21:54:32] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:54:32] INFO: Starting Bubbletea program
+[2025-10-28 21:54:32] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:54:32] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:54:32] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:54:32] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: ./plugins
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: ./plugins
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/example-plugin/main.lua
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/pluginmanager-header/main.lua
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/session-save-plugin/main.lua
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Found 3 potential plugin files
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: File 1: plugins/example-plugin/main.lua
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: File 2: plugins/pluginmanager-header/main.lua
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: File 3: plugins/session-save-plugin/main.lua
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Attempting to load plugin: example-plugin from plugins/example-plugin/main.lua
+[2025-10-28 21:54:37] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: example-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Available functions in example-plugin:
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   GetResourceTypes: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   GetUIExtensions: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Validating required functions for plugin: example-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: example-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: example-plugin
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Name() returned: example-lua-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Initializing plugin example-lua-plugin (example-plugin v2.0.0)
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Calling Initialize for example-plugin
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:54:37] INFO: 📢 Plugin Status: Example plugin ready
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Plugin example-lua-plugin initialized successfully
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Function types for example-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-lua-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for example-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for example-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Getting default config for example-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Calling Setup for example-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Setup completed for example-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Processing CLI arguments for example-lua-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: example-lua-plugin v2.0.0
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 📊 Also registered as legacy resource plugin: example-lua-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎨 Also registered as legacy UI plugin: example-lua-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎉 Plugin example-lua-plugin loaded and registered successfully
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: example-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Attempting to load plugin: pluginmanager-header from plugins/pluginmanager-header/main.lua
+[2025-10-28 21:54:37] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: pluginmanager-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Available functions in pluginmanager-header:
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Validating required functions for plugin: pluginmanager-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: pluginmanager-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: pluginmanager-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: pluginmanager-header
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Name() returned: neovim-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Initializing plugin neovim-header (pluginmanager-header v1.0.0)
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Calling Initialize for pluginmanager-header
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:54:37] INFO: 📢 Plugin Status: Neovim-style plugin loaded!
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Plugin neovim-header initialized successfully
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Function types for pluginmanager-header - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: neovim-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for pluginmanager-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for pluginmanager-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Getting default config for pluginmanager-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Calling Setup for pluginmanager-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Setup completed for pluginmanager-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Processing CLI arguments for neovim-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: neovim-header v1.0.0
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎉 Plugin neovim-header loaded and registered successfully
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: pluginmanager-header
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from plugins/session-save-plugin/main.lua
+[2025-10-28 21:54:37] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:54:37] INFO: 🔌 Plugin Manager: Plugin loading complete - 3 loaded, 0 failed
+[2025-10-28 21:54:37] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:54:37] INFO: 🔌 Plugin manager available, found 1 custom resource types
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:54:37] INFO: 🔌 Loading custom resource type: ExampleResources (type: exampleresource)
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:54:37] INFO: 🔌 UI: Found plugin icon for ExampleResources: '󰐧'
+[2025-10-28 21:54:37] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:54:37] INFO: DEBUG: SetCurrentNamespace called with: otavio
+[2025-10-28 21:54:37] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:54:37] INFO: 📢 Plugin Status: Example plugin active in namespace: otavio
+[2025-10-28 21:54:37] INFO: 📢 Plugin Status: Switched to namespace: otavio
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'example-status'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'ui_injection'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('KeyBinding') = empty (type: nil)
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Location') = 'header'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Position') = 'right'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getNumberField('Priority') = 10.000000
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('DataSource') = 'static'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getNumberField('UpdateInterval') = 0.000000
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'text'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getNumberField('Width') not found or not a number, returning 0
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getNumberField('Height') not found or not a number, returning 0
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('Border') = empty (type: nil)
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('ForegroundColor') = '#00FF00'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('BackgroundColor') = '#000000'
+[2025-10-28 21:54:37] DEBUG: 🔌 Lua Plugin: getStringField('BorderColor') = empty (type: nil)
+[2025-10-28 21:54:51] INFO: Application completed successfully
+[2025-10-28 21:54:51] INFO: Application shutting down
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: /home/otavio/.local/share/k8s-tui/plugins
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Found potential plugin file: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Found 2 potential plugin files
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: File 1: /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: File 2: /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Attempting to load plugin: cluster-tab-test-plugin from /home/otavio/.local/share/k8s-tui/plugins/cluster-tab-test-plugin/main.lua
+[2025-10-28 21:55:00] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: cluster-tab-test-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Available functions in cluster-tab-test-plugin:
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Name: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Version: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Description: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Initialize: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Setup: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Config: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Commands: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Hooks: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Validating required functions for plugin: cluster-tab-test-plugin
+[2025-10-28 21:55:00] ERROR: 🔌 Plugin Manager: Plugin cluster-tab-test-plugin missing required Name() function
+[2025-10-28 21:55:00] ERROR: 🔌 Plugin Manager: ❌ Failed to load plugin cluster-tab-test-plugin: Lua plugin must define a Name function
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from /home/otavio/.local/share/k8s-tui/plugins/session-save-plugin/main.lua
+[2025-10-28 21:55:00] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:55:00] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:55:00] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:55:00] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:55:00] INFO: 🔌 Plugin Manager: Plugin loading complete - 1 loaded, 1 failed
+[2025-10-28 21:55:00] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:55:00] INFO: 🔌 Plugin manager available, found 0 custom resource types
+[2025-10-28 21:55:00] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:55:00] INFO: DEBUG: SetCurrentNamespace called with: default
+[2025-10-28 21:55:00] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:55:00] INFO: Starting Bubbletea program
+[2025-10-28 21:55:00] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:55:00] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:55:00] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:55:00] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Starting plugin loading from directory: ./plugins
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Scanning for Lua plugins in: ./plugins
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/example-plugin/main.lua
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/pluginmanager-header/main.lua
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Found potential plugin file: plugins/session-save-plugin/main.lua
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Found 3 potential plugin files
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: File 1: plugins/example-plugin/main.lua
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: File 2: plugins/pluginmanager-header/main.lua
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: File 3: plugins/session-save-plugin/main.lua
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Attempting to load plugin: example-plugin from plugins/example-plugin/main.lua
+[2025-10-28 21:55:04] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: example-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Available functions in example-plugin:
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   GetResourceTypes: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   GetUIExtensions: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Validating required functions for plugin: example-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: example-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: example-plugin
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Name() returned: example-lua-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Initializing plugin example-lua-plugin (example-plugin v2.0.0)
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Calling Initialize for example-plugin
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:55:04] INFO: 📢 Plugin Status: Example plugin ready
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Plugin example-lua-plugin initialized successfully
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Function types for example-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: example-lua-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for example-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for example-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Getting default config for example-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Calling Setup for example-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Setup completed for example-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Processing CLI arguments for example-lua-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: example-lua-plugin v2.0.0
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 📊 Also registered as legacy resource plugin: example-lua-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎨 Also registered as legacy UI plugin: example-lua-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎉 Plugin example-lua-plugin loaded and registered successfully
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: example-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Attempting to load plugin: pluginmanager-header from plugins/pluginmanager-header/main.lua
+[2025-10-28 21:55:04] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: pluginmanager-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Available functions in pluginmanager-header:
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Validating required functions for plugin: pluginmanager-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: pluginmanager-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: pluginmanager-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: pluginmanager-header
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Name() returned: neovim-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Initializing plugin neovim-header (pluginmanager-header v1.0.0)
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Calling Initialize for pluginmanager-header
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:55:04] INFO: 📢 Plugin Status: Neovim-style plugin loaded!
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Plugin neovim-header initialized successfully
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Function types for pluginmanager-header - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: neovim-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for pluginmanager-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for pluginmanager-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Getting default config for pluginmanager-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Calling Setup for pluginmanager-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Setup completed for pluginmanager-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Processing CLI arguments for neovim-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Found 0 CLI arguments
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: neovim-header v1.0.0
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎉 Plugin neovim-header loaded and registered successfully
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: pluginmanager-header
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Attempting to load plugin: session-save-plugin from plugins/session-save-plugin/main.lua
+[2025-10-28 21:55:04] DEBUG: 🔌 Plugin Manager: Creating Lua state for plugin: session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Available functions in session-save-plugin:
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Name: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Version: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Description: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Initialize: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Setup: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Config: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Commands: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   Hooks: FUNCTION
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   GetResourceTypes: nil
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager:   GetUIExtensions: nil
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Validating required functions for plugin: session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Setting up k8s_tui API for pluginmanager-style plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: k8s_tui API set up for plugin: session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Creating plugin wrapper for: session-save-plugin
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Name() returned: session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Initializing plugin session-save-plugin (session-save-plugin v1.0.0)
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Calling Initialize for session-save-plugin
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Calling Initialize()
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Initialize() completed successfully
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Plugin session-save-plugin initialized successfully
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Function types for session-save-plugin - Setup: function, Config: function, Commands: function, Hooks: function
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Creating PluginmanagerStyleLuaPlugin for session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: PluginmanagerStyleLuaPlugin created for session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Getting default config for session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Calling Setup for session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Setup completed for session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Processing CLI arguments for session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Found 1 CLI arguments
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Registering CLI argument: session -> Load session from JSON file
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎯 Registered pluginmanager-style plugin: session-save-plugin v1.0.0
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: 🎉 Plugin session-save-plugin loaded and registered successfully
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: ✅ Successfully loaded plugin: session-save-plugin
+[2025-10-28 21:55:04] INFO: 🔌 Plugin Manager: Plugin loading complete - 3 loaded, 0 failed
+[2025-10-28 21:55:04] INFO: DEBUG: Creating new TabManager
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:55:04] INFO: 🔌 Plugin manager available, found 1 custom resource types
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:55:04] INFO: 🔌 Loading custom resource type: ExampleResources (type: exampleresource)
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Calling GetResourceTypes()
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'ExampleResources'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'exampleresource'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Icon') = '󰐧'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getNumberField('RefreshIntervalSeconds') not found or not a number, returning 0
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: RefreshIntervalSeconds = 10.000000, RefreshInterval = 10s
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Category') = 'Examples'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Description') = 'Demonstrates custom resource functionality'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Parsing resource type - Name: 'ExampleResources', Type: 'exampleresource', Icon: '󰐧', Namespaced: true, Refresh: 10s, Category: 'Examples'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'table'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: Display component type: table
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: GetResourceTypes() returned 1 resource types
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin:   [1] ExampleResources (exampleresource)
+[2025-10-28 21:55:04] INFO: 🔌 UI: Found plugin icon for ExampleResources: '󰐧'
+[2025-10-28 21:55:04] INFO: DEBUG: TabManager created with 1 tabs
+[2025-10-28 21:55:04] INFO: DEBUG: SetCurrentNamespace called with: otavio
+[2025-10-28 21:55:04] INFO: DEBUG: setNamespaceCallback is nil
+[2025-10-28 21:55:04] INFO: 📢 Plugin Status: Example plugin active in namespace: otavio
+[2025-10-28 21:55:04] INFO: 📢 Plugin Status: Switched to namespace: otavio
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Name') = 'example-status'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'ui_injection'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('KeyBinding') = empty (type: nil)
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Location') = 'header'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Position') = 'right'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getNumberField('Priority') = 10.000000
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('DataSource') = 'static'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getNumberField('UpdateInterval') = 0.000000
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Type') = 'text'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getNumberField('Width') not found or not a number, returning 0
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getNumberField('Height') not found or not a number, returning 0
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('Border') = empty (type: nil)
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('ForegroundColor') = '#00FF00'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('BackgroundColor') = '#000000'
+[2025-10-28 21:55:04] DEBUG: 🔌 Lua Plugin: getStringField('BorderColor') = empty (type: nil)
+[2025-10-28 21:55:05] INFO: DEBUG: updateHeaderTabs called
+[2025-10-28 21:55:05] INFO: DEBUG: Got 1 tabs from tabManager
+[2025-10-28 21:55:05] INFO: DEBUG: Tab 0: ID=initial, Title=Pods, ResourceType=Pods, IsActive=true
+[2025-10-28 21:55:05] INFO: DEBUG: Cleared header tabs
+[2025-10-28 21:55:05] INFO: DEBUG: Adding tab 0 to header: ID=initial, Title=Pods, ResourceType=Pods
+[2025-10-28 21:55:05] INFO: DEBUG: Tab 0 is active
+[2025-10-28 21:55:05] INFO: DEBUG: Setting active tab to index 0
+[2025-10-28 21:55:05] INFO: DEBUG: updateHeaderTabs completed
+[2025-10-28 21:55:05] DEBUG: Table View called
+[2025-10-28 21:55:05] DEBUG: PluginAPI GetPods called with namespace=otavio, selector=
+[2025-10-28 21:55:05] DEBUG: Pod handler exists: true, handler: &{pod}
+[2025-10-28 21:55:05] DEBUG: Using custom handler (no selector provided)
+[2025-10-28 21:55:05] DEBUG: Fetching pods with selector: 
+[2025-10-28 21:55:05] DEBUG: Table View called
+[2025-10-28 21:55:05] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:55:05] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:55:05] DEBUG: About to call m.Table.View()
+[2025-10-28 21:55:05] DEBUG: m.Table.View() returned
+[2025-10-28 21:55:05] DEBUG: Table View called
+[2025-10-28 21:55:05] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:55:05] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:55:05] DEBUG: About to call m.Table.View()
+[2025-10-28 21:55:05] DEBUG: m.Table.View() returned
+[2025-10-28 21:55:06] DEBUG: Table View called
+[2025-10-28 21:55:06] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:55:06] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:55:06] DEBUG: About to call m.Table.View()
+[2025-10-28 21:55:06] DEBUG: m.Table.View() returned
+[2025-10-28 21:55:06] DEBUG: Table View called
+[2025-10-28 21:55:06] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:55:06] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:55:06] DEBUG: About to call m.Table.View()
+[2025-10-28 21:55:06] DEBUG: m.Table.View() returned
+[2025-10-28 21:55:06] DEBUG: Table View called
+[2025-10-28 21:55:06] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:55:06] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:55:06] DEBUG: About to call m.Table.View()
+[2025-10-28 21:55:06] DEBUG: m.Table.View() returned
+[2025-10-28 21:55:06] DEBUG: Table View called
+[2025-10-28 21:55:06] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:55:06] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:55:06] DEBUG: About to call m.Table.View()
+[2025-10-28 21:55:06] DEBUG: m.Table.View() returned
+[2025-10-28 21:55:06] DEBUG: Table View called
+[2025-10-28 21:55:06] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:55:06] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:55:06] DEBUG: About to call m.Table.View()
+[2025-10-28 21:55:06] DEBUG: m.Table.View() returned
+[2025-10-28 21:55:06] DEBUG: Table View called
+[2025-10-28 21:55:06] DEBUG: updateColumnWidths with width 158
+[2025-10-28 21:55:06] DEBUG: final widths: [3 25 51 25 20 12 8]
+[2025-10-28 21:55:06] DEBUG: About to call m.Table.View()
+[2025-10-28 21:55:06] DEBUG: m.Table.View() returned
+[2025-10-28 21:55:06] INFO: DEBUG: updateHeaderTabs called
+[2025-10-28 21:55:06] INFO: DEBUG: Got 1 tabs from tabManager
+[2025-10-28 21:55:06] INFO: DEBUG: Tab 0: ID=initial, Title=Resource List, ResourceType=Resource List, IsActive=true
+[2025-10-28 21:55:06] INFO: DEBUG: Cleared header tabs
+[2025-10-28 21:55:06] INFO: DEBUG: Adding tab 0 to header: ID=initial, Title=Resource List, ResourceType=Resource List
+[2025-10-28 21:55:06] INFO: DEBUG: Tab 0 is active
+[2025-10-28 21:55:06] INFO: DEBUG: Setting active tab to index 0
+[2025-10-28 21:55:06] INFO: DEBUG: updateHeaderTabs completed
+[2025-10-28 21:55:07] INFO: Application completed successfully
+[2025-10-28 21:55:07] INFO: Application shutting down
