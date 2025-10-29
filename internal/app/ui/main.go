@@ -45,10 +45,17 @@ type MultiClusterModel struct {
 	clusters            []*AppModel
 	currentCluster      int
 	clusterTabComponent *components.TabComponent
+	kubeconfigSelector  tea.Model
+	namespaceSelector   tea.Model
+	pendingKubeconfig   string
 }
 
 func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel {
 	appConfig := initializeAppConfigAndColors()
+
+	if cfg.Namespace == "" {
+		cfg.Namespace = "default"
+	}
 
 	// For multi-cluster, we'll handle in MultiClusterModel
 	// For now, use first kubeconfig or default
@@ -198,7 +205,7 @@ func (m *AppModel) updateHeaderTabs() {
 	logger.Info("DEBUG: updateHeaderTabs completed")
 }
 
-func NewMultiClusterModel(cfg cli.Config, pluginManager *plugins.PluginManager) *MultiClusterModel {
+func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 	// If no kubeconfigs provided, use default
 	if len(cfg.KubeconfigPaths) == 0 {
 		cfg.KubeconfigPaths = []string{""}
@@ -210,6 +217,14 @@ func NewMultiClusterModel(cfg cli.Config, pluginManager *plugins.PluginManager) 
 		// Create a copy of cfg with single kubeconfig
 		singleCfg := cfg
 		singleCfg.KubeconfigPaths = []string{kubeconfig}
+		// Create separate plugin manager for each cluster
+		pluginManager := plugins.NewPluginManager(cfg.PluginDir)
+		if err := pluginManager.LoadPlugins(); err != nil {
+			// Log error, but continue
+			logger.Warn(fmt.Sprintf("Failed to load plugins for cluster %d: %v", i+1, err))
+		}
+		// Set as global for this cluster's models
+		plugins.SetGlobalPluginManager(pluginManager)
 		clusters[i] = NewAppModel(singleCfg, pluginManager)
 		// Add cluster tab
 		title := fmt.Sprintf("Cluster %d", i+1)
@@ -230,6 +245,7 @@ func NewMultiClusterModel(cfg cli.Config, pluginManager *plugins.PluginManager) 
 
 func (m *MultiClusterModel) Init() tea.Cmd {
 	if len(m.clusters) > 0 && m.clusters[m.currentCluster] != nil {
+		plugins.SetGlobalPluginManager(m.clusters[m.currentCluster].pluginManager)
 		return m.clusters[m.currentCluster].Init()
 	}
 	return nil
@@ -247,28 +263,88 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "f1" && len(m.clusters) > 0 {
 			m.currentCluster = 0
 			m.clusterTabComponent.SetActiveTab(0)
+			plugins.SetGlobalPluginManager(m.clusters[0].pluginManager)
 			return m, nil
 		}
 		if msg.String() == "f2" && len(m.clusters) > 1 {
 			m.currentCluster = 1
 			m.clusterTabComponent.SetActiveTab(1)
+			plugins.SetGlobalPluginManager(m.clusters[1].pluginManager)
 			return m, nil
 		}
 		if msg.String() == "f3" && len(m.clusters) > 2 {
 			m.currentCluster = 2
 			m.clusterTabComponent.SetActiveTab(2)
+			plugins.SetGlobalPluginManager(m.clusters[2].pluginManager)
 			return m, nil
 		}
-		// Add more as needed
+		if msg.String() == "ctrl+n" {
+			m.kubeconfigSelector = models.NewKubeconfigSelectorModel()
+			return m, m.kubeconfigSelector.Init()
+		}
+	// Add more as needed
 	case components.TabMsg:
 		// Handle cluster tab switching
 		if msg.ResourceType == "cluster" && msg.Action == "switch" {
 			if index, err := strconv.Atoi(msg.TabID); err == nil && index >= 0 && index < len(m.clusters) {
 				m.currentCluster = index
 				m.clusterTabComponent.SetActiveTab(index)
+				plugins.SetGlobalPluginManager(m.clusters[index].pluginManager)
 				return m, nil
 			}
 		}
+	case models.KubeconfigSelectedMsg:
+		// Store pending kubeconfig and open namespace selector
+		m.pendingKubeconfig = msg.Path
+		m.kubeconfigSelector = nil
+		m.namespaceSelector = models.NewNamespaceSelectorModel(msg.Path)
+		return m, m.namespaceSelector.Init()
+	case models.NamespaceSelectedMsg:
+		// Add new cluster with selected namespace
+		singleCfg := cli.Config{
+			KubeconfigPaths: []string{m.pendingKubeconfig},
+			Namespace:       msg.Namespace,
+			PluginDir:       "./plugins",
+		}
+		// Create separate plugin manager for the new cluster
+		pluginManager := plugins.NewPluginManager(singleCfg.PluginDir)
+		if err := pluginManager.LoadPlugins(); err != nil {
+			// Log error, but continue
+			logger.Warn(fmt.Sprintf("Failed to load plugins for new cluster: %v", err))
+		}
+		// Set as global for this cluster's models
+		plugins.SetGlobalPluginManager(pluginManager)
+		newCluster := NewAppModel(singleCfg, pluginManager)
+		m.clusters = append(m.clusters, newCluster)
+		newIndex := len(m.clusters) - 1
+		title := fmt.Sprintf("Cluster %d", newIndex+1)
+		m.clusterTabComponent.AddTab(fmt.Sprintf("%d", newIndex), title, "cluster")
+		m.currentCluster = newIndex
+		m.clusterTabComponent.SetActiveTab(newIndex)
+		m.namespaceSelector = nil
+		m.pendingKubeconfig = ""
+		return m, nil
+	}
+
+	// If selector is open, delegate to it
+	if m.kubeconfigSelector != nil {
+		updated, cmd := m.kubeconfigSelector.Update(msg)
+		if updated == nil {
+			m.kubeconfigSelector = nil // Closed
+		} else {
+			m.kubeconfigSelector = updated
+		}
+		return m, cmd
+	}
+	if m.namespaceSelector != nil {
+		updated, cmd := m.namespaceSelector.Update(msg)
+		if updated == nil {
+			m.namespaceSelector = nil // Closed
+			m.pendingKubeconfig = ""
+		} else {
+			m.namespaceSelector = updated
+		}
+		return m, cmd
 	}
 
 	// Delegate to current cluster
@@ -283,6 +359,13 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *MultiClusterModel) View() string {
+	if m.kubeconfigSelector != nil {
+		return m.kubeconfigSelector.View()
+	}
+	if m.namespaceSelector != nil {
+		return m.namespaceSelector.View()
+	}
+
 	if len(m.clusters) == 0 || m.clusters[m.currentCluster] == nil {
 		return "No clusters configured"
 	}

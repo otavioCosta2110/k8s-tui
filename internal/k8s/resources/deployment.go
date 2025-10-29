@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/otavioCosta2110/k8s-tui/pkg/format"
@@ -50,6 +51,9 @@ func (d *DeploymentInfo) Fetch() error {
 }
 
 func FetchDeploymentList(client Client, namespace string) ([]string, error) {
+	if client.Clientset == nil {
+		return []string{}, errors.New("kubernetes client not available")
+	}
 	ds, err := client.Clientset.AppsV1().Deployments(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch deployments: %v", err)

@@ -2,11 +2,11 @@ package k8s
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/otavioCosta2110/k8s-tui/pkg/format"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -21,6 +21,9 @@ type PodInfo struct {
 }
 
 func FetchPods(client Client, namespace string, selector string) ([]PodInfo, error) {
+	if client.Clientset == nil {
+		return nil, errors.New("kubernetes client not available")
+	}
 	logger.Debug("Fetching pods with selector: " + selector)
 	listOptions := metav1.ListOptions{}
 	if selector != "" {

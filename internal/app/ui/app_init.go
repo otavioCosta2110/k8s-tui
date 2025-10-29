@@ -145,6 +145,7 @@ func createAppModelWithoutKubeClient(appConfig config.AppConfig, pluginManager *
 		helpScreen:     components.NewHelpModel(),
 		pluginManager:  pluginManager,
 		uiInjector:     uiInjector,
+		// kube is zero value (nil Clientset)
 	}
 
 	if pluginManager != nil {
@@ -190,6 +191,7 @@ func createFallbackAppModel(appConfig config.AppConfig, pluginManager *plugins.P
 		helpScreen:     components.NewHelpModel(),
 		pluginManager:  pluginManager,
 		uiInjector:     uiInjector,
+		// kube is zero value (nil Clientset)
 	}
 
 	if pluginManager != nil {

@@ -1,12 +1,12 @@
 package models
 
 import (
-	"maps"
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
+	"maps"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -42,6 +42,9 @@ type TabManagerMsg struct {
 }
 
 func NewTabManager(kubeClient *k8s.Client, namespace string, keyBindings map[string]string) *TabManager {
+	if namespace == "" {
+		namespace = "default"
+	}
 	logger.Info("DEBUG: Creating new TabManager")
 	tm := &TabManager{
 		tabs:        []TabData{},
@@ -268,12 +271,12 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 						deployment := k8s.NewDeployment(parentResource, tm.namespace, *tm.kubeClient)
 						if err := deployment.Fetch(); err != nil {
 							logger.Error(fmt.Sprintf("Failed to fetch deployment %s for selector: %v", parentResource, err))
-							continue 
+							continue
 						}
 						selector, err = deployment.GetLabelSelector()
 						if err != nil {
 							logger.Error(fmt.Sprintf("Failed to get label selector for deployment %s: %v", parentResource, err))
-							continue 
+							continue
 						}
 					}
 
@@ -282,12 +285,12 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 						podsModel, err := NewPodsWithParent(*tm.kubeClient, tm.namespace, parentResource, selector)
 						if err != nil {
 							logger.Error(fmt.Sprintf("Failed to create pods model for crumb %s: %v", crumb, err))
-							continue 
+							continue
 						}
 						model, err = podsModel.InitComponent(tm.kubeClient)
 						if err != nil {
 							logger.Error(fmt.Sprintf("Failed to init pods model for crumb %s: %v", crumb, err))
-							continue 
+							continue
 						}
 						resourceModel = podsModel
 					} else {
@@ -295,7 +298,7 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 						model, err = resourceList.InitComponent(*tm.kubeClient)
 						if err != nil {
 							logger.Error(fmt.Sprintf("Failed to create model for crumb %s (type %s): %v", crumb, resourceType, err))
-							continue 
+							continue
 						}
 						resourceModel = resourceList
 					}
@@ -304,7 +307,7 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 					model, err = resourceList.InitComponent(*tm.kubeClient)
 					if err != nil {
 						logger.Error(fmt.Sprintf("Failed to create model for crumb %s (type %s): %v", crumb, resourceType, err))
-						continue 
+						continue
 					}
 					resourceModel = resourceList
 				}

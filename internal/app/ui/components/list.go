@@ -127,6 +127,11 @@ func (m *ListModel) View() string {
 			Background(lipgloss.Color(customstyles.BackgroundColor)).
 			Render("Loading...")
 	}
+
+	if styles.ScreenWidth == 0 || styles.ScreenHeight == 0 {
+		return "Initializing..."
+	}
+
 	m.List.SetSize(styles.ScreenWidth, styles.ScreenHeight-2)
 
 	originalTitle := m.List.Title

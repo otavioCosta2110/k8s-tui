@@ -1,11 +1,14 @@
 package components
 
 import (
-	styles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles"
-	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles"
+	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -180,22 +183,43 @@ func (m *TableModel) toggleCheckbox(rowIdx int) {
 }
 
 func (m *TableModel) View() string {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error(fmt.Sprintf("Panic in Table View: %v", r))
+		}
+	}()
+	logger.Debug("Table View called")
 	if m.loading {
 		return m.spinner.CenteredView(styles.ScreenWidth, styles.ScreenHeight)
+	}
+
+	if styles.ScreenWidth < 10 || styles.ScreenHeight < 5 {
+		return "Initializing..."
 	}
 
 	m.updateColumnWidths(styles.ScreenWidth)
 
 	tableHeight := styles.ScreenHeight
+	sumWidths := 0
+	for _, col := range m.Table.Columns() {
+		sumWidths += col.Width
+	}
 	m.Table.SetHeight(tableHeight)
-	m.Table.SetWidth(styles.ScreenWidth)
+	m.Table.SetWidth(sumWidths)
 
+	if len(m.Table.Rows()) == 0 {
+		return "No data available"
+	}
+
+	logger.Debug("About to call m.Table.View()")
 	tableView := m.Table.View()
+	logger.Debug("m.Table.View() returned")
 
 	return tableView
 }
 
 func (m *TableModel) updateColumnWidths(totalWidth int) {
+	logger.Debug(fmt.Sprintf("updateColumnWidths with width %d", totalWidth))
 	columns := m.Table.Columns()
 	widths := make([]int, len(columns))
 
@@ -214,8 +238,16 @@ func (m *TableModel) updateColumnWidths(totalWidth int) {
 		widths[len(widths)-1] += totalWidth - totalAssigned
 	}
 	for i := range columns {
+		minWidth := 3
+		if i > 0 {
+			minWidth = len(columns[i].Title) + 2
+		}
+		if widths[i] < minWidth {
+			widths[i] = minWidth
+		}
 		columns[i].Width = widths[i]
 	}
+	logger.Debug(fmt.Sprintf("final widths: %v", widths))
 	m.Table.SetColumns(columns)
 }
 
