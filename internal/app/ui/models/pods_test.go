@@ -51,14 +51,23 @@ func TestPodsModelDataToRows(t *testing.T) {
 	if len(rows[0]) != 6 {
 		t.Errorf("Expected 6 columns in row, got %d", len(rows[0]))
 	}
-	if rows[0][1] != "test-pod" {
-		t.Errorf("Pod name mismatch in row: expected 'test-pod', got '%s'", rows[0][1])
-	}
 	if rows[0][0] != "default" {
 		t.Errorf("Pod namespace mismatch in row: expected 'default', got '%s'", rows[0][0])
 	}
+	if rows[0][1] != "test-pod" {
+		t.Errorf("Pod name mismatch in row: expected 'test-pod', got '%s'", rows[0][1])
+	}
 	if rows[0][2] != "1/1" {
 		t.Errorf("Pod ready status mismatch in row: expected '1/1', got '%s'", rows[0][2])
+	}
+	if rows[0][3] != "Running" {
+		t.Errorf("Pod status mismatch in row: expected 'Running', got '%s'", rows[0][3])
+	}
+	if rows[0][4] != "0" {
+		t.Errorf("Pod restarts mismatch in row: expected '0', got '%s'", rows[0][4])
+	}
+	if rows[0][5] != "5m" {
+		t.Errorf("Pod age mismatch in row: expected '5m', got '%s'", rows[0][5])
 	}
 }
 
@@ -92,6 +101,29 @@ func TestResourceConfig(t *testing.T) {
 	}
 	if config.RefreshInterval != 5*time.Second {
 		t.Error("RefreshInterval mismatch")
+	}
+}
+
+func TestPodDataGetColumns(t *testing.T) {
+	podInfo := k8s.PodInfo{
+		Name:      "test-pod",
+		Namespace: "default",
+		Ready:     "1/1",
+		Status:    "Running",
+		Restarts:  3,
+		Age:       "10m",
+	}
+	podData := PodData{&podInfo}
+
+	columns := podData.GetColumns()
+	if len(columns) != 6 {
+		t.Errorf("Expected 6 columns, got %d", len(columns))
+	}
+	expected := []string{"default", "test-pod", "1/1", "Running", "3", "10m"}
+	for i, exp := range expected {
+		if columns[i] != exp {
+			t.Errorf("Column %d mismatch: expected '%s', got '%s'", i, exp, columns[i])
+		}
 	}
 }
 

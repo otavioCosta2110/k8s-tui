@@ -14,6 +14,19 @@ Available from any screen:
 | `q` | Quit | Exit the application |
 | `?` | Help | Show context-sensitive help |
 
+## Multi-Cluster Navigation
+
+Available when managing multiple clusters:
+
+| Key Combination | Action | Description |
+|-----------------|--------|-------------|
+| `F1` | Switch to Cluster 1 | Switch to first cluster |
+| `F2` | Switch to Cluster 2 | Switch to second cluster |
+| `F3` | Switch to Cluster 3 | Switch to third cluster |
+| `Ctrl + N` | Add New Cluster | Open cluster addition workflow |
+| `Tab` (on cluster bar) | Next Cluster | Switch to next cluster tab |
+| `Shift + Tab` (on cluster bar) | Previous Cluster | Switch to previous cluster tab |
+
 ## Resource List Screens
 
 Available when viewing lists of resources (Pods, Deployments, etc.):

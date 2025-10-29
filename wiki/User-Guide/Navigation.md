@@ -2,9 +2,23 @@
 
 k8s-tui uses a tab-based interface for navigating between different Kubernetes resource types and managing your clusters.
 
-## Tab Navigation
+## Multi-Cluster Navigation
 
-The main interface consists of tabs at the top representing different resource types:
+When managing multiple clusters, a cluster tab bar appears at the top:
+
+- **Cluster 1, Cluster 2, etc.**: Switch between configured clusters
+- `F1-F3`: Quick cluster switching (up to 3 clusters)
+- `Ctrl + N`: Add a new cluster dynamically
+- `Tab`/`Shift + Tab`: Navigate cluster tabs
+
+Each cluster maintains its own:
+- Namespace context
+- Resource tabs
+- Plugin state
+
+## Resource Tab Navigation
+
+Within each cluster, navigate resource types using tabs:
 
 - **Pods**: Manage pod lifecycle
 - **Deployments**: Handle deployment scaling and updates
@@ -19,10 +33,10 @@ The main interface consists of tabs at the top representing different resource t
 - **Namespaces**: Organize resources
 - **Nodes**: Monitor cluster nodes
 
-### Switching Tabs
+### Switching Resource Tabs
 
-- `Tab`: Move to next tab
-- `Shift + Tab`: Move to previous tab
+- `Tab`: Move to next resource tab
+- `Shift + Tab`: Move to previous resource tab
 - `1-9`: Jump directly to tab number (if available)
 
 ## Screen Transitions

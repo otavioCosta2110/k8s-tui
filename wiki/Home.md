@@ -1,6 +1,6 @@
 # k8s-tui Documentation
 
-Welcome to the comprehensive documentation for k8s-tui, a terminal-based Kubernetes resource manager.
+Welcome to the comprehensive documentation for k8s-tui, a terminal-based Kubernetes resource manager with multi-cluster support.
 
 ## Table of Contents
 
@@ -29,9 +29,19 @@ Welcome to the comprehensive documentation for k8s-tui, a terminal-based Kuberne
 - [Issues](https://github.com/otavioCosta2110/k8s-tui/issues)
 - [Discussions](https://github.com/otavioCosta2110/k8s-tui/discussions)
 
+## Key Features
+
+- **Multi-Cluster Management**: Manage multiple Kubernetes clusters simultaneously with isolated views
+- **Resource Management**: Create, read, update, and delete Kubernetes resources
+- **Plugin System**: Extend functionality with Lua plugins
+- **Terminal UI**: Intuitive keyboard-driven interface
+- **Real-time Updates**: Auto-refreshing resource views
+
 ## Getting Started
 
 If you're new to k8s-tui, start with the [Quick Start](../README.md#quick-start) in the main README, then explore the [[User-Guide/Navigation]] guide.
+
+For multi-cluster setups, see [[User-Guide/Configuration#multiple-clusters]].
 
 For developers looking to contribute, check out the [[Developer/Contributing]] guide.
 

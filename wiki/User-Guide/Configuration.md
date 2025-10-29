@@ -28,15 +28,45 @@ k8s-tui uses the standard Kubernetes configuration files and environment variabl
 
 #### Multiple Clusters
 
-To manage multiple clusters:
+k8s-tui supports managing multiple Kubernetes clusters simultaneously with isolated views and plugin managers.
+
+##### Command Line Configuration
+
+Specify multiple kubeconfig files:
 
 ```bash
-# Set KUBECONFIG to multiple files
-export KUBECONFIG=~/.kube/cluster1:~/.kube/cluster2
+# Multiple kubeconfig files
+k8s-tui --kubeconfig ~/.kube/cluster1 --kubeconfig ~/.kube/cluster2
 
-# Or merge configs
-kubectl config view --merge > ~/.kube/merged-config
-export KUBECONFIG=~/.kube/merged-config
+# Or using environment variable
+export KUBECONFIG=~/.kube/cluster1:~/.kube/cluster2
+k8s-tui
+```
+
+##### Dynamic Cluster Addition
+
+While running k8s-tui:
+
+1. Press `Ctrl + N` to add a new cluster
+2. Select a kubeconfig file from `~/.kube/`
+3. Choose a namespace for the cluster
+4. The cluster will be added with a new tab
+
+##### Cluster Isolation
+
+Each cluster maintains:
+- Separate Kubernetes client connection
+- Independent plugin manager instance
+- Isolated resource views
+- Separate namespace context
+
+##### Plugin Directory
+
+All clusters share the same plugin directory:
+
+```bash
+# Set plugin directory (shared across clusters)
+k8s-tui --plugin-dir ./my-plugins --kubeconfig cluster1 --kubeconfig cluster2
 ```
 
 #### Context Switching

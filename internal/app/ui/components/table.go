@@ -205,7 +205,11 @@ func (m *TableModel) View() string {
 		sumWidths += col.Width
 	}
 	m.Table.SetHeight(tableHeight)
-	m.Table.SetWidth(sumWidths)
+	tableWidth := styles.ScreenWidth
+	if sumWidths > styles.ScreenWidth {
+		tableWidth = sumWidths
+	}
+	m.Table.SetWidth(tableWidth)
 
 	if len(m.Table.Rows()) == 0 {
 		return "No data available"
