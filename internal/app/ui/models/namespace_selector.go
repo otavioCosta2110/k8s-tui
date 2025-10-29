@@ -16,12 +16,12 @@ type NamespaceSelectedMsg struct {
 }
 
 type NamespaceSelectorModel struct {
-	list       *components.ListModel
+	list       *components.FullscreenListModel
 	kubeconfig string
 }
 
 func NewNamespaceSelectorModel(kubeconfig string) *NamespaceSelectorModel {
-	list := components.NewList([]string{}, "Select Namespace", func(selected string) tea.Msg {
+	list := components.NewFullscreenList([]string{}, "Select Namespace", func(selected string) tea.Msg {
 		return NamespaceSelectedMsg{Namespace: selected}
 	})
 
@@ -30,7 +30,6 @@ func NewNamespaceSelectorModel(kubeconfig string) *NamespaceSelectorModel {
 		kubeconfig: kubeconfig,
 	}
 
-	// Start fetching namespaces
 	return model
 }
 
@@ -66,11 +65,11 @@ func (m *NamespaceSelectorModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case fetchedNamespacesMsg:
 		if msg.err != nil {
 			// Use default if error
-			m.list = components.NewList([]string{"default"}, "Select Namespace", func(selected string) tea.Msg {
+			m.list = components.NewFullscreenList([]string{"default"}, "Select Namespace", func(selected string) tea.Msg {
 				return NamespaceSelectedMsg{Namespace: selected}
 			})
 		} else {
-			m.list = components.NewList(msg.namespaces, "Select Namespace", func(selected string) tea.Msg {
+			m.list = components.NewFullscreenList(msg.namespaces, "Select Namespace", func(selected string) tea.Msg {
 				return NamespaceSelectedMsg{Namespace: selected}
 			})
 		}
@@ -82,7 +81,7 @@ func (m *NamespaceSelectorModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	updated, cmd := m.list.Update(msg)
-	if list, ok := updated.(*components.ListModel); ok {
+	if list, ok := updated.(*components.FullscreenListModel); ok {
 		m.list = list
 	}
 	return m, cmd

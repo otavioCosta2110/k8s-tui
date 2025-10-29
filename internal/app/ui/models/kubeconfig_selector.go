@@ -17,7 +17,7 @@ type KubeconfigSelectedMsg struct {
 }
 
 type KubeconfigSelectorModel struct {
-	list *components.ListModel
+	list *components.FullscreenListModel
 }
 
 func NewKubeconfigSelectorModel() *KubeconfigSelectorModel {
@@ -28,7 +28,7 @@ func NewKubeconfigSelectorModel() *KubeconfigSelectorModel {
 		files = []string{}
 	}
 
-	list := components.NewList(files, "Select Kubeconfig", func(selected string) tea.Msg {
+	list := components.NewFullscreenList(files, "Select Kubeconfig", func(selected string) tea.Msg {
 		return KubeconfigSelectedMsg{Path: filepath.Join(kubeDir, selected)}
 	})
 
@@ -50,7 +50,7 @@ func (m *KubeconfigSelectorModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	updated, cmd := m.list.Update(msg)
-	if list, ok := updated.(*components.ListModel); ok {
+	if list, ok := updated.(*components.FullscreenListModel); ok {
 		m.list = list
 	}
 	return m, cmd

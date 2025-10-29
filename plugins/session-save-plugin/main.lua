@@ -32,7 +32,6 @@ function Setup(opts)
 end
 
 function Initialize()
-  print("DEBUG: Lua Initialize called")
   return nil
 end
 

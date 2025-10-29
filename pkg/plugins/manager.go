@@ -115,7 +115,6 @@ func (pm *PluginManager) setupBasicLuaAPI(L *lua.LState) {
 	}))
 
 	L.SetGlobal("k8s_tui", apiTable)
-	print("DEBUG: Basic k8s_tui API set up for Lua plugin")
 }
 
 type basicLuaPlugin struct {
@@ -357,14 +356,10 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 	commandsType = L.GetGlobal("Commands").Type()
 	hooksType = L.GetGlobal("Hooks").Type()
 
-	print(fmt.Sprintf("DEBUG: Plugin %s function types: Setup=%s, Config=%s, Commands=%s, Hooks=%s", pluginName, setupType, configType, commandsType, hooksType))
-
 	isNeovimStyle = setupType == lua.LTFunction ||
 		configType == lua.LTFunction ||
 		commandsType == lua.LTFunction ||
 		hooksType == lua.LTFunction
-
-	print(fmt.Sprintf("DEBUG: Plugin %s isNeovimStyle: %t", pluginName, isNeovimStyle))
 
 	if isNeovimStyle {
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: 🎯 Detected pluginmanager-style plugin: %s", pluginName))
