@@ -28,5 +28,5 @@ jobs:
         with:
           path: docs/
           token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ github.repository }}.wiki
+          repository: ${{ github.repository }}
           branch: main
