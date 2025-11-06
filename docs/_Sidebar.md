@@ -5,8 +5,8 @@ This is the main entry point for the k8s-tui documentation. All documentation is
 ## 🚀 Quick Start
 
 1. **Installation**: See the main [README](../README.md) for installation instructions
-2. **Configuration**: Check the [[Configuration Guide]] for setup options
-3. **Navigation**: Learn the interface with the [[Navigation Guide]]
+2. **Configuration**: Check the [[Configuration Guide | User-Guide-Configuration]] for setup options
+3. **Navigation**: Learn the interface with the [[Navigation Guide | User-Guide-Navigation]]
 
 ## 📚 Complete Documentation
 

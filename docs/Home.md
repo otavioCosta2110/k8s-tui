@@ -43,8 +43,6 @@ Welcome to the comprehensive documentation for k8s-tui, a terminal-based Kuberne
 
 If you're new to k8s-tui, start with the [Quick Start](../README.md#quick-start) in the main README, then explore the [[🧭 Navigation | User-Guide-Navigation]].
 
-For multi-cluster setups, see [[User-Guide-Configuration#multiple-clusters|Multi-Cluster Configuration]].
-
 For developers looking to contribute, check out the [[🤝 Contributing | Developer-Contributing]].
 
 ## 🆘 Support
