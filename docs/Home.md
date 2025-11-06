@@ -5,14 +5,14 @@ Welcome to the comprehensive documentation for k8s-tui, a terminal-based Kuberne
 ## 📚 Table of Contents
 
 ### 🚀 User Guide
-- [[User-Guide/Navigation|Navigation Guide]] - Learn how to navigate the interface
-- [[User-Guide/Resource-Management|Resource Management]] - Manage Kubernetes resources
-- [[User-Guide/Key-Bindings|Key Bindings]] - Keyboard shortcuts and commands
-- [[User-Guide/Configuration|Configuration]] - Setup and customization
-- [[User-Guide/Troubleshooting|Troubleshooting]] - Common issues and solutions
+- [[User-Guide/Navigation|🧭 Navigation]] - Learn how to navigate the interface
+- [[User-Guide/Resource-Management|⚡ Resource Management]] - Manage Kubernetes resources
+- [[User-Guide/Key-Bindings|⌨️ Key Bindings]] - Keyboard shortcuts and commands
+- [[User-Guide/Configuration|⚙️ Configuration]] - Setup and customization
+- [[User-Guide/Troubleshooting|🆘 Troubleshooting]] - Common issues and solutions
 
 ### 🛠️ Developer Guide
-- [[Development|Development Guide]] - Getting started with development
+- [[Development|🛠️ Development]] - Getting started with development
 - [[Developer/Architecture|🏗️ Architecture]] - System design and components
 - [[Developer/Code-Structure|📁 Code Structure]] - Project organization
 - [[Developer/Contributing|🤝 Contributing]] - How to contribute
@@ -41,17 +41,17 @@ Welcome to the comprehensive documentation for k8s-tui, a terminal-based Kuberne
 
 ## 🚀 Getting Started
 
-If you're new to k8s-tui, start with the [Quick Start](../README.md#quick-start) in the main README, then explore the [[User-Guide/Navigation|Navigation Guide]].
+If you're new to k8s-tui, start with the [Quick Start](../README.md#quick-start) in the main README, then explore the [[User-Guide/Navigation|🧭 Navigation]].
 
 For multi-cluster setups, see [[User-Guide/Configuration#multiple-clusters|Multi-Cluster Configuration]].
 
-For developers looking to contribute, check out the [[Developer/Contributing|Contributing Guide]].
+For developers looking to contribute, check out the [[Developer/Contributing|🤝 Contributing]].
 
 ## 🆘 Support
 
 - Report bugs or request features via [GitHub Issues](https://github.com/otavioCosta2110/k8s-tui/issues)
 - Ask questions in [GitHub Discussions](https://github.com/otavioCosta2110/k8s-tui/discussions)
-- Check the [[User-Guide/Troubleshooting|Troubleshooting Guide]] for common issues
+- Check the [[User-Guide/Troubleshooting|🆘 Troubleshooting]] for common issues
 
 ---
 
