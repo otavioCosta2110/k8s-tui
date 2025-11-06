@@ -20,11 +20,11 @@ type ReplicaSetInfo struct {
 	Client    Client
 }
 
-func NewReplicaSet(name, namespace string, k Client) *ReplicaSetInfo {
+func NewReplicaSetInfo(name, namespace string, kubernetesClient Client) *ReplicaSetInfo {
 	return &ReplicaSetInfo{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k,
+		Client:    kubernetesClient,
 	}
 }
 

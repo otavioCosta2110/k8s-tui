@@ -24,10 +24,10 @@ type NodeInfo struct {
 	Client  Client
 }
 
-func NewNode(name string, k Client) *NodeInfo {
+func NewNodeInfo(name string, kubernetesClient Client) *NodeInfo {
 	return &NodeInfo{
 		Name:   name,
-		Client: k,
+		Client: kubernetesClient,
 	}
 }
 

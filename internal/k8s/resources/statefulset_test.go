@@ -12,7 +12,7 @@ import (
 
 func TestNewStatefulSet(t *testing.T) {
 	client := Client{Namespace: "default"}
-	statefulset := NewStatefulSet("test-statefulset", "default", client)
+	statefulset := NewStatefulSetInfo("test-statefulset", "default", client)
 
 	if statefulset.Name != "test-statefulset" {
 		t.Error("StatefulSet name mismatch")

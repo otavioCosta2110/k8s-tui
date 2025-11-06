@@ -1,0 +1,32 @@
+name: Sync Wiki
+
+on:
+  push:
+    paths: 
+      - 'docs/**'
+      - 'README.md'
+      - '.github/workflows/sync-wiki.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Sync to Wiki
+        uses: Andrew-Chen-Wang/github-wiki-action@v4
+        with:
+          path: docs/
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}.wiki
+          branch: main

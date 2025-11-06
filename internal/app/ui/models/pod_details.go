@@ -20,7 +20,7 @@ type podDetailsLoadedMsg struct {
 func NewPodDetails(k k8s.Client, namespace, podName string) *podDetailsModel {
 	return &podDetailsModel{
 		baseDetailsModel: newBaseDetailsModel("Pod: "+podName, "Loading pod details..."),
-		pod:              k8s.NewPod(podName, namespace, k),
+		pod:              k8s.NewPodInfo(podName, namespace, k),
 	}
 }
 

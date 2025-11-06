@@ -1,4 +1,4 @@
-# Navigation Guide
+# 🧭 Navigation Guide
 
 k8s-tui uses a tab-based interface for navigating between different Kubernetes resource types and managing your clusters.
 

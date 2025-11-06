@@ -20,7 +20,7 @@ type serviceDetailsLoadedMsg struct {
 func NewServiceDetails(k k8s.Client, namespace, serviceName string) *serviceDetailsModel {
 	return &serviceDetailsModel{
 		baseDetailsModel: newBaseDetailsModel("Service: "+serviceName, "Loading service details..."),
-		service:          k8s.NewService(serviceName, namespace, k),
+		service:          k8s.NewServiceInfo(serviceName, namespace, k),
 	}
 }
 

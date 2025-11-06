@@ -69,7 +69,7 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	r.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		replicaset := k8s.NewReplicaSet(selected, r.namespace, *k)
+		replicaset := k8s.NewReplicaSetInfo(selected, r.namespace, *k)
 		err := replicaset.Fetch()
 		if err != nil {
 			return components.NavigateMsg{

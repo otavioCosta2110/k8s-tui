@@ -10,7 +10,7 @@ import (
 
 func TestNewPod(t *testing.T) {
 	client := Client{Namespace: "default"}
-	pod := NewPod("test-pod", "default", client)
+	pod := NewPodInfo("test-pod", "default", client)
 
 	if pod.Name != "test-pod" {
 		t.Error("Pod name mismatch")
@@ -65,7 +65,7 @@ func TestBorderedWriter(t *testing.T) {
 
 func TestPodWithMockData(t *testing.T) {
 	client := Client{Namespace: "test-namespace"}
-	pod := NewPod("mock-pod", "test-namespace", client)
+	pod := NewPodInfo("mock-pod", "test-namespace", client)
 
 	pod.Raw = &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{

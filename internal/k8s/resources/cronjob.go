@@ -24,11 +24,11 @@ type CronJobInfo struct {
 	Client       Client
 }
 
-func NewCronJob(name, namespace string, k Client) *CronJobInfo {
+func NewCronJobInfo(name, namespace string, kubernetesClient Client) *CronJobInfo {
 	return &CronJobInfo{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k,
+		Client:    kubernetesClient,
 	}
 }
 

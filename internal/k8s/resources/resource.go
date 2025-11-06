@@ -362,40 +362,40 @@ func DescribeResource(client Client, resourceType ResourceType, namespace, name 
 
 	switch resourceType {
 	case ResourceTypePod:
-		pod := NewPod(name, namespace, client)
+		pod := NewPodInfo(name, namespace, client)
 		return pod.Describe()
 	case ResourceTypeService:
-		service := NewService(name, namespace, client)
+		service := NewServiceInfo(name, namespace, client)
 		return service.Describe()
 	case ResourceTypeConfigMap:
-		configmap := NewConfigmap(name, namespace, client)
+		configmap := NewConfigMapInfo(name, namespace, client)
 		return configmap.Describe()
 	case ResourceTypeSecret:
-		secret := NewSecret(name, namespace, client)
+		secret := NewSecretInfo(name, namespace, client)
 		return secret.Describe()
 	case ResourceTypeIngress:
-		ingress := NewIngress(name, namespace, client)
+		ingress := NewIngressInfo(name, namespace, client)
 		return ingress.Describe()
 	case ResourceTypeJob:
-		job := NewJob(name, namespace, client)
+		job := NewJobInfo(name, namespace, client)
 		return job.Describe()
 	case ResourceTypeCronJob:
-		cronjob := NewCronJob(name, namespace, client)
+		cronjob := NewCronJobInfo(name, namespace, client)
 		return cronjob.Describe()
 	case ResourceTypeDaemonSet:
-		daemonset := NewDaemonSet(name, namespace, client)
+		daemonset := NewDaemonSetInfo(name, namespace, client)
 		return daemonset.Describe()
 	case ResourceTypeStatefulSet:
-		statefulset := NewStatefulSet(name, namespace, client)
+		statefulset := NewStatefulSetInfo(name, namespace, client)
 		return statefulset.Describe()
 	case ResourceTypeNode:
-		node := NewNode(name, client)
+		node := NewNodeInfo(name, client)
 		return node.Describe()
 	case ResourceTypeDeployment:
-		deployment := NewDeployment(name, namespace, client)
+		deployment := NewDeploymentInfo(name, namespace, client)
 		return deployment.Describe()
 	case ResourceTypeServiceAccount:
-		serviceaccount := NewServiceAccount(name, namespace, client)
+		serviceaccount := NewServiceAccountInfo(name, namespace, client)
 		return serviceaccount.Describe()
 	default:
 		return "", fmt.Errorf("unsupported resource type for description: %s", resourceType)
@@ -409,7 +409,7 @@ func GetResourceLogs(client Client, resourceType ResourceType, namespace, name s
 
 	switch resourceType {
 	case ResourceTypePod:
-		pod := NewPod(name, namespace, client)
+		pod := NewPodInfo(name, namespace, client)
 		return pod.GetLogs()
 	default:
 		return "", fmt.Errorf("logs not supported for resource type: %s", resourceType)
@@ -423,7 +423,7 @@ func ExecResource(client Client, resourceType ResourceType, namespace, name stri
 
 	switch resourceType {
 	case ResourceTypePod:
-		pod := NewPod(name, namespace, client)
+		pod := NewPodInfo(name, namespace, client)
 		return pod.Exec(command)
 	default:
 		return "", "", fmt.Errorf("exec not supported for resource type: %s", resourceType)

@@ -25,7 +25,7 @@ type cmDetailsLoadedMsg struct {
 func NewConfigmapDetails(k k8s.Client, namespace, cmName string) *cmDetailsModel {
 	return &cmDetailsModel{
 		baseDetailsModel: newBaseDetailsModel("Configmap: "+cmName, "Loading configmap details..."),
-		cm:               k8s.NewConfigmap(cmName, namespace, k),
+		cm:               k8s.NewConfigMapInfo(cmName, namespace, k),
 		isEditing:        false,
 	}
 }

@@ -11,7 +11,7 @@ import (
 
 func TestNewJob(t *testing.T) {
 	client := Client{Namespace: "default"}
-	job := NewJob("test-job", "default", client)
+	job := NewJobInfo("test-job", "default", client)
 
 	if job.Name != "test-job" {
 		t.Error("Job name mismatch")

@@ -20,11 +20,11 @@ type ServiceAccountInfo struct {
 	Client    Client
 }
 
-func NewServiceAccount(name, namespace string, k Client) *ServiceAccountInfo {
+func NewServiceAccountInfo(name, namespace string, kubernetesClient Client) *ServiceAccountInfo {
 	return &ServiceAccountInfo{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k,
+		Client:    kubernetesClient,
 	}
 }
 

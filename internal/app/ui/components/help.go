@@ -60,10 +60,10 @@ func (m *HelpModel) Init() tea.Cmd {
 func (m *HelpModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.viewport.Width = msg.Width 
-		m.viewport.Height = msg.Height 
+		m.viewport.Width = msg.Width
+		m.viewport.Height = msg.Height
 		if m.content != "" {
-			m.viewport.SetContent(m.content) 
+			m.viewport.SetContent(m.content)
 		}
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -116,7 +116,7 @@ func (m *HelpModel) View() string {
 		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render("")
 
-	contentHeight := (styles.ScreenHeight + styles.HeaderSize) 
+	contentHeight := (styles.ScreenHeight + styles.HeaderSize)
 	m.viewport.Height = contentHeight
 
 	content := lipgloss.NewStyle().

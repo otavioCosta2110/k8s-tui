@@ -24,11 +24,11 @@ type IngressInfo struct {
 	Client    Client
 }
 
-func NewIngress(name, namespace string, k Client) *IngressInfo {
+func NewIngressInfo(name, namespace string, kubernetesClient Client) *IngressInfo {
 	return &IngressInfo{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k,
+		Client:    kubernetesClient,
 	}
 }
 

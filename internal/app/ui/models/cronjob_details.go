@@ -20,7 +20,7 @@ type cronjobDetailsLoadedMsg struct {
 func NewCronJobDetails(k k8s.Client, namespace, cronjobName string) *cronjobDetailsModel {
 	return &cronjobDetailsModel{
 		baseDetailsModel: newBaseDetailsModel("CronJob: "+cronjobName, "Loading cronjob details..."),
-		cronjob:          k8s.NewCronJob(cronjobName, namespace, k),
+		cronjob:          k8s.NewCronJobInfo(cronjobName, namespace, k),
 	}
 }
 

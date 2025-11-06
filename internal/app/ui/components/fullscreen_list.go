@@ -28,14 +28,30 @@ func (m *FullscreenListModel) Init() tea.Cmd {
 }
 
 func (m *FullscreenListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	updated, cmd := m.list.Update(msg)
-	if list, ok := updated.(*ListModel); ok {
-		m.list = list
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		// Update screen dimensions
+		styles.ScreenWidth = msg.Width
+		styles.ScreenHeight = msg.Height
+		// Let the underlying list handle the resize as well
+		updated, cmd := m.list.Update(msg)
+		if list, ok := updated.(*ListModel); ok {
+			m.list = list
+		}
+		return m, cmd
+	default:
+		updated, cmd := m.list.Update(msg)
+		if list, ok := updated.(*ListModel); ok {
+			m.list = list
+		}
+		return m, cmd
 	}
-	return m, cmd
 }
 
 func (m *FullscreenListModel) View() string {
+	// Calculate available space for content
+	availableWidth := styles.ScreenWidth - 4 // Account for borders
+	
 	borderStyle := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color(customstyles.BorderColor)).
@@ -45,10 +61,30 @@ func (m *FullscreenListModel) View() string {
 		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Foreground(customstyles.TextColor)
 
-	separator := strings.Repeat("─", styles.ScreenWidth-4)
-	content := m.list.View()
+	// Style for the title
+	titleStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color(customstyles.AccentColor)).
+		Align(lipgloss.Center).
+		Width(availableWidth).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
 
-	fullContent := m.title + "\n" + separator + "\n" + content
+	// Style for help footer
+	footerStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(customstyles.HelpTextColor)).
+		Align(lipgloss.Center).
+		Width(availableWidth).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
+
+	separator := strings.Repeat("─", availableWidth)
+	content := m.list.View()
+	helpText := "↑/↓ or j/k: Navigate • Enter: Select • esc: Close"
+
+	fullContent := titleStyle.Render(m.title) + "\n" + 
+		separator + "\n" + 
+		content + "\n" + 
+		separator + "\n" +
+		footerStyle.Render(helpText)
 
 	return borderStyle.Render(fullContent)
 }

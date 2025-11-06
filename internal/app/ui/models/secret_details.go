@@ -23,7 +23,7 @@ type secretDetailsLoadedMsg struct {
 func NewSecretDetails(k k8s.Client, namespace, secretName string) *secretDetailsModel {
 	return &secretDetailsModel{
 		baseDetailsModel: newBaseDetailsModel("Secret: "+secretName, "Loading secret details..."),
-		secret:           k8s.NewSecret(secretName, namespace, k),
+		secret:           k8s.NewSecretInfo(secretName, namespace, k),
 		showValues:       false,
 	}
 }

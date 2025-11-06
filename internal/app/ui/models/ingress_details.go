@@ -20,7 +20,7 @@ type ingressDetailsLoadedMsg struct {
 func NewIngressDetails(k k8s.Client, namespace, ingressName string) *ingressDetailsModel {
 	return &ingressDetailsModel{
 		baseDetailsModel: newBaseDetailsModel("Ingress: "+ingressName, "Loading ingress details..."),
-		ingress:          k8s.NewIngress(ingressName, namespace, k),
+		ingress:          k8s.NewIngressInfo(ingressName, namespace, k),
 	}
 }
 

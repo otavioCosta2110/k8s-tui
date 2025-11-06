@@ -25,12 +25,12 @@ type Configmap struct {
 	YAML      string
 }
 
-func NewConfigmap(name, namespace string, k Client) *Configmap {
+func NewConfigMapInfo(name, namespace string, kubernetesClient Client) *Configmap {
 	return &Configmap{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k.Clientset,
-		Config:    k.Config,
+		Client:    kubernetesClient.Clientset,
+		Config:    kubernetesClient.Config,
 	}
 }
 

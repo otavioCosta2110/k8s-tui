@@ -268,7 +268,7 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 					if selector == "" && strings.HasSuffix(strings.ToLower(crumb), " pods") && j > 0 && tabInfo.Breadcrumb[j-1] == "Deployments" {
 						parentResource = strings.TrimSuffix(crumb, " pods")
 						logger.Info(fmt.Sprintf("DEBUG: Inferring selector for deployment %s from breadcrumb", parentResource))
-						deployment := k8s.NewDeployment(parentResource, tm.namespace, *tm.kubeClient)
+						deployment := k8s.NewDeploymentInfo(parentResource, tm.namespace, *tm.kubeClient)
 						if err := deployment.Fetch(); err != nil {
 							logger.Error(fmt.Sprintf("Failed to fetch deployment %s for selector: %v", parentResource, err))
 							continue

@@ -22,11 +22,11 @@ type JobInfo struct {
 	Client      Client
 }
 
-func NewJob(name, namespace string, k Client) *JobInfo {
+func NewJobInfo(name, namespace string, kubernetesClient Client) *JobInfo {
 	return &JobInfo{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k,
+		Client:    kubernetesClient,
 	}
 }
 

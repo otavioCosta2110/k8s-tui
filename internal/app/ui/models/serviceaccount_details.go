@@ -25,7 +25,7 @@ type serviceaccountDetailsLoadedMsg struct {
 
 func NewServiceAccountDetails(k k8s.Client, namespace, serviceaccountName string) *serviceaccountDetailsModel {
 	return &serviceaccountDetailsModel{
-		serviceaccount: k8s.NewServiceAccount(serviceaccountName, namespace, k),
+		serviceaccount: k8s.NewServiceAccountInfo(serviceaccountName, namespace, k),
 		k8sClient:      &k,
 		yamlViewer:     components.NewYAMLViewerWithHelp("ServiceAccount: "+serviceaccountName, "Loading...", "↑/↓: Scroll • q: Quit"),
 		loading:        true,

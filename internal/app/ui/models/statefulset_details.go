@@ -20,7 +20,7 @@ type statefulsetDetailsLoadedMsg struct {
 func NewStatefulSetDetails(k k8s.Client, namespace, statefulsetName string) *statefulsetDetailsModel {
 	return &statefulsetDetailsModel{
 		baseDetailsModel: newBaseDetailsModel("StatefulSet: "+statefulsetName, "Loading statefulset details..."),
-		statefulset:      k8s.NewStatefulSet(statefulsetName, namespace, k),
+		statefulset:      k8s.NewStatefulSetInfo(statefulsetName, namespace, k),
 	}
 }
 

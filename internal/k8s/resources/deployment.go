@@ -24,43 +24,48 @@ type DeploymentInfo struct {
 	Client    Client
 }
 
-func NewDeployment(name, namespace string, k Client) *DeploymentInfo {
+func NewDeploymentInfo(name, namespace string, kubernetesClient Client) *DeploymentInfo {
 	return &DeploymentInfo{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k,
+		Client:    kubernetesClient,
 	}
 }
 
 func (d *DeploymentInfo) Fetch() error {
+	if d.Client.Clientset == nil {
+		return fmt.Errorf("kubernetes client not available")
+	}
+
 	deployment, err := d.Client.Clientset.AppsV1().Deployments(d.Namespace).Get(
 		context.Background(),
 		d.Name,
 		metav1.GetOptions{},
 	)
 	if err != nil {
-		return fmt.Errorf("failed to get deployment: %v", err)
+		return fmt.Errorf("failed to fetch deployment %s/%s: %w", d.Namespace, d.Name, err)
 	}
 
 	if deployment == nil {
-		return fmt.Errorf("deployment not found")
+		return fmt.Errorf("deployment %s/%s not found", d.Namespace, d.Name)
 	}
 
 	d.Raw = deployment
 	return nil
 }
 
-func FetchDeploymentList(client Client, namespace string) ([]string, error) {
-	if client.Clientset == nil {
+func FetchDeploymentList(kubernetesClient Client, namespace string) ([]string, error) {
+	if kubernetesClient.Clientset == nil {
 		return []string{}, errors.New("kubernetes client not available")
 	}
-	ds, err := client.Clientset.AppsV1().Deployments(namespace).List(context.Background(), metav1.ListOptions{})
+
+	deploymentList, err := kubernetesClient.Clientset.AppsV1().Deployments(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch deployments: %v", err)
+		return nil, fmt.Errorf("failed to fetch deployments in namespace %s: %w", namespace, err)
 	}
 
-	deploymentNames := make([]string, 0, len(ds.Items))
-	for _, deployment := range ds.Items {
+	deploymentNames := make([]string, 0, len(deploymentList.Items))
+	for _, deployment := range deploymentList.Items {
 		deploymentNames = append(deploymentNames, deployment.Name)
 	}
 

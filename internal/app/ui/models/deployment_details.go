@@ -25,7 +25,7 @@ type deploymentDetailsLoadedMsg struct {
 func NewDeploymentDetails(k k8s.Client, namespace, deploymentName string) *deploymentDetailsModel {
 	return &deploymentDetailsModel{
 		baseDetailsModel: newBaseDetailsModel("Deployment: "+deploymentName, "Loading deployment details..."),
-		deployment:       k8s.NewDeployment(deploymentName, namespace, k),
+		deployment:       k8s.NewDeploymentInfo(deploymentName, namespace, k),
 		isEditing:        false,
 	}
 }

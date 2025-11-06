@@ -73,7 +73,7 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 	d.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		deployment := resources.NewDeployment(selected, d.namespace, *k)
+		deployment := resources.NewDeploymentInfo(selected, d.namespace, *k)
 		if err := deployment.Fetch(); err != nil {
 			return components.NavigateMsg{
 				Error:   err,

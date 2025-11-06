@@ -11,7 +11,7 @@ import (
 
 func TestNewDaemonSet(t *testing.T) {
 	client := Client{Namespace: "default"}
-	daemonset := NewDaemonSet("test-daemonset", "default", client)
+	daemonset := NewDaemonSetInfo("test-daemonset", "default", client)
 
 	if daemonset.Name != "test-daemonset" {
 		t.Error("DaemonSet name mismatch")

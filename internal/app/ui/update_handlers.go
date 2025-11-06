@@ -292,34 +292,34 @@ func (m *AppModel) handleCreateSubmitMsg(msg components.CreateSubmitMsg) (tea.Mo
 	var err error
 	switch msg.ResourceType {
 	case "pod":
-		pod := resources.NewPod("", "", m.kube)
+		pod := resources.NewPodInfo("", "", m.kube)
 		err = pod.Create(msg.Values["name"], msg.Values["image"], msg.Values["namespace"])
 	case "deployment":
-		deployment := resources.NewDeployment("", "", m.kube)
+		deployment := resources.NewDeploymentInfo("", "", m.kube)
 		err = deployment.Create(msg.Values["name"], msg.Values["image"], msg.Values["replicas"], msg.Values["namespace"])
 	case "service":
-		service := resources.NewService("", "", m.kube)
+		service := resources.NewServiceInfo("", "", m.kube)
 		err = service.Create(msg.Values["name"], msg.Values["type"], msg.Values["port"], msg.Values["targetPort"], msg.Values["namespace"])
 	case "configmap":
-		configmap := resources.NewConfigmap("", "", m.kube)
+		configmap := resources.NewConfigMapInfo("", "", m.kube)
 		err = configmap.Create(msg.Values["name"], msg.Values["namespace"])
 	case "secret":
-		secret := resources.NewSecret("", "", m.kube)
+		secret := resources.NewSecretInfo("", "", m.kube)
 		err = secret.Create(msg.Values["name"], msg.Values["type"], msg.Values["namespace"])
 	case "ingress":
-		ingress := resources.NewIngress("", "", m.kube)
+		ingress := resources.NewIngressInfo("", "", m.kube)
 		err = ingress.Create(msg.Values["name"], msg.Values["host"], msg.Values["path"], msg.Values["serviceName"], msg.Values["servicePort"], msg.Values["namespace"])
 	case "job":
-		job := resources.NewJob("", "", m.kube)
+		job := resources.NewJobInfo("", "", m.kube)
 		err = job.Create(msg.Values["name"], msg.Values["image"], msg.Values["backoffLimit"], msg.Values["namespace"])
 	case "cronjob":
-		cronjob := resources.NewCronJob("", "", m.kube)
+		cronjob := resources.NewCronJobInfo("", "", m.kube)
 		err = cronjob.Create(msg.Values["name"], msg.Values["image"], msg.Values["schedule"], msg.Values["suspend"], msg.Values["namespace"])
 	case "daemonset":
-		daemonset := resources.NewDaemonSet("", "", m.kube)
+		daemonset := resources.NewDaemonSetInfo("", "", m.kube)
 		err = daemonset.Create(msg.Values["name"], msg.Values["image"], msg.Values["namespace"])
 	case "statefulset":
-		statefulset := resources.NewStatefulSet("", "", m.kube)
+		statefulset := resources.NewStatefulSetInfo("", "", m.kube)
 		err = statefulset.Create(msg.Values["name"], msg.Values["image"], msg.Values["replicas"], msg.Values["namespace"])
 	case "namespace":
 		namespace := resources.NewNamespaces(m.kube)

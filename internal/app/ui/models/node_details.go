@@ -20,7 +20,7 @@ type nodeDetailsLoadedMsg struct {
 func NewNodeDetails(k k8s.Client, nodeName string) *nodeDetailsModel {
 	return &nodeDetailsModel{
 		baseDetailsModel: newBaseDetailsModel("Node: "+nodeName, "Loading node details..."),
-		node:             k8s.NewNode(nodeName, k),
+		node:             k8s.NewNodeInfo(nodeName, k),
 	}
 }
 

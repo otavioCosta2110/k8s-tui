@@ -20,7 +20,7 @@ type daemonsetDetailsLoadedMsg struct {
 func NewDaemonSetDetails(k k8s.Client, namespace, daemonsetName string) *daemonsetDetailsModel {
 	return &daemonsetDetailsModel{
 		baseDetailsModel: newBaseDetailsModel("DaemonSet: "+daemonsetName, "Loading daemonset details..."),
-		daemonset:        k8s.NewDaemonSet(daemonsetName, namespace, k),
+		daemonset:        k8s.NewDaemonSetInfo(daemonsetName, namespace, k),
 	}
 }
 

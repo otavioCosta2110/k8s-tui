@@ -26,11 +26,11 @@ type DaemonSetInfo struct {
 	Client       Client
 }
 
-func NewDaemonSet(name, namespace string, k Client) *DaemonSetInfo {
+func NewDaemonSetInfo(name, namespace string, kubernetesClient Client) *DaemonSetInfo {
 	return &DaemonSetInfo{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k,
+		Client:    kubernetesClient,
 	}
 }
 

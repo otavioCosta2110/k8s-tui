@@ -22,11 +22,11 @@ type StatefulSetInfo struct {
 	Client    Client
 }
 
-func NewStatefulSet(name, namespace string, k Client) *StatefulSetInfo {
+func NewStatefulSetInfo(name, namespace string, kubernetesClient Client) *StatefulSetInfo {
 	return &StatefulSetInfo{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k,
+		Client:    kubernetesClient,
 	}
 }
 

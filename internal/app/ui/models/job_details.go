@@ -20,7 +20,7 @@ type jobDetailsLoadedMsg struct {
 func NewJobDetails(k k8s.Client, namespace, jobName string) *jobDetailsModel {
 	return &jobDetailsModel{
 		baseDetailsModel: newBaseDetailsModel("Job: "+jobName, "Loading job details..."),
-		job:              k8s.NewJob(jobName, namespace, k),
+		job:              k8s.NewJobInfo(jobName, namespace, k),
 	}
 }
 

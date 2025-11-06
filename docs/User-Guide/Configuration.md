@@ -1,4 +1,4 @@
-# Configuration Guide
+# ⚙️ Configuration Guide
 
 k8s-tui is designed to work out-of-the-box with standard Kubernetes configurations, but offers several customization options.
 

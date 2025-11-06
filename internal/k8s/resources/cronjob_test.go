@@ -11,7 +11,7 @@ import (
 
 func TestNewCronJob(t *testing.T) {
 	client := Client{Namespace: "default"}
-	cronjob := NewCronJob("test-cronjob", "default", client)
+	cronjob := NewCronJobInfo("test-cronjob", "default", client)
 
 	if cronjob.Name != "test-cronjob" {
 		t.Error("CronJob name mismatch")

@@ -25,11 +25,11 @@ type ServiceInfo struct {
 	Client     Client
 }
 
-func NewService(name, namespace string, k Client) *ServiceInfo {
+func NewServiceInfo(name, namespace string, kubernetesClient Client) *ServiceInfo {
 	return &ServiceInfo{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k,
+		Client:    kubernetesClient,
 	}
 }
 
@@ -67,10 +67,10 @@ func parseIntOrString(s string) intstr.IntOrString {
 	return intstr.FromString(s)
 }
 
-func FetchServiceList(client Client, namespace string) ([]string, error) {
-	services, err := client.Clientset.CoreV1().Services(namespace).List(context.Background(), metav1.ListOptions{})
+func FetchServiceList(kubernetesClient Client, namespace string) ([]string, error) {
+	services, err := kubernetesClient.Clientset.CoreV1().Services(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch services: %v", err)
+		return nil, fmt.Errorf("failed to fetch services in namespace %s: %w", namespace, err)
 	}
 
 	serviceNames := make([]string, 0, len(services.Items))

@@ -22,11 +22,11 @@ type SecretInfo struct {
 	Client    Client
 }
 
-func NewSecret(name, namespace string, k Client) *SecretInfo {
+func NewSecretInfo(name, namespace string, kubernetesClient Client) *SecretInfo {
 	return &SecretInfo{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k,
+		Client:    kubernetesClient,
 	}
 }
 

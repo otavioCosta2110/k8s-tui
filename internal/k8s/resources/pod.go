@@ -28,12 +28,12 @@ type Pod struct {
 	Config    *rest.Config
 }
 
-func NewPod(name, namespace string, k Client) *Pod {
+func NewPodInfo(name, namespace string, kubernetesClient Client) *Pod {
 	return &Pod{
 		Name:      name,
 		Namespace: namespace,
-		Client:    k.Clientset,
-		Config:    k.Config,
+		Client:    kubernetesClient.Clientset,
+		Config:    kubernetesClient.Config,
 	}
 }
 
