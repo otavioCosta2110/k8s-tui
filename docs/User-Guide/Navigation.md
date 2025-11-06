@@ -9,7 +9,7 @@ When managing multiple clusters, a cluster tab bar appears at the top:
 - **Cluster 1, Cluster 2, etc.**: Switch between configured clusters
 - `F1-F3`: Quick cluster switching (up to 3 clusters)
 - `Ctrl + N`: Add a new cluster dynamically
-- `Tab`/`Shift + Tab`: Navigate cluster tabs
+- `Left`/`Right`: Navigate cluster tabs
 
 Each cluster maintains its own:
 - Namespace context
@@ -35,8 +35,8 @@ Within each cluster, navigate resource types using tabs:
 
 ### Switching Resource Tabs
 
-- `Tab`: Move to next resource tab
-- `Shift + Tab`: Move to previous resource tab
+- `Right`: Move to next resource tab
+- `Left`: Move to previous resource tab
 - `1-9`: Jump directly to tab number (if available)
 
 ## Screen Transitions
@@ -70,8 +70,8 @@ From any resource list:
 
 | Key | Action |
 |-----|--------|
-| `Tab` | Next tab |
-| `Shift+Tab` | Previous tab |
+| `Right` | Next tab |
+| `Left` | Previous tab |
 | `Ctrl+C` | Quit |
 | `q` | Quit |
 | `?` | Show help |
