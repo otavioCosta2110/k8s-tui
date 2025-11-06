@@ -12,10 +12,11 @@ func (m *AppModel) getKeyBinding(action string) string {
 		"forward":     "]",
 		"new_tab":     "ctrl+t",
 		"close_tab":   "ctrl+w",
+		"tab_next":    "right",
+		"tab_prev":    "left",
 		"quick_nav":   "g",
-		"cluster1":    "f1",
-		"cluster2":    "f2",
-		"cluster3":    "f3",
+		"cluster_prev": "ctrl+left",
+		"cluster_next": "ctrl+right",
 		"add_cluster": "ctrl+n",
 	}
 	return defaults[action]

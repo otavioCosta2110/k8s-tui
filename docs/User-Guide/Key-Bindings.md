@@ -8,10 +8,10 @@ Available from any screen:
 
 | Key Combination | Action | Description |
 |-----------------|--------|-------------|
-| `Tab` | Next Tab | Switch to next resource tab |
-| `Shift + Tab` | Previous Tab | Switch to previous resource tab |
-| `Ctrl + C` | Quit | Exit the application |
-| `q` | Quit | Exit the application |
+| `Left` | Previous Tab | Switch to previous resource tab |
+| `Right` | Next Tab | Switch to next resource tab |
+| `Ctrl + C` | Quit | Exit application |
+| `q` | Quit | Exit application |
 | `?` | Help | Show context-sensitive help |
 
 ## Multi-Cluster Navigation
@@ -20,12 +20,9 @@ Available when managing multiple clusters:
 
 | Key Combination | Action | Description |
 |-----------------|--------|-------------|
-| `F1` | Switch to Cluster 1 | Switch to first cluster |
-| `F2` | Switch to Cluster 2 | Switch to second cluster |
-| `F3` | Switch to Cluster 3 | Switch to third cluster |
+| `Ctrl + Left` | Previous Cluster | Switch to previous cluster |
+| `Ctrl + Right` | Next Cluster | Switch to next cluster |
 | `Ctrl + N` | Add New Cluster | Open cluster addition workflow |
-| `Tab` (on cluster bar) | Next Cluster | Switch to next cluster tab |
-| `Shift + Tab` (on cluster bar) | Previous Cluster | Switch to previous cluster tab |
 
 ## Resource List Screens
 

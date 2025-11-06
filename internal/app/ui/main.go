@@ -265,39 +265,33 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 	case tea.KeyMsg:
-		// Handle cluster switching, e.g., f1, f2, f3
-		if msg.String() == "f1" && len(m.clusters) > 0 {
-			m.currentCluster = 0
-			m.clusterTabComponent.SetActiveTab(0)
-			plugins.SetGlobalPluginManager(m.clusters[0].pluginManager)
-			if m.width > 0 {
-				updated, _ := m.clusters[0].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
-				if appModel, ok := updated.(*AppModel); ok {
-					m.clusters[0] = appModel
+		// Handle cluster switching with Ctrl+Left/Ctrl+Right
+		if msg.String() == "ctrl+left" {
+			if len(m.clusters) > 0 {
+				newCluster := (m.currentCluster - 1 + len(m.clusters)) % len(m.clusters)
+				m.currentCluster = newCluster
+				m.clusterTabComponent.SetActiveTab(newCluster)
+				plugins.SetGlobalPluginManager(m.clusters[newCluster].pluginManager)
+				if m.width > 0 {
+					updated, _ := m.clusters[newCluster].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+					if appModel, ok := updated.(*AppModel); ok {
+						m.clusters[newCluster] = appModel
+					}
 				}
 			}
 			return m, nil
 		}
-		if msg.String() == "f2" && len(m.clusters) > 1 {
-			m.currentCluster = 1
-			m.clusterTabComponent.SetActiveTab(1)
-			plugins.SetGlobalPluginManager(m.clusters[1].pluginManager)
-			if m.width > 0 {
-				updated, _ := m.clusters[1].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
-				if appModel, ok := updated.(*AppModel); ok {
-					m.clusters[1] = appModel
-				}
-			}
-			return m, nil
-		}
-		if msg.String() == "f3" && len(m.clusters) > 2 {
-			m.currentCluster = 2
-			m.clusterTabComponent.SetActiveTab(2)
-			plugins.SetGlobalPluginManager(m.clusters[2].pluginManager)
-			if m.width > 0 {
-				updated, _ := m.clusters[2].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
-				if appModel, ok := updated.(*AppModel); ok {
-					m.clusters[2] = appModel
+		if msg.String() == "ctrl+right" {
+			if len(m.clusters) > 0 {
+				newCluster := (m.currentCluster + 1) % len(m.clusters)
+				m.currentCluster = newCluster
+				m.clusterTabComponent.SetActiveTab(newCluster)
+				plugins.SetGlobalPluginManager(m.clusters[newCluster].pluginManager)
+				if m.width > 0 {
+					updated, _ := m.clusters[newCluster].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+					if appModel, ok := updated.(*AppModel); ok {
+						m.clusters[newCluster] = appModel
+					}
 				}
 			}
 			return m, nil

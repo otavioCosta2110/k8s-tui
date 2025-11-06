@@ -25,4 +25,4 @@
   - `Resource-Management.md` - Managing Kubernetes resources
   - `Troubleshooting.md` - Common issues and solutions
 - **Home Page**: `/wiki/Home.md` - Main documentation entry point
-- **Documentation Updates**: When adding features, update relevant wiki pages
+- **Documentation Updates**: When adding features, update relevant wiki pages. Always check if documentation changes are needed when modifying key bindings, configuration options, or user-facing features.
