@@ -13,16 +13,16 @@ Welcome to the comprehensive documentation for k8s-tui, a terminal-based Kuberne
 
 ### 🛠️ Developer Guide
 - [[Development|Development Guide]] - Getting started with development
-- [[Developer/Architecture|Architecture]] - System design and components
-- [[Developer/Code-Structure|Code Structure]] - Project organization
-- [[Developer/Contributing|Contributing]] - How to contribute
-- [[Developer/Testing|Testing]] - Testing guidelines
-- [[Developer/Build-Process|Build Process]] - Building and packaging
+- [[Developer/Architecture|🏗️ Architecture]] - System design and components
+- [[Developer/Code-Structure|📁 Code Structure]] - Project organization
+- [[Developer/Contributing|🤝 Contributing]] - How to contribute
+- [[Developer/Testing|🧪 Testing]] - Testing guidelines
+- [[Developer/Build-Process|🔨 Build Process]] - Building and packaging
 
 ### 🔌 API & Plugins
-- [[API/Plugins|Plugins]] - Plugin development guide
-- [[API/API-Reference|API Reference]] - Complete API documentation
-- [[API/Extension-Points|Extension Points]] - Extending the application
+- [[API/Plugins|🔌 Plugins]] - Plugin development guide
+- [[API/API-Reference|📋 API Reference]] - Complete API documentation
+- [[API/Extension-Points|🔧 Extension Points]] - Extending the application
 
 ## 🔗 Quick Links
 

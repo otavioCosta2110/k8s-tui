@@ -22,11 +22,15 @@ A terminal-based Kubernetes resource manager with multi-cluster support.
 ### Developer
 - [[Development|🛠️ Development Guide]]
 - [[Developer/Architecture|🏗️ Architecture]]
+- [[Developer/Code-Structure|📁 Code Structure]]
 - [[Developer/Contributing|🤝 Contributing]]
+- [[Developer/Testing|🧪 Testing]]
+- [[Developer/Build-Process|🔨 Build Process]]
 
 ### API & Plugins
 - [[API/Plugins|🔌 Plugins]]
 - [[API/API-Reference|📋 API Reference]]
+- [[API/Extension-Points|🔧 Extension Points]]
 
 ---
 
