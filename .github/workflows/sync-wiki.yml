@@ -30,7 +30,6 @@ jobs:
           
           # Copy and rename files for wiki structure
           cp docs/Home.md wiki/Home.md
-          cp docs/_Footer.md wiki/_Footer.md
           cp docs/_Sidebar.md wiki/_Sidebar.md
           cp docs/Development.md wiki/Development.md
           
