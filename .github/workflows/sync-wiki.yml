@@ -23,10 +23,44 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Prepare Wiki Files
+        run: |
+          # Create wiki directory
+          mkdir -p wiki
+          
+          # Copy and rename files for wiki structure
+          cp docs/Home.md wiki/Home.md
+          cp docs/_Footer.md wiki/_Footer.md
+          cp docs/_Sidebar.md wiki/_Sidebar.md
+          cp docs/Development.md wiki/Development.md
+          
+          # User Guide files
+          cp docs/User-Guide/Navigation.md wiki/User-Guide-Navigation.md
+          cp docs/User-Guide/Resource-Management.md wiki/User-Guide-Resource-Management.md
+          cp docs/User-Guide/Key-Bindings.md wiki/User-Guide-Key-Bindings.md
+          cp docs/User-Guide/Configuration.md wiki/User-Guide-Configuration.md
+          cp docs/User-Guide/Troubleshooting.md wiki/User-Guide-Troubleshooting.md
+          
+          # Developer files
+          cp docs/Developer/Architecture.md wiki/Developer-Architecture.md
+          cp docs/Developer/Build-Process.md wiki/Developer-Build-Process.md
+          cp docs/Developer/Code-Structure.md wiki/Developer-Code-Structure.md
+          cp docs/Developer/Contributing.md wiki/Developer-Contributing.md
+          cp docs/Developer/Testing.md wiki/Developer-Testing.md
+          
+          # API files
+          cp docs/API/Plugins.md wiki/API-Plugins.md
+          cp docs/API/API-Reference.md wiki/API-API-Reference.md
+          cp docs/API/Extension-Points.md wiki/API-Extension-Points.md
+          
+          # List wiki files
+          echo "Wiki files prepared:"
+          ls -la wiki/
+
       - name: Sync to Wiki
         uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
-          path: docs/
+          path: wiki/
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           branch: main
