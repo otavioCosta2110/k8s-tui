@@ -18,6 +18,7 @@ type PodInfo struct {
 	Status    string
 	Restarts  int
 	Age       string
+	Image     string
 }
 
 func FetchPods(client Client, namespace string, selector string) ([]PodInfo, error) {
@@ -76,6 +77,14 @@ func processPodData(pod *corev1.Pod) (PodInfo, error) {
 		}
 	}
 
+	image := ""
+	if len(pod.Spec.Containers) > 0 {
+		image = pod.Spec.Containers[0].Image
+		if len(pod.Spec.Containers) > 1 {
+			image += " +"
+		}
+	}
+
 	return PodInfo{
 		Namespace: pod.Namespace,
 		Name:      pod.Name,
@@ -83,6 +92,7 @@ func processPodData(pod *corev1.Pod) (PodInfo, error) {
 		Status:    status,
 		Restarts:  restarts,
 		Age:       age,
+		Image:     image,
 	}, nil
 }
 

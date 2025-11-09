@@ -27,11 +27,12 @@ func NewPodsWithParent(k k8s.Client, namespace, parentDeployment string, selecto
 	config := ResourceConfig{
 		ResourceType:    k8s.ResourceTypePod,
 		Title:           styles.ResourceIcons["Pods"] + " Pods in " + namespace,
-		ColumnWidths:    []float64{1, 2, 1, 0.8, 0.5, 1},
+		ColumnWidths:    []float64{1, 1.5, 1.3, 0.3, 0.8, 0.5, 1},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),
 			components.NewColumn("NAME", 0),
+			components.NewColumn("IMAGE", 0),
 			components.NewColumn("READY", 0),
 			components.NewColumn("STATUS", 0),
 			components.NewColumn("RESTARTS", 0),

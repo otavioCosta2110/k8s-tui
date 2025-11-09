@@ -24,6 +24,7 @@ func (p PodData) GetColumns() table.Row {
 	return table.Row{
 		p.Namespace,
 		p.Name,
+		p.Image,
 		p.Ready,
 		p.Status,
 		fmt.Sprintf("%d", p.Restarts),
