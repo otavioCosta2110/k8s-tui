@@ -4,27 +4,49 @@ k8s-tui is designed to work out-of-the-box with standard Kubernetes configuratio
 
 ## Kubernetes Configuration
 
+### Kubeconfig Discovery
+
+k8s-tui uses a specific approach for kubeconfig discovery and selection:
+
+#### Configuration Sources
+
+1. **Command Line Arguments**
+   - Specify kubeconfig files directly: `k8s-tui --kubeconfig /path/to/config`
+   - Multiple kubeconfigs: `k8s-tui --kubeconfig config1 --kubeconfig config2`
+
+2. **Interactive Kubeconfig Selection**
+   - If no kubeconfig is specified, k8s-tui scans `~/.kube/` directory
+   - Presents a list of available kubeconfig files
+   - User selects the desired kubeconfig from the interface
+
+3. **Environment Variable**
+   - Sets `KUBECONFIG` environment variable when a kubeconfig is selected
+   - Also sets `KUBERNETES_MASTER` for compatibility
+
+#### Configuration Loading Process
+
+```bash
+# k8s-tui follows this process:
+# 1. Check for --kubeconfig command line arguments
+# 2. If none provided, scan ~/.kube/ directory for config files
+# 3. Show interactive selection menu
+# 4. Set selected config as KUBECONFIG environment variable
+# 5. Create Kubernetes client using client-go with the selected path
+```
+
+#### Kubeconfig File Discovery
+
+- **Scanned Directory**: `~/.kube/`
+- **File Types**: All non-directory files in the kubeconfig directory
+- **Selection**: Interactive UI-based selection from available files
+
+#### Client Configuration
+
+- **Namespace**: Can be set via `--namespace` flag or selected interactively
+
 ### Kubeconfig Setup
 
 k8s-tui uses the standard Kubernetes configuration files and environment variables:
-
-#### Configuration Sources (in order of precedence)
-
-1. **KUBECONFIG environment variable**
-   ```bash
-   export KUBECONFIG=/path/to/config:/another/config
-   ```
-
-2. **Default kubeconfig location**
-   ```bash
-   # User-specific config
-   ~/.kube/config
-
-   # System-wide configs
-   /etc/kubernetes/admin.conf
-   ```
-
-3. **In-cluster configuration** (when running inside a Kubernetes pod)
 
 #### Multiple Clusters
 
@@ -69,34 +91,6 @@ All clusters share the same plugin directory:
 k8s-tui --plugin-dir ./my-plugins --kubeconfig cluster1 --kubeconfig cluster2
 ```
 
-#### Context Switching
-
-Switch between contexts using kubectl:
-
-```bash
-# List available contexts
-kubectl config get-contexts
-
-# Switch context
-kubectl config use-context my-cluster
-
-# Verify current context
-kubectl config current-context
-```
-
-### Authentication
-
-k8s-tui supports all standard Kubernetes authentication methods:
-
-- **X.509 certificates**
-- **Bearer tokens**
-- **OIDC authentication**
-- **AWS IAM**
-- **Azure AD**
-- **GCP service accounts**
-
-Ensure your kubeconfig contains the appropriate authentication credentials.
-
 ## Theme Configuration
 
 k8s-tui supports multiple color schemes for different environments and preferences.
@@ -125,7 +119,7 @@ Follow the interactive prompts to select your preferred theme.
 
 ### Custom Themes
 
-Create custom themes by adding JSON files to `assets/colorschemes/`:
+Create custom themes by adding JSON files to `~/.local/share/k8s-tui/themes/`:
 
 ```json
 {
@@ -146,23 +140,28 @@ Create custom themes by adding JSON files to `assets/colorschemes/`:
 
 ### Plugin Directory
 
-Plugins are loaded from the `plugins/` directory in the project root.
+Plugins are loaded from the directory specified by `plugin_dir` specified at ~/.config/k8s-tui or by the `--plugin-dir` argument (default: `./plugins`).
 
 ### Installing Plugins
 
-1. Download or create plugin files (`.lua`)
-2. Place them in the `plugins/` directory
-3. Restart k8s-tui
+1. Download or create plugin files
+2. Place them in your plugin directory
+3. Restart k8s-tui with the correct plugin directory
 
-### Plugin Manager
+### Plugin Configuration
 
-Use the built-in plugin manager:
+Plugins can be configured through:
+- **Command line arguments**: `k8s-tui --my-plugin-setting=value`
+- **Configuration file**: Plugin-specific settings in `~/.config/k8s-tui/config.json`
 
-1. Navigate to the Plugin Manager tab
-2. Browse available plugins
-3. Install/uninstall as needed
+### Available Plugins
 
-See [Plugins](../api/plugins.md) for development details.
+Example plugins included:
+- **example-plugin**: Demonstrates custom resource types
+- **pluginmanager-header**: Adds custom header content
+- **session-save-plugin**: Saves and restores session state
+
+See [PLUGINS.md](../../PLUGINS.md) for development details and examples.
 
 ## Application Settings
 
@@ -195,57 +194,89 @@ For optimal experience:
 - **Color support**: 256-color or truecolor terminal
 - **Unicode support**: For proper icon display
 
-## Environment Variables
+### Command Line Arguments
 
-| Variable | Description | Default |
+| Argument | Description | Example |
 |----------|-------------|---------|
-| `KUBECONFIG` | Path to kubeconfig file(s) | `~/.kube/config` |
-| `EDITOR` | YAML editor command | System default |
-| `KUBERNETES_SERVICE_HOST` | API server host (in-cluster) | - |
-| `KUBERNETES_SERVICE_PORT` | API server port (in-cluster) | - |
+| `--kubeconfig` | Specify kubeconfig file path | `--kubeconfig ~/.kube/config` |
+| `--namespace` | Set default namespace | `--namespace default` |
+| `--plugin-dir` | Override plugin directory | `--plugin-dir ./my-plugins` |
+
+### Plugin Arguments
+
+Custom plugin arguments can be passed using `--<plugin-arg>=<value>` format:
+
+```bash
+# Example plugin arguments
+k8s-tui --my-plugin-setting=value --another-flag=true
+```
 
 ## Troubleshooting Configuration
 
-### Connection Issues
+### Kubeconfig Selection Issues
 
 ```bash
+# Check if ~/.kube directory exists
+ls -la ~/.kube/
+
+# Verify kubeconfig files are present
+ls -la ~/.kube/*
+
+# Test specific kubeconfig file
+kubectl --kubeconfig ~/.kube/config cluster-info
+
+# Check current context in specific config
+kubectl --kubeconfig ~/.kube/config config current-context
+
 # Test cluster connectivity
 kubectl cluster-info
-
-# Check current context
-kubectl config current-context
 
 # Verify authentication
 kubectl auth can-i list pods
 ```
 
-### Theme Issues
+### Common Selection Problems
 
-```bash
-# Reset to default theme
-cd assets/colorschemes
-cp one-dark.json current-theme.json
-```
+1. **No kubeconfig files found**
+   ```bash
+   # Create default kubeconfig directory
+   mkdir -p ~/.kube
+   # Copy your config file to ~/.kube/
+   cp /path/to/your/config ~/.kube/my-cluster
+   ```
 
-### Plugin Problems
+2. **Invalid kubeconfig format**
+   ```bash
+   # Validate kubeconfig syntax
+   kubectl --kubeconfig ~/.kube/config config view --minify
+   
+   # Check for common issues
+   kubectl --kubeconfig ~/.kube/config config get-contexts
+   ```
 
-```bash
-# Check plugin syntax
-lua -l plugin.lua
+3. **Permission issues**
+   ```bash
+   # Check file permissions
+   ls -la ~/.kube/
+   
+   # Fix permissions if needed
+   chmod 600 ~/.kube/config
+   ```
 
-# View plugin logs
-tail -f ~/.k8s-tui/logs/plugin.log
-```
+4. **Command line kubeconfig not working**
+   ```bash
+   # Test with explicit kubeconfig path
+   k8s-tui --kubeconfig /absolute/path/to/config
+   
+   # Verify file exists and is readable
+   ls -la /absolute/path/to/config
+   ```
 
 ## Advanced Configuration
 
 ### Custom Resource Definitions
 
 k8s-tui automatically discovers CRDs. For custom views, create plugins.
-
-### Network Policies
-
-Ensure your cluster allows connections from k8s-tui to the API server.
 
 ### RBAC Permissions
 
@@ -282,14 +313,3 @@ cp ~/.kube/config ~/.kube/config.backup
 # Backup themes
 cp -r assets/colorschemes ~/k8s-tui-themes-backup
 ```
-
-### Reset Configuration
-
-```bash
-# Reset themes
-cd assets/colorschemes
-git checkout .
-
-# Clear plugin cache
-rm -rf ~/.k8s-tui/cache
-```</content>

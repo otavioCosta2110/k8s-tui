@@ -168,7 +168,7 @@ You should see:
 ## Plugin Development Tips
 
 1. **Error Handling**: Always return `nil` for success, or an error string for failures
-2. **Logging**: Use `print()` for debug output (visible in application logs at `~/.local/state/k8s-tui/logs/`)
+2. **Logging**: Use `k8s_tui.log("message")` for plugin logging (logs go to `~/.local/state/k8s-tui/logs/plugins/<plugin-name>-<date>.log`)
 3. **Configuration**: Use the `Config()` function to provide sensible defaults
 4. **Events**: Register for events sparingly to avoid performance issues
 5. **API**: Use the `k8s_tui` global API for application integration

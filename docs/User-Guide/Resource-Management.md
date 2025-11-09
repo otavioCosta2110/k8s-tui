@@ -23,12 +23,6 @@ Press `Enter` on any resource to see detailed information:
 - **Related Resources**: Links to dependent resources
 - **Events**: Recent events affecting the resource
 
-### Sorting and Filtering
-
-- Use arrow keys to navigate
-- `/` to search by name
-- Results update in real-time
-
 ## Creating Resources
 
 ### Using Creation Forms

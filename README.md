@@ -17,6 +17,8 @@ A powerful terminal-based user interface for managing Kubernetes resources. Brow
 - **YAML Editing**: Edit resources directly in your preferred editor
 - **Search & Filter**: Quickly find resources across namespaces
 
+<!-- SCREENSHOT_PLACEHOLDER: Main dashboard-->
+
 ## Supported Resources
 
 - Pods
@@ -46,6 +48,43 @@ go build -o k8s-tui ./cmd
 
 Download pre-built binaries from the [releases page](https://github.com/otavioCosta2110/k8s-tui/releases).
 
+## Usage
+
+### Command Line Arguments
+
+```bash
+# Basic usage
+./k8s-tui
+
+# Specify kubeconfig file
+./k8s-tui --kubeconfig ~/.kube/cluster-config
+
+# Use multiple kubeconfig files
+./k8s-tui --kubeconfig ~/.kube/cluster1 --kubeconfig ~/.kube/cluster2
+
+# Set default namespace
+./k8s-tui --namespace production
+
+# Use custom plugin directory
+./k8s-tui --plugin-dir ./my-plugins
+
+# Pass plugin-specific arguments
+./k8s-tui --my-plugin-setting=value --another-flag=true
+
+# Help
+./k8s-tui --help
+```
+
+### Available Arguments
+
+| Argument | Description | Example |
+|----------|-------------|---------|
+| `--kubeconfig` | Path to kubeconfig file(s) | `--kubeconfig ~/.kube/config` |
+| `--namespace` | Default namespace to use | `--namespace default` |
+| `--plugin-dir` | Plugin directory path | `--plugin-dir ./plugins` |
+| `--help`, `-h` | Show help message | `--help` |
+| `--<plugin-arg>` | Custom plugin arguments | `--my-setting=value` |
+
 ## Quick Start
 
 1. Ensure you have access to a Kubernetes cluster via `kubectl` or `kubeconfig`
@@ -54,33 +93,58 @@ Download pre-built binaries from the [releases page](https://github.com/otavioCo
 ```bash
 ./k8s-tui
 ```
-
-3. Use Tab to navigate between resource types
+3. Use up and down arrows to navigate between resource types
 4. Use arrow keys to browse resources
+<!-- SCREENSHOT_PLACEHOLDER: Main interface showing pods -->
 5. Press Enter to view details
+<!-- SCREENSHOT_PLACEHOLDER: Resource details view showing pod information -->
+
 6. Press 'n' to create new resources
+
+<!-- SCREENSHOT_PLACEHOLDER: pod creation form -->
+
 7. Press 'd' to delete resources
 
 ## Key Bindings
 
-### Global
-- `Tab` / `Shift+Tab`: Switch between resource tabs
-- `Ctrl+C` / `q`: Quit
-- `?`: Show help
+### Global Shortcuts
+- `left/right`: Switch between resource tabs
+- `Ctrl+C` / `q`: Quit application
+- `?`: Show context-sensitive help
+
+### Multi-Cluster Navigation
+- `Ctrl+Left`: Previous cluster
+- `Ctrl+Right`: Next cluster  
+- `Ctrl+N`: Add new cluster
 
 ### Resource Lists
 - `↑` / `↓` / `j` / `k`: Navigate resources
+- `Page Up` / `Page Down`: Navigate by page
+- `Home` / `End`: Jump to top/bottom
 - `Enter`: View resource details
 - `n`: Create new resource
 - `d`: Delete selected resource
-- `r`: Refresh
-- `/`: Search
+- `e`: Edit resource (from details view)
+- `r`: Refresh resource list
 - `Esc`: Go back
 
-### Forms
+### Resource Details
+- `e`: Edit YAML in external editor
+- `r`: Refresh resource data
+- `Esc/q`: Return to resource list
+
+### Creation Forms
 - `Tab` / `Shift+Tab`: Navigate between fields
-- `Enter`: Next field / Submit
-- `Esc`: Cancel
+- `↑` / `↓`: Alternative field navigation
+- `Enter`: Submit form or move to next field
+- `Esc`: Cancel creation
+
+### Tab-Specific Shortcuts
+- **Pods**: `l` (view logs), `v` (view manifest)
+- **Deployments**: `s` (scale), `v` (view pods)
+- **Services**: `v` (view endpoints)
+
+For a complete reference, see [Key Bindings Guide](docs/User-Guide/Key-Bindings.md).
 
 ## Configuration
 
@@ -101,6 +165,8 @@ Configure themes by editing the configuration file at `~/.config/k8s-tui/config.
   "theme": "catppuccin-mocha"
 }
 ```
+
+<!-- SCREENSHOT_PLACEHOLDER: Theme comparison showing different color schemes -->
 
 Available themes:
 - `catppuccin-mocha`
