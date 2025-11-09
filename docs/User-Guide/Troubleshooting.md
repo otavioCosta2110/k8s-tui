@@ -369,9 +369,3 @@ When reporting issues, include:
 ### Feature Requests
 
 Use GitHub Issues with the "enhancement" label to request new features.</content>
-</xai:function_call">  
-
-Assistant: Now developer documentation. Start with architecture. 
-
-<xai:function_call name="write">
-<parameter name="filePath">docs/developer/architecture.md

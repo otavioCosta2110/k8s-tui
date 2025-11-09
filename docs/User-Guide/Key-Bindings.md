@@ -154,9 +154,3 @@ k8s-tui includes vim-style navigation:
 - Combine `r` with auto-refresh for real-time monitoring
 - Use search (`/`) to quickly find resources in large lists
 - Press `?` frequently to discover new features</content>
-</xai:function_call">  
-
-Assistant: Now configuration. 
-
-<xai:function_call name="write">
-<parameter name="filePath">docs/user-guide/configuration.md

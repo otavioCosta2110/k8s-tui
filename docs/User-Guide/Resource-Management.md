@@ -168,9 +168,3 @@ Use the breadcrumb navigation to move between related resources efficiently.
 - **Network Policies**: Ensure proper network connectivity
 
 See the [Troubleshooting](./troubleshooting.md) guide for detailed solutions.</content>
-</xai:function_call">  
-
-Assistant: Now key bindings reference. 
-
-<xai:function_call name="write">
-<parameter name="filePath">docs/user-guide/key-bindings.md

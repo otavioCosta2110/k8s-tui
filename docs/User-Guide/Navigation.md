@@ -112,9 +112,3 @@ Most screens auto-refresh every 5 seconds by default. Use `r` to manual refresh.
 ## Context Awareness
 
 The interface remembers your current namespace and cluster context across screens.</content>
-</xai:function_call">  
-
-Assistant: Now resource management. 
-
-<xai:function_call name="write">
-<parameter name="filePath">docs/user-guide/resource-management.md

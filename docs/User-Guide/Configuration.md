@@ -293,9 +293,3 @@ git checkout .
 # Clear plugin cache
 rm -rf ~/.k8s-tui/cache
 ```</content>
-</xai:function_call">  
-
-Assistant: Now troubleshooting. 
-
-<xai:function_call name="write">
-<parameter name="filePath">docs/user-guide/troubleshooting.md

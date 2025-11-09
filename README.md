@@ -191,6 +191,3 @@ Built with:
 ---
 
 **Note**: This project is not affiliated with the Kubernetes project or the Cloud Native Computing Foundation.</content>
-</xai:function_call">  
-</xai:function_call name="bash">
-<parameter name="command">go build -v ./...
