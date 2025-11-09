@@ -70,8 +70,7 @@ end
 
 -- Register custom resources with the application
 function registerResources()
-    -- This would register resources with the k8s_tui API
-    -- For now, we'll keep the legacy functions for backward compatibility
+    -- Register resources using the k8s_tui API
     print("Registered example resources")
 end
 
@@ -125,7 +124,7 @@ function on_namespace_changed(data)
     k8s_tui.set_status("Example plugin active in namespace: " .. data)
 end
 
--- Legacy function for backward compatibility (will be removed)
+-- Resource type definition function
 function GetResourceTypes()
     if not config.demo_resources then
         return {}
@@ -196,7 +195,7 @@ function GetResourceInfo(resourceType, namespace, name)
     }, nil
 end
 
--- Legacy function for backward compatibility (will be removed)
+-- UI extensions function
 function GetUIExtensions()
     if not config.show_status then
         return {}

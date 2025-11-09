@@ -42,12 +42,6 @@ cd k8s-tui
 go build -o k8s-tui ./cmd
 ```
 
-### Using Go Install
-
-```bash
-go install github.com/otavioCosta2110/k8s-tui/cmd@latest
-```
-
 ### Binary Releases
 
 Download pre-built binaries from the [releases page](https://github.com/otavioCosta2110/k8s-tui/releases).
@@ -100,29 +94,29 @@ k8s-tui uses the standard Kubernetes configuration:
 
 ### Themes
 
-Switch between themes using the theme switcher in `assets/colorschemes/switch-theme.sh`:
+Configure themes by editing the configuration file at `~/.config/k8s-tui/config.json`:
 
-```bash
-./assets/colorschemes/switch-theme.sh
+```json
+{
+  "theme": "catppuccin-mocha"
+}
 ```
 
 Available themes:
-- Catppuccin Mocha
-- Dracula
-- Gruvbox
-- Nord
-- One Dark
-- Solarized Dark
-- Tokyo Night
+- `catppuccin-mocha`
+- `dracula`
+- `gruvbox`
+- `nord`
+- `one-dark`
+- `solarized-dark`
+- `tokyo-night`
+- `transparent`
+
+The configuration file is automatically created on first run. You can also customize individual colors in the `colors` section of the config file.
 
 ## Plugins
 
 Extend k8s-tui functionality with Lua plugins. See [PLUGINS.md](PLUGINS.md) for details.
-
-Example plugins:
-- Custom resource viewers
-- Enhanced logging
-- Resource health checks
 
 ## Development
 

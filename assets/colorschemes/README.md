@@ -7,7 +7,7 @@ K8s TUI supports comprehensive configuration through JSON files located in your 
 ```
 ~/.config/k8s-tui/
 ├── config.json          # Main application configuration
-└── colorscheme.json     # Legacy colorscheme (auto-generated)
+└── colorscheme.json     # Colorscheme file (auto-generated for compatibility)
 
 ~/.local/share/k8s-tui/
 └── themes/              # Theme files (auto-copied from installation)
@@ -136,15 +136,15 @@ When you first run K8s TUI, it will automatically:
 1. Create the necessary directories (`~/.config/k8s-tui/` and `~/.local/share/k8s-tui/themes/`)
 2. Copy all built-in themes to the themes directory
 3. Create a default `config.json` file
-4. Create a legacy `colorscheme.json` file for backward compatibility
+4. Create a `colorscheme.json` file for compatibility
 
-## Migration from Legacy Configuration
+## Migration from Existing Configuration
 
 If you have an existing `colorscheme.json` file, K8s TUI will automatically migrate it to the new configuration format while preserving your custom colors.
 
-## Legacy Theme Switching
+## Alternative Theme Switching
 
-For backward compatibility, you can still use the theme switching script:
+For compatibility, you can still use the theme switching script:
 
 ```bash
 ./colorschemes/switch-theme.sh dracula

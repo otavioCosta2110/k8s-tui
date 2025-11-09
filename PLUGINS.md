@@ -2,17 +2,28 @@
 
 k8s-tui supports a powerful plugin system inspired by Neovim's architecture, allowing you to extend the application with custom functionality written in Lua.
 
+## Plugin Architecture
+
+The plugin system supports Lua plugins with advanced features including:
+- Setup functions and configuration management
+- Custom commands and CLI arguments
+- Event-driven hooks
+- Resource type extensions
+- UI component injections
+
 ## Plugin Types
 
-### 1. Legacy Plugins
-- Basic Lua plugins with `GetResourceTypes()`, `GetResourceData()`, etc.
-- Located in `./plugins/` directory
-- Example: `cluster-monitor/main.lua`, `example-plugin/main.lua`
+### 1. Resource Plugins
+- Extend k8s-tui with custom Kubernetes resource types
+- Define custom table columns and data sources
+- Handle CRUD operations for custom resources
+- Example: `example-plugin/`
 
-### 2. Neovim-Style Plugins ✨
-- Advanced plugins with setup functions, configuration, commands, and hooks
-- Follow Neovim's plugin architecture patterns
-- Example: `neovim-header/main.lua`
+### 2. UI Plugins
+- Add custom UI components and interactions
+- Register commands and key bindings
+- Respond to application events
+- Example: `pluginmanager-header/`, `session-save-plugin/`
 
 ## Neovim-Style Plugin Structure
 
@@ -116,48 +127,76 @@ Plugins can register for these events:
 - `resource_selected` - Fired when a resource is selected
 - `ui_update` - Fired when UI updates
 
-## Creating a Neovim-Style Plugin
+## Creating a Plugin
 
 1. Create a directory in `./plugins/` (e.g., `my-plugin/`)
 2. Create `main.lua` with the plugin structure above
 3. Implement the required functions (`Name`, `Version`, `Description`, `Initialize`)
 4. Optionally implement advanced features (`Setup`, `Config`, `Commands`, `Hooks`)
 
-## Example Plugin: Neovim Header
+## Example Plugins
 
-The `neovim-header` plugin demonstrates:
-- Configuration system
-- Setup function
-- Event hooks
-- Header integration
-- Status messages
+### Resource Plugin: Example Plugin
+The `example-plugin` demonstrates:
+- Custom resource type definition
+- Data fetching and display
+- Basic CRUD operations
+
+### UI Plugin: PluginManager Header
+The `pluginmanager-header` plugin demonstrates:
+- Configuration system with `Setup()` and `Config()`
+- Event hooks for app lifecycle
+- Header component injection
+- Custom commands registration
+
+### Session Save Plugin
+The `session-save-plugin` demonstrates:
+- Session state management
+- File I/O operations
+- Custom key bindings (Ctrl+S)
 
 ```bash
-# Test the plugin
+# Test plugins
 go run cmd/main.go --plugin-dir ./plugins
 ```
 
 You should see:
-- "Neovim Header Plugin initialized" in logs
-- Custom header content added by the plugin
-- Status messages from plugin hooks
+- Plugin initialization messages in logs
+- Custom UI components added by plugins
+- New commands available in the interface
 
 ## Plugin Development Tips
 
 1. **Error Handling**: Always return `nil` for success, or an error string for failures
-2. **Logging**: Use `print()` for debug output (visible in application logs)
+2. **Logging**: Use `print()` for debug output (visible in application logs at `~/.local/state/k8s-tui/logs/`)
 3. **Configuration**: Use the `Config()` function to provide sensible defaults
 4. **Events**: Register for events sparingly to avoid performance issues
-5. **API**: Check the k8s_tui API documentation for available functions
+5. **API**: Use the `k8s_tui` global API for application integration
+6. **Resource Plugins**: Implement `GetResourceTypes()`, `GetResourceData()`, `DeleteResource()`, and `GetResourceInfo()`
+7. **UI Plugins**: Implement `GetUIExtensions()` for custom components
 
-## Migration from Legacy Plugins
+## Plugin Configuration
 
-To migrate a legacy plugin to Neovim-style:
+Plugins can be configured through:
+1. **Default Config**: Use the `Config()` function in your plugin
+2. **User Config**: Users can override settings in `~/.config/k8s-tui/config.json`
+3. **Setup Function**: The `Setup(opts)` function receives user configuration
 
-1. Add `Setup(opts)` function for configuration
-2. Add `Config()` function for defaults
-3. Add `Commands()` and `Hooks()` functions
-4. Use the `k8s_tui` API instead of direct function calls
-5. Update function signatures to match the new pattern
+## Available Events
 
-Legacy plugins will continue to work alongside Neovim-style plugins.
+Plugins can register for these events:
+- `app_started` - Fired when the application starts
+- `app_shutdown` - Fired when the application shuts down
+- `namespace_changed` - Fired when namespace changes
+- `resource_selected` - Fired when a resource is selected
+- `ui_update` - Fired when UI updates
+
+## Plugin API Reference
+
+The `k8s_tui` global API provides:
+- **Namespace Management**: `get_namespace()`, `set_namespace()`
+- **UI Components**: `add_header()`, `add_footer()`, `set_status()`
+- **Commands**: `register_command()`, `execute_command()`
+- **Kubernetes Resources**: Access to pods, services, deployments, etc.
+- **Resource Operations**: Create, read, update, delete operations
+- **Session Management**: Get/set tabs, breadcrumb trail, etc.

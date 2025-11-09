@@ -107,10 +107,11 @@ This guide helps you resolve common issues when using k8s-tui.
    ```
 
 3. **Check file permissions:**
-   ```bash
-   # Ensure temp directory is writable
-   mkdir -p /tmp/k8s-tui
-   ```
+    ```bash
+    # Ensure temp directory is writable
+    mkdir -p /tmp/k8s-tui
+    chmod 755 /tmp/k8s-tui
+    ```
 
 ## Display Issues
 
@@ -136,10 +137,12 @@ This guide helps you resolve common issues when using k8s-tui.
    ```
 
 3. **Reset theme:**
-   ```bash
-   cd assets/colorschemes
-   cp one-dark.json current-theme.json
-   ```
+    ```bash
+    # Themes are located in ~/.local/share/k8s-tui/themes/
+    # Or use the theme switching script:
+    cd assets/colorschemes
+    ./switch-theme.sh one-dark
+    ```
 
 ### Screen Size Issues
 
@@ -174,29 +177,22 @@ This guide helps you resolve common issues when using k8s-tui.
    kubectl get pods --all-namespaces | wc -l
    ```
 
-2. **Reduce refresh interval:**
-   ```bash
-   # Currently not configurable, but check network latency
-   ping <api-server>
-   ```
+2. **Configure refresh interval:**
+    ```bash
+    # Edit ~/.config/k8s-tui/config.json
+    # Set "refresh_interval_seconds" to a higher value (e.g., 30)
+    # Also check network latency:
+    ping <api-server>
+    ```
 
 3. **Use namespace filtering:**
-   ```bash
-   # Instead of --all-namespaces, specify namespace
-   kubectl config set-context --current --namespace=<namespace>
-   ```
-
-### High Memory Usage
-
-**Symptoms:**
-- Application becomes slow
-- System memory usage increases
-
-**Solutions:**
-
-1. **Close unused tabs**
-2. **Reduce concurrent operations**
-3. **Check for memory leaks in plugins**
+    ```bash
+    # Set default namespace in config:
+    # Edit ~/.config/k8s-tui/config.json
+    # Set "default_namespace" to your preferred namespace
+    # Or use kubectl:
+    kubectl config set-context --current --namespace=<namespace>
+    ```
 
 ## Plugin Issues
 
@@ -208,20 +204,29 @@ This guide helps you resolve common issues when using k8s-tui.
 
 **Solutions:**
 
-1. **Check plugin syntax:**
-   ```bash
-   lua -l plugins/<plugin>.lua
-   ```
+1. **Check plugin configuration:**
+    ```bash
+    # Verify plugin directory in config:
+    cat ~/.config/k8s-tui/config.json | grep -i plugin
+    # Ensure the plugins path points to the correct location
+    ```
 
 2. **Verify plugin directory:**
    ```bash
-   ls -la plugins/
+   ls -la <plugin_dir>/
    ```
 
-3. **Check plugin logs:**
-   ```bash
-   tail -f ~/.k8s-tui/logs/plugin.log
-   ```
+3. **Check plugin syntax:**
+    ```bash
+    lua -c <plugin_dir>/<plugin>/main.lua
+    # Or check all plugins:
+    find <plugin_dir>/ -name "*.lua" -exec lua -c {} \;
+    ```
+
+4. **Check plugin logs:**
+    ```bash
+    tail -f ~/.local/state/k8s-tui/logs/plugins/<plugin-name>-$(date +%Y-%m-%d).log
+    ```
 
 ### Plugin Errors
 
@@ -310,14 +315,15 @@ This guide helps you resolve common issues when using k8s-tui.
 ### Enable Debug Logging
 
 ```bash
-export K8S_TUI_LOG_LEVEL=debug
+# Debug logging is enabled by default. Logs are written to:
+# ~/.local/state/k8s-tui/logs/k8s-tui-$(date +%Y-%m-%d).log
 ./k8s-tui
 ```
 
 ### View Application Logs
 
 ```bash
-tail -f ~/.k8s-tui/logs/app.log
+tail -f ~/.local/state/k8s-tui/logs/k8s-tui-$(date +%Y-%m-%d).log
 ```
 
 ### Kubernetes Logs
@@ -342,9 +348,12 @@ kubectl logs -n kube-system kube-apiserver-<node>
 When reporting issues, include:
 
 1. **k8s-tui version:**
-   ```bash
-   ./k8s-tui --version
-   ```
+    ```bash
+    go build -o k8s-tui ./cmd
+    ./k8s-tui --version
+    # Or check git commit:
+    git rev-parse HEAD
+    ```
 
 2. **Go version:**
    ```bash
