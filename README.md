@@ -165,17 +165,47 @@ Configure themes by editing the configuration file at `~/.config/k8s-tui/config.
 }
 ```
 
-Available themes:
-- `catppuccin-mocha`
-- `dracula`
-- `gruvbox`
-- `nord`
-- `one-dark`
-- `solarized-dark`
-- `tokyo-night`
-- `transparent`
+## Theme Showcase
 
-The configuration file is automatically created on first run. You can also customize individual colors in the `colors` section of the config file.
+<details>
+<summary><strong>catppuccin-mocha</strong></summary>
+![Catppuccin Mocha Theme Preview](./assets/screenshots/catppuccin-mocha.png)
+</details>
+
+<details>
+<summary><strong>dracula</strong></summary>
+![Dracula Theme Preview](./assets/screenshots/dracula.png)
+</details>
+
+<details>
+<summary><strong>gruvbox</strong></summary>
+![Gruvbox Theme Preview](./assets/screenshots/gruvbox.png)
+</details>
+
+<details>
+<summary><strong>nord</strong></summary>
+![Nord Theme Preview](./assets/screenshots/nord.png)
+</details>
+
+<details>
+<summary><strong>one-dark</strong></summary>
+![One Dark Theme Preview](./assets/screenshots/one-dark.png)
+</details>
+
+<details>
+<summary><strong>solarized-dark</strong></summary>
+![Solarized Dark Theme Preview](./assets/screenshots/solarized-dark.png)
+</details>
+
+<details>
+<summary><strong>tokyo-night</strong></summary>
+![Tokyo Night Theme Preview](./assets/screenshots/tokyo-night.png)
+</details>
+
+<details>
+<summary><strong>transparent</strong></summary>
+![Transparent Theme Preview](./assets/screenshots/transparent.png)
+</details>
 
 ## Plugins
 
