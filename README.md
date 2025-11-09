@@ -17,7 +17,7 @@ A powerful terminal-based user interface for managing Kubernetes resources. Brow
 - **YAML Editing**: Edit resources directly in your preferred editor
 - **Search & Filter**: Quickly find resources across namespaces
 
-<!-- SCREENSHOT_PLACEHOLDER: Main dashboard-->
+![main dashboard](./assets/screenshots/main_dashboard.png)
 
 ## Supported Resources
 
@@ -95,13 +95,12 @@ Download pre-built binaries from the [releases page](https://github.com/otavioCo
 ```
 3. Use up and down arrows to navigate between resource types
 4. Use arrow keys to browse resources
-<!-- SCREENSHOT_PLACEHOLDER: Main interface showing pods -->
+![main dashboard](./assets/screenshots/pod_list.png)
 5. Press Enter to view details
-<!-- SCREENSHOT_PLACEHOLDER: Resource details view showing pod information -->
+![main dashboard](./assets/screenshots/pod_detail.png)
 
 6. Press 'n' to create new resources
-
-<!-- SCREENSHOT_PLACEHOLDER: pod creation form -->
+![main dashboard](./assets/screenshots/pod_new.png)
 
 7. Press 'd' to delete resources
 
@@ -165,8 +164,6 @@ Configure themes by editing the configuration file at `~/.config/k8s-tui/config.
   "theme": "catppuccin-mocha"
 }
 ```
-
-<!-- SCREENSHOT_PLACEHOLDER: Theme comparison showing different color schemes -->
 
 Available themes:
 - `catppuccin-mocha`
