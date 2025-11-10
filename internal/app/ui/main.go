@@ -273,9 +273,14 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 		}
 
 		clusters = append(clusters, appModel)
-		// Add cluster tab
-		title := fmt.Sprintf("Cluster %d", i+1)
-		clusterTabComponent.AddTab(fmt.Sprintf("%d", len(clusters)-1), title, "cluster")
+		// Add cluster tab with server address
+		clusterName := "Unknown"
+		if appModel.kube.Clientset != nil {
+			clusterName = appModel.kube.GetClusterName()
+		} else {
+			clusterName = fmt.Sprintf("Cluster %d", i+1)
+		}
+		clusterTabComponent.AddTab(fmt.Sprintf("%d", len(clusters)-1), clusterName, "cluster")
 	}
 
 	// Set active tab
