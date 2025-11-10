@@ -127,7 +127,6 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 	tableModel := ui.NewTable(d.config.Columns, d.config.ColumnWidths, []table.Row{}, d.config.Title, onSelect, 1, fetchFunc, nil)
 
 	actions := map[string]func() tea.Cmd{
-		"d": d.createDeleteAction(tableModel),
 		"v": d.createViewDetailsAction(tableModel),
 		"n": d.createNewDeploymentAction(),
 	}

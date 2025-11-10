@@ -33,6 +33,7 @@ type GenericResourceModel struct {
 	err             error
 	refreshInterval time.Duration
 	config          ResourceConfig
+	searchQuery     string
 }
 
 func NewGenericResourceModel(k k8s.Client, namespace string, config ResourceConfig) *GenericResourceModel {
@@ -135,6 +136,13 @@ func (g *GenericResourceModel) GetNamespace() string {
 	return g.namespace
 }
 
+func (g *GenericResourceModel) GetTable() *ui.TableModel {
+	// The table is managed by the component, not directly exposed
+	// We need to access it through the component system
+	// For now, return nil and handle this differently
+	return nil
+}
+
 func (g *GenericResourceModel) Help() (string, string) {
 	resourceTypeToDisplay := map[k8s.ResourceType]string{
 		k8s.ResourceTypePod:                   "Pods",
@@ -191,8 +199,19 @@ func (g *GenericResourceModel) dataToRows() []table.Row {
 		k8s.ResourceTypeServiceAccount:        "ServiceAccounts",
 	}
 
-	rows := make([]table.Row, len(g.resourceData))
-	for i, rd := range g.resourceData {
+	// Filter data based on search query
+	filteredData := g.resourceData
+	if g.searchQuery != "" {
+		filteredData = make([]types.ResourceData, 0)
+		for _, rd := range g.resourceData {
+			if g.matchesSearch(rd) {
+				filteredData = append(filteredData, rd)
+			}
+		}
+	}
+
+	rows := make([]table.Row, len(filteredData))
+	for i, rd := range filteredData {
 		row := rd.GetColumns()
 		if displayName, exists := resourceTypeToDisplay[g.config.ResourceType]; exists {
 			if icon, iconExists := customstyles.ResourceIcons[displayName]; iconExists {
@@ -213,6 +232,54 @@ func (g *GenericResourceModel) dataToRows() []table.Row {
 		rows[i] = row
 	}
 	return rows
+}
+
+func (g *GenericResourceModel) matchesSearch(rd types.ResourceData) bool {
+	if g.searchQuery == "" {
+		return true
+	}
+
+	query := strings.ToLower(g.searchQuery)
+
+	// Search in name
+	if strings.Contains(strings.ToLower(rd.GetName()), query) {
+		return true
+	}
+
+	// Search in namespace
+	if strings.Contains(strings.ToLower(rd.GetNamespace()), query) {
+		return true
+	}
+
+	// Search in all column data
+	columns := rd.GetColumns()
+	for _, col := range columns {
+		if strings.Contains(strings.ToLower(col), query) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (g *GenericResourceModel) SetSearchQuery(query string) {
+	g.searchQuery = query
+}
+
+func (g *GenericResourceModel) Init() tea.Cmd {
+	return nil
+}
+
+func (g *GenericResourceModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	return g, nil
+}
+
+func (g *GenericResourceModel) View() string {
+	return "GenericResourceModel View"
+}
+
+func (g *GenericResourceModel) Refresh() (tea.Model, tea.Cmd) {
+	return g, nil
 }
 
 func (g *GenericResourceModel) isResourceHealthy(rd types.ResourceData) bool {

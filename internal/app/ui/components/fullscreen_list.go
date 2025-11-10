@@ -51,7 +51,7 @@ func (m *FullscreenListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *FullscreenListModel) View() string {
 	// Calculate available space for content
 	availableWidth := styles.ScreenWidth - 4 // Account for borders
-	
+
 	borderStyle := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color(customstyles.BorderColor)).
@@ -80,9 +80,9 @@ func (m *FullscreenListModel) View() string {
 	content := m.list.View()
 	helpText := "↑/↓ or j/k: Navigate • Enter: Select • esc: Close"
 
-	fullContent := titleStyle.Render(m.title) + "\n" + 
-		separator + "\n" + 
-		content + "\n" + 
+	fullContent := titleStyle.Render(m.title) + "\n" +
+		separator + "\n" +
+		content + "\n" +
 		separator + "\n" +
 		footerStyle.Render(helpText)
 

@@ -13,6 +13,7 @@ import (
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 	"strconv"
+	"strings"
 )
 
 type InputDialogRequest struct {
@@ -39,6 +40,38 @@ type AppModel struct {
 	breadcrumbTrail     []string
 	pluginManager       *plugins.PluginManager
 	uiInjector          *UIInjector
+}
+
+// isInSearchMode checks if the current active component is in search mode
+func (m *AppModel) isInSearchMode() bool {
+	if m.tabManager == nil {
+		return false
+	}
+
+	// Get active tab
+	activeTab := m.tabManager.GetActiveTab()
+	if activeTab == nil {
+		return false
+	}
+
+	// Check if active model is a table component in search mode
+	if tableModel, ok := activeTab.Model.(*components.TableModel); ok {
+		// We need to access the unexported searchMode field
+		// Since we can't access it directly, we'll use a different approach
+		// We'll check if the view contains search indicators
+		view := tableModel.View()
+		return strings.Contains(view, "Search:") && strings.Contains(view, "█")
+	}
+
+	// Check if it's a resource model that contains a table
+	if resourceModel, ok := activeTab.Model.(interface{ GetTable() *components.TableModel }); ok {
+		if table := resourceModel.GetTable(); table != nil {
+			view := table.View()
+			return strings.Contains(view, "Search:") && strings.Contains(view, "█")
+		}
+	}
+
+	return false
 }
 
 type MultiClusterModel struct {

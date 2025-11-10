@@ -79,6 +79,13 @@ func (m *AutoRefreshModel) SetFooterText(text string) {
 	m.footerText = text
 }
 
+func (m *AutoRefreshModel) GetTable() *ui.TableModel {
+	if tableModel, ok := m.inner.(*ui.TableModel); ok {
+		return tableModel
+	}
+	return nil
+}
+
 func (m *AutoRefreshModel) Refresh() (tea.Model, tea.Cmd) {
 	if m.inner == nil {
 		return m, nil

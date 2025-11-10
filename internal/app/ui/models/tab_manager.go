@@ -178,13 +178,51 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tm.getKeyBinding("forward"):
 			return tm.navigateForward()
 		case tm.getKeyBinding("quit"):
+			// Check if current tab is in search mode before handling quit
+			if tm.activeIndex >= 0 && tm.activeIndex < len(tm.tabs) {
+				activeTab := &tm.tabs[tm.activeIndex]
+				if tableModel, ok := activeTab.Model.(*components.TableModel); ok {
+					view := tableModel.View()
+					if strings.Contains(view, "Search:") && strings.Contains(view, "█") {
+						// In search mode, let the table handle the key
+						var cmd tea.Cmd
+						activeTab.Model, cmd = activeTab.Model.Update(msg)
+						return tm, cmd
+					}
+				}
+				// Check if it's a resource model that contains a table
+				if resourceModel, ok := activeTab.Model.(interface{ GetTable() *components.TableModel }); ok {
+					if table := resourceModel.GetTable(); table != nil {
+						view := table.View()
+						if strings.Contains(view, "Search:") && strings.Contains(view, "█") {
+							// In search mode, let's resource model handle the key
+							var cmd tea.Cmd
+							activeTab.Model, cmd = activeTab.Model.Update(msg)
+							return tm, cmd
+						}
+					}
+				}
+				// Check if it's an AutoRefreshModel that contains a table
+				if autoRefreshModel, ok := activeTab.Model.(interface{ GetTable() *components.TableModel }); ok {
+					if table := autoRefreshModel.GetTable(); table != nil {
+						view := table.View()
+						if strings.Contains(view, "Search:") && strings.Contains(view, "█") {
+							// In search mode, let's auto refresh model handle the key
+							var cmd tea.Cmd
+							activeTab.Model, cmd = activeTab.Model.Update(msg)
+							return tm, cmd
+						}
+					}
+				}
+			}
 			return tm.navigateBack()
-		}
 
-		if tm.activeIndex >= 0 && tm.activeIndex < len(tm.tabs) {
-			var cmd tea.Cmd
-			tm.tabs[tm.activeIndex].Model, cmd = tm.tabs[tm.activeIndex].Model.Update(msg)
-			return tm, cmd
+		default:
+			if tm.activeIndex >= 0 && tm.activeIndex < len(tm.tabs) {
+				var cmd tea.Cmd
+				tm.tabs[tm.activeIndex].Model, cmd = tm.tabs[tm.activeIndex].Model.Update(msg)
+				return tm, cmd
+			}
 		}
 	}
 

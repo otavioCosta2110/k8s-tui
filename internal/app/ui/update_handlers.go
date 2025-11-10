@@ -93,6 +93,18 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	// Check if any component is in search mode - if so, let them handle the key
+	if m.isInSearchMode() {
+		if m.tabManager != nil {
+			updatedManager, cmd := m.tabManager.Update(msg)
+			if manager, ok := updatedManager.(*models.TabManager); ok {
+				m.tabManager = manager
+				m.updateHeaderTabs()
+			}
+			return m, cmd
+		}
+	}
+
 	switch msg.String() {
 	case "esc":
 		if m.errorPopup != nil {

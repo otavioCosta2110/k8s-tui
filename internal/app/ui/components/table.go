@@ -26,18 +26,22 @@ type fetchResultMsg struct {
 }
 
 type TableModel struct {
-	Table           table.Model
-	OnSelected      func(selected string) tea.Msg
-	selectColumn    int
-	loading         bool
-	initialized     bool
-	colPercent      []float64
-	checkedRows     map[int]bool
-	refreshInterval time.Duration
-	lastRefresh     time.Time
-	refreshFunc     func() ([]table.Row, error)
-	updateActions   map[string]func() tea.Cmd
-	spinner         SpinnerModel
+	Table            table.Model
+	OnSelected       func(selected string) tea.Msg
+	selectColumn     int
+	loading          bool
+	initialized      bool
+	colPercent       []float64
+	checkedRows      map[int]bool
+	refreshInterval  time.Duration
+	lastRefresh      time.Time
+	refreshFunc      func() ([]table.Row, error)
+	updateActions    map[string]func() tea.Cmd
+	spinner          SpinnerModel
+	searchMode       bool
+	searchQuery      string
+	allDataRows      []table.Row
+	filteredDataRows []table.Row
 }
 
 func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, title string, onSelect func(selected string) tea.Msg, selectColumn int, refreshFunc func() ([]table.Row, error), updateActions map[string]func() tea.Cmd) *TableModel {
@@ -76,18 +80,22 @@ func NewTable(columns []table.Column, colPercent []float64, rows []table.Row, ti
 	t.SetStyles(styles)
 
 	return &TableModel{
-		Table:           t,
-		OnSelected:      onSelect,
-		selectColumn:    selectColumn + 1,
-		colPercent:      newColPercent,
-		loading:         len(rows) == 0,
-		initialized:     false,
-		checkedRows:     make(map[int]bool),
-		refreshInterval: 5 * time.Second,
-		refreshFunc:     refreshFunc,
-		lastRefresh:     time.Now(),
-		updateActions:   updateActions,
-		spinner:         NewSpinner("Loading resources..."),
+		Table:            t,
+		OnSelected:       onSelect,
+		selectColumn:     selectColumn + 1,
+		colPercent:       newColPercent,
+		loading:          len(rows) == 0,
+		initialized:      false,
+		checkedRows:      make(map[int]bool),
+		refreshInterval:  5 * time.Second,
+		refreshFunc:      refreshFunc,
+		lastRefresh:      time.Now(),
+		updateActions:    updateActions,
+		spinner:          NewSpinner("Loading resources..."),
+		searchMode:       false,
+		searchQuery:      "",
+		allDataRows:      rows,
+		filteredDataRows: rows,
 	}
 }
 
@@ -115,37 +123,71 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeySpace:
-			if !m.loading {
-				selectedIdx := m.Table.Cursor()
-				m.toggleCheckbox(selectedIdx)
+		if m.searchMode {
+			// In search mode, only handle search-specific keys
+			switch msg.Type {
+			case tea.KeyEnter, tea.KeyEscape:
+				m.searchMode = false
+				if msg.Type == tea.KeyEscape {
+					m.searchQuery = ""
+					m.applySearchFilter()
+				}
+				return m, nil
+			case tea.KeyBackspace:
+				if len(m.searchQuery) > 0 {
+					m.searchQuery = m.searchQuery[:len(m.searchQuery)-1]
+					m.applySearchFilter()
+				}
+				return m, nil
+			case tea.KeyRunes:
+				for _, r := range msg.Runes {
+					if r >= 32 && r <= 126 {
+						m.searchQuery += string(r)
+					}
+				}
+				m.applySearchFilter()
+				return m, nil
+			default:
 				return m, nil
 			}
-		case tea.KeyRunes:
-			if action, exists := m.updateActions[string(msg.Runes)]; exists {
-				cmd := action()
-				m.refreshData()
-				return m, cmd
-			}
-			if string(msg.Runes) == "r" {
-				return m, m.refreshData()
-			}
-		case tea.KeyEnter:
-			if !m.loading && m.OnSelected != nil {
-				if len(m.Table.SelectedRow()) > 0 {
-					selected := m.Table.SelectedRow()[m.selectColumn]
-					if strings.Contains(selected, " ") {
-						parts := strings.SplitN(selected, " ", 2)
-						if len(parts) == 2 && len(parts[0]) > 0 {
-							firstPart := parts[0]
-							if len(firstPart) > 1 || (len(firstPart) == 1 && firstPart[0] > 127) {
-								selected = parts[1]
+		} else {
+			switch msg.Type {
+			case tea.KeySpace:
+				if !m.loading {
+					selectedIdx := m.Table.Cursor()
+					m.toggleCheckbox(selectedIdx)
+					return m, nil
+				}
+			case tea.KeyRunes:
+				if action, exists := m.updateActions[string(msg.Runes)]; exists {
+					cmd := action()
+					m.refreshData()
+					return m, cmd
+				}
+				if string(msg.Runes) == "r" {
+					return m, m.refreshData()
+				}
+				if string(msg.Runes) == "/" {
+					m.searchMode = true
+					m.searchQuery = ""
+					return m, nil
+				}
+			case tea.KeyEnter:
+				if !m.loading && m.OnSelected != nil {
+					if len(m.Table.SelectedRow()) > 0 {
+						selected := m.Table.SelectedRow()[m.selectColumn]
+						if strings.Contains(selected, " ") {
+							parts := strings.SplitN(selected, " ", 2)
+							if len(parts) == 2 && len(parts[0]) > 0 {
+								firstPart := parts[0]
+								if len(firstPart) > 1 || (len(firstPart) == 1 && firstPart[0] > 127) {
+									selected = parts[1]
+								}
 							}
 						}
-					}
-					return m, func() tea.Msg {
-						return m.OnSelected(selected)
+						return m, func() tea.Msg {
+							return m.OnSelected(selected)
+						}
 					}
 				}
 			}
@@ -199,7 +241,13 @@ func (m *TableModel) View() string {
 
 	m.updateColumnWidths(styles.ScreenWidth)
 
-	tableHeight := styles.ScreenHeight
+	// Reserve space for search line at bottom if search is active or has query
+	searchHeight := 0
+	if m.searchMode || m.searchQuery != "" {
+		searchHeight = 1
+	}
+
+	tableHeight := styles.ScreenHeight - searchHeight
 	sumWidths := 0
 	for _, col := range m.Table.Columns() {
 		sumWidths += col.Width
@@ -212,14 +260,60 @@ func (m *TableModel) View() string {
 	m.Table.SetWidth(tableWidth)
 
 	if len(m.Table.Rows()) == 0 {
-		return "No data available"
+		// Create a single row with a "No data available" message
+		noDataRow := table.Row{""}
+		for i := 1; i < len(m.Table.Columns()); i++ {
+			if i == 1 { // Put the message in the first data column
+				noDataRow = append(noDataRow, "No data available")
+			} else {
+				noDataRow = append(noDataRow, "")
+			}
+		}
+
+		// Temporarily set the no data row
+		originalRows := m.Table.Rows()
+		m.Table.SetRows([]table.Row{noDataRow})
+		tableView := m.Table.View()
+		m.Table.SetRows(originalRows) // Restore original empty rows
+
+		// Add search line at bottom if search is active or has query
+		if m.searchMode || m.searchQuery != "" {
+			searchLine := m.getSearchLine()
+			return lipgloss.JoinVertical(lipgloss.Left, tableView, searchLine)
+		}
+		return tableView
 	}
 
 	logger.Debug("About to call m.Table.View()")
 	tableView := m.Table.View()
 	logger.Debug("m.Table.View() returned")
 
+	// Add search line at bottom if search is active or has query
+	if m.searchMode || m.searchQuery != "" {
+		searchLine := m.getSearchLine()
+		return lipgloss.JoinVertical(lipgloss.Left, tableView, searchLine)
+	}
+
 	return tableView
+}
+
+func (m *TableModel) getSearchLine() string {
+	cursor := ""
+	if m.searchMode {
+		cursor = "█"
+	}
+
+	searchText := fmt.Sprintf("Search: %s%s", m.searchQuery, cursor)
+	searchStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(customstyles.AccentColor)).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		Width(styles.ScreenWidth).
+		Padding(0, 1)
+
+
+	searchLine := searchStyle.Render(searchText)
+
+	return searchLine
 }
 
 func (m *TableModel) updateColumnWidths(totalWidth int) {
@@ -312,15 +406,9 @@ func NewRow(values ...string) table.Row {
 }
 
 func (m *TableModel) UpdateRows(rows []table.Row) {
-	newRows := make([]table.Row, len(rows))
-	for i, row := range rows {
-		if m.checkedRows[i] {
-			newRows[i] = append(table.Row{"🗹"}, row...)
-		} else {
-			newRows[i] = append(table.Row{"▢"}, row...)
-		}
-	}
-	m.Table.SetRows(newRows)
+	m.allDataRows = rows
+	m.filteredDataRows = rows
+	m.applySearchFilter()
 }
 
 func (m *TableModel) UpdateColumns(columns []table.Column) {
@@ -345,4 +433,61 @@ func (t *TableModel) fetchDataCmd() tea.Cmd {
 		rows, err := t.refreshFunc()
 		return fetchResultMsg{rows: rows, err: err}
 	})
+}
+
+func (m *TableModel) applySearchFilter() {
+	if m.searchQuery == "" {
+		m.filteredDataRows = m.allDataRows
+	} else {
+		query := strings.ToLower(m.searchQuery)
+		var filtered []table.Row
+		for _, row := range m.allDataRows {
+			if m.matchesSearch(row, query) {
+				filtered = append(filtered, row)
+			}
+		}
+		m.filteredDataRows = filtered
+	}
+
+	newRows := make([]table.Row, len(m.filteredDataRows))
+	for i, row := range m.filteredDataRows {
+		// Check if this row was originally checked
+		originalIndex := m.findOriginalRowIndex(row)
+		if originalIndex >= 0 && m.checkedRows[originalIndex] {
+			newRows[i] = append(table.Row{"🗹"}, row...)
+		} else {
+			newRows[i] = append(table.Row{"▢"}, row...)
+		}
+	}
+	m.Table.SetRows(newRows)
+}
+
+func (m *TableModel) findOriginalRowIndex(targetRow table.Row) int {
+	for i, row := range m.allDataRows {
+		if m.rowsEqual(row, targetRow) {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *TableModel) rowsEqual(row1, row2 table.Row) bool {
+	if len(row1) != len(row2) {
+		return false
+	}
+	for i := range row1 {
+		if row1[i] != row2[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func (m *TableModel) matchesSearch(row table.Row, query string) bool {
+	for _, cell := range row {
+		if strings.Contains(strings.ToLower(cell), query) {
+			return true
+		}
+	}
+	return false
 }
