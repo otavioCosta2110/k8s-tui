@@ -74,8 +74,12 @@ func (tm *TabManager) getKeyBinding(action string) string {
 }
 
 func (tm *TabManager) createInitialTab() {
+	if tm.kubeClient == nil {
+		logger.Error("Cannot create initial tab: kubeClient is nil")
+		return
+	}
 	resourceModel := NewResource(*tm.kubeClient, tm.namespace)
-	resourceComponent := resourceModel.InitComponent(*tm.kubeClient)
+	resourceComponent := resourceModel.InitComponent(tm.kubeClient)
 
 	initialTab := TabData{
 		ID:            "initial",
@@ -254,7 +258,7 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 
 			if j == 0 && crumb == "Resource List" {
 				resourceModel = NewResource(*tm.kubeClient, tm.namespace)
-				model = resourceModel.(Resource).InitComponent(*tm.kubeClient)
+				model = resourceModel.(Resource).InitComponent(tm.kubeClient)
 			} else {
 				resourceType := crumb
 
@@ -434,7 +438,7 @@ func (tm *TabManager) CreateNewTab(model tea.Model, breadcrumb string) (tea.Mode
 
 func (tm *TabManager) CreateNewResourceTab() (tea.Model, tea.Cmd) {
 	resourceModel := NewResource(*tm.kubeClient, tm.namespace)
-	resourceComponent := resourceModel.InitComponent(*tm.kubeClient)
+	resourceComponent := resourceModel.InitComponent(tm.kubeClient)
 
 	tm.tabs = append(tm.tabs, TabData{
 		ID:            fmt.Sprintf("tab-%d", len(tm.tabs)+1),

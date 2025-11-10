@@ -24,6 +24,16 @@ func ParseFlags() Config {
 		defaultPluginDir = appConfig.PluginDir
 	}
 
+	// Set default namespace to "default"
+	if cfg.Namespace == "" {
+		cfg.Namespace = "default"
+	}
+
+	// Check for KUBECONFIG environment variable
+	if kubeconfig := os.Getenv("KUBECONFIG"); kubeconfig != "" && len(cfg.KubeconfigPaths) == 0 {
+		cfg.KubeconfigPaths = append(cfg.KubeconfigPaths, kubeconfig)
+	}
+
 	args := os.Args[1:]
 	cfg.PluginArgs = make(map[string]string)
 
@@ -56,6 +66,11 @@ func ParseFlags() Config {
 
 	if cfg.PluginDir == "" {
 		cfg.PluginDir = defaultPluginDir
+	}
+
+	// If no kubeconfig specified, use empty string to let k8s client use default behavior
+	if len(cfg.KubeconfigPaths) == 0 {
+		cfg.KubeconfigPaths = []string{""}
 	}
 
 	return cfg

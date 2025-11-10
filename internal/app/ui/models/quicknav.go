@@ -68,7 +68,7 @@ func (m QuickNavModel) navigateToResource(resourceType string) tea.Cmd {
 	return func() tea.Msg {
 		if resourceType == "ResourceList" {
 			resourceScreen := NewResource(m.kube, m.namespace)
-			resourceComponent := resourceScreen.InitComponent(m.kube)
+			resourceComponent := resourceScreen.InitComponent(&m.kube)
 			return components.NavigateMsg{
 				NewScreen:     resourceComponent,
 				ResourceModel: resourceScreen,

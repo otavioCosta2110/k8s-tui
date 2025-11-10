@@ -25,7 +25,7 @@ func NewResource(k k8s.Client, namespace string) Resource {
 	}
 }
 
-func (r Resource) InitComponent(k k8s.Client) tea.Model {
+func (r Resource) InitComponent(k *k8s.Client) tea.Model {
 	resourceTypes := resourceFactory.GetValidResourceTypes()
 
 	var listItems []components.ListItem
@@ -78,7 +78,7 @@ func (r Resource) InitComponent(k k8s.Client) tea.Model {
 
 		r.resourceType = resourceType
 		resourceList := NewResourceList(r.kube, r.namespace, resourceType)
-		newResourceList, err := resourceList.InitComponent(k)
+		newResourceList, err := resourceList.InitComponent(*k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error: err,

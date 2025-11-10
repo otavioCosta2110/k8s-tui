@@ -243,29 +243,12 @@ func (m *AppModel) updateHeaderTabs() {
 }
 
 func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
-	// Initialize colorscheme and app config first
-	appConfig := initializeAppConfigAndColors()
-
-	// Check if no kubeconfig or namespace arguments provided
-	if len(cfg.KubeconfigPaths) == 0 && cfg.Namespace == "" {
-		// Start with kubeconfig selector
-		kubeconfigSelector := models.NewKubeconfigSelectorModel()
-		return &MultiClusterModel{
-			clusters:            []*AppModel{},
-			currentCluster:      0,
-			clusterTabComponent: components.NewTabComponent(),
-			pluginDir:           cfg.PluginDir,
-			kubeconfigSelector:  kubeconfigSelector,
-			config:              appConfig,
-		}
-	}
-
 	// If no kubeconfigs provided, use default
 	if len(cfg.KubeconfigPaths) == 0 {
 		cfg.KubeconfigPaths = []string{""}
 	}
 
-	clusters := make([]*AppModel, len(cfg.KubeconfigPaths))
+	clusters := make([]*AppModel, 0, len(cfg.KubeconfigPaths))
 	clusterTabComponent := components.NewTabComponent()
 	for i, kubeconfig := range cfg.KubeconfigPaths {
 		// Create a copy of cfg with single kubeconfig
@@ -279,10 +262,20 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 		}
 		// Set as global for this cluster's models
 		plugins.SetGlobalPluginManager(pluginManager)
-		clusters[i] = NewAppModel(singleCfg, pluginManager)
+
+		appModel := NewAppModel(singleCfg, pluginManager)
+
+		// Check if the app model has an error popup (indicating initialization failure)
+		if appModel.errorPopup != nil {
+			// Skip this cluster but continue with others
+			logger.Warn(fmt.Sprintf("Failed to initialize cluster %d: %v", i+1, kubeconfig))
+			continue
+		}
+
+		clusters = append(clusters, appModel)
 		// Add cluster tab
 		title := fmt.Sprintf("Cluster %d", i+1)
-		clusterTabComponent.AddTab(fmt.Sprintf("%d", i), title, "cluster")
+		clusterTabComponent.AddTab(fmt.Sprintf("%d", len(clusters)-1), title, "cluster")
 	}
 
 	// Set active tab

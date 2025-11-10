@@ -59,12 +59,20 @@ func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
 	var err error
 
 	if kubeconfigPath == "" {
-		return nil, nil
-	}
-
-	config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
-	if err != nil {
-		return nil, err
+		// Use in-cluster config or default kubeconfig locations
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			// Fallback to default kubeconfig file
+			config, err = clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	config.QPS = 50

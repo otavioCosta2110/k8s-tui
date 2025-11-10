@@ -31,7 +31,7 @@ func (m MainModel) InitComponent(k k8s.Client) (tea.Model, error) {
 		return namespacesComponent, nil
 	}
 	resourceModel := NewResource(m.kube, m.namespace)
-	return resourceModel.InitComponent(k), nil
+	return resourceModel.InitComponent(&k), nil
 }
 
 func (m MainModel) Init() tea.Cmd {

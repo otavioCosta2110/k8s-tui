@@ -123,6 +123,10 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 	case "Q":
+		if m.errorPopup != nil {
+			m.errorPopup = nil
+			return m, nil
+		}
 		return m, tea.Quit
 	case m.getKeyBinding("quick_nav"):
 		if m.quickNav != nil {

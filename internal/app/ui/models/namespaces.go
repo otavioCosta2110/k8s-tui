@@ -50,7 +50,7 @@ func (n *namespacesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		}
 
 		return components.NavigateMsg{
-			NewScreen: NewResource(*k, namespace).InitComponent(*k),
+			NewScreen: NewResource(*k, namespace).InitComponent(k),
 		}
 	}
 
