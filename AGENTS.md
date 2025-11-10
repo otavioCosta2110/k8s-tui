@@ -26,3 +26,13 @@
   - `Troubleshooting.md` - Common issues and solutions
 - **Home Page**: `/wiki/Home.md` - Main documentation entry point
 - **Documentation Updates**: When adding features, update relevant wiki pages. Always check if documentation changes are needed when modifying key bindings, configuration options, or user-facing features.
+
+## Cluster Tab Creation Flow (Ctrl+N)
+When user presses `Ctrl+N`:
+1. **Key Binding**: `internal/app/ui/main.go:332` - detects "ctrl+n" key press
+2. **Kubeconfig Selector**: Creates `KubeconfigSelectorModel` (`internal/app/ui/models/kubeconfig_selector.go:23`) to show file selection
+3. **File Selection**: User selects kubeconfig file, triggers `KubeconfigSelectedMsg`
+4. **Namespace Selector**: Creates `NamespaceSelectorModel` for namespace selection (`internal/app/ui/main.go:357`)
+5. **Cluster Creation**: After namespace selection, creates new `AppModel` and adds to clusters slice (`internal/app/ui/main.go:374-375`)
+6. **Tab Addition**: Adds new tab to `clusterTabComponent` with title "Cluster X" (`internal/app/ui/main.go:378`)
+7. **Switch**: Sets new cluster as active (`internal/app/ui/main.go:379-380`)

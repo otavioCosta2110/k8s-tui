@@ -84,6 +84,7 @@ type MultiClusterModel struct {
 	width               int
 	height              int
 	pluginDir           string
+	config              config.AppConfig
 }
 
 func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel {
@@ -242,6 +243,23 @@ func (m *AppModel) updateHeaderTabs() {
 }
 
 func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
+	// Initialize colorscheme and app config first
+	appConfig := initializeAppConfigAndColors()
+
+	// Check if no kubeconfig or namespace arguments provided
+	if len(cfg.KubeconfigPaths) == 0 && cfg.Namespace == "" {
+		// Start with kubeconfig selector
+		kubeconfigSelector := models.NewKubeconfigSelectorModel()
+		return &MultiClusterModel{
+			clusters:            []*AppModel{},
+			currentCluster:      0,
+			clusterTabComponent: components.NewTabComponent(),
+			pluginDir:           cfg.PluginDir,
+			kubeconfigSelector:  kubeconfigSelector,
+			config:              appConfig,
+		}
+	}
+
 	// If no kubeconfigs provided, use default
 	if len(cfg.KubeconfigPaths) == 0 {
 		cfg.KubeconfigPaths = []string{""}
@@ -277,10 +295,14 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 		currentCluster:      0,
 		clusterTabComponent: clusterTabComponent,
 		pluginDir:           cfg.PluginDir,
+		config:              initializeAppConfigAndColors(),
 	}
 }
 
 func (m *MultiClusterModel) Init() tea.Cmd {
+	if m.kubeconfigSelector != nil {
+		return m.kubeconfigSelector.Init()
+	}
 	if len(m.clusters) > 0 && m.clusters[m.currentCluster] != nil {
 		plugins.SetGlobalPluginManager(m.clusters[m.currentCluster].pluginManager)
 		return m.clusters[m.currentCluster].Init()
@@ -289,6 +311,133 @@ func (m *MultiClusterModel) Init() tea.Cmd {
 }
 
 func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Handle kubeconfig selector when no clusters exist
+	if m.kubeconfigSelector != nil {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			if msg.String() == "esc" {
+				return nil, tea.Quit
+			}
+		case models.KubeconfigSelectedMsg:
+			// Store pending kubeconfig and open namespace selector
+			m.pendingKubeconfig = msg.Path
+			m.kubeconfigSelector = nil
+			m.namespaceSelector = models.NewNamespaceSelectorModel(msg.Path)
+			return m, m.namespaceSelector.Init()
+		case models.NamespaceSelectedMsg:
+			// Create first cluster with selected namespace
+			singleCfg := cli.Config{
+				KubeconfigPaths: []string{m.pendingKubeconfig},
+				Namespace:       msg.Namespace,
+				PluginDir:       m.pluginDir,
+			}
+			// Create separate plugin manager for the new cluster
+			pluginManager := plugins.NewPluginManager(singleCfg.PluginDir)
+			if err := pluginManager.LoadPlugins(); err != nil {
+				// Log error, but continue
+				logger.Warn(fmt.Sprintf("Failed to load plugins for new cluster: %v", err))
+			}
+			// Set as global for this cluster's models
+			plugins.SetGlobalPluginManager(pluginManager)
+			newCluster := NewAppModel(singleCfg, pluginManager)
+			m.clusters = append(m.clusters, newCluster)
+			newIndex := len(m.clusters) - 1
+
+			// Get cluster name from client
+			clusterName := "Unknown"
+			if newCluster.kube.Clientset != nil {
+				clusterName = newCluster.kube.GetClusterName()
+			}
+
+			m.clusterTabComponent.AddTab(fmt.Sprintf("%d", newIndex), clusterName, "cluster")
+			m.currentCluster = newIndex
+			m.clusterTabComponent.SetActiveTab(newIndex)
+			m.pendingKubeconfig = ""
+			m.namespaceSelector = nil
+
+			// Initialize the new cluster and update with window size if available
+			initCmd := newCluster.Init()
+			if m.width > 0 {
+				updated, cmd := newCluster.Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+				if appModel, ok := updated.(*AppModel); ok {
+					m.clusters[newIndex] = appModel
+				}
+				return m, tea.Batch(initCmd, cmd)
+			}
+
+			return m, initCmd
+		}
+
+		// Forward other messages to kubeconfig selector
+		updated, cmd := m.kubeconfigSelector.Update(msg)
+		if selector, ok := updated.(*models.KubeconfigSelectorModel); ok {
+			m.kubeconfigSelector = selector
+		}
+		return m, cmd
+	}
+
+	// Handle namespace selector when it exists
+	if m.namespaceSelector != nil {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			if msg.String() == "esc" {
+				// Go back to kubeconfig selector
+				m.namespaceSelector = nil
+				m.kubeconfigSelector = models.NewKubeconfigSelectorModel()
+				return m, m.kubeconfigSelector.Init()
+			}
+		case models.NamespaceSelectedMsg:
+			// Create first cluster with selected namespace
+			singleCfg := cli.Config{
+				KubeconfigPaths: []string{m.pendingKubeconfig},
+				Namespace:       msg.Namespace,
+				PluginDir:       m.pluginDir,
+			}
+			// Create separate plugin manager for the new cluster
+			pluginManager := plugins.NewPluginManager(singleCfg.PluginDir)
+			if err := pluginManager.LoadPlugins(); err != nil {
+				// Log error, but continue
+				logger.Warn(fmt.Sprintf("Failed to load plugins for new cluster: %v", err))
+			}
+			// Set as global for this cluster's models
+			plugins.SetGlobalPluginManager(pluginManager)
+			newCluster := NewAppModel(singleCfg, pluginManager)
+			m.clusters = append(m.clusters, newCluster)
+			newIndex := len(m.clusters) - 1
+
+			// Get cluster name from client
+			clusterName := "Unknown"
+			if newCluster.kube.Clientset != nil {
+				clusterName = newCluster.kube.GetClusterName()
+			}
+
+			m.clusterTabComponent.AddTab(fmt.Sprintf("%d", newIndex), clusterName, "cluster")
+			m.currentCluster = newIndex
+			m.clusterTabComponent.SetActiveTab(newIndex)
+			m.pendingKubeconfig = ""
+			m.namespaceSelector = nil
+
+			// Initialize the new cluster and update with window size if available
+			initCmd := newCluster.Init()
+			if m.width > 0 {
+				updated, cmd := newCluster.Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+				if appModel, ok := updated.(*AppModel); ok {
+					m.clusters[newIndex] = appModel
+				}
+				return m, tea.Batch(initCmd, cmd)
+			}
+
+			return m, initCmd
+		}
+
+		// Forward other messages to namespace selector
+		updated, cmd := m.namespaceSelector.Update(msg)
+		if selector, ok := updated.(*models.NamespaceSelectorModel); ok {
+			m.namespaceSelector = selector
+		}
+		return m, cmd
+	}
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		// Set width for cluster tab component
@@ -297,6 +446,22 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.width = msg.Width
 		m.height = msg.Height
+
+		// Forward WindowSizeMsg to selectors if they exist
+		if m.kubeconfigSelector != nil {
+			updated, cmd := m.kubeconfigSelector.Update(msg)
+			if selector, ok := updated.(*models.KubeconfigSelectorModel); ok {
+				m.kubeconfigSelector = selector
+			}
+			return m, cmd
+		}
+		if m.namespaceSelector != nil {
+			updated, cmd := m.namespaceSelector.Update(msg)
+			if selector, ok := updated.(*models.NamespaceSelectorModel); ok {
+				m.namespaceSelector = selector
+			}
+			return m, cmd
+		}
 	case tea.KeyMsg:
 		// Handle cluster switching with Ctrl+Left/Ctrl+Right
 		if msg.String() == "ctrl+left" {
@@ -374,20 +539,34 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		newCluster := NewAppModel(singleCfg, pluginManager)
 		m.clusters = append(m.clusters, newCluster)
 		newIndex := len(m.clusters) - 1
-		title := fmt.Sprintf("Cluster %d", newIndex+1)
-		m.clusterTabComponent.AddTab(fmt.Sprintf("%d", newIndex), title, "cluster")
+
+		// Get cluster name from client
+		clusterName := "Unknown"
+		if newCluster.kube.Clientset != nil {
+			clusterName = newCluster.kube.GetClusterName()
+		}
+
+		m.clusterTabComponent.AddTab(fmt.Sprintf("%d", newIndex), clusterName, "cluster")
 		m.currentCluster = newIndex
 		m.clusterTabComponent.SetActiveTab(newIndex)
 		plugins.SetGlobalPluginManager(m.clusters[newIndex].pluginManager)
+
+		// Initialize the new cluster properly
+		initCmd := m.clusters[newIndex].Init()
+
+		// Update with window size if available
 		if m.width > 0 {
-			updated, _ := m.clusters[newIndex].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+			updated, cmd := m.clusters[newIndex].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
 			if appModel, ok := updated.(*AppModel); ok {
 				m.clusters[newIndex] = appModel
 			}
+			// Return both init and window update commands
+			return m, tea.Batch(initCmd, cmd)
 		}
+
 		m.namespaceSelector = nil
 		m.pendingKubeconfig = ""
-		return m, nil
+		return m, initCmd
 	}
 
 	// If selector is open, delegate to it

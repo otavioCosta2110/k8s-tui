@@ -3,6 +3,8 @@ package k8s
 import (
 	"testing"
 	"time"
+
+	"k8s.io/client-go/rest"
 )
 
 func TestResourceTypeConstants(t *testing.T) {
@@ -79,5 +81,58 @@ func TestClientStruct(t *testing.T) {
 
 	if client.Namespace != "test-namespace" {
 		t.Error("Client namespace not set correctly")
+	}
+}
+
+func TestGetClusterName(t *testing.T) {
+	tests := []struct {
+		name     string
+		host     string
+		expected string
+	}{
+		{
+			name:     "HTTPS with port",
+			host:     "https://kubernetes.default.svc.cluster.local:443",
+			expected: "kubernetes.defaul...",
+		},
+		{
+			name:     "HTTP with port",
+			host:     "http://api.example.com:8080",
+			expected: "api.example.com",
+		},
+		{
+			name:     "HTTPS without port",
+			host:     "https://my-cluster.k8s.local",
+			expected: "my-cluster.k8s.local",
+		},
+		{
+			name:     "Long hostname gets truncated",
+			host:     "https://very-long-cluster-name-that-exceeds-twenty-chars.example.com",
+			expected: "very-long-cluster...",
+		},
+		{
+			name:     "Short hostname",
+			host:     "https://short.local",
+			expected: "short.local",
+		},
+		{
+			name:     "Nil config",
+			host:     "",
+			expected: "Unknown",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &Client{}
+			if tt.host != "" {
+				client.Config = &rest.Config{Host: tt.host}
+			}
+
+			result := client.GetClusterName()
+			if result != tt.expected {
+				t.Errorf("GetClusterName() = %v, want %v", result, tt.expected)
+			}
+		})
 	}
 }

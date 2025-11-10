@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"strings"
 	"time"
 
 	"k8s.io/client-go/kubernetes"
@@ -84,4 +85,32 @@ func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
 
 func (c *Client) SetNamespace(namespace string) {
 	c.Namespace = namespace
+}
+
+// GetClusterName returns a truncated cluster name for display in tabs
+func (c *Client) GetClusterName() string {
+	if c.Config == nil || c.Config.Host == "" {
+		return "Unknown"
+	}
+
+	host := c.Config.Host
+
+	// Remove https:// prefix if present
+	if strings.HasPrefix(host, "https://") {
+		host = strings.TrimPrefix(host, "https://")
+	} else if strings.HasPrefix(host, "http://") {
+		host = strings.TrimPrefix(host, "http://")
+	}
+
+	// Remove port if present
+	if colonIndex := strings.LastIndex(host, ":"); colonIndex != -1 {
+		host = host[:colonIndex]
+	}
+
+	// Truncate if too long (max 20 characters for tab display)
+	if len(host) > 20 {
+		host = host[:17] + "..."
+	}
+
+	return host
 }
