@@ -10,34 +10,30 @@ import (
 	"github.com/yuin/gopher-lua"
 )
 
+// Plugin defines the basic interface that all plugins must implement
 type Plugin interface {
-	Name() string
-
-	Version() string
-
-	Description() string
-
-	Initialize() error
-
-	Shutdown() error
+	Name() string        // Plugin display name
+	Version() string     // Plugin version
+	Description() string // Plugin description
+	Initialize() error   // Initialize plugin
+	Shutdown() error     // Cleanup and shutdown plugin
 }
 
+// ResourcePlugin extends Plugin interface for custom Kubernetes resources
 type ResourcePlugin interface {
 	Plugin
 
-	GetResourceTypes() []CustomResourceType
-
-	GetResourceData(client k8s.Client, resourceType string, namespace string) ([]types.ResourceData, error)
-
-	DeleteResource(client k8s.Client, resourceType string, namespace string, name string) error
-
-	GetResourceInfo(client k8s.Client, resourceType string, namespace string, name string) (*k8s.ResourceInfo, error)
+	GetResourceTypes() []CustomResourceType                                                                           // Get custom resource types
+	GetResourceData(client k8s.Client, resourceType string, namespace string) ([]types.ResourceData, error)           // Get resource data
+	DeleteResource(client k8s.Client, resourceType string, namespace string, name string) error                       // Delete resource
+	GetResourceInfo(client k8s.Client, resourceType string, namespace string, name string) (*k8s.ResourceInfo, error) // Get resource info
 }
 
+// UIPlugin extends Plugin interface for UI extensions and custom components
 type UIPlugin interface {
 	Plugin
 
-	GetUIExtensions() []UIExtension
+	GetUIExtensions() []UIExtension // Get UI extensions
 }
 
 type CustomResourceType struct {
@@ -220,20 +216,15 @@ const (
 	EventUIUpdate         PluginEvent = "ui_update"
 )
 
+// PluginAPI provides the main interface for plugins to interact with k8s-tui
 type PluginAPI interface {
-	GetCurrentNamespace() string
-
-	SetCurrentNamespace(namespace string)
-
-	SetStatusMessage(message string)
-
-	AddHeaderComponent(component UIInjectionPoint)
-
-	AddFooterComponent(component UIInjectionPoint)
-
-	RegisterCommand(name, description string, handler func(args []string) (string, error))
-
-	ExecuteCommand(name string, args []string) (string, error)
+	GetCurrentNamespace() string                                                           // Get current namespace
+	SetCurrentNamespace(namespace string)                                                  // Set current namespace
+	SetStatusMessage(message string)                                                       // Set status message in UI
+	AddHeaderComponent(component UIInjectionPoint)                                         // Add component to header
+	AddFooterComponent(component UIInjectionPoint)                                         // Add component to footer
+	RegisterCommand(name, description string, handler func(args []string) (string, error)) // Register command
+	ExecuteCommand(name string, args []string) (string, error)                             // Execute registered command
 
 	RegisterCLIArgument(name, description string, handler func(value string) error)
 

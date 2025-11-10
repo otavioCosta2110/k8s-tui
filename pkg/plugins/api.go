@@ -9,6 +9,59 @@ import (
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 )
 
+// Helper functions for styling help content to reduce verbosity
+func getHeaderStyle() lipgloss.Style {
+	return lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor))
+}
+
+func getTextStyle() lipgloss.Style {
+	return lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.TextColor)).Background(lipgloss.Color(customstyles.BackgroundColor))
+}
+
+func getKeyStyle() lipgloss.Style {
+	return lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor))
+}
+
+func getValueStyle() lipgloss.Style {
+	return lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor))
+}
+
+func getSpaceStyle() lipgloss.Style {
+	return lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor))
+}
+
+func getHelpTextStyle() lipgloss.Style {
+	return lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HelpTextColor)).Background(lipgloss.Color(customstyles.BackgroundColor))
+}
+
+func getSectionStyle() lipgloss.Style {
+	return lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor))
+}
+
+func getBulletStyle() lipgloss.Style {
+	return lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Background(lipgloss.Color(customstyles.BackgroundColor))
+}
+
+// helpLine creates a formatted help line with key and value
+func helpLine(key, value string) string {
+	return getKeyStyle().Render(key) + getSpaceStyle().Render(" ") + getValueStyle().Render(value)
+}
+
+// helpSection creates a formatted help section header
+func helpSection(title string) string {
+	return getSectionStyle().Render(title) + "\n"
+}
+
+// helpText creates formatted help text
+func helpText(text string) string {
+	return getTextStyle().Render(text)
+}
+
+// helpItem creates a complete help item with bullet point
+func helpItem(bullet, description string) string {
+	return getBulletStyle().Render("• ") + getKeyStyle().Render(bullet) + getSpaceStyle().Render(" ") + getValueStyle().Render(description) + "\n"
+}
+
 type UIManager struct {
 	headerComponents []UIInjectionPoint
 	footerComponents []UIInjectionPoint
@@ -171,6 +224,8 @@ type PluginAPIImpl struct {
 	}
 }
 
+// NewPluginAPI creates a new plugin API instance with all managers initialized
+// Provides the main interface for plugins to interact with k8s-tui
 func NewPluginAPI() *PluginAPIImpl {
 	return &PluginAPIImpl{
 		currentNamespace:   "default",
@@ -187,10 +242,12 @@ func NewPluginAPI() *PluginAPIImpl {
 	}
 }
 
+// GetCurrentNamespace returns the currently active Kubernetes namespace
 func (api *PluginAPIImpl) GetCurrentNamespace() string {
 	return api.currentNamespace
 }
 
+// SetCurrentNamespace changes the active Kubernetes namespace and triggers events
 func (api *PluginAPIImpl) SetCurrentNamespace(namespace string) {
 	logger.Info(fmt.Sprintf("DEBUG: SetCurrentNamespace called with: %s", namespace))
 	api.currentNamespace = namespace
@@ -203,6 +260,7 @@ func (api *PluginAPIImpl) SetCurrentNamespace(namespace string) {
 	api.eventManager.TriggerEvent(EventNamespaceChanged, namespace)
 }
 
+// SetStatusMessage displays a status message in the TUI interface
 func (api *PluginAPIImpl) SetStatusMessage(message string) {
 	logger.Info(fmt.Sprintf("📢 Plugin Status: %s", message))
 	if api.setStatusCallback != nil {
@@ -226,6 +284,7 @@ func (api *PluginAPIImpl) GetFooterComponents() []UIInjectionPoint {
 	return api.uiManager.GetFooterComponents()
 }
 
+// RegisterCommand registers a new command that can be called from plugins
 func (api *PluginAPIImpl) RegisterCommand(name, description string, handler func(args []string) (string, error)) {
 	api.commandManager.RegisterCommand(name, description, handler)
 }
@@ -278,6 +337,7 @@ func (api *PluginAPIImpl) SetClient(client k8s.Client) {
 	api.client = client
 }
 
+// GetPods retrieves pod information from Kubernetes cluster with optional label selector
 func (api *PluginAPIImpl) GetPods(namespace string, selector ...string) ([]k8s.PodInfo, error) {
 	if namespace == "" {
 		namespace = api.currentNamespace
@@ -647,333 +707,218 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 	}{
 		"Pods": {
 			title: "Pods Help",
-			content: lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.TextColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Pods are the smallest deployable units in Kubernetes.") + "\n\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Key Bindings:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• ↑/↓/j/k:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Navigate pods") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• enter:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("View pod details") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• d:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Delete selected pods") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• r:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Refresh") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• /:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Search pods") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• esc:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Go back") + "\n\n" +
+			content: helpText("Pods are the smallest deployable units in Kubernetes.") + "\n\n" +
+				helpSection("Key Bindings:") +
+				helpItem("↑/↓/j/k:", "Navigate pods") +
+				helpItem("enter:", "View pod details") +
+				helpItem("d:", "Delete selected pods") +
+				helpItem("r:", "Refresh") +
+				helpItem("/:", "Search pods") +
+				helpItem("esc:", "Go back") + "\n\n" +
 
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Pod Status:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Running:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Pod is running successfully") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Pending:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Pod is being scheduled") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Failed:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Pod has failed") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Succeeded:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Pod completed successfully") + "\n\n" +
+				helpSection("Pod Status:") +
+				helpItem("Running:", "Pod is running successfully") +
+				helpItem("Pending:", "Pod is being scheduled") +
+				helpItem("Failed:", "Pod has failed") +
+				helpItem("Succeeded:", "Pod completed successfully") + "\n\n" +
 
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Common Actions:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• View logs:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Enter on a pod to see details") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Delete pod:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Select with space, then press 'd'") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Refresh:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Press 'r' to update the list"),
+				helpSection("Common Actions:") +
+				helpItem("View logs:", "Enter on a pod to see details") +
+				helpItem("Delete pod:", "Select with space, then press 'd'") +
+				helpItem("Refresh:", "Press 'r' to update the list"),
 		},
 		"Deployments": {
 			title: "Deployments Help",
-			content: lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.TextColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Deployments manage the deployment and scaling of applications.") + "\n\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Key Bindings:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• ↑/↓/j/k:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Navigate deployments") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• enter:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("View deployment details") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• d:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Delete selected deployments") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• r:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Refresh") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• /:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Search deployments") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• esc:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Go back") + "\n\n" +
+			content: helpText("Deployments manage the deployment and scaling of applications.") + "\n\n" +
+				helpSection("Key Bindings:") +
+				helpItem("↑/↓/j/k:", "Navigate deployments") +
+				helpItem("enter:", "View deployment pods") +
+				helpItem("v:", "View deployment details") +
+				helpItem("d:", "Delete selected deployments") +
+				helpItem("r:", "Refresh") +
+				helpItem("/:", "Search deployments") +
+				helpItem("esc:", "Go back") + "\n\n" +
 
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Deployment Status:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Ready:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Shows ready/desired replicas") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Updated:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Shows updated replicas") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Available:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Shows available replicas") + "\n\n" +
+				helpSection("Deployment Status:") +
+				helpItem("Ready:", "Shows ready/desired replicas") +
+				helpItem("Updated:", "Shows updated replicas") +
+				helpItem("Available:", "Shows available replicas") + "\n\n" +
 
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Common Actions:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Scale deployment:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Enter to view details and scale") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Update image:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Use deployment details view") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• View pods:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("See associated pods in details"),
+				helpSection("Common Actions:") +
+				helpItem("Scale deployment:", "Enter to view details and scale") +
+				helpItem("Update image:", "Use deployment details view") +
+				helpItem("View pods:", "See associated pods in details"),
 		},
 		"Services": {
 			title: "Services Help",
-			content: lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.TextColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Services expose applications running on pods.") + "\n\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Key Bindings:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• ↑/↓/j/k:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Navigate services") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• enter:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("View service details") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• d:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Delete selected services") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• r:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Refresh") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• /:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Search services") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• esc:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Go back") + "\n\n" +
+			content: helpText("Services expose applications running on pods.") + "\n\n" +
+				helpSection("Key Bindings:") +
+				helpItem("↑/↓/j/k:", "Navigate services") +
+				helpItem("enter:", "View service details") +
+				helpItem("d:", "Delete selected services") +
+				helpItem("r:", "Refresh") +
+				helpItem("/:", "Search services") +
+				helpItem("esc:", "Go back") + "\n\n" +
 
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Service Types:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• ClusterIP:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Internal cluster access") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• NodePort:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("External access via node port") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• LoadBalancer:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Cloud load balancer") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• ExternalName:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("DNS alias") + "\n\n" +
+				helpSection("Service Types:") +
+				helpItem("ClusterIP:", "Internal cluster access") +
+				helpItem("NodePort:", "External access via node port") +
+				helpItem("LoadBalancer:", "Cloud load balancer") +
+				helpItem("ExternalName:", "DNS alias") + "\n\n" +
 
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Common Actions:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• View endpoints:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("See pods backing the service") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Check connectivity:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Use service details"),
+				helpSection("Common Actions:") +
+				helpItem("View endpoints:", "See pods backing the service") +
+				helpItem("Check connectivity:", "Use service details"),
 		},
 		"Ingresses": {
 			title: "Ingresses Help",
 			content: lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(`Ingresses manage external access to services.
 
 Key Bindings:
-• ↑/↓/j/k: Navigate ingresses
-• enter: View ingress details
-• d: Delete selected ingresses
-• r: Refresh
-• /: Search ingresses
-• esc: Go back
+↑/↓/j/k: Navigate ingresses
+enter: View ingress details
+d: Delete selected ingresses
+r: Refresh
+/: Search ingresses
+esc: Go back
 
 Common Actions:
-• View rules: See routing rules
-• Check TLS: View SSL certificates
-• Test routing: Verify external access`),
+View rules: See routing rules
+Check TLS: View SSL certificates
+Test routing: Verify external access`),
 		},
 		"ConfigMaps": {
 			title: "ConfigMaps Help",
 			content: lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(`ConfigMaps store configuration data.
 
 Key Bindings:
-• ↑/↓/j/k: Navigate configmaps
-• enter: View configmap details
-• d: Delete selected configmaps
-• r: Refresh
-• /: Search configmaps
-• esc: Go back
+↑/↓/j/k: Navigate configmaps
+enter: View configmap details
+d: Delete selected configmaps
+r: Refresh
+/: Search configmaps
+esc: Go back
 
 Common Actions:
-• View data: See configuration key-value pairs
-• Edit values: Modify configuration data
-• Check usage: See which pods use this config`),
+View data: See configuration key-value pairs
+Edit values: Modify configuration data
+Check usage: See which pods use this config`),
 		},
 		"Secrets": {
 			title: "Secrets Help",
 			content: lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(`Secrets store sensitive information.
 
 Key Bindings:
-• ↑/↓/j/k: Navigate secrets
-• enter: View secret details
-• d: Delete selected secrets
-• r: Refresh
-• /: Search secrets
-• esc: Go back
+↑/↓/j/k: Navigate secrets
+enter: View secret details
+d: Delete selected secrets
+r: Refresh
+/: Search secrets
+esc: Go back
 
 Secret Types:
-• Opaque: Generic secret data
-• TLS: Certificate/key pairs
-• Docker: Docker registry credentials
+Opaque: Generic secret data
+TLS: Certificate/key pairs
+Docker: Docker registry credentials
 
 Common Actions:
-• View data: See secret contents (use caution)
-• Rotate secrets: Update sensitive data
-• Check usage: See which pods reference this secret`),
+View data: See secret contents (use caution)
+Rotate secrets: Update sensitive data
+Check usage: See which pods reference this secret`),
 		},
 		"Jobs": {
 			title: "Jobs Help",
 			content: lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(`Jobs create and manage batch processing tasks.
 
 Key Bindings:
-• ↑/↓/j/k: Navigate jobs
-• enter: View job details
-• d: Delete selected jobs
-• r: Refresh
-• /: Search jobs
-• esc: Go back
+↑/↓/j/k: Navigate jobs
+enter: View job details
+d: Delete selected jobs
+r: Refresh
+/: Search jobs
+esc: Go back
 
 Job Status:
-• Complete: Job finished successfully
-• Failed: Job failed
-• Active: Job is running
+Complete: Job finished successfully
+Failed: Job failed
+Active: Job is running
 
 Common Actions:
-• View pods: See job execution pods
-• Check logs: Examine job output
-• Retry failed jobs: Delete and recreate`),
+View pods: See job execution pods
+Check logs: Examine job output
+Retry failed jobs: Delete and recreate`),
 		},
 		"CronJobs": {
 			title: "CronJobs Help",
 			content: lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(`CronJobs run jobs on a schedule.
 
 Key Bindings:
-• ↑/↓/j/k: Navigate cronjobs
-• enter: View cronjob details
-• d: Delete selected cronjobs
-• r: Refresh
-• /: Search cronjobs
-• esc: Go back
+↑/↓/j/k: Navigate cronjobs
+enter: View cronjob details
+d: Delete selected cronjobs
+r: Refresh
+/: Search cronjobs
+esc: Go back
 
 Schedule Format:
-• Uses standard cron syntax
-• Example: "0 0 * * *" = daily at midnight
+Uses standard cron syntax
+Example: "0 0 * * *" = daily at midnight
 
 Common Actions:
-• View schedule: See execution schedule
-• Check history: View past job executions
-• Manual trigger: Run job immediately`),
+View schedule: See execution schedule
+Check history: View past job executions
+Manual trigger: Run job immediately`),
 		},
 		"Nodes": {
 			title: "Nodes Help",
 			content: lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(`Nodes are the worker machines in the cluster.
 
 Key Bindings:
-• ↑/↓/j/k: Navigate nodes
-• enter: View node details
-• r: Refresh
-• /: Search nodes
-• esc: Go back
+↑/↓/j/k: Navigate nodes
+enter: View node details
+r: Refresh
+/: Search nodes
+esc: Go back
 
 Node Status:
-• Ready: Node is healthy and schedulable
-• NotReady: Node has issues
-• SchedulingDisabled: Node won't accept new pods
+Ready: Node is healthy and schedulable
+NotReady: Node has issues
+SchedulingDisabled: Node won't accept new pods
 
 Common Actions:
-• View capacity: See CPU/memory resources
-• Check conditions: View node health status
-• View pods: See pods running on node`),
+View capacity: See CPU/memory resources
+Check conditions: View node health status
+View pods: See pods running on node`),
 		},
 		"ResourceList": {
 			title: "Resource List Help",
-			content: lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.TextColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Resource List shows available Kubernetes resources.") + "\n\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Key Bindings:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• ↑/↓/j/k:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Navigate resources") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• enter:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Select resource type") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• /:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Search resources") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• esc:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Go back") + "\n\n" +
+			content: helpText("Resource List shows available Kubernetes resources.") + "\n\n" +
+				helpSection("Key Bindings:") +
+				helpItem("↑/↓/j/k:", "Navigate resources") +
+				helpItem("enter:", "Select resource type") +
+				helpItem("/:", "Search resources") +
+				helpItem("esc:", "Go back") + "\n\n" +
 
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Resource Categories:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Workloads:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Pods, Deployments, Jobs, etc.") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Networking:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Services, Ingresses") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Configuration:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("ConfigMaps, Secrets") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• Infrastructure:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Nodes") + "\n\n" +
+				helpSection("Resource Categories:") +
+				helpItem("Workloads:", "Pods, Deployments, Jobs, etc.") +
+				helpItem("Networking:", "Services, Ingresses") +
+				helpItem("Configuration:", "ConfigMaps, Secrets") +
+				helpItem("Infrastructure:", "Nodes") + "\n\n" +
 
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Quick Navigation:") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• p:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Pods") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• d:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Deployments") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• s:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Services") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• i:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Ingresses") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• c:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("ConfigMaps") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• e:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Secrets") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• n:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Nodes") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• j:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Jobs") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• k:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("CronJobs") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• m:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("DaemonSets") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• t:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("StatefulSets") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• r:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("ReplicaSets") + "\n" +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• a:") +
-				lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-				lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("ServiceAccounts"),
+				helpSection("Quick Navigation:") +
+				helpItem("p:", "Pods") +
+				helpItem("d:", "Deployments") +
+				helpItem("s:", "Services") +
+				helpItem("i:", "Ingresses") +
+				helpItem("c:", "ConfigMaps") +
+				helpItem("e:", "Secrets") +
+				helpItem("n:", "Nodes") +
+				helpItem("j:", "Jobs") +
+				helpItem("k:", "CronJobs") +
+				helpItem("m:", "DaemonSets") +
+				helpItem("t:", "StatefulSets") +
+				helpItem("r:", "ReplicaSets") +
+				helpItem("a:", "ServiceAccounts"),
 		},
 	}
 
@@ -981,26 +926,14 @@ Common Actions:
 		return help.title, help.content
 	}
 
-	return "Help", lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.TextColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render(fmt.Sprintf("Help for %s", resourceType)) + "\n\n" +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HeaderColor)).Bold(true).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Key Bindings:") + "\n" +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• ↑/↓/j/k:") +
-		lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Navigate items") + "\n" +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• enter:") +
-		lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("View details") + "\n" +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• d:") +
-		lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Delete selected items (if supported)") + "\n" +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• r:") +
-		lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Refresh") + "\n" +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• /:") +
-		lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Search") + "\n" +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLKeyColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("• esc:") +
-		lipgloss.NewStyle().Background(lipgloss.Color(customstyles.BackgroundColor)).Render(" ") +
-		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.YAMLValueColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Go back") + "\n\n" +
+	return "Help", helpText(fmt.Sprintf("Help for %s", resourceType)) + "\n\n" +
+		helpSection("Key Bindings:") +
+		helpItem("↑/↓/j/k:", "Navigate items") +
+		helpItem("enter:", "View details") +
+		helpItem("d:", "Delete selected items (if supported)") +
+		helpItem("r:", "Refresh") +
+		helpItem("/:", "Search") +
+		helpItem("esc:", "Go back") + "\n\n" +
 		lipgloss.NewStyle().Foreground(lipgloss.Color(customstyles.HelpTextColor)).Background(lipgloss.Color(customstyles.BackgroundColor)).Render("For more specific help, check the resource documentation.")
 }
 

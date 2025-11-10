@@ -23,6 +23,7 @@ type PluginManager struct {
 	pluginmanagerPlugins []PluginmanagerStylePlugin
 }
 
+// NewPluginManager creates a new plugin manager instance for loading and managing Lua plugins
 func NewPluginManager(pluginDir string) *PluginManager {
 	api := NewPluginAPI()
 	return &PluginManager{
@@ -34,6 +35,7 @@ func NewPluginManager(pluginDir string) *PluginManager {
 	}
 }
 
+// LoadPlugins scans plugin directory and loads all Lua plugins
 func (pm *PluginManager) LoadPlugins() error {
 	logger.Info(fmt.Sprintf("🔌 Plugin Manager: Starting plugin loading from directory: %s", pm.pluginDir))
 
@@ -93,6 +95,7 @@ func (pm *PluginManager) LoadPlugins() error {
 	return nil
 }
 
+// setupBasicLuaAPI configures the basic Lua API for simple plugins
 func (pm *PluginManager) setupBasicLuaAPI(L *lua.LState) {
 	apiTable := L.NewTable()
 
@@ -304,6 +307,7 @@ func getNumberField(tbl *lua.LTable, key string) float64 {
 	return 0
 }
 
+// loadLuaPlugin loads and initializes a single Lua plugin from file path
 func (pm *PluginManager) loadLuaPlugin(path string) error {
 	pluginName := filepath.Base(filepath.Dir(path))
 

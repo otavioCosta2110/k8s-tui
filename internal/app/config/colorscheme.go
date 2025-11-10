@@ -44,7 +44,7 @@ func DefaultColorScheme() ColorScheme {
 		SelectionForeground: "#000000",
 		BackgroundColor:     "#000000",
 		YAMLKeyColor:        "#5E9AFF",
-		YAMLValueColor:      "",
+		YAMLValueColor:      "#FFFFFF",
 		YAMLTitleColor:      "#FAFAFA",
 		HelpTextColor:       "#757575",
 		HeaderValueColor:    "#A1EFD3",

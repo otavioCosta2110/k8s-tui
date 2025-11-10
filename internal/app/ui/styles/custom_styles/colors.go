@@ -75,7 +75,11 @@ func InitColors() error {
 	}
 
 	YAMLKeyColor = scheme.YAMLKeyColor
-	YAMLValueColor = scheme.YAMLValueColor
+	if scheme.YAMLValueColor != "" {
+		YAMLValueColor = scheme.YAMLValueColor
+	} else {
+		YAMLValueColor = "#FFFFFF"
+	}
 	YAMLTitleColor = scheme.YAMLTitleColor
 	HelpTextColor = scheme.HelpTextColor
 	HeaderValueColor = scheme.HeaderValueColor

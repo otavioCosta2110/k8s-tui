@@ -310,7 +310,6 @@ func (m *TableModel) getSearchLine() string {
 		Width(styles.ScreenWidth).
 		Padding(0, 1)
 
-
 	searchLine := searchStyle.Render(searchText)
 
 	return searchLine

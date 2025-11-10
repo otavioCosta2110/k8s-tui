@@ -50,7 +50,8 @@ func (d *deploymentsModel) Help() (string, string) {
 
 Key Bindings:
 • ↑/↓/j/k: Navigate deployments
-• enter: View deployment details
+• enter: View deployment pods
+• v: View deployment details
 • d: Delete selected deployments
 • n: Create new deployment
 • r: Refresh
