@@ -11,7 +11,7 @@ function Description()
 end
 
 function CLIArguments()
-  print("DEBUG: CLIArguments called")
+  k8s_tui.log("DEBUG: CLIArguments called")
   return {
     {
       name = "session",

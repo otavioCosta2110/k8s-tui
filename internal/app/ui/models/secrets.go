@@ -42,6 +42,12 @@ func NewSecrets(k k8s.Client, namespace string) (*secretsModel, error) {
 	return model, nil
 }
 
+func (s *secretsModel) SetNamespace(namespace string) {
+	s.GenericResourceModel.SetNamespace(namespace)
+	// Update the title to reflect the new namespace
+	s.config.Title = customstyles.ResourceIcons["Secrets"] + " Secrets in " + namespace
+}
+
 func (s *secretsModel) Help() (string, string) {
 	return "Secrets Help", `Secrets store sensitive information.
 
@@ -112,7 +118,7 @@ func (s *secretsModel) fetchData() error {
 	var secretInfo []k8s.SecretInfo
 	var err error
 
-	secretInfo, err = s.pluginAPI.GetSecrets("")
+	secretInfo, err = s.pluginAPI.GetSecrets(s.namespace)
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch secrets: %v", err)

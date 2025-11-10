@@ -31,9 +31,9 @@ end
 
 -- Setup function (called with user configuration)
 function Setup(opts)
-    print("Setting up Example Plugin with options:")
+    k8s_tui.log("Setting up Example Plugin with options:")
     for k, v in pairs(opts) do
-        print("  " .. k .. " = " .. tostring(v))
+        k8s_tui.log("  " .. k .. " = " .. tostring(v))
     end
 
     -- Store configuration
@@ -54,7 +54,7 @@ end
 
 -- Initialize the plugin
 function Initialize()
-    print("Example Lua plugin initialized")
+    k8s_tui.log("Example Lua plugin initialized")
 
     -- Set initial status
     k8s_tui.set_status("Example plugin ready")
@@ -64,14 +64,14 @@ end
 
 -- Shutdown the plugin
 function Shutdown()
-    print("Example Lua plugin shutting down")
+    k8s_tui.log("Example Lua plugin shutting down")
     return nil
 end
 
 -- Register custom resources with the application
 function registerResources()
     -- Register resources using the k8s_tui API
-    print("Registered example resources")
+    k8s_tui.log("Registered example resources")
 end
 
 -- Setup UI components using the new API
@@ -115,12 +115,12 @@ end
 
 -- Hook handlers
 function on_app_started(data)
-    print("Example Plugin: App started event received")
+    k8s_tui.log("Example Plugin: App started event received")
     k8s_tui.set_status("Example plugin initialized")
 end
 
 function on_namespace_changed(data)
-    print("Example Plugin: Namespace changed to " .. data)
+    k8s_tui.log("Example Plugin: Namespace changed to " .. data)
     k8s_tui.set_status("Example plugin active in namespace: " .. data)
 end
 

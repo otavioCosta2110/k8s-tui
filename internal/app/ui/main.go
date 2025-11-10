@@ -38,7 +38,7 @@ type AppModel struct {
 	pendingInputDialog  *InputDialogRequest
 	currentResourceType string
 	breadcrumbTrail     []string
-	pluginManager       *plugins.PluginManager
+	pluginManager       *plugins.GlobalPluginManager
 	uiInjector          *UIInjector
 }
 
@@ -87,7 +87,7 @@ type MultiClusterModel struct {
 	config              config.AppConfig
 }
 
-func NewAppModel(cfg cli.Config, pluginManager *plugins.PluginManager) *AppModel {
+func NewAppModel(cfg cli.Config, pluginManager *plugins.GlobalPluginManager) *AppModel {
 	appConfig := initializeAppConfigAndColors()
 
 	if cfg.Namespace == "" {
@@ -255,7 +255,7 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 		singleCfg := cfg
 		singleCfg.KubeconfigPaths = []string{kubeconfig}
 		// Create separate plugin manager for each cluster
-		pluginManager := plugins.NewPluginManager(cfg.PluginDir)
+		pluginManager := plugins.NewGlobalPluginManager(cfg.PluginDir)
 		if err := pluginManager.LoadPlugins(); err != nil {
 			// Log error, but continue
 			logger.Warn(fmt.Sprintf("Failed to load plugins for cluster %d: %v", i+1, err))
@@ -330,7 +330,7 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				PluginDir:       m.pluginDir,
 			}
 			// Create separate plugin manager for the new cluster
-			pluginManager := plugins.NewPluginManager(singleCfg.PluginDir)
+			pluginManager := plugins.NewGlobalPluginManager(singleCfg.PluginDir)
 			if err := pluginManager.LoadPlugins(); err != nil {
 				// Log error, but continue
 				logger.Warn(fmt.Sprintf("Failed to load plugins for new cluster: %v", err))
@@ -392,7 +392,7 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				PluginDir:       m.pluginDir,
 			}
 			// Create separate plugin manager for the new cluster
-			pluginManager := plugins.NewPluginManager(singleCfg.PluginDir)
+			pluginManager := plugins.NewGlobalPluginManager(singleCfg.PluginDir)
 			if err := pluginManager.LoadPlugins(); err != nil {
 				// Log error, but continue
 				logger.Warn(fmt.Sprintf("Failed to load plugins for new cluster: %v", err))
@@ -468,6 +468,14 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.currentCluster = newCluster
 				m.clusterTabComponent.SetActiveTab(newCluster)
 				plugins.SetGlobalPluginManager(m.clusters[newCluster].pluginManager)
+
+				// Update header namespace to match current cluster's namespace
+				currentClusterModel := m.clusters[newCluster]
+				if currentClusterModel.kube.Clientset != nil {
+					currentClusterModel.header.SetNamespace(currentClusterModel.kube.Namespace)
+					currentClusterModel.header.UpdateContent()
+				}
+
 				if m.width > 0 {
 					updated, _ := m.clusters[newCluster].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
 					if appModel, ok := updated.(*AppModel); ok {
@@ -483,6 +491,14 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.currentCluster = newCluster
 				m.clusterTabComponent.SetActiveTab(newCluster)
 				plugins.SetGlobalPluginManager(m.clusters[newCluster].pluginManager)
+
+				// Update header namespace to match current cluster's namespace
+				currentClusterModel := m.clusters[newCluster]
+				if currentClusterModel.kube.Clientset != nil {
+					currentClusterModel.header.SetNamespace(currentClusterModel.kube.Namespace)
+					currentClusterModel.header.UpdateContent()
+				}
+
 				if m.width > 0 {
 					updated, _ := m.clusters[newCluster].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
 					if appModel, ok := updated.(*AppModel); ok {
@@ -504,6 +520,14 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.currentCluster = index
 				m.clusterTabComponent.SetActiveTab(index)
 				plugins.SetGlobalPluginManager(m.clusters[index].pluginManager)
+
+				// Update header namespace to match current cluster's namespace
+				currentClusterModel := m.clusters[index]
+				if currentClusterModel.kube.Clientset != nil {
+					currentClusterModel.header.SetNamespace(currentClusterModel.kube.Namespace)
+					currentClusterModel.header.UpdateContent()
+				}
+
 				if m.width > 0 {
 					updated, _ := m.clusters[index].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
 					if appModel, ok := updated.(*AppModel); ok {
@@ -527,7 +551,7 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			PluginDir:       m.pluginDir,
 		}
 		// Create separate plugin manager for the new cluster
-		pluginManager := plugins.NewPluginManager(singleCfg.PluginDir)
+		pluginManager := plugins.NewGlobalPluginManager(singleCfg.PluginDir)
 		if err := pluginManager.LoadPlugins(); err != nil {
 			// Log error, but continue
 			logger.Warn(fmt.Sprintf("Failed to load plugins for new cluster: %v", err))

@@ -222,11 +222,17 @@ type PluginAPIImpl struct {
 		title   string
 		content string
 	}
+	globalManager *GlobalPluginManager // Reference to global manager for per-cluster namespace support
 }
 
 // NewPluginAPI creates a new plugin API instance with all managers initialized
 // Provides the main interface for plugins to interact with k8s-tui
 func NewPluginAPI() *PluginAPIImpl {
+	return NewPluginAPIWithGlobalManager(nil)
+}
+
+// NewPluginAPIWithGlobalManager creates a new plugin API instance with optional global manager
+func NewPluginAPIWithGlobalManager(globalManager *GlobalPluginManager) *PluginAPIImpl {
 	return &PluginAPIImpl{
 		currentNamespace:   "default",
 		uiManager:          NewUIManager(),
@@ -235,6 +241,7 @@ func NewPluginAPI() *PluginAPIImpl {
 		eventManager:       NewEventManager(),
 		configManager:      NewConfigManager(),
 		resourceRegistry:   NewResourceRegistry(),
+		globalManager:      globalManager,
 		customHelp: make(map[string]struct {
 			title   string
 			content string
@@ -251,6 +258,19 @@ func (api *PluginAPIImpl) GetCurrentNamespace() string {
 func (api *PluginAPIImpl) SetCurrentNamespace(namespace string) {
 	logger.Info(fmt.Sprintf("DEBUG: SetCurrentNamespace called with: %s", namespace))
 	api.currentNamespace = namespace
+
+	// If we have a global manager, update the current cluster's namespace
+	if api.globalManager != nil {
+		if currentCluster := api.globalManager.GetCurrentCluster(); currentCluster != nil {
+			err := api.globalManager.SetClusterNamespace(currentCluster.ID, namespace)
+			if err != nil {
+				logger.Error(fmt.Sprintf("Failed to update cluster namespace: %v", err))
+			} else {
+				logger.Info(fmt.Sprintf("Updated cluster %s namespace to %s", currentCluster.ID, namespace))
+			}
+		}
+	}
+
 	if api.setNamespaceCallback != nil {
 		logger.Info("DEBUG: Calling setNamespaceCallback")
 		api.setNamespaceCallback(namespace)

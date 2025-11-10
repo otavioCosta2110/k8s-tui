@@ -45,6 +45,12 @@ func NewDeployments(k resources.Client, namespace string) (*deploymentsModel, er
 	return model, nil
 }
 
+func (d *deploymentsModel) SetNamespace(namespace string) {
+	d.GenericResourceModel.SetNamespace(namespace)
+	// Update the title to reflect the new namespace
+	d.config.Title = styles.ResourceIcons["Deployments"] + " Deployments in " + namespace
+}
+
 func (d *deploymentsModel) Help() (string, string) {
 	return "Deployments Help", `Deployments manage the deployment and scaling of applications.
 
@@ -176,7 +182,7 @@ func (d *deploymentsModel) fetchData() error {
 	var deploymentInfo []resources.DeploymentInfo
 	var err error
 
-	deploymentInfo, err = d.pluginAPI.GetDeployments("")
+	deploymentInfo, err = d.pluginAPI.GetDeployments(d.namespace)
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch deployments: %v", err)

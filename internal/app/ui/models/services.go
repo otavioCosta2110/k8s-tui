@@ -44,6 +44,12 @@ func NewServices(k k8s.Client, namespace string) (*servicesModel, error) {
 	return model, nil
 }
 
+func (s *servicesModel) SetNamespace(namespace string) {
+	s.GenericResourceModel.SetNamespace(namespace)
+	// Update the title to reflect the new namespace
+	s.config.Title = customstyles.ResourceIcons["Services"] + " Services in " + namespace
+}
+
 func (s *servicesModel) Help() (string, string) {
 	return "Services Help", `Services expose applications running on pods.
 
@@ -114,7 +120,7 @@ func (s *servicesModel) fetchData() error {
 	var serviceInfo []k8s.ServiceInfo
 	var err error
 
-	serviceInfo, err = s.pluginAPI.GetServices("")
+	serviceInfo, err = s.pluginAPI.GetServices(s.namespace)
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch services: %v", err)

@@ -41,6 +41,12 @@ func NewConfigmaps(k k8s.Client, namespace string) (*configmapsModel, error) {
 	return model, nil
 }
 
+func (c *configmapsModel) SetNamespace(namespace string) {
+	c.GenericResourceModel.SetNamespace(namespace)
+	// Update the title to reflect the new namespace
+	c.config.Title = customstyles.ResourceIcons["ConfigMaps"] + " ConfigMaps in " + namespace
+}
+
 func (c *configmapsModel) Help() (string, string) {
 	return "ConfigMaps Help", `ConfigMaps store configuration data.
 
@@ -106,7 +112,7 @@ func (c *configmapsModel) fetchData() error {
 	var cms []k8s.Configmap
 	var err error
 
-	cms, err = c.pluginAPI.GetConfigMaps("")
+	cms, err = c.pluginAPI.GetConfigMaps(c.namespace)
 
 	if err != nil {
 		return err

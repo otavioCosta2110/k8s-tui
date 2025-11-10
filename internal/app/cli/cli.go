@@ -76,7 +76,7 @@ func ParseFlags() Config {
 	return cfg
 }
 
-func HandlePluginArgs(pluginManager *plugins.PluginManager, pluginArgs map[string]string) error {
+func HandlePluginArgs(pluginManager *plugins.GlobalPluginManager, pluginArgs map[string]string) error {
 	if pluginManager == nil {
 		return nil
 	}

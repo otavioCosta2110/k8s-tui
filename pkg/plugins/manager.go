@@ -1351,6 +1351,11 @@ func (pm *PluginManager) GetAPI() *PluginAPIImpl {
 	return pm.api
 }
 
+// SetGlobalManagerReference sets the global manager reference in the API
+func (pm *PluginManager) SetGlobalManagerReference(globalManager *GlobalPluginManager) {
+	pm.api.globalManager = globalManager
+}
+
 func (pm *PluginManager) GetPluginmanagerPlugins() []PluginmanagerStylePlugin {
 	return pm.pluginmanagerPlugins
 }

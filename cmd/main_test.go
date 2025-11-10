@@ -10,8 +10,8 @@ import (
 
 func TestMain(t *testing.T) {
 	cfg := ui.ParseFlags()
-	pluginManager := plugins.NewPluginManager("./plugins")
-	m := ui.NewAppModel(cfg, pluginManager)
+	globalPluginManager := plugins.NewGlobalPluginManager("./plugins")
+	m := ui.NewAppModel(cfg, globalPluginManager)
 	if m == nil {
 		t.Error("Expected NewAppModel to return a non-nil model")
 	}

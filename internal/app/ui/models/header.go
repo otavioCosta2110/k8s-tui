@@ -189,13 +189,10 @@ func (m HeaderModel) getClusterInfo() map[string]string {
 		return info
 	}
 
-	if m.namespace != "" {
-		info["namespace"] = m.namespace
-	} else {
-		info["namespace"] = m.kubeconfig.Namespace
-		if info["namespace"] == "" {
-			info["namespace"] = "default"
-		}
+	// Use the header's namespace field which is properly updated via SetNamespace
+	info["namespace"] = m.namespace
+	if info["namespace"] == "" {
+		info["namespace"] = "default"
 	}
 
 	if m.kubeconfig.Config != nil {

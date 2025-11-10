@@ -397,6 +397,21 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 
 func (tm *TabManager) SetNamespace(namespace string) {
 	tm.namespace = namespace
+	// Refresh all existing resource models to use the new namespace
+	tm.refreshAllResourceModels()
+}
+
+// refreshAllResourceModels refreshes all existing resource models to use the current namespace
+func (tm *TabManager) refreshAllResourceModels() {
+	for i := range tm.tabs {
+		tab := &tm.tabs[i]
+		if tab.ResourceModel != nil {
+			// Update the namespace in the resource model
+			if resourceModel, ok := tab.ResourceModel.(interface{ SetNamespace(string) }); ok {
+				resourceModel.SetNamespace(tm.namespace)
+			}
+		}
+	}
 }
 
 func (tm *TabManager) SetResourceTypeCallback(callback func(resourceType string)) {

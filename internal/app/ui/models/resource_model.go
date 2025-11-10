@@ -136,6 +136,14 @@ func (g *GenericResourceModel) GetNamespace() string {
 	return g.namespace
 }
 
+func (g *GenericResourceModel) SetNamespace(namespace string) {
+	g.namespace = namespace
+	// Also update the plugin API's namespace
+	if g.pluginAPI != nil {
+		g.pluginAPI.SetCurrentNamespace(namespace)
+	}
+}
+
 func (g *GenericResourceModel) GetTable() *ui.TableModel {
 	// The table is managed by the component, not directly exposed
 	// We need to access it through the component system

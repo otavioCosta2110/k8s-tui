@@ -30,9 +30,9 @@ end
 
 -- Setup function (called with user configuration)
 function Setup(opts)
-    print("Setting up Neovim Header Plugin with options:")
+    k8s_tui.log("Setting up Neovim Header Plugin with options:")
     for k, v in pairs(opts) do
-        print("  " .. k .. " = " .. v)
+        k8s_tui.log("  " .. k .. " = " .. v)
     end
 
     -- Store configuration
@@ -48,7 +48,7 @@ end
 
 -- Initialize the plugin
 function Initialize()
-    print("Neovim Header Plugin initialized")
+    k8s_tui.log("Neovim Header Plugin initialized")
 
     -- Add a status message
     k8s_tui.set_status("Neovim-style plugin loaded!")
@@ -58,7 +58,7 @@ end
 
 -- Shutdown the plugin
 function Shutdown()
-    print("Neovim Header Plugin shutting down")
+    k8s_tui.log("Neovim Header Plugin shutting down")
     return nil
 end
 
@@ -96,12 +96,12 @@ end
 
 -- Hook handlers
 function on_app_started(data)
-    print("Header plugin: App started event received")
+    k8s_tui.log("Header plugin: App started event received")
     k8s_tui.set_status("Header plugin ready!")
 end
 
 function on_namespace_changed(data)
-    print("Header plugin: Namespace changed to " .. data)
+    k8s_tui.log("Header plugin: Namespace changed to " .. data)
     local current_ns = k8s_tui.get_namespace()
     k8s_tui.set_status("Switched to namespace: " .. current_ns)
 end

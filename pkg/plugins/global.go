@@ -1,11 +1,11 @@
 package plugins
 
-var globalPluginManager *PluginManager
+var globalPluginManager *GlobalPluginManager
 
-func SetGlobalPluginManager(pm *PluginManager) {
+func SetGlobalPluginManager(pm *GlobalPluginManager) {
 	globalPluginManager = pm
 }
 
-func GetGlobalPluginManager() *PluginManager {
+func GetGlobalPluginManager() *GlobalPluginManager {
 	return globalPluginManager
 }

@@ -26,7 +26,7 @@ func initializeAppConfigAndColors() config.AppConfig {
 	return appConfig
 }
 
-func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pluginManager *plugins.PluginManager, kubeClient *resources.Client) *AppModel {
+func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pluginManager *plugins.GlobalPluginManager, kubeClient *resources.Client) *AppModel {
 	header := models.NewHeader("K8s TUI", kubeClient)
 	header.SetNamespace(cfg.Namespace)
 
@@ -59,7 +59,7 @@ func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pl
 	return appModel
 }
 
-func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.PluginManager, cfg cli.Config, tabManager *models.TabManager) {
+func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.GlobalPluginManager, cfg cli.Config, tabManager *models.TabManager) {
 	if pluginManager == nil {
 		return
 	}
@@ -134,7 +134,7 @@ func initializeTabs(tabManager *models.TabManager, header models.HeaderModel) {
 	}
 }
 
-func createAppModelWithoutKubeClient(appConfig config.AppConfig, pluginManager *plugins.PluginManager, err error) *AppModel {
+func createAppModelWithoutKubeClient(appConfig config.AppConfig, pluginManager *plugins.GlobalPluginManager, err error) *AppModel {
 	popup := models.NewErrorScreen(err, "Failed to initialize Kubernetes config", "")
 	uiInjector := NewUIInjector()
 	appModel := &AppModel{
@@ -155,7 +155,7 @@ func createAppModelWithoutKubeClient(appConfig config.AppConfig, pluginManager *
 	return appModel
 }
 
-func setupPluginManagerForNoKubeClient(appModel *AppModel, pluginManager *plugins.PluginManager) {
+func setupPluginManagerForNoKubeClient(appModel *AppModel, pluginManager *plugins.GlobalPluginManager) {
 	pluginManager.GetAPI().SetCurrentNamespace("default")
 
 	pluginManager.GetAPI().SetNamespaceCallback(func(namespace string) {
@@ -182,7 +182,7 @@ func setupPluginManagerForNoKubeClient(appModel *AppModel, pluginManager *plugin
 	appModel.loadPluginUIExtensions()
 }
 
-func createFallbackAppModel(appConfig config.AppConfig, pluginManager *plugins.PluginManager) *AppModel {
+func createFallbackAppModel(appConfig config.AppConfig, pluginManager *plugins.GlobalPluginManager) *AppModel {
 	uiInjector := NewUIInjector()
 	appModel := &AppModel{
 		header:         models.NewHeader("K8s TUI", nil),

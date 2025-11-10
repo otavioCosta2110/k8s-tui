@@ -56,6 +56,12 @@ func NewPodsWithParent(k k8s.Client, namespace, parentDeployment string, selecto
 	return model, nil
 }
 
+func (p *podsModel) SetNamespace(namespace string) {
+	p.GenericResourceModel.SetNamespace(namespace)
+	// Update the title to reflect the new namespace
+	p.config.Title = styles.ResourceIcons["Pods"] + " Pods in " + namespace
+}
+
 func (p *podsModel) Help() (string, string) {
 	return "Pods Help", `Pods are the smallest deployable units in Kubernetes.
 
@@ -153,7 +159,7 @@ func (p *podsModel) fetchData(selector string) error {
 	var podsInfo []k8s.PodInfo
 	var err error
 
-	podsInfo, err = p.pluginAPI.GetPods("", selector)
+	podsInfo, err = p.pluginAPI.GetPods(p.namespace, selector)
 
 	if err != nil {
 		return err
