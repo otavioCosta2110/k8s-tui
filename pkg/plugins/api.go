@@ -258,18 +258,8 @@ func (api *PluginAPIImpl) GetCurrentNamespace() string {
 func (api *PluginAPIImpl) SetCurrentNamespace(namespace string) {
 	logger.Info(fmt.Sprintf("DEBUG: SetCurrentNamespace called with: %s", namespace))
 	api.currentNamespace = namespace
-
-	// If we have a global manager, update the current cluster's namespace
-	if api.globalManager != nil {
-		if currentCluster := api.globalManager.GetCurrentCluster(); currentCluster != nil {
-			err := api.globalManager.SetClusterNamespace(currentCluster.ID, namespace)
-			if err != nil {
-				logger.Error(fmt.Sprintf("Failed to update cluster namespace: %v", err))
-			} else {
-				logger.Info(fmt.Sprintf("Updated cluster %s namespace to %s", currentCluster.ID, namespace))
-			}
-		}
-	}
+	// Note: Cluster namespace is managed by GlobalPluginManager.SwitchToCluster()
+	// to avoid deadlocks. Don't call back into globalManager here.
 
 	if api.setNamespaceCallback != nil {
 		logger.Info("DEBUG: Calling setNamespaceCallback")

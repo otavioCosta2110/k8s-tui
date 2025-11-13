@@ -4,17 +4,22 @@
 - **Build**: `go build -v ./...`
 - **Test All**: `go test -v ./...`
 - **Test Package**: `go test -v ./internal/k8s`
-- **Test Function**: `go test -v -run TestResourceTypeConstants ./internal/k8s`
+- **Test Function**: `go test -v -run TestFunctionName ./path/to/package`
 - **Format**: `gofmt -w .`
-- **Lint**: `golangci-lint run` (if available)
+- **Lint**: `golangci-lint run`
 
 ## Code Style Guidelines
 - **Imports**: Standard → Third-party → Local (blank lines between groups)
-- **Naming**: PascalCase for exported types/functions, camelCase for unexported
+- **Naming**: PascalCase for exported, camelCase for unexported
 - **Error Handling**: Return `(result, error)`, check/handle all errors, use `fmt.Errorf`
 - **Testing**: Table-driven tests with `t.Run()`, test success/error paths
-- **Organization**: Interfaces for abstraction, single-purpose functions, meaningful names
 - **Go Idioms**: Use `gofmt`, struct embedding, composition over inheritance
+
+## Plugin API & Multi-Cluster
+- **Plugin API**: Located at `pkg/plugins/api.go` - provides k8s resource access, UI management, commands
+- **Multi-Cluster**: `GlobalPluginManager` in `pkg/plugins/global_manager.go` handles multiple cluster contexts
+- **Cluster Context**: Each cluster has isolated namespace, tabs, settings, and k8s client
+- **Plugin Access**: Use `MultiClusterPluginAPI` for cluster switching and resource operations
 
 ## Documentation Structure
 - **Wiki Directory**: Located at `/wiki/` containing user documentation

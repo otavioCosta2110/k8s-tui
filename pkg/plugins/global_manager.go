@@ -2,19 +2,25 @@ package plugins
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	k8s "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
+	"github.com/yuin/gopher-lua"
 )
 
 // ClusterContext holds cluster-specific information for plugins
 type ClusterContext struct {
-	ID        string
-	Name      string
-	Client    k8s.Client
-	Settings  map[string]interface{}
-	Namespace string
+	ID         string
+	Name       string
+	Client     k8s.Client
+	Settings   map[string]interface{}
+	Namespace  string
+	Tabs       []TabInfo
+	Breadcrumb []string
 }
 
 // GlobalPluginManager manages a single plugin instance across multiple clusters
@@ -38,6 +44,575 @@ func NewGlobalPluginManager(pluginDir string) *GlobalPluginManager {
 	pm.SetGlobalManagerReference(gpm)
 
 	return gpm
+}
+
+// LoadPlugins loads plugins using multi-cluster API
+func (gpm *GlobalPluginManager) LoadPlugins() error {
+	if gpm.pluginDir == "" {
+		logger.Info("🔌 Global Plugin Manager: No plugin directory specified, skipping plugin loading")
+		return nil
+	}
+
+	if _, err := os.Stat(gpm.pluginDir); os.IsNotExist(err) {
+		logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Plugin directory does not exist: %s", gpm.pluginDir))
+		return nil
+	}
+
+	logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Scanning for Lua plugins in: %s", gpm.pluginDir))
+
+	var files []string
+	err := filepath.Walk(gpm.pluginDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Error scanning directory %s: %v", path, err))
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(info.Name(), ".lua") {
+			files = append(files, path)
+			logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Found potential plugin file: %s", path))
+		}
+		return nil
+	})
+	if err != nil {
+		logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Failed to scan plugin directory: %v", err))
+		return fmt.Errorf("failed to scan plugin directory: %v", err)
+	}
+
+	logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Found %d potential plugin files", len(files)))
+
+	loadedCount := 0
+	failedCount := 0
+
+	for _, file := range files {
+		pluginName := filepath.Base(filepath.Dir(file))
+		logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Attempting to load plugin: %s from %s", pluginName, file))
+
+		if err := gpm.loadLuaPluginWithMultiClusterAPI(file); err != nil {
+			logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: ❌ Failed to load plugin %s: %v", pluginName, err))
+			failedCount++
+			continue
+		}
+
+		logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: ✅ Successfully loaded plugin: %s", pluginName))
+		loadedCount++
+	}
+
+	logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Plugin loading complete - %d loaded, %d failed", loadedCount, failedCount))
+	return nil
+}
+
+// loadLuaPluginWithMultiClusterAPI loads a plugin with multi-cluster API support
+func (gpm *GlobalPluginManager) loadLuaPluginWithMultiClusterAPI(path string) error {
+	pluginName := filepath.Base(filepath.Dir(path))
+
+	logger.Debug(fmt.Sprintf("🔌 Global Plugin Manager: Creating Lua state for plugin: %s", pluginName))
+	L := lua.NewState()
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		L.Close()
+		logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Failed to read Lua script %s: %v", path, err))
+		return fmt.Errorf("failed to read Lua script: %v", err)
+	}
+
+	if err := L.DoString(string(content)); err != nil {
+		L.Close()
+		logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Failed to execute Lua script %s: %v", path, err))
+		return fmt.Errorf("failed to load Lua script: %v", err)
+	}
+
+	// Check if this is a pluginmanager-style plugin
+	setupType := L.GetGlobal("Setup").Type()
+	configType := L.GetGlobal("Config").Type()
+	commandsType := L.GetGlobal("Commands").Type()
+	hooksType := L.GetGlobal("Hooks").Type()
+
+	isPluginmanagerStyle := setupType == lua.LTFunction ||
+		configType == lua.LTFunction ||
+		commandsType == lua.LTFunction ||
+		hooksType == lua.LTFunction
+
+	if isPluginmanagerStyle {
+		logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: 🎯 Detected pluginmanager-style plugin: %s", pluginName))
+		logger.Info("🔌 Global Plugin Manager: Setting up multi-cluster k8s_tui API for pluginmanager-style plugin")
+
+		// Set up multi-cluster Lua API for pluginmanager-style plugins
+		gpm.setupMultiClusterLuaAPI(L)
+
+		// Call Setup function if available
+		if setupType == lua.LTFunction {
+			logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Calling Setup() for plugin: %s", pluginName))
+			if err := L.CallByParam(lua.P{
+				Fn:      L.GetGlobal("Setup"),
+				NRet:    1,
+				Protect: true,
+			}); err != nil {
+				logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Error calling Setup() for plugin %s: %v", pluginName, err))
+				return fmt.Errorf("error calling Setup: %v", err)
+			}
+
+			// Check if Setup returned an error
+			ret := L.Get(-1)
+			L.Pop(1)
+			if ret.Type() == lua.LTString {
+				errorMsg := ret.String()
+				logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Plugin %s Setup() returned error: %s", pluginName, errorMsg))
+				return fmt.Errorf("%s", errorMsg)
+			}
+		}
+
+		// Register commands if available
+		if commandsType == lua.LTFunction {
+			logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Registering commands for plugin: %s", pluginName))
+			if err := L.CallByParam(lua.P{
+				Fn:      L.GetGlobal("Commands"),
+				NRet:    1,
+				Protect: true,
+			}); err != nil {
+				logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Error calling Commands() for plugin %s: %v", pluginName, err))
+				return fmt.Errorf("error calling Commands: %v", err)
+			}
+
+			// Get the commands table
+			commandsRet := L.Get(-1)
+			L.Pop(1)
+
+			if commandsRet.Type() == lua.LTTable {
+				commandsTable := commandsRet.(*lua.LTable)
+				commandsTable.ForEach(func(key, value lua.LValue) {
+					if value.Type() == lua.LTTable {
+						cmdTable := value.(*lua.LTable)
+						cmdName := getStringField(cmdTable, "name")
+						cmdDesc := getStringField(cmdTable, "description")
+						handlerName := getStringField(cmdTable, "handler")
+
+						if cmdName != "" && handlerName != "" {
+							// Create a command handler that calls the Lua function
+							handler := func(args []string) (string, error) {
+								if L.GetGlobal(handlerName).Type() == lua.LTFunction {
+									if err := L.CallByParam(lua.P{
+										Fn:      L.GetGlobal(handlerName),
+										NRet:    1,
+										Protect: true,
+									}); err != nil {
+										return "", fmt.Errorf("error calling Lua handler %s: %v", handlerName, err)
+									}
+
+									ret := L.Get(-1)
+									L.Pop(1)
+									if ret.Type() == lua.LTString {
+										return ret.String(), nil
+									}
+									return "Command executed", nil
+								}
+								return "", fmt.Errorf("handler function %s not found", handlerName)
+							}
+
+							gpm.api.RegisterCommand(cmdName, cmdDesc, handler)
+							logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Registered command: %s", cmdName))
+						}
+					}
+				})
+			}
+		}
+
+		// Register CLI arguments if available
+		cliArgsType := L.GetGlobal("CLIArguments").Type()
+		if cliArgsType == lua.LTFunction {
+			logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Registering CLI arguments for plugin: %s", pluginName))
+			if err := L.CallByParam(lua.P{
+				Fn:      L.GetGlobal("CLIArguments"),
+				NRet:    1,
+				Protect: true,
+			}); err != nil {
+				logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Error calling CLIArguments() for plugin %s: %v", pluginName, err))
+				return fmt.Errorf("error calling CLIArguments: %v", err)
+			}
+
+			// Get the CLI arguments table
+			cliArgsRet := L.Get(-1)
+			L.Pop(1)
+
+			if cliArgsRet.Type() == lua.LTTable {
+				cliArgsTable := cliArgsRet.(*lua.LTable)
+				cliArgsTable.ForEach(func(key, value lua.LValue) {
+					if value.Type() == lua.LTTable {
+						argTable := value.(*lua.LTable)
+						argName := getStringField(argTable, "name")
+						argDesc := getStringField(argTable, "description")
+						handlerName := getStringField(argTable, "handler")
+
+						if argName != "" && handlerName != "" {
+							// Create a CLI argument handler that calls the Lua function
+							handler := func(argValue string) error {
+								// Call the Lua handler function with the argument value
+								if err := L.CallByParam(lua.P{
+									Fn:      L.GetGlobal(handlerName),
+									NRet:    2,
+									Protect: true,
+								}, lua.LString(argValue)); err != nil {
+									return fmt.Errorf("error calling CLI handler %s: %v", handlerName, err)
+								}
+
+								// Check for errors (Lua functions can return 2 values: result, error)
+								ret2 := L.Get(-1)
+								_ = L.Get(-2) // First return value (result), ignore it
+								L.Pop(2)
+
+								if ret2.Type() == lua.LTString {
+									// Second return value is an error
+									return fmt.Errorf("%s", ret2.String())
+								}
+
+								// Success
+								return nil
+							}
+
+							gpm.api.RegisterCLIArgument(argName, argDesc, handler)
+							logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Registered CLI argument: %s", argName))
+						}
+					}
+				})
+			}
+		}
+
+		// Store Lua state for cleanup
+		gpm.luaStates[pluginName] = L
+
+		// Call Initialize function
+		logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Calling Initialize() for plugin: %s", pluginName))
+		if err := L.CallByParam(lua.P{
+			Fn:      L.GetGlobal("Initialize"),
+			NRet:    1,
+			Protect: true,
+		}); err != nil {
+			logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Error calling Initialize() for plugin %s: %v", pluginName, err))
+			return fmt.Errorf("error calling Initialize: %v", err)
+		}
+
+		// Check if Initialize returned an error
+		ret := L.Get(-1)
+		L.Pop(1)
+		if ret.Type() == lua.LTString {
+			errorMsg := ret.String()
+			logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Plugin %s Initialize() returned error: %s", pluginName, errorMsg))
+			return fmt.Errorf("%s", errorMsg)
+		}
+
+		logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Successfully initialized pluginmanager-style plugin: %s", pluginName))
+		return nil
+	}
+
+	// Basic plugin style - set up multi-cluster Lua API
+	gpm.setupMultiClusterLuaAPI(L)
+
+	logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Available functions in %s:", pluginName))
+	for _, funcName := range []string{"Name", "Version", "Description", "Initialize", "Setup", "Config", "Commands", "Hooks", "GetResourceTypes", "GetUIExtensions"} {
+		funcType := L.GetGlobal(funcName).Type()
+		if funcType == lua.LTFunction {
+			logger.Info(fmt.Sprintf("🔌 Global Plugin Manager:   %s: FUNCTION", funcName))
+		} else {
+			logger.Info(fmt.Sprintf("🔌 Global Plugin Manager:   %s: %s", funcName, funcType))
+		}
+	}
+
+	logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Validating required functions for plugin: %s", pluginName))
+
+	if L.GetGlobal("Name").Type() != lua.LTFunction {
+		L.Close()
+		logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Plugin %s missing required Name() function", pluginName))
+		return fmt.Errorf("Lua plugin must define a Name function")
+	}
+	if L.GetGlobal("Initialize").Type() != lua.LTFunction {
+		L.Close()
+		logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Plugin %s missing required Initialize() function", pluginName))
+		return fmt.Errorf("Lua plugin must define an Initialize function")
+	}
+
+	// Store Lua state for cleanup
+	gpm.luaStates[pluginName] = L
+
+	// Call Initialize function
+	logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Calling Initialize() for plugin: %s", pluginName))
+	if err := L.CallByParam(lua.P{
+		Fn:      L.GetGlobal("Initialize"),
+		NRet:    1,
+		Protect: true,
+	}); err != nil {
+		logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Error calling Initialize() for plugin %s: %v", pluginName, err))
+		return fmt.Errorf("error calling Initialize: %v", err)
+	}
+
+	// Check if Initialize returned an error
+	ret := L.Get(-1)
+	L.Pop(1)
+	if ret.Type() == lua.LTString {
+		errorMsg := ret.String()
+		logger.Error(fmt.Sprintf("🔌 Global Plugin Manager: Plugin %s Initialize() returned error: %s", pluginName, errorMsg))
+		return fmt.Errorf("%s", errorMsg)
+	}
+
+	logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Successfully initialized basic plugin: %s", pluginName))
+	return nil
+}
+
+// setupMultiClusterLuaAPI configures the Lua API with multi-cluster support
+func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
+	apiTable := L.NewTable()
+
+	// Basic API functions
+	L.SetField(apiTable, "get_namespace", L.NewFunction(func(L *lua.LState) int {
+		namespace := gpm.api.GetCurrentNamespace()
+		L.Push(lua.LString(namespace))
+		return 1
+	}))
+	L.SetField(apiTable, "set_namespace", L.NewFunction(func(L *lua.LState) int {
+		namespace := L.CheckString(1)
+		gpm.api.SetCurrentNamespace(namespace)
+		return 0
+	}))
+	L.SetField(apiTable, "set_status", L.NewFunction(func(L *lua.LState) int {
+		message := L.CheckString(1)
+		gpm.api.SetStatusMessage(message)
+		return 0
+	}))
+	L.SetField(apiTable, "get_tabs", L.NewFunction(func(L *lua.LState) int {
+		tabs, err := gpm.api.GetTabs()
+		if err != nil {
+			L.Push(lua.LString(fmt.Sprintf("failed to get tabs: %v", err)))
+			return 1
+		}
+
+		resultTable := L.NewTable()
+		for i, tab := range tabs {
+			tabTable := L.NewTable()
+			L.SetField(tabTable, "ID", lua.LString(tab.ID))
+			L.SetField(tabTable, "Title", lua.LString(tab.Title))
+			L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+			L.SetField(tabTable, "CurrentIndex", lua.LNumber(tab.CurrentIndex))
+
+			breadcrumbTable := L.NewTable()
+			for j, crumb := range tab.Breadcrumb {
+				L.RawSetInt(breadcrumbTable, j+1, lua.LString(crumb))
+			}
+			L.SetField(tabTable, "Breadcrumb", breadcrumbTable)
+
+			metadataTable := L.NewTable()
+			for k, v := range tab.Metadata {
+				L.SetField(metadataTable, k, lua.LString(fmt.Sprintf("%v", v)))
+			}
+			L.SetField(tabTable, "Metadata", metadataTable)
+
+			L.RawSetInt(resultTable, i+1, tabTable)
+		}
+		L.Push(resultTable)
+		return 1
+	}))
+	L.SetField(apiTable, "set_tabs", L.NewFunction(func(L *lua.LState) int {
+		tabsTable := L.CheckTable(1)
+		tabs := make([]TabInfo, 0, tabsTable.Len())
+
+		tabsTable.ForEach(func(key, value lua.LValue) {
+			if value.Type() != lua.LTTable {
+				return
+			}
+			tabTable := value.(*lua.LTable)
+
+			tab := TabInfo{
+				ID:           getStringField(tabTable, "ID"),
+				Title:        getStringField(tabTable, "Title"),
+				ResourceType: getStringField(tabTable, "ResourceType"),
+				CurrentIndex: int(getNumberField(tabTable, "CurrentIndex")),
+			}
+
+			// Handle breadcrumb array
+			if breadcrumbValue := tabTable.RawGetString("Breadcrumb"); breadcrumbValue.Type() == lua.LTTable {
+				breadcrumbTable := breadcrumbValue.(*lua.LTable)
+				var breadcrumb []string
+				breadcrumbTable.ForEach(func(_, crumb lua.LValue) {
+					if crumb.Type() == lua.LTString {
+						breadcrumb = append(breadcrumb, crumb.String())
+					}
+				})
+				tab.Breadcrumb = breadcrumb
+			}
+
+			// Handle metadata object
+			if metadataValue := tabTable.RawGetString("Metadata"); metadataValue.Type() == lua.LTTable {
+				metadataTable := metadataValue.(*lua.LTable)
+				metadata := make(map[string]interface{})
+				metadataTable.ForEach(func(key, val lua.LValue) {
+					if key.Type() == lua.LTString && val.Type() == lua.LTString {
+						metadata[key.String()] = val.String()
+					}
+				})
+				tab.Metadata = metadata
+			}
+
+			tabs = append(tabs, tab)
+		})
+
+		err := gpm.api.SetTabs(tabs)
+		if err != nil {
+			L.Push(lua.LString(fmt.Sprintf("failed to set tabs: %v", err)))
+			return 1
+		}
+		return 0
+	}))
+	L.SetField(apiTable, "get_breadcrumb_trail", L.NewFunction(func(L *lua.LState) int {
+		breadcrumb := gpm.api.GetBreadcrumbTrail()
+		resultTable := L.NewTable()
+		for i, crumb := range breadcrumb {
+			L.RawSetInt(resultTable, i+1, lua.LString(crumb))
+		}
+		L.Push(resultTable)
+		return 1
+	}))
+	L.SetField(apiTable, "set_breadcrumb_trail", L.NewFunction(func(L *lua.LState) int {
+		breadcrumbTable := L.CheckTable(1)
+		breadcrumb := make([]string, 0, breadcrumbTable.Len())
+		breadcrumbTable.ForEach(func(_, crumb lua.LValue) {
+			if crumb.Type() == lua.LTString {
+				breadcrumb = append(breadcrumb, crumb.String())
+			}
+		})
+		gpm.api.SetBreadcrumbTrail(breadcrumb)
+		return 0
+	}))
+	L.SetField(apiTable, "show_input_dialog", L.NewFunction(func(L *lua.LState) int {
+		title := L.CheckString(1)
+		placeholder := L.CheckString(2)
+		submitCommand := L.CheckString(3)
+		cancelCommand := L.CheckString(4)
+		gpm.api.ShowInputDialog(title, placeholder, submitCommand, cancelCommand)
+		return 0
+	}))
+
+	L.SetField(apiTable, "log", L.NewFunction(func(L *lua.LState) int {
+		message := L.CheckString(1)
+		logger.PluginInfo("multicluster", message)
+		return 0
+	}))
+
+	// Multi-cluster API functions
+	L.SetField(apiTable, "get_all_clusters", L.NewFunction(func(L *lua.LState) int {
+		allClusters := gpm.GetAllClusters()
+		resultTable := L.NewTable()
+
+		// Convert map to array for Lua
+		clusterArray := make([]*ClusterContext, 0, len(allClusters))
+		for _, cluster := range allClusters {
+			clusterArray = append(clusterArray, cluster)
+		}
+
+		for i, cluster := range clusterArray {
+			clusterTable := L.NewTable()
+			L.SetField(clusterTable, "ID", lua.LString(cluster.ID))
+			L.SetField(clusterTable, "Name", lua.LString(cluster.Name))
+			L.SetField(clusterTable, "Namespace", lua.LString(cluster.Namespace))
+			L.SetField(clusterTable, "Kubeconfig", lua.LString("")) // Could be added if needed
+			L.SetField(clusterTable, "Index", lua.LNumber(i))
+			L.SetField(clusterTable, "IsActive", lua.LBool(gpm.currentCluster == cluster.ID))
+
+			// Add tabs if available
+			if cluster.Tabs != nil {
+				tabsTable := L.NewTable()
+				for j, tab := range cluster.Tabs {
+					tabTable := L.NewTable()
+					L.SetField(tabTable, "ID", lua.LString(tab.ID))
+					L.SetField(tabTable, "Title", lua.LString(tab.Title))
+					L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+					L.SetField(tabTable, "CurrentIndex", lua.LNumber(tab.CurrentIndex))
+
+					// Handle breadcrumb
+					if tab.Breadcrumb != nil {
+						breadcrumbTable := L.NewTable()
+						for k, crumb := range tab.Breadcrumb {
+							L.RawSetInt(breadcrumbTable, k+1, lua.LString(crumb))
+						}
+						L.SetField(tabTable, "Breadcrumb", breadcrumbTable)
+					}
+
+					// Handle metadata
+					if tab.Metadata != nil {
+						metadataTable := L.NewTable()
+						for k, v := range tab.Metadata {
+							L.SetField(metadataTable, k, lua.LString(fmt.Sprintf("%v", v)))
+						}
+						L.SetField(tabTable, "Metadata", metadataTable)
+					}
+
+					L.RawSetInt(tabsTable, j+1, tabTable)
+				}
+				L.SetField(clusterTable, "Tabs", tabsTable)
+			}
+
+			// Add breadcrumb if available
+			if cluster.Breadcrumb != nil {
+				breadcrumbTable := L.NewTable()
+				for j, crumb := range cluster.Breadcrumb {
+					L.RawSetInt(breadcrumbTable, j+1, lua.LString(crumb))
+				}
+				L.SetField(clusterTable, "Breadcrumb", breadcrumbTable)
+			}
+
+			L.RawSetInt(resultTable, i+1, clusterTable)
+		}
+		L.Push(resultTable)
+		return 1
+	}))
+
+	L.SetField(apiTable, "get_current_cluster", L.NewFunction(func(L *lua.LState) int {
+		currentCluster := gpm.GetCurrentCluster()
+		if currentCluster == nil {
+			L.Push(lua.LNil)
+			return 1
+		}
+
+		clusterTable := L.NewTable()
+		L.SetField(clusterTable, "ID", lua.LString(currentCluster.ID))
+		L.SetField(clusterTable, "Name", lua.LString(currentCluster.Name))
+		L.SetField(clusterTable, "Namespace", lua.LString(currentCluster.Namespace))
+		L.SetField(clusterTable, "Kubeconfig", lua.LString("")) // Could be added if needed
+		L.SetField(clusterTable, "Index", lua.LNumber(0))       // Could be calculated if needed
+		L.SetField(clusterTable, "IsActive", lua.LBool(true))
+		L.Push(clusterTable)
+		return 1
+	}))
+
+	L.SetField(apiTable, "sync_current_cluster_session", L.NewFunction(func(L *lua.LState) int {
+		currentCluster := gpm.GetCurrentCluster()
+		if currentCluster == nil {
+			L.Push(lua.LBool(false))
+			return 1
+		}
+
+		// Get current tabs
+		tabs, err := gpm.api.GetTabs()
+		if err == nil {
+			if err := gpm.SetClusterTabs(currentCluster.ID, tabs); err != nil {
+				logger.Warn(fmt.Sprintf("Failed to update cluster tabs: %v", err))
+			}
+		}
+
+		// Get current breadcrumb
+		breadcrumb := gpm.api.GetBreadcrumbTrail()
+		if len(breadcrumb) > 0 {
+			if err := gpm.SetClusterBreadcrumb(currentCluster.ID, breadcrumb); err != nil {
+				logger.Warn(fmt.Sprintf("Failed to update cluster breadcrumb: %v", err))
+			}
+		}
+
+		// Update namespace in cluster context
+		currentNamespace := gpm.api.GetCurrentNamespace()
+		if err := gpm.SetClusterNamespace(currentCluster.ID, currentNamespace); err != nil {
+			logger.Warn(fmt.Sprintf("Failed to update cluster namespace: %v", err))
+		}
+
+		L.Push(lua.LBool(true))
+		return 1
+	}))
+
+	L.SetGlobal("k8s_tui", apiTable)
 }
 
 // AddCluster adds a new cluster context to the global plugin manager
@@ -166,6 +741,34 @@ func (gpm *GlobalPluginManager) SetClusterNamespace(clusterID, namespace string)
 	}
 
 	logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Set namespace %s for cluster %s (%s)", namespace, cluster.Name, clusterID))
+	return nil
+}
+
+// SetClusterTabs sets the tabs for a specific cluster
+func (gpm *GlobalPluginManager) SetClusterTabs(clusterID string, tabs []TabInfo) error {
+	gpm.mu.Lock()
+	defer gpm.mu.Unlock()
+
+	cluster, exists := gpm.clusters[clusterID]
+	if !exists {
+		return fmt.Errorf("cluster %s not found", clusterID)
+	}
+
+	cluster.Tabs = tabs
+	return nil
+}
+
+// SetClusterBreadcrumb sets the breadcrumb for a specific cluster
+func (gpm *GlobalPluginManager) SetClusterBreadcrumb(clusterID string, breadcrumb []string) error {
+	gpm.mu.Lock()
+	defer gpm.mu.Unlock()
+
+	cluster, exists := gpm.clusters[clusterID]
+	if !exists {
+		return fmt.Errorf("cluster %s not found", clusterID)
+	}
+
+	cluster.Breadcrumb = breadcrumb
 	return nil
 }
 

@@ -117,6 +117,11 @@ func (pm *PluginManager) setupBasicLuaAPI(L *lua.LState) {
 		return 0
 	}))
 
+	// Multi-cluster API functions
+	L.SetField(apiTable, "get_all_clusters", L.NewFunction(plugin.luaGetAllClusters))
+	L.SetField(apiTable, "get_current_cluster", L.NewFunction(plugin.luaGetCurrentCluster))
+	L.SetField(apiTable, "sync_current_cluster_session", L.NewFunction(plugin.luaSyncCurrentClusterSession))
+
 	L.SetGlobal("k8s_tui", apiTable)
 }
 
@@ -256,6 +261,144 @@ func (p *basicLuaPlugin) luaSetBreadcrumbTrail(L *lua.LState) int {
 	})
 	p.api.SetBreadcrumbTrail(breadcrumb)
 	return 0
+}
+
+func (p *basicLuaPlugin) luaGetAllClusters(L *lua.LState) int {
+	if p.api.globalManager == nil {
+		logger.Error("🔌 DEBUG: globalManager is nil!")
+		L.Push(lua.LNil)
+		return 1
+	}
+
+	allClusters := p.api.globalManager.GetAllClusters()
+	logger.Info(fmt.Sprintf("🔌 DEBUG: luaGetAllClusters called, found %d clusters", len(allClusters)))
+	for id, cluster := range allClusters {
+		logger.Info(fmt.Sprintf("🔌 DEBUG: Cluster %s: Name=%s, Namespace=%s, Tabs=%d, Breadcrumb=%d",
+			id, cluster.Name, cluster.Namespace, len(cluster.Tabs), len(cluster.Breadcrumb)))
+	}
+	resultTable := L.NewTable()
+
+	index := 0
+	for id, cluster := range allClusters {
+		logger.Info(fmt.Sprintf("🔌 DEBUG: Building Lua table for cluster %d: %s", index, id))
+		clusterTable := L.NewTable()
+		L.SetField(clusterTable, "Index", lua.LNumber(index))
+		L.SetField(clusterTable, "ID", lua.LString(id))
+		L.SetField(clusterTable, "Name", lua.LString(cluster.Name))
+		L.SetField(clusterTable, "Namespace", lua.LString(cluster.Namespace))
+		logger.Info(fmt.Sprintf("🔌 DEBUG: Set basic fields for cluster %d", index))
+
+		// Check if this is the active cluster
+		currentCluster := p.api.globalManager.GetCurrentCluster()
+		isActive := currentCluster != nil && currentCluster.ID == id
+		L.SetField(clusterTable, "IsActive", lua.LBool(isActive))
+
+		// Get kubeconfig path from the client
+		kubeconfigPath := cluster.Client.KubeconfigPath
+		if kubeconfigPath == "" && cluster.Client.Config != nil && cluster.Client.Config.Host != "" {
+			kubeconfigPath = cluster.Client.Config.Host
+		}
+		L.SetField(clusterTable, "Kubeconfig", lua.LString(kubeconfigPath))
+
+		// Add tabs
+		tabsTable := L.NewTable()
+		for i, tab := range cluster.Tabs {
+			tabTable := L.NewTable()
+			L.SetField(tabTable, "ID", lua.LString(tab.ID))
+			L.SetField(tabTable, "Title", lua.LString(tab.Title))
+			L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+			L.SetField(tabTable, "CurrentIndex", lua.LNumber(tab.CurrentIndex))
+
+			breadcrumbTable := L.NewTable()
+			for j, crumb := range tab.Breadcrumb {
+				L.RawSetInt(breadcrumbTable, j+1, lua.LString(crumb))
+			}
+			L.SetField(tabTable, "Breadcrumb", breadcrumbTable)
+
+			metadataTable := L.NewTable()
+			if tab.Metadata != nil {
+				for k, v := range tab.Metadata {
+					L.SetField(metadataTable, k, lua.LString(fmt.Sprintf("%v", v)))
+				}
+			}
+			L.SetField(tabTable, "Metadata", metadataTable)
+
+			L.RawSetInt(tabsTable, i+1, tabTable)
+		}
+		L.SetField(clusterTable, "Tabs", tabsTable)
+
+		// Add breadcrumb
+		breadcrumbTable := L.NewTable()
+		for i, crumb := range cluster.Breadcrumb {
+			L.RawSetInt(breadcrumbTable, i+1, lua.LString(crumb))
+		}
+		L.SetField(clusterTable, "Breadcrumb", breadcrumbTable)
+
+		L.RawSetInt(resultTable, index+1, clusterTable)
+		index++
+	}
+
+	L.Push(resultTable)
+	return 1
+}
+
+func (p *basicLuaPlugin) luaGetCurrentCluster(L *lua.LState) int {
+	if p.api.globalManager == nil {
+		L.Push(lua.LNil)
+		return 1
+	}
+
+	currentCluster := p.api.globalManager.GetCurrentCluster()
+	if currentCluster == nil {
+		L.Push(lua.LNil)
+		return 1
+	}
+
+	clusterTable := L.NewTable()
+	L.SetField(clusterTable, "ID", lua.LString(currentCluster.ID))
+	L.SetField(clusterTable, "Name", lua.LString(currentCluster.Name))
+	L.SetField(clusterTable, "Namespace", lua.LString(currentCluster.Namespace))
+	L.SetField(clusterTable, "IsActive", lua.LBool(true))
+
+	// Get kubeconfig path from the client
+	kubeconfigPath := currentCluster.Client.KubeconfigPath
+	if kubeconfigPath == "" && currentCluster.Client.Config != nil && currentCluster.Client.Config.Host != "" {
+		kubeconfigPath = currentCluster.Client.Config.Host
+	}
+	L.SetField(clusterTable, "Kubeconfig", lua.LString(kubeconfigPath))
+
+	L.Push(clusterTable)
+	return 1
+}
+
+func (p *basicLuaPlugin) luaSyncCurrentClusterSession(L *lua.LState) int {
+	if p.api.globalManager == nil {
+		L.Push(lua.LBool(false))
+		return 1
+	}
+
+	currentCluster := p.api.globalManager.GetCurrentCluster()
+	if currentCluster == nil {
+		L.Push(lua.LBool(false))
+		return 1
+	}
+
+	// Get current tabs
+	tabs, err := p.api.GetTabs()
+	if err == nil {
+		if err := p.api.globalManager.SetClusterTabs(currentCluster.ID, tabs); err != nil {
+			logger.Warn(fmt.Sprintf("Failed to update cluster tabs: %v", err))
+		}
+	}
+
+	// Get current breadcrumb
+	breadcrumb := p.api.GetBreadcrumbTrail()
+	if err := p.api.globalManager.SetClusterBreadcrumb(currentCluster.ID, breadcrumb); err != nil {
+		logger.Warn(fmt.Sprintf("Failed to update cluster breadcrumb: %v", err))
+	}
+
+	L.Push(lua.LBool(true))
+	return 1
 }
 
 func parseTabInfo(tbl *lua.LTable) TabInfo {
@@ -1229,6 +1372,47 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			L.Push(resultTable)
 			return 1
 		}))
+
+		// Session management functions for pluginmanager-style plugins
+		L.SetField(apiTable, "get_breadcrumb_trail", L.NewFunction(func(L *lua.LState) int {
+			breadcrumb := pm.api.GetBreadcrumbTrail()
+			resultTable := L.NewTable()
+			for i, crumb := range breadcrumb {
+				L.RawSetInt(resultTable, i+1, lua.LString(crumb))
+			}
+			L.Push(resultTable)
+			return 1
+		}))
+		L.SetField(apiTable, "set_breadcrumb_trail", L.NewFunction(func(L *lua.LState) int {
+			breadcrumbTable := L.CheckTable(1)
+			var breadcrumb []string
+			breadcrumbTable.ForEach(func(key, value lua.LValue) {
+				if value.Type() == lua.LTString {
+					breadcrumb = append(breadcrumb, value.String())
+				}
+			})
+			pm.api.SetBreadcrumbTrail(breadcrumb)
+			return 0
+		}))
+		L.SetField(apiTable, "show_input_dialog", L.NewFunction(func(L *lua.LState) int {
+			title := L.CheckString(1)
+			placeholder := L.CheckString(2)
+			submitCommand := L.CheckString(3)
+			cancelCommand := L.OptString(4, "")
+			pm.api.ShowInputDialog(title, placeholder, submitCommand, cancelCommand)
+			return 0
+		}))
+		L.SetField(apiTable, "log", L.NewFunction(func(L *lua.LState) int {
+			message := L.CheckString(1)
+			logger.PluginInfo(pluginName, message)
+			return 0
+		}))
+
+		// Multi-cluster API functions for pluginmanager-style plugins
+		plugin := &basicLuaPlugin{api: pm.api}
+		L.SetField(apiTable, "get_all_clusters", L.NewFunction(plugin.luaGetAllClusters))
+		L.SetField(apiTable, "get_current_cluster", L.NewFunction(plugin.luaGetCurrentCluster))
+		L.SetField(apiTable, "sync_current_cluster_session", L.NewFunction(plugin.luaSyncCurrentClusterSession))
 
 		L.SetGlobal("k8s_tui", apiTable)
 		logger.Info(fmt.Sprintf("🔌 Plugin Manager: k8s_tui API set up for plugin: %s", pluginName))
