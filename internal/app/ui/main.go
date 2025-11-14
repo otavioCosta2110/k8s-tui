@@ -78,14 +78,15 @@ type MultiClusterModel struct {
 	clusters            []*AppModel
 	currentCluster      int
 	clusterTabComponent *components.TabComponent
-	kubeconfigSelector  tea.Model
-	namespaceSelector   tea.Model
-	pendingKubeconfig   string
-	width               int
-	height              int
 	pluginDir           string
 	pluginManager       *plugins.GlobalPluginManager
 	config              config.AppConfig
+	width               int
+	height              int
+	kubeconfigSelector  *models.KubeconfigSelectorModel
+	namespaceSelector   *models.NamespaceSelectorModel
+	pendingKubeconfig   string
+	pluginArgs          map[string]string
 }
 
 func NewAppModel(cfg cli.Config, pluginManager *plugins.GlobalPluginManager) *AppModel {
@@ -103,7 +104,7 @@ func NewAppModel(cfg cli.Config, pluginManager *plugins.GlobalPluginManager) *Ap
 	}
 	kubeClient, err := resources.NewClient(kubeconfig, cfg.Namespace)
 	if err == nil && kubeClient != nil {
-		return createAppModelWithKubeClient(cfg, appConfig, pluginManager, kubeClient)
+		return createAppModelWithKubeClient(cfg, appConfig, pluginManager, kubeClient, true)
 	}
 
 	_, kubeconfigErr := models.NewKubeconfigModel().InitComponent(nil)
@@ -169,6 +170,103 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 	}
+}
+
+// addClusterTabFromPlugin adds a new cluster tab from a plugin request
+func (m *MultiClusterModel) addClusterTabFromPlugin(kubeconfigPath, clusterName, namespace string) error {
+	logger.Info(fmt.Sprintf("Adding cluster tab from plugin: %s with kubeconfig %s and namespace %s", clusterName, kubeconfigPath, namespace))
+
+	// Create config for new cluster
+	singleCfg := cli.Config{
+		KubeconfigPaths: []string{kubeconfigPath},
+		Namespace:       namespace,
+		PluginDir:       m.pluginDir,
+	}
+
+	// Use the shared plugin manager
+	newCluster := NewAppModel(singleCfg, m.pluginManager)
+
+	// Check if cluster initialization failed
+	if newCluster.errorPopup != nil {
+		return fmt.Errorf("failed to initialize cluster %s", clusterName)
+	}
+
+	m.clusters = append(m.clusters, newCluster)
+	newIndex := len(m.clusters) - 1
+
+	// Get actual cluster name from client if available
+	actualClusterName := clusterName
+	if newCluster.kube.Clientset != nil {
+		actualClusterName = newCluster.kube.GetClusterName()
+	}
+
+	// Add cluster tab
+	m.clusterTabComponent.AddTab(fmt.Sprintf("%d", newIndex), actualClusterName, "cluster")
+
+	// Register cluster with the shared plugin manager
+	clusterID := fmt.Sprintf("%d", newIndex)
+	m.pluginManager.AddClusterWithNamespace(clusterID, actualClusterName, newCluster.kube, newCluster.kube.Namespace)
+
+	logger.Info(fmt.Sprintf("Successfully added cluster tab %s (%s) from plugin", actualClusterName, clusterID))
+
+	return nil
+}
+
+// getClustersForPlugin returns cluster information for plugins
+func (m *MultiClusterModel) getClustersForPlugin() []plugins.ClusterInfo {
+	logger.Info(fmt.Sprintf("DEBUG: getClustersForPlugin called with %d clusters", len(m.clusters)))
+	clusters := make([]plugins.ClusterInfo, 0, len(m.clusters))
+
+	for i, cluster := range m.clusters {
+		clusterName := "Unknown"
+		if cluster.kube.Clientset != nil {
+			clusterName = cluster.kube.GetClusterName()
+		}
+
+		clusterInfo := plugins.ClusterInfo{
+			ID:         fmt.Sprintf("%d", i),
+			Name:       clusterName,
+			Namespace:  cluster.kube.Namespace,
+			Kubeconfig: cluster.kube.KubeconfigPath,
+		}
+		clusters = append(clusters, clusterInfo)
+		logger.Info(fmt.Sprintf("DEBUG: Cluster %d: %s (ID: %s, NS: %s)", i, clusterName, clusterInfo.ID, clusterInfo.Namespace))
+	}
+
+	logger.Info(fmt.Sprintf("DEBUG: getClustersForPlugin returning %d clusters", len(clusters)))
+	return clusters
+}
+
+// switchToClusterFromPlugin switches to a specific cluster from a plugin request
+func (m *MultiClusterModel) switchToClusterFromPlugin(clusterID string) error {
+	logger.Info(fmt.Sprintf("Switching to cluster %s from plugin request", clusterID))
+
+	// Convert clusterID to index
+	clusterIndex := -1
+	if id, err := strconv.Atoi(clusterID); err == nil {
+		clusterIndex = id
+	} else {
+		return fmt.Errorf("invalid cluster ID: %s", clusterID)
+	}
+
+	// Validate cluster index
+	if clusterIndex < 0 || clusterIndex >= len(m.clusters) {
+		return fmt.Errorf("cluster index %d out of range (0-%d)", clusterIndex, len(m.clusters)-1)
+	}
+
+	// Switch to the cluster
+	m.currentCluster = clusterIndex
+	m.clusterTabComponent.SetActiveTab(clusterIndex)
+
+	// Switch to the new cluster in the plugin manager
+	if err := m.pluginManager.SwitchToCluster(clusterID); err != nil {
+		logger.Warn(fmt.Sprintf("Failed to switch to cluster %s: %v", clusterID, err))
+		return err
+	}
+
+	logger.Info(fmt.Sprintf("Successfully switched to cluster %s", clusterID))
+
+	return nil
 }
 
 func (m *AppModel) View() string {
@@ -257,6 +355,10 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 	// Set as global
 	plugins.SetGlobalPluginManager(sharedPluginManager)
 
+	// Set up cluster management callbacks for plugins
+	// These will be set after the MultiClusterModel is created
+	// We'll store them temporarily and set them in the returned model
+
 	clusters := make([]*AppModel, 0, len(cfg.KubeconfigPaths))
 	clusterTabComponent := components.NewTabComponent()
 	for i, kubeconfig := range cfg.KubeconfigPaths {
@@ -304,17 +406,41 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 		}
 	}
 
-	return &MultiClusterModel{
+	model := &MultiClusterModel{
 		clusters:            clusters,
 		currentCluster:      0,
 		clusterTabComponent: clusterTabComponent,
 		pluginDir:           cfg.PluginDir,
 		pluginManager:       sharedPluginManager,
 		config:              initializeAppConfigAndColors(),
+		pluginArgs:          cfg.PluginArgs,
 	}
+
+	// Set up cluster management callbacks for plugins
+	logger.Info("DEBUG: Setting up cluster management callbacks for plugins")
+	sharedPluginManager.GetAPI().SetAddClusterTabCallback(model.addClusterTabFromPlugin)
+	sharedPluginManager.GetAPI().SetGetClustersCallback(model.getClustersForPlugin)
+	sharedPluginManager.GetAPI().SetSwitchToClusterCallback(model.switchToClusterFromPlugin)
+	logger.Info("DEBUG: Cluster management callbacks set")
+
+	return model
 }
 
 func (m *MultiClusterModel) Init() tea.Cmd {
+	// Process plugin CLI arguments here after callbacks are set
+	logger.Info("DEBUG: MultiClusterModel.Init() called")
+	logger.Info(fmt.Sprintf("DEBUG: Plugin args to process: %d", len(m.pluginArgs)))
+
+	if len(m.pluginArgs) > 0 {
+		logger.Info("DEBUG: About to process plugin args")
+		if err := cli.HandlePluginArgs(m.pluginManager, m.pluginArgs); err != nil {
+			logger.Error(fmt.Sprintf("Failed to handle plugin CLI arguments in MultiClusterModel.Init(): %v", err))
+		}
+		// Clear plugin args after processing
+		m.pluginArgs = make(map[string]string)
+		logger.Info("DEBUG: Plugin args processed and cleared")
+	}
+
 	if m.kubeconfigSelector != nil {
 		return m.kubeconfigSelector.Init()
 	}
@@ -640,8 +766,17 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		updated, cmd := m.kubeconfigSelector.Update(msg)
 		if updated == nil {
 			m.kubeconfigSelector = nil // Closed
-		} else {
-			m.kubeconfigSelector = updated
+		} else if selector, ok := updated.(*models.KubeconfigSelectorModel); ok {
+			m.kubeconfigSelector = selector
+		}
+		return m, cmd
+	}
+	if m.namespaceSelector != nil {
+		updated, cmd := m.namespaceSelector.Update(msg)
+		if updated == nil {
+			m.namespaceSelector = nil // Closed
+		} else if selector, ok := updated.(*models.NamespaceSelectorModel); ok {
+			m.namespaceSelector = selector
 		}
 		return m, cmd
 	}
@@ -650,8 +785,8 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if updated == nil {
 			m.namespaceSelector = nil // Closed
 			m.pendingKubeconfig = ""
-		} else {
-			m.namespaceSelector = updated
+		} else if selector, ok := updated.(*models.NamespaceSelectorModel); ok {
+			m.namespaceSelector = selector
 		}
 		return m, cmd
 	}

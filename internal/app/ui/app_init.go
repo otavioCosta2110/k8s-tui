@@ -26,7 +26,7 @@ func initializeAppConfigAndColors() config.AppConfig {
 	return appConfig
 }
 
-func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pluginManager *plugins.GlobalPluginManager, kubeClient *resources.Client) *AppModel {
+func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pluginManager *plugins.GlobalPluginManager, kubeClient *resources.Client, skipPluginArgs bool) *AppModel {
 	var pluginAPI interface{}
 	if pluginManager != nil {
 		pluginAPI = pluginManager.GetAPI()
@@ -58,9 +58,23 @@ func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pl
 
 	setupPluginManagerForKubeClient(appModel, pluginManager, cfg, tabManager)
 
-	initializeTabs(tabManager, header)
-
 	return appModel
+}
+
+func NewAppModelWithSkip(cfg cli.Config, pluginManager *plugins.GlobalPluginManager, skipPluginArgs bool) *AppModel {
+	kubeClient, err := resources.NewClient(cfg.KubeconfigPaths[0], cfg.Namespace)
+	if err != nil {
+		popup := models.NewErrorScreen(err, "Failed to initialize Kubernetes config", "")
+		return &AppModel{
+			errorPopup:    &popup,
+			config:        initializeAppConfigAndColors(),
+			pluginManager: pluginManager,
+			uiInjector:    NewUIInjector(),
+		}
+	}
+
+	appConfig := initializeAppConfigAndColors()
+	return createAppModelWithKubeClient(cfg, appConfig, pluginManager, kubeClient, skipPluginArgs)
 }
 
 func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.GlobalPluginManager, cfg cli.Config, tabManager *models.TabManager) {
@@ -118,9 +132,12 @@ func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.
 
 	appModel.loadPluginUIExtensions()
 
-	if err := cli.HandlePluginArgs(pluginManager, cfg.PluginArgs); err != nil {
-		logger.Error(fmt.Sprintf("Failed to handle plugin CLI arguments: %v", err))
-	}
+	// Skip CLI args processing in individual AppModel - handled in MultiClusterModel
+	// if !skipPluginArgs {
+	//	if err := cli.HandlePluginArgs(pluginManager, cfg.PluginArgs); err != nil {
+	//		logger.Error(fmt.Sprintf("Failed to handle plugin CLI arguments: %v", err))
+	//	}
+	// }
 }
 
 func initializeTabs(tabManager *models.TabManager, header models.HeaderModel) {

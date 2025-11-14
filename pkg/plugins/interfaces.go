@@ -206,6 +206,13 @@ type TabInfo struct {
 	Metadata     map[string]interface{}
 }
 
+type ClusterInfo struct {
+	ID         string
+	Name       string
+	Namespace  string
+	Kubeconfig string
+}
+
 type PluginEvent string
 
 const (
@@ -305,4 +312,9 @@ type PluginAPI interface {
 	GetHelp(resourceType string) (title, content string)
 
 	RegisterHelp(resourceType string, title, content string)
+
+	// Cluster management functions
+	AddClusterTab(kubeconfigPath, clusterName, namespace string) error
+	GetClusters() []ClusterInfo
+	SwitchToCluster(clusterID string) error
 }

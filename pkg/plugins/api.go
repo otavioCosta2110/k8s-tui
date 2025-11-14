@@ -223,6 +223,11 @@ type PluginAPIImpl struct {
 		content string
 	}
 	globalManager *GlobalPluginManager // Reference to global manager for per-cluster namespace support
+
+	// Cluster management callbacks
+	addClusterTabCallback   func(kubeconfigPath, clusterName, namespace string) error
+	getClustersCallback     func() []ClusterInfo
+	switchToClusterCallback func(clusterID string) error
 }
 
 // NewPluginAPI creates a new plugin API instance with all managers initialized
@@ -698,6 +703,18 @@ func (api *PluginAPIImpl) SetShowInputDialogCallback(callback func(title, placeh
 	api.showInputDialogCallback = callback
 }
 
+func (api *PluginAPIImpl) SetAddClusterTabCallback(callback func(kubeconfigPath, clusterName, namespace string) error) {
+	api.addClusterTabCallback = callback
+}
+
+func (api *PluginAPIImpl) SetGetClustersCallback(callback func() []ClusterInfo) {
+	api.getClustersCallback = callback
+}
+
+func (api *PluginAPIImpl) SetSwitchToClusterCallback(callback func(clusterID string) error) {
+	api.switchToClusterCallback = callback
+}
+
 func (api *PluginAPIImpl) GetCurrentResourceType() string {
 	return api.currentResourceType
 }
@@ -956,4 +973,36 @@ func (api *PluginAPIImpl) RegisterHelp(resourceType string, title, content strin
 		content: content,
 	}
 	logger.PluginDebug("api", fmt.Sprintf("Registered custom help for resource type: %s", resourceType))
+}
+
+// AddClusterTab creates a new cluster tab with the specified kubeconfig, name, and namespace
+func (api *PluginAPIImpl) AddClusterTab(kubeconfigPath, clusterName, namespace string) error {
+	if api.addClusterTabCallback == nil {
+		return fmt.Errorf("add cluster tab callback not set")
+	}
+
+	logger.Info(fmt.Sprintf("Plugin API: Adding cluster tab %s with kubeconfig %s and namespace %s", clusterName, kubeconfigPath, namespace))
+	return api.addClusterTabCallback(kubeconfigPath, clusterName, namespace)
+}
+
+// GetClusters returns information about all available clusters
+func (api *PluginAPIImpl) GetClusters() []ClusterInfo {
+	if api.getClustersCallback == nil {
+		logger.Warn("Get clusters callback not set, returning empty slice")
+		return []ClusterInfo{}
+	}
+
+	clusters := api.getClustersCallback()
+	logger.Debug(fmt.Sprintf("Plugin API: Retrieved %d clusters", len(clusters)))
+	return clusters
+}
+
+// SwitchToCluster switches to the specified cluster by ID
+func (api *PluginAPIImpl) SwitchToCluster(clusterID string) error {
+	if api.switchToClusterCallback == nil {
+		return fmt.Errorf("switch to cluster callback not set")
+	}
+
+	logger.Info(fmt.Sprintf("Plugin API: Switching to cluster %s", clusterID))
+	return api.switchToClusterCallback(clusterID)
 }

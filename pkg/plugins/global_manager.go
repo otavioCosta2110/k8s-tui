@@ -613,6 +613,50 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 		return 1
 	}))
 
+	// Cluster management functions for plugins
+	L.SetField(apiTable, "add_cluster_tab", L.NewFunction(func(L *lua.LState) int {
+		kubeconfigPath := L.CheckString(1)
+		clusterName := L.CheckString(2)
+		namespace := L.OptString(3, "default")
+
+		err := gpm.api.AddClusterTab(kubeconfigPath, clusterName, namespace)
+		if err != nil {
+			L.Push(lua.LString(fmt.Sprintf("failed to add cluster tab: %v", err)))
+			return 1
+		}
+		L.Push(lua.LNil)
+		return 1
+	}))
+
+	L.SetField(apiTable, "get_clusters", L.NewFunction(func(L *lua.LState) int {
+		clusters := gpm.api.GetClusters()
+		resultTable := L.NewTable()
+
+		for i, cluster := range clusters {
+			clusterTable := L.NewTable()
+			L.SetField(clusterTable, "ID", lua.LString(cluster.ID))
+			L.SetField(clusterTable, "Name", lua.LString(cluster.Name))
+			L.SetField(clusterTable, "Namespace", lua.LString(cluster.Namespace))
+			L.SetField(clusterTable, "Kubeconfig", lua.LString(cluster.Kubeconfig))
+			L.RawSetInt(resultTable, i+1, clusterTable)
+		}
+
+		L.Push(resultTable)
+		return 1
+	}))
+
+	L.SetField(apiTable, "switch_to_cluster", L.NewFunction(func(L *lua.LState) int {
+		clusterID := L.CheckString(1)
+
+		err := gpm.api.SwitchToCluster(clusterID)
+		if err != nil {
+			L.Push(lua.LString(fmt.Sprintf("failed to switch to cluster: %v", err)))
+			return 1
+		}
+		L.Push(lua.LNil)
+		return 1
+	}))
+
 	L.SetGlobal("k8s_tui", apiTable)
 }
 
@@ -1232,4 +1276,29 @@ func (mc *MultiClusterPluginAPI) DescribeNode(name string) (string, error) {
 
 func (mc *MultiClusterPluginAPI) DescribeServiceAccount(namespace, name string) (string, error) {
 	return mc.api.DescribeServiceAccount(namespace, name)
+}
+
+// AddClusterTab creates a new cluster tab with the specified kubeconfig, name, and namespace
+func (mc *MultiClusterPluginAPI) AddClusterTab(kubeconfigPath, clusterName, namespace string) error {
+	return mc.api.AddClusterTab(kubeconfigPath, clusterName, namespace)
+}
+
+// GetClusters returns information about all available clusters
+func (mc *MultiClusterPluginAPI) GetClusters() []ClusterInfo {
+	return mc.api.GetClusters()
+}
+
+// SetAddClusterTabCallback sets the callback for adding cluster tabs
+func (mc *MultiClusterPluginAPI) SetAddClusterTabCallback(callback func(kubeconfigPath, clusterName, namespace string) error) {
+	mc.api.SetAddClusterTabCallback(callback)
+}
+
+// SetGetClustersCallback sets the callback for getting clusters
+func (mc *MultiClusterPluginAPI) SetGetClustersCallback(callback func() []ClusterInfo) {
+	mc.api.SetGetClustersCallback(callback)
+}
+
+// SetSwitchToClusterCallback sets the callback for switching to clusters
+func (mc *MultiClusterPluginAPI) SetSwitchToClusterCallback(callback func(clusterID string) error) {
+	mc.api.SetSwitchToClusterCallback(callback)
 }

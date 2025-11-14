@@ -10,6 +10,16 @@ import (
 	"github.com/otavioCosta2110/k8s-tui/pkg/plugins"
 )
 
+var (
+	PluginArgs          map[string]string
+	KubeconfigPaths     []string
+	Namespace           string
+	PluginDir           string
+	SessionFile         string
+	SessionClusters     []SessionCluster
+	pluginArgsProcessed = false
+)
+
 type Config struct {
 	KubeconfigPaths []string
 	Namespace       string
@@ -134,6 +144,11 @@ func HandlePluginArgs(pluginManager *plugins.GlobalPluginManager, pluginArgs map
 		return nil
 	}
 
+	if pluginArgsProcessed {
+		fmt.Printf("DEBUG: Plugin args already processed, skipping\n")
+		return nil
+	}
+
 	api := pluginManager.GetAPI()
 	if api == nil {
 		return nil
@@ -141,11 +156,13 @@ func HandlePluginArgs(pluginManager *plugins.GlobalPluginManager, pluginArgs map
 
 	for argName, argValue := range pluginArgs {
 		if api.HasCLIArgument(argName) {
+			fmt.Printf("DEBUG: Processing plugin arg: %s = %s\n", argName, argValue)
 			if err := api.ExecuteCLIArgument(argName, argValue); err != nil {
 				return err
 			}
 		}
 	}
 
+	pluginArgsProcessed = true
 	return nil
 }
