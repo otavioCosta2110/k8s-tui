@@ -341,50 +341,61 @@ function load_session_from_file(filename)
 
   -- Load clusters from session
   local clusters = session_data.clusters or {}
-  local loaded_clusters = {}
-  local active_cluster_id = nil
+  local cluster_configs = {}
+  local active_cluster_index = 0
 
+  -- Prepare cluster configurations
   for i, cluster_data in ipairs(clusters) do
     if k8s_tui.log then
-      k8s_tui.log("DEBUG: Loading cluster " .. i .. ": " .. (cluster_data.Name or "unknown"))
+      k8s_tui.log("DEBUG: Preparing cluster " .. i .. ": " .. (cluster_data.Name or "unknown"))
     end
 
-    -- Add cluster tab using the API
+    -- Create cluster configuration
     local kubeconfig = cluster_data.Kubeconfig or ""
     local name = cluster_data.Name or "Cluster " .. i
     local namespace = cluster_data.Namespace or "default"
     
-    k8s_tui.log("DEBUG: Adding cluster - Name: '" .. name .. "', Namespace: '" .. namespace .. "', Kubeconfig: '" .. kubeconfig .. "'")
+    k8s_tui.log("DEBUG: Preparing cluster - Name: '" .. name .. "', Namespace: '" .. namespace .. "', Kubeconfig: '" .. kubeconfig .. "'")
     
-    local result = k8s_tui.add_cluster_tab(kubeconfig, name, namespace)
+    local cluster_config = {
+      KubeconfigPath = kubeconfig,
+      ClusterName = name,
+      Namespace = namespace
+    }
+    
+    table.insert(cluster_configs, cluster_config)
 
-    if result and result.cluster_id then
-      loaded_clusters[i] = result.cluster_id
-      k8s_tui.log("DEBUG: Added cluster with ID: " .. result.cluster_id)
-
-      -- Store active cluster info
-      if cluster_data.IsActive or (session_data.current_cluster and session_data.current_cluster.Index == (cluster_data.Index or i-1)) then
-        active_cluster_id = result.cluster_id
-      end
-    else
-      k8s_tui.log("ERROR: Failed to add cluster: " .. (cluster_data.Name or "unknown"))
+    -- Determine active cluster index
+    if cluster_data.IsActive or (session_data.current_cluster and session_data.current_cluster.Index == (cluster_data.Index or i-1)) then
+      active_cluster_index = i - 1  -- Convert to 0-based index
     end
   end
 
+  -- Set all cluster tabs at once using the new API
+  k8s_tui.log("DEBUG: Calling set_cluster_tabs with " .. #cluster_configs .. " cluster configurations")
+  local result = k8s_tui.set_cluster_tabs(cluster_configs)
+  
+  if result then
+    k8s_tui.log("ERROR: Failed to set cluster tabs: " .. tostring(result))
+    k8s_tui.set_status("Failed to load session: " .. tostring(result))
+    return "Failed to set cluster tabs: " .. tostring(result), nil
+  end
+
   -- Switch to active cluster
-  if active_cluster_id then
-    k8s_tui.log("DEBUG: Switching to active cluster: " .. active_cluster_id)
+  if #cluster_configs > 0 then
+    local active_cluster_id = tostring(active_cluster_index)
+    k8s_tui.log("DEBUG: Switching to active cluster: " .. active_cluster_id .. " (index: " .. active_cluster_index .. ")")
     local switch_result = k8s_tui.switch_to_cluster(active_cluster_id)
     if switch_result then
-      k8s_tui.set_status("Session loaded: " .. #loaded_clusters .. " cluster(s), active: " .. active_cluster_id)
+      k8s_tui.set_status("Session loaded: " .. #cluster_configs .. " cluster(s), active: " .. active_cluster_id)
       return "Session loaded successfully", nil
     else
       k8s_tui.set_status("Session loaded but failed to switch to active cluster")
       return "Session loaded but failed to switch to active cluster", nil
     end
   else
-    k8s_tui.set_status("Session loaded: " .. #loaded_clusters .. " cluster(s) (no active cluster)")
-    return "Session loaded but no active cluster found", nil
+    k8s_tui.set_status("Session loaded: 0 cluster(s)")
+    return "Session loaded but no clusters found", nil
   end
 end
 

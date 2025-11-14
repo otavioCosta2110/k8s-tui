@@ -226,6 +226,7 @@ type PluginAPIImpl struct {
 
 	// Cluster management callbacks
 	addClusterTabCallback   func(kubeconfigPath, clusterName, namespace string) error
+	setClusterTabsCallback  func(clusters []ClusterTabConfig) error
 	getClustersCallback     func() []ClusterInfo
 	switchToClusterCallback func(clusterID string) error
 }
@@ -715,6 +716,10 @@ func (api *PluginAPIImpl) SetSwitchToClusterCallback(callback func(clusterID str
 	api.switchToClusterCallback = callback
 }
 
+func (api *PluginAPIImpl) SetClusterTabsCallback(callback func(clusters []ClusterTabConfig) error) {
+	api.setClusterTabsCallback = callback
+}
+
 func (api *PluginAPIImpl) GetCurrentResourceType() string {
 	return api.currentResourceType
 }
@@ -983,6 +988,16 @@ func (api *PluginAPIImpl) AddClusterTab(kubeconfigPath, clusterName, namespace s
 
 	logger.Info(fmt.Sprintf("Plugin API: Adding cluster tab %s with kubeconfig %s and namespace %s", clusterName, kubeconfigPath, namespace))
 	return api.addClusterTabCallback(kubeconfigPath, clusterName, namespace)
+}
+
+// SetClusterTabs replaces all cluster tabs with the specified clusters
+func (api *PluginAPIImpl) SetClusterTabs(clusters []ClusterTabConfig) error {
+	if api.setClusterTabsCallback == nil {
+		return fmt.Errorf("set cluster tabs callback not set")
+	}
+
+	logger.Info(fmt.Sprintf("Plugin API: Setting %d cluster tabs", len(clusters)))
+	return api.setClusterTabsCallback(clusters)
 }
 
 // GetClusters returns information about all available clusters

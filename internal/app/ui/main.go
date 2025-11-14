@@ -214,6 +214,80 @@ func (m *MultiClusterModel) addClusterTabFromPlugin(kubeconfigPath, clusterName,
 	return nil
 }
 
+// setClusterTabsFromPlugin replaces all cluster tabs with the specified clusters from a plugin request
+func (m *MultiClusterModel) setClusterTabsFromPlugin(clusters []plugins.ClusterTabConfig) error {
+	logger.Info(fmt.Sprintf("Setting %d cluster tabs from plugin request", len(clusters)))
+
+	// Clear all existing clusters
+	m.clusters = make([]*AppModel, 0)
+
+	// Clear cluster tabs
+	m.clusterTabComponent.ClearTabs()
+
+	// Clear plugin manager clusters
+	if m.pluginManager != nil {
+		// Get all existing cluster IDs to remove them
+		existingClusters := m.pluginManager.GetAllClusters()
+		for clusterID := range existingClusters {
+			m.pluginManager.RemoveCluster(clusterID)
+		}
+	}
+
+	// Add new clusters
+	for i, clusterConfig := range clusters {
+		logger.Info(fmt.Sprintf("Adding cluster %d: %s with kubeconfig %s and namespace %s", i, clusterConfig.ClusterName, clusterConfig.KubeconfigPath, clusterConfig.Namespace))
+
+		// Create config for new cluster
+		singleCfg := cli.Config{
+			KubeconfigPaths: []string{clusterConfig.KubeconfigPath},
+			Namespace:       clusterConfig.Namespace,
+			PluginDir:       m.pluginDir,
+		}
+
+		// Use shared plugin manager
+		newCluster := NewAppModel(singleCfg, m.pluginManager)
+
+		// Check if cluster initialization failed
+		if newCluster.errorPopup != nil {
+			logger.Error(fmt.Sprintf("Failed to initialize cluster %s", clusterConfig.ClusterName))
+			continue // Skip this cluster but continue with others
+		}
+
+		m.clusters = append(m.clusters, newCluster)
+		newIndex := len(m.clusters) - 1
+
+		// Get actual cluster name from client if available
+		actualClusterName := clusterConfig.ClusterName
+		if newCluster.kube.Clientset != nil {
+			actualClusterName = newCluster.kube.GetClusterName()
+		}
+
+		// Add cluster tab
+		m.clusterTabComponent.AddTab(fmt.Sprintf("%d", newIndex), actualClusterName, "cluster")
+
+		// Register cluster with shared plugin manager
+		clusterID := fmt.Sprintf("%d", newIndex)
+		m.pluginManager.AddClusterWithNamespace(clusterID, actualClusterName, newCluster.kube, newCluster.kube.Namespace)
+
+		logger.Info(fmt.Sprintf("Successfully added cluster tab %s (%s) from plugin", actualClusterName, clusterID))
+	}
+
+	// Set current cluster to first one if any clusters exist
+	if len(m.clusters) > 0 {
+		m.currentCluster = 0
+		// Switch to first cluster in plugin manager
+		firstClusterID := fmt.Sprintf("%d", 0)
+		if err := m.pluginManager.SwitchToCluster(firstClusterID); err != nil {
+			logger.Error(fmt.Sprintf("Failed to switch to first cluster: %v", err))
+		}
+	} else {
+		m.currentCluster = -1
+	}
+
+	logger.Info(fmt.Sprintf("Successfully set %d cluster tabs from plugin", len(m.clusters)))
+	return nil
+}
+
 // getClustersForPlugin returns cluster information for plugins
 func (m *MultiClusterModel) getClustersForPlugin() []plugins.ClusterInfo {
 	logger.Info(fmt.Sprintf("DEBUG: getClustersForPlugin called with %d clusters", len(m.clusters)))
@@ -416,6 +490,7 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 	// Set up cluster management callbacks for plugins
 	logger.Info("DEBUG: Setting up cluster management callbacks for plugins")
 	sharedPluginManager.GetAPI().SetAddClusterTabCallback(model.addClusterTabFromPlugin)
+	sharedPluginManager.GetAPI().SetClusterTabsCallback(model.setClusterTabsFromPlugin)
 	sharedPluginManager.GetAPI().SetGetClustersCallback(model.getClustersForPlugin)
 	sharedPluginManager.GetAPI().SetSwitchToClusterCallback(model.switchToClusterFromPlugin)
 	logger.Info("DEBUG: Cluster management callbacks set")

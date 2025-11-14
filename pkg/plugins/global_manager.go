@@ -628,6 +628,39 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 		return 1
 	}))
 
+	L.SetField(apiTable, "set_cluster_tabs", L.NewFunction(func(L *lua.LState) int {
+		clustersTable := L.CheckTable(1)
+		clusters := make([]ClusterTabConfig, 0, clustersTable.Len())
+
+		clustersTable.ForEach(func(key, value lua.LValue) {
+			if value.Type() != lua.LTTable {
+				return
+			}
+			clusterTable := value.(*lua.LTable)
+
+			cluster := ClusterTabConfig{
+				KubeconfigPath: getStringField(clusterTable, "KubeconfigPath"),
+				ClusterName:    getStringField(clusterTable, "ClusterName"),
+				Namespace:      getStringField(clusterTable, "Namespace"),
+			}
+
+			// Handle empty namespace by defaulting to "default"
+			if cluster.Namespace == "" {
+				cluster.Namespace = "default"
+			}
+
+			clusters = append(clusters, cluster)
+		})
+
+		err := gpm.api.SetClusterTabs(clusters)
+		if err != nil {
+			L.Push(lua.LString(fmt.Sprintf("failed to set cluster tabs: %v", err)))
+			return 1
+		}
+		L.Push(lua.LNil)
+		return 1
+	}))
+
 	L.SetField(apiTable, "get_clusters", L.NewFunction(func(L *lua.LState) int {
 		clusters := gpm.api.GetClusters()
 		resultTable := L.NewTable()
@@ -1283,6 +1316,11 @@ func (mc *MultiClusterPluginAPI) AddClusterTab(kubeconfigPath, clusterName, name
 	return mc.api.AddClusterTab(kubeconfigPath, clusterName, namespace)
 }
 
+// SetClusterTabs replaces all cluster tabs with the specified clusters
+func (mc *MultiClusterPluginAPI) SetClusterTabs(clusters []ClusterTabConfig) error {
+	return mc.api.SetClusterTabs(clusters)
+}
+
 // GetClusters returns information about all available clusters
 func (mc *MultiClusterPluginAPI) GetClusters() []ClusterInfo {
 	return mc.api.GetClusters()
@@ -1301,4 +1339,9 @@ func (mc *MultiClusterPluginAPI) SetGetClustersCallback(callback func() []Cluste
 // SetSwitchToClusterCallback sets the callback for switching to clusters
 func (mc *MultiClusterPluginAPI) SetSwitchToClusterCallback(callback func(clusterID string) error) {
 	mc.api.SetSwitchToClusterCallback(callback)
+}
+
+// SetClusterTabsCallback sets the callback for setting cluster tabs
+func (mc *MultiClusterPluginAPI) SetClusterTabsCallback(callback func(clusters []ClusterTabConfig) error) {
+	mc.api.SetClusterTabsCallback(callback)
 }

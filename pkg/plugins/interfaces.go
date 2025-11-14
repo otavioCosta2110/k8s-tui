@@ -213,6 +213,12 @@ type ClusterInfo struct {
 	Kubeconfig string
 }
 
+type ClusterTabConfig struct {
+	KubeconfigPath string
+	ClusterName    string
+	Namespace      string
+}
+
 type PluginEvent string
 
 const (
@@ -315,6 +321,7 @@ type PluginAPI interface {
 
 	// Cluster management functions
 	AddClusterTab(kubeconfigPath, clusterName, namespace string) error
+	SetClusterTabs(clusters []ClusterTabConfig) error
 	GetClusters() []ClusterInfo
 	SwitchToCluster(clusterID string) error
 }
