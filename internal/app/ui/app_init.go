@@ -27,7 +27,11 @@ func initializeAppConfigAndColors() config.AppConfig {
 }
 
 func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pluginManager *plugins.GlobalPluginManager, kubeClient *resources.Client) *AppModel {
-	header := models.NewHeader("K8s TUI", kubeClient)
+	var pluginAPI interface{}
+	if pluginManager != nil {
+		pluginAPI = pluginManager.GetAPI()
+	}
+	header := models.NewHeader("K8s TUI", kubeClient, pluginAPI)
 	header.SetNamespace(cfg.Namespace)
 
 	tabManager := models.NewTabManager(kubeClient, cfg.Namespace, appConfig.KeyBindings)
@@ -87,7 +91,7 @@ func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.
 	})
 
 	pluginManager.GetAPI().SetNamespaceCallback(func(namespace string) {
-		logger.Info(fmt.Sprintf("DEBUG: SetNamespaceCallback called with namespace: %s", namespace))
+		logger.Info(fmt.Sprintf("DEBUG: SetNamespaceCallback called with namespace: %s for cluster", namespace))
 		appModel.header.SetNamespace(namespace)
 		if tabManager != nil {
 			tabManager.SetNamespace(namespace)
@@ -95,9 +99,8 @@ func setupPluginManagerForKubeClient(appModel *AppModel, pluginManager *plugins.
 		if appModel.kube.Clientset != nil {
 			appModel.kube.SetNamespace(namespace)
 		}
-		logger.Info("DEBUG: Called header.SetNamespace, tabManager.SetNamespace, and kube.SetNamespace, now calling UpdateContent")
 		appModel.header.UpdateContent()
-		logger.Info(fmt.Sprintf("Plugin changed namespace to: %s", namespace))
+		logger.Info(fmt.Sprintf("DEBUG: Plugin changed namespace to: %s", namespace))
 	})
 
 	pluginManager.GetAPI().SetStatusCallback(func(message string) {
@@ -138,7 +141,7 @@ func createAppModelWithoutKubeClient(appConfig config.AppConfig, pluginManager *
 	popup := models.NewErrorScreen(err, "Failed to initialize Kubernetes config", "")
 	uiInjector := NewUIInjector()
 	appModel := &AppModel{
-		header:         models.NewHeader("K8s TUI", nil),
+		header:         models.NewHeader("K8s TUI", nil, nil),
 		config:         appConfig,
 		configSelected: true,
 		errorPopup:     &popup,
@@ -160,7 +163,7 @@ func setupPluginManagerForNoKubeClient(appModel *AppModel, pluginManager *plugin
 
 	pluginManager.GetAPI().SetNamespaceCallback(func(namespace string) {
 		logger.Info(fmt.Sprintf("DEBUG: SetNamespaceCallback called with namespace: %s", namespace))
-		appModel.header.SetNamespace(namespace)
+		// appModel.header.SetNamespace(namespace)
 		logger.Info("DEBUG: Called header.SetNamespace, now calling UpdateContent")
 		appModel.header.UpdateContent()
 		logger.Info(fmt.Sprintf("Plugin changed namespace to: %s", namespace))
@@ -185,7 +188,7 @@ func setupPluginManagerForNoKubeClient(appModel *AppModel, pluginManager *plugin
 func createFallbackAppModel(appConfig config.AppConfig, pluginManager *plugins.GlobalPluginManager) *AppModel {
 	uiInjector := NewUIInjector()
 	appModel := &AppModel{
-		header:         models.NewHeader("K8s TUI", nil),
+		header:         models.NewHeader("K8s TUI", nil, nil),
 		config:         appConfig,
 		configSelected: true,
 		helpScreen:     components.NewHelpModel(),

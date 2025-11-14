@@ -29,12 +29,14 @@ type HeaderModel struct {
 	metricsManager   *MetricsManager
 	tabComponent     *components.TabComponent
 	pluginComponents []string
+	pluginAPI        interface{} // Plugin API interface for getting current namespace
 }
 
-func NewHeader(headerText string, kubeconfig *k8s.Client) HeaderModel {
+func NewHeader(headerText string, kubeconfig *k8s.Client, pluginAPI interface{}) HeaderModel {
 	return HeaderModel{
 		content:      headerText,
 		kubeconfig:   kubeconfig,
+		pluginAPI:    pluginAPI,
 		headerStyle:  lipgloss.NewStyle().Height(styles.HeaderSize).Background(lipgloss.Color(customstyles.BackgroundColor)),
 		tabComponent: components.NewTabComponent(),
 		height:       styles.HeaderSize,
@@ -189,8 +191,20 @@ func (m HeaderModel) getClusterInfo() map[string]string {
 		return info
 	}
 
-	// Use the header's namespace field which is properly updated via SetNamespace
-	info["namespace"] = m.namespace
+	// Use the plugin API to get the current namespace instead of the internal field
+	if m.pluginAPI != nil {
+		// Try to call GetCurrentNamespace on the plugin API
+		if api, ok := m.pluginAPI.(interface{ GetCurrentNamespace() string }); ok {
+			info["namespace"] = api.GetCurrentNamespace()
+		} else {
+			// Fallback to internal namespace field
+			info["namespace"] = m.namespace
+		}
+	} else {
+		// Fallback to internal namespace field
+		info["namespace"] = m.namespace
+	}
+
 	if info["namespace"] == "" {
 		info["namespace"] = "default"
 	}
@@ -325,7 +339,15 @@ func (m *HeaderModel) SetNamespace(namespace string) {
 }
 
 func (m *HeaderModel) UpdateContent() {
-	m.updateContentFromManager()
+	m.updateContent()
+}
+
+func (m *HeaderModel) updateContent() {
+	var metrics Metrics
+	if m.metricsManager != nil {
+		metrics = m.metricsManager.GetMetrics()
+	}
+	m.content = m.buildEnhancedHeader(metrics)
 }
 
 func (m *HeaderModel) updateContentFromManager() {
@@ -337,7 +359,7 @@ func (m *HeaderModel) updateContentFromManager() {
 
 func (m *HeaderModel) RefreshMetrics() {
 	if m.metricsManager != nil {
-		m.updateContentFromManager()
+		m.updateContent()
 	}
 }
 

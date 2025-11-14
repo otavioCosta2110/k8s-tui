@@ -264,6 +264,11 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 		singleCfg := cfg
 		singleCfg.KubeconfigPaths = []string{kubeconfig}
 
+		// If loading from session, use the namespace from the session cluster
+		if cfg.SessionFile != "" && i < len(cfg.SessionClusters) {
+			singleCfg.Namespace = cfg.SessionClusters[i].Namespace
+		}
+
 		appModel := NewAppModel(singleCfg, sharedPluginManager)
 
 		// Check if the app model has an error popup (indicating initialization failure)
@@ -556,11 +561,11 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					logger.Warn(fmt.Sprintf("Failed to switch to cluster %s: %v", clusterID, err))
 				}
 
-				// Update header namespace to match current cluster's namespace
-				currentClusterModel := m.clusters[index]
-				if currentClusterModel.kube.Clientset != nil {
-					currentClusterModel.header.SetNamespace(currentClusterModel.kube.Namespace)
-					currentClusterModel.header.UpdateContent()
+				// Update plugin manager's current namespace to match cluster's namespace
+				if m.clusters[index].kube.Clientset != nil {
+					m.pluginManager.GetAPI().SetCurrentNamespace(m.clusters[index].kube.Namespace)
+					m.clusters[index].header.SetNamespace(m.clusters[index].kube.Namespace)
+					m.clusters[index].header.UpdateContent()
 				}
 
 				if m.width > 0 {

@@ -15,7 +15,7 @@ func TestHeaderRefreshInterval(t *testing.T) {
 }
 
 func TestHeaderRefreshCycle(t *testing.T) {
-	header := NewHeader("Test Header", nil)
+	header := NewHeader("Test Header", nil, nil)
 
 	cmd := header.Init()
 	if cmd != nil {
@@ -47,7 +47,7 @@ func TestHeaderConstants(t *testing.T) {
 }
 
 func TestHeaderViewWithoutKubeconfig(t *testing.T) {
-	header := NewHeader("Test Header", nil)
+	header := NewHeader("Test Header", nil, nil)
 
 	content := header.View()
 

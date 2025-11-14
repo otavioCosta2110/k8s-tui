@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 
@@ -13,6 +15,38 @@ type Config struct {
 	Namespace       string
 	PluginDir       string
 	PluginArgs      map[string]string
+	SessionFile     string
+	SessionClusters []SessionCluster
+}
+
+// SessionCluster represents a cluster in a session file
+type SessionCluster struct {
+	Index      int    `json:"Index"`
+	Name       string `json:"Name"`
+	Namespace  string `json:"Namespace"`
+	Kubeconfig string `json:"Kubeconfig"`
+	IsActive   bool   `json:"IsActive"`
+}
+
+// SessionData represents the structure of a session file
+type SessionData struct {
+	Clusters       []SessionCluster `json:"clusters"`
+	CurrentCluster SessionCluster   `json:"current_cluster"`
+}
+
+// parseSessionFile parses a session file and returns cluster configurations
+func parseSessionFile(sessionPath string) ([]SessionCluster, error) {
+	data, err := os.ReadFile(sessionPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read session file: %v", err)
+	}
+
+	var sessionData SessionData
+	if err := json.Unmarshal(data, &sessionData); err != nil {
+		return nil, fmt.Errorf("failed to parse session JSON: %v", err)
+	}
+
+	return sessionData.Clusters, nil
 }
 
 func ParseFlags() Config {
@@ -50,6 +84,8 @@ func ParseFlags() Config {
 					cfg.Namespace = flagValue
 				case "plugin-dir":
 					cfg.PluginDir = flagValue
+				case "session":
+					cfg.SessionFile = flagValue
 				default:
 					cfg.PluginArgs[flagName] = flagValue
 				}
@@ -66,6 +102,23 @@ func ParseFlags() Config {
 
 	if cfg.PluginDir == "" {
 		cfg.PluginDir = defaultPluginDir
+	}
+
+	// Handle session loading
+	if cfg.SessionFile != "" {
+		clusters, err := parseSessionFile(cfg.SessionFile)
+		if err != nil {
+			fmt.Printf("Warning: Failed to parse session file %s: %v\n", cfg.SessionFile, err)
+		} else {
+			cfg.SessionClusters = clusters
+			// Add kubeconfig paths from session
+			for _, cluster := range clusters {
+				if cluster.Kubeconfig != "" {
+					cfg.KubeconfigPaths = append(cfg.KubeconfigPaths, cluster.Kubeconfig)
+				}
+			}
+			fmt.Printf("Loaded %d clusters from session file: %s\n", len(clusters), cfg.SessionFile)
+		}
 	}
 
 	// If no kubeconfig specified, use empty string to let k8s client use default behavior

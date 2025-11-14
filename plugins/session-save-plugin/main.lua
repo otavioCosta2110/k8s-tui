@@ -64,15 +64,15 @@ function Commands()
 end
 
 function load_session_cli_handler(value)
-  -- Read the session file
-  local file = io.open(value, "r")
-  if not file then
-    return nil, "Failed to open session file: " .. value
-  end
+  k8s_tui.log("DEBUG: load_session_cli_handler called with value: " .. (value or "nil"))
+  k8s_tui.log("DEBUG: Session loading is now handled at application startup level, not plugin level")
+  k8s_tui.log("DEBUG: This handler is kept for compatibility but does not perform cluster creation")
 
-  local content = file:read("*all")
-  file:close()
+  -- Session loading is now handled at the application CLI level
+  -- This handler is kept for backward compatibility but doesn't create clusters
+  k8s_tui.set_status("Session loading handled at application level")
 
+  return "Session loading handled at application level", nil
 end
 
 function session_save()
@@ -210,10 +210,10 @@ function save_session_to_file(filename)
         json = json .. '}'
         json = json .. '}'
       end
-    end
-    json = json .. ']}'
-    json = json .. '}'
-  end
+     end
+     json = json .. ']}'
+     json = json .. '}'
+   end
 
   json = json .. '],"current_cluster":'
 
