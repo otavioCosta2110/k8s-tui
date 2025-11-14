@@ -72,6 +72,19 @@ func TestSessionSavePlugin_MultiClusterAPI(t *testing.T) {
 		}
 	}
 
+	// Verify that the kubeconfig path is correctly stored and accessible
+	allClusters := gpm.GetAllClusters()
+	if len(allClusters) != 1 {
+		t.Fatalf("Expected 1 cluster, got %d", len(allClusters))
+	}
+
+	cluster := allClusters["test-cluster"]
+	if cluster.Kubeconfig != "/test/config" {
+		t.Errorf("Expected kubeconfig '/test/config', got '%s'", cluster.Kubeconfig)
+	} else {
+		t.Logf("✅ Kubeconfig path correctly stored: %s", cluster.Kubeconfig)
+	}
+
 	// Verify that the multi-cluster API functions are working
 	// We can test this by checking if the plugin was able to call them without error
 	// The fact that it loaded successfully indicates the multi-cluster API is working

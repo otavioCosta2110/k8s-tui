@@ -19,6 +19,7 @@ type ClusterContext struct {
 	Client     k8s.Client
 	Settings   map[string]interface{}
 	Namespace  string
+	Kubeconfig string
 	Tabs       []TabInfo
 	Breadcrumb []string
 }
@@ -509,7 +510,7 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 			L.SetField(clusterTable, "ID", lua.LString(cluster.ID))
 			L.SetField(clusterTable, "Name", lua.LString(cluster.Name))
 			L.SetField(clusterTable, "Namespace", lua.LString(cluster.Namespace))
-			L.SetField(clusterTable, "Kubeconfig", lua.LString("")) // Could be added if needed
+			L.SetField(clusterTable, "Kubeconfig", lua.LString(cluster.Kubeconfig))
 			L.SetField(clusterTable, "Index", lua.LNumber(i))
 			L.SetField(clusterTable, "IsActive", lua.LBool(gpm.currentCluster == cluster.ID))
 
@@ -572,8 +573,8 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 		L.SetField(clusterTable, "ID", lua.LString(currentCluster.ID))
 		L.SetField(clusterTable, "Name", lua.LString(currentCluster.Name))
 		L.SetField(clusterTable, "Namespace", lua.LString(currentCluster.Namespace))
-		L.SetField(clusterTable, "Kubeconfig", lua.LString("")) // Could be added if needed
-		L.SetField(clusterTable, "Index", lua.LNumber(0))       // Could be calculated if needed
+		L.SetField(clusterTable, "Kubeconfig", lua.LString(currentCluster.Kubeconfig))
+		L.SetField(clusterTable, "Index", lua.LNumber(0)) // Could be calculated if needed
 		L.SetField(clusterTable, "IsActive", lua.LBool(true))
 		L.Push(clusterTable)
 		return 1
@@ -626,11 +627,12 @@ func (gpm *GlobalPluginManager) AddClusterWithNamespace(id, name string, client 
 	defer gpm.mu.Unlock()
 
 	gpm.clusters[id] = &ClusterContext{
-		ID:        id,
-		Name:      name,
-		Client:    client,
-		Settings:  make(map[string]interface{}),
-		Namespace: namespace,
+		ID:         id,
+		Name:       name,
+		Client:     client,
+		Settings:   make(map[string]interface{}),
+		Namespace:  namespace,
+		Kubeconfig: client.KubeconfigPath,
 	}
 
 	logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Added cluster %s (%s) with namespace %s", name, id, namespace))
