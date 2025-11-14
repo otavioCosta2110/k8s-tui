@@ -1,13 +1,14 @@
-# Session Save Plugin
+# Session Management Plugin
 
-A k8s-tui plugin that allows saving the current session (opened tabs) to a JSON file by pressing Ctrl+S.
+A k8s-tui plugin that provides complete session management - saving and loading sessions (opened tabs, namespaces, clusters) to/from JSON files.
 
 ## Features
 
-- Saves current namespace
-- Saves all opened tabs with their details (ID, title, resource type, breadcrumb)
-- Prompts user for custom filename
-- Outputs to a JSON file in the current directory
+- **Save Sessions**: Save current namespace, all opened tabs with their details (ID, title, resource type, breadcrumb)
+- **Load Sessions**: Restore complete multi-cluster sessions with all tabs and navigation state
+- **Multi-Cluster Support**: Save and load sessions with multiple clusters and their configurations
+- **CLI Integration**: Load sessions via command line argument
+- **Interactive Prompts**: User-friendly file selection dialogs
 
 ## Installation
 
@@ -16,23 +17,46 @@ A k8s-tui plugin that allows saving the current session (opened tabs) to a JSON 
 
 ## Usage
 
-1. Open some tabs in k8s-tui
+### Saving Sessions
+
+1. Open some tabs and navigate in k8s-tui
 2. Press Ctrl+S to save the current session
 3. Enter a filename for the session (e.g., "my-session" or "my-session.json")
 4. Press Enter to save, or Esc to cancel
 5. The session will be saved to the specified file in the current directory
 
-## Key Binding
+### Loading Sessions
 
-To bind the save command to Ctrl+S, add to your k8s-tui config:
+#### Interactive Loading
+1. Press Ctrl+L (if bound) or use the command palette
+2. Execute `session:load` command
+3. Enter the session file path (e.g., "my-session.json")
+4. Press Enter to load, or Esc to cancel
+5. The plugin will recreate all clusters and switch to the active one
+
+#### CLI Loading
+```bash
+k8s-tui --session my-session.json
+```
+
+### Key Bindings
+
+To bind the session commands to keyboard shortcuts, add to your k8s-tui config:
 
 ```json
 {
   "key_bindings": {
-    "ctrl+s": "session:save"
+    "ctrl+s": "session:save",
+    "ctrl+l": "session:load"
   }
 }
 ```
+
+### Commands
+
+- `session:save` - Save current session to JSON file
+- `session:load` - Load session from JSON file
+- `--session <filename>` - CLI argument to load session on startup
 
 ## Output Format
 
@@ -99,6 +123,29 @@ The saved JSON file contains multi-cluster information:
   - `breadcrumb`: Navigation breadcrumb trail
   - `tabs`: Array of open resource tabs with their state
 
+### Session Loading Process
+
+When loading a session, the plugin:
+
+1. **Parses the JSON file** and extracts cluster configurations
+2. **Creates cluster tabs** using `k8s_tui.add_cluster_tab()` for each cluster
+3. **Restores namespaces** and cluster configurations
+4. **Switches to active cluster** using `k8s_tui.switch_to_cluster()`
+5. **Updates status** with loading results
+
+### Error Handling
+
+The plugin provides comprehensive error handling:
+- File not found or read errors
+- Invalid JSON format
+- Missing cluster configurations
+- API function failures
+- Graceful degradation with informative status messages
+
 ### Backwards Compatibility
 
 The plugin can load both the old single-cluster format and the new multi-cluster format.
+
+### Session File Format
+
+The plugin uses the same JSON format as before, ensuring compatibility with existing session files. See the format examples below for details.

@@ -183,6 +183,8 @@ func (m *MultiClusterModel) addClusterTabFromPlugin(kubeconfigPath, clusterName,
 		PluginDir:       m.pluginDir,
 	}
 
+	logger.Info(fmt.Sprintf("DEBUG: Created singleCfg with namespace: '%s'", singleCfg.Namespace))
+
 	// Use the shared plugin manager
 	newCluster := NewAppModel(singleCfg, m.pluginManager)
 
@@ -365,11 +367,6 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 		// Create a copy of cfg with single kubeconfig
 		singleCfg := cfg
 		singleCfg.KubeconfigPaths = []string{kubeconfig}
-
-		// If loading from session, use the namespace from the session cluster
-		if cfg.SessionFile != "" && i < len(cfg.SessionClusters) {
-			singleCfg.Namespace = cfg.SessionClusters[i].Namespace
-		}
 
 		appModel := NewAppModel(singleCfg, sharedPluginManager)
 
