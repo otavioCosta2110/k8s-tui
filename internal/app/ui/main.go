@@ -517,6 +517,15 @@ func (m *AppModel) updateHeaderTabs() {
 	logger.Info("DEBUG: updateHeaderTabs completed")
 }
 
+// getUniqueClusterName creates a unique cluster name by including namespace when needed
+func getUniqueClusterName(baseName, namespace string, index int) string {
+	// If we have multiple clusters (index > 0), make name unique by including namespace
+	if index > 0 {
+		return fmt.Sprintf("%s (%s)", baseName, namespace)
+	}
+	return baseName
+}
+
 func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 	// If no kubeconfigs provided, use default
 	if len(cfg.KubeconfigPaths) == 0 {
@@ -557,7 +566,10 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 		// Add cluster tab with server address
 		clusterName := "Unknown"
 		if appModel.kube.Clientset != nil {
-			clusterName = appModel.kube.GetClusterName()
+			baseName := appModel.kube.GetClusterName()
+			// Make cluster name unique by including namespace if multiple clusters use same kubeconfig
+			uniqueName := getUniqueClusterName(baseName, appModel.kube.Namespace, i)
+			clusterName = uniqueName
 		} else {
 			clusterName = fmt.Sprintf("Cluster %d", i+1)
 		}

@@ -399,6 +399,14 @@ function load_session_from_file(filename)
   for i, cluster_data in ipairs(clusters) do
     local cluster_id = tostring(i - 1) -- 0-based cluster ID
 
+    k8s_tui.log("DEBUG: Cluster " .. cluster_id .. " - session exists: " .. tostring(cluster_data.session ~= nil))
+    if cluster_data.session then
+      k8s_tui.log("DEBUG: Cluster " .. cluster_id .. " - tabs exist: " .. tostring(cluster_data.session.tabs ~= nil))
+      if cluster_data.session.tabs then
+        k8s_tui.log("DEBUG: Cluster " .. cluster_id .. " - tabs count: " .. #cluster_data.session.tabs)
+      end
+    end
+
     if cluster_data.session and cluster_data.session.tabs then
       k8s_tui.log("DEBUG: Restoring tabs for cluster " .. cluster_id .. " (" .. (cluster_data.Name or "unknown") .. ")")
 
@@ -619,36 +627,6 @@ function parse_clusters_array(clusters_str)
     pos = cluster_end + 1
   end
 
-  while pos < (content_end or #clusters_str) do
-    local cluster_start = clusters_str:find('{', pos)
-    if not cluster_start then
-      k8s_tui.log("DEBUG: No more cluster objects found")
-      break
-    end
-
-    k8s_tui.log("DEBUG: Found cluster start at position: " .. cluster_start)
-
-    local cluster_end = find_matching_bracket(clusters_str, cluster_start)
-    if not cluster_end then
-      k8s_tui.log("ERROR: Failed to find cluster end bracket")
-      break
-    end
-
-    k8s_tui.log("DEBUG: Found cluster end at position: " .. cluster_end)
-
-    local cluster_str = clusters_str:sub(cluster_start, cluster_end)
-    local cluster = parse_cluster_object(cluster_str)
-
-    if cluster then
-      table.insert(clusters, cluster)
-      k8s_tui.log("DEBUG: Successfully parsed cluster " .. #clusters)
-    else
-      k8s_tui.log("ERROR: Failed to parse cluster object")
-    end
-
-    pos = cluster_end + 1
-  end
-
   k8s_tui.log("DEBUG: Parsed " .. #clusters .. " clusters total")
   return clusters
 end
@@ -674,12 +652,21 @@ function parse_cluster_object(cluster_str)
 
   -- Extract session data if present
   local session_start = cluster_str:find('"session"%s*:%s*{')
+  k8s_tui.log("DEBUG: parse_cluster_object - session_start: " .. (session_start or "nil"))
   if session_start then
     local bracket_start = cluster_str:find('{', session_start)
     local session_end = find_matching_bracket(cluster_str, bracket_start)
+    k8s_tui.log("DEBUG: parse_cluster_object - bracket_start: " .. (bracket_start or "nil") .. ", session_end: " .. (session_end or "nil"))
     if session_end then
-      cluster.session = parse_session_data(cluster_str:sub(session_start, session_end))
+      local session_content = cluster_str:sub(session_start, session_end)
+      k8s_tui.log("DEBUG: parse_cluster_object - session_content length: " .. #session_content)
+      cluster.session = parse_session_data(session_content)
+      k8s_tui.log("DEBUG: parse_cluster_object - parsed session, tabs count: " .. #(cluster.session and cluster.session.tabs or {}))
+    else
+      k8s_tui.log("ERROR: parse_cluster_object - failed to find session end bracket")
     end
+  else
+    k8s_tui.log("ERROR: parse_cluster_object - no session data found")
   end
 
   return cluster
@@ -702,6 +689,8 @@ end
 function parse_session_data(session_str)
   local session = {}
 
+  k8s_tui.log("DEBUG: parse_session_data - parsing session string length: " .. #session_str)
+
   session.namespace = extract_string_field(session_str, "namespace") or "default"
 
   -- Parse breadcrumb array
@@ -716,12 +705,21 @@ function parse_session_data(session_str)
 
   -- Parse tabs array
   local tabs_start = session_str:find('"tabs"%s*:%s*%[')
+  k8s_tui.log("DEBUG: parse_session_data - looking for tabs, tabs_start: " .. (tabs_start or "nil"))
   if tabs_start then
     local bracket_start = session_str:find('%[', tabs_start)
     local tabs_end = find_matching_bracket(session_str, bracket_start)
+    k8s_tui.log("DEBUG: parse_session_data - bracket_start: " .. (bracket_start or "nil") .. ", tabs_end: " .. (tabs_end or "nil"))
     if tabs_end then
-      session.tabs = parse_tabs_array(session_str:sub(tabs_start, tabs_end))
+      local tabs_content = session_str:sub(bracket_start, tabs_end)
+      k8s_tui.log("DEBUG: parse_session_data - tabs_content length: " .. #tabs_content)
+      session.tabs = parse_tabs_array(tabs_content)
+      k8s_tui.log("DEBUG: parse_session_data - parsed tabs count: " .. #(session.tabs or {}))
+    else
+      k8s_tui.log("ERROR: parse_session_data - failed to find tabs end bracket")
     end
+  else
+    k8s_tui.log("ERROR: parse_session_data - no tabs array found")
   end
 
   return session
@@ -747,38 +745,58 @@ end
 
 function parse_tabs_array(tabs_str)
   local tabs = {}
-  local pos = tabs_str:find('%[') + 1
-  local end_pos = tabs_str:find(']', pos) - 1
+  local bracket_start = tabs_str:find('%[')
+  local bracket_end = find_matching_bracket(tabs_str, bracket_start)
+  local pos = bracket_start + 1
 
-  while pos < end_pos do
+  k8s_tui.log("DEBUG: parse_tabs_array - input string length: " .. #tabs_str)
+  k8s_tui.log("DEBUG: parse_tabs_array - bracket_start: " .. bracket_start .. ", bracket_end: " .. bracket_end)
+
+  while pos < bracket_end do
     local tab_start = tabs_str:find('{', pos)
-    if not tab_start then break end
+    if not tab_start then 
+      k8s_tui.log("DEBUG: parse_tabs_array - no more tab objects found at pos " .. pos)
+      break 
+    end
+
+    k8s_tui.log("DEBUG: parse_tabs_array - found tab start at position: " .. tab_start)
 
     local tab_end = find_matching_bracket(tabs_str, tab_start)
-    if not tab_end then break end
+    if not tab_end then 
+      k8s_tui.log("DEBUG: parse_tabs_array - failed to find tab end bracket")
+      break 
+    end
+
+    k8s_tui.log("DEBUG: parse_tabs_array - found tab end at position: " .. tab_end)
 
     local tab_str = tabs_str:sub(tab_start, tab_end)
     local tab = parse_tab_object(tab_str)
 
     if tab then
       table.insert(tabs, tab)
+      k8s_tui.log("DEBUG: parse_tabs_array - successfully parsed tab " .. #tabs .. " with title: " .. (tab.Title or "nil"))
+    else
+      k8s_tui.log("DEBUG: parse_tabs_array - failed to parse tab object")
     end
 
     pos = tab_end + 1
   end
 
+  k8s_tui.log("DEBUG: parse_tabs_array - returning " .. #tabs .. " tabs total")
   return tabs
 end
 
 function parse_tab_object(tab_str)
   local tab = {}
   
+  k8s_tui.log("DEBUG: parse_tab_object - parsing tab string: " .. tab_str:sub(1, 100) .. "...")
+  
   local id = extract_string_field(tab_str, "ID")
   local title = extract_string_field(tab_str, "Title")
   local resourceType = extract_string_field(tab_str, "ResourceType")
   local currentIndex = extract_number_field(tab_str, "CurrentIndex") or 0
   
-
+  k8s_tui.log("DEBUG: parse_tab_object - extracted - ID: " .. (id or "nil") .. ", Title: " .. (title or "nil") .. ", ResourceType: " .. (resourceType or "nil"))
   
   tab.ID = id
   tab.Title = title
