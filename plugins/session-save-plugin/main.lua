@@ -80,12 +80,12 @@ end
 
 function load_session_cli_handler(value)
   k8s_tui.log("DEBUG: load_session_cli_handler called with value: " .. (value or "nil"))
-  
+
   if not value or value == "" then
     k8s_tui.set_status("Error: Session file path required")
     return "Error: Session file path required", nil
   end
-  
+
   return load_session_from_file(value)
 end
 
@@ -100,11 +100,13 @@ end
 
 function session_save_submit(filename)
   if k8s_tui and k8s_tui.log then
-    k8s_tui.log("DEBUG: session_save_submit called with filename: '" .. (filename or "nil") .. "' (type: " .. type(filename) .. ")")
+    k8s_tui.log("DEBUG: session_save_submit called with filename: '" ..
+    (filename or "nil") .. "' (type: " .. type(filename) .. ")")
   end
   -- For debugging, set status with the received filename
   if k8s_tui and k8s_tui.set_status then
-    k8s_tui.set_status("DEBUG: Received filename: '" .. (filename or "nil") .. "' (len: " .. string.len(filename or "") .. ")")
+    k8s_tui.set_status("DEBUG: Received filename: '" ..
+    (filename or "nil") .. "' (len: " .. string.len(filename or "") .. ")")
   end
   local actual_filename = filename
   if not filename or filename == "" then
@@ -133,9 +135,10 @@ end
 
 function session_load_submit(filename)
   if k8s_tui and k8s_tui.log then
-    k8s_tui.log("DEBUG: session_load_submit called with filename: '" .. (filename or "nil") .. "' (type: " .. type(filename) .. ")")
+    k8s_tui.log("DEBUG: session_load_submit called with filename: '" ..
+    (filename or "nil") .. "' (type: " .. type(filename) .. ")")
   end
-  
+
   local actual_filename = filename
   if not filename or filename == "" then
     actual_filename = "session.json"
@@ -143,7 +146,7 @@ function session_load_submit(filename)
       k8s_tui.log("DEBUG: Using default filename: session.json")
     end
   end
-  
+
   return load_session_from_file(actual_filename)
 end
 
@@ -165,7 +168,8 @@ function save_session_to_file(filename)
   end
 
   if k8s_tui and k8s_tui.log then
-    k8s_tui.log("DEBUG: save_session_to_file called with filename: '" .. (filename or "nil") .. "', using path: '" .. path .. "'")
+    k8s_tui.log("DEBUG: save_session_to_file called with filename: '" ..
+    (filename or "nil") .. "', using path: '" .. path .. "'")
   end
 
   -- Debug: show what we're saving to
@@ -254,10 +258,10 @@ function save_session_to_file(filename)
         json = json .. '}'
         json = json .. '}'
       end
-     end
-     json = json .. ']}'
-     json = json .. '}'
-   end
+    end
+    json = json .. ']}'
+    json = json .. '}'
+  end
 
   json = json .. '],"current_cluster":'
 
@@ -350,35 +354,117 @@ function load_session_from_file(filename)
       k8s_tui.log("DEBUG: Preparing cluster " .. i .. ": " .. (cluster_data.Name or "unknown"))
     end
 
+    -- Validate cluster data
+    if not cluster_data.Kubeconfig or cluster_data.Kubeconfig == "" then
+      k8s_tui.log("ERROR: Cluster " .. i .. " missing kubeconfig path")
+      return "Cluster " .. i .. " missing kubeconfig path", nil
+    end
+
     -- Create cluster configuration
-    local kubeconfig = cluster_data.Kubeconfig or ""
+    local kubeconfig = cluster_data.Kubeconfig
     local name = cluster_data.Name or "Cluster " .. i
     local namespace = cluster_data.Namespace or "default"
-    
-    k8s_tui.log("DEBUG: Preparing cluster - Name: '" .. name .. "', Namespace: '" .. namespace .. "', Kubeconfig: '" .. kubeconfig .. "'")
-    
+
+    k8s_tui.log("DEBUG: Preparing cluster - Name: '" ..
+    name .. "', Namespace: '" .. namespace .. "', Kubeconfig: '" .. kubeconfig .. "'")
+
     local cluster_config = {
       KubeconfigPath = kubeconfig,
       ClusterName = name,
       Namespace = namespace
     }
-    
+
     table.insert(cluster_configs, cluster_config)
 
     -- Determine active cluster index
-    if cluster_data.IsActive or (session_data.current_cluster and session_data.current_cluster.Index == (cluster_data.Index or i-1)) then
-      active_cluster_index = i - 1  -- Convert to 0-based index
+    if cluster_data.IsActive or (session_data.current_cluster and session_data.current_cluster.Index == (cluster_data.Index or i - 1)) then
+      active_cluster_index = i - 1 -- Convert to 0-based index
     end
   end
 
   -- Set all cluster tabs at once using the new API
   k8s_tui.log("DEBUG: Calling set_cluster_tabs with " .. #cluster_configs .. " cluster configurations")
   local result = k8s_tui.set_cluster_tabs(cluster_configs)
-  
+
   if result then
     k8s_tui.log("ERROR: Failed to set cluster tabs: " .. tostring(result))
     k8s_tui.set_status("Failed to load session: " .. tostring(result))
     return "Failed to set cluster tabs: " .. tostring(result), nil
+  end
+
+  -- Restore tabs for each cluster individually
+  local tab_restore_success = true
+  local tab_restore_errors = {}
+
+  for i, cluster_data in ipairs(clusters) do
+    local cluster_id = tostring(i - 1) -- 0-based cluster ID
+
+    if cluster_data.session and cluster_data.session.tabs then
+      k8s_tui.log("DEBUG: Restoring tabs for cluster " .. cluster_id .. " (" .. (cluster_data.Name or "unknown") .. ")")
+
+      -- Convert session tabs to the format expected by set_tabs_for_cluster
+      local tabs_table = {}
+      for j, tab_data in ipairs(cluster_data.session.tabs) do
+        -- Validate tab data
+
+        local tab = {
+          ID = tab_data.ID or ("tab_" .. j),
+          Title = tab_data.Title,
+          ResourceType = tab_data.ResourceType,
+          CurrentIndex = tab_data.CurrentIndex or 0,
+          Breadcrumb = tab_data.Breadcrumb or {},
+          Metadata = tab_data.Metadata or {}
+        }
+        
+        table.insert(tabs_table, tab)
+      end
+
+      -- Validate we have at least one tab
+      if #tabs_table == 0 then
+        k8s_tui.log("WARN: No valid tabs found for cluster " .. cluster_id .. ", creating default tab")
+        table.insert(tabs_table, {
+          ID = "default",
+          Title = "Pods",
+          ResourceType = "Pods",
+          CurrentIndex = 0,
+          Breadcrumb = {},
+          Metadata = {}
+        })
+      end
+
+      -- Debug log the tabs we're about to set
+      k8s_tui.log("DEBUG: Setting " .. #tabs_table .. " tabs for cluster " .. cluster_id)
+      -- Set tabs for this specific cluster
+      local set_tabs_result = k8s_tui.set_tabs_for_cluster(cluster_id, tabs_table)
+      if set_tabs_result then
+        k8s_tui.log("ERROR: Failed to set tabs for cluster " .. cluster_id .. ": " .. tostring(set_tabs_result))
+        table.insert(tab_restore_errors, "Cluster " .. cluster_id .. ": " .. tostring(set_tabs_result))
+        tab_restore_success = false
+      else
+        -- Trigger UI restoration for this cluster
+        local restore_result = k8s_tui.restore_tabs_for_cluster(cluster_id)
+        if restore_result then
+          k8s_tui.log("ERROR: Failed to restore tabs for cluster " .. cluster_id .. ": " .. tostring(restore_result))
+          table.insert(tab_restore_errors, "Cluster " .. cluster_id .. " restore: " .. tostring(restore_result))
+          tab_restore_success = false
+        else
+          -- Successfully restored tabs to UI
+        end
+      end
+
+      -- Restore breadcrumb for this cluster if available
+      if cluster_data.session.breadcrumb and #cluster_data.session.breadcrumb > 0 then
+        k8s_tui.log("DEBUG: Restoring breadcrumb for cluster " .. cluster_id)
+        local breadcrumb_result = k8s_tui.set_breadcrumb_for_cluster(cluster_id, cluster_data.session.breadcrumb)
+        if breadcrumb_result then
+          k8s_tui.log("ERROR: Failed to set breadcrumb for cluster " .. cluster_id .. ": " .. tostring(breadcrumb_result))
+          table.insert(tab_restore_errors, "Cluster " .. cluster_id .. " breadcrumb: " .. tostring(breadcrumb_result))
+          tab_restore_success = false
+        else
+          k8s_tui.log("DEBUG: Successfully restored breadcrumb for cluster " .. cluster_id)
+        end
+      end
+    end
   end
 
   -- Switch to active cluster
@@ -386,8 +472,15 @@ function load_session_from_file(filename)
     local active_cluster_id = tostring(active_cluster_index)
     k8s_tui.log("DEBUG: Switching to active cluster: " .. active_cluster_id .. " (index: " .. active_cluster_index .. ")")
     local switch_result = k8s_tui.switch_to_cluster(active_cluster_id)
-    if switch_result then
-      k8s_tui.set_status("Session loaded: " .. #cluster_configs .. " cluster(s), active: " .. active_cluster_id)
+
+    local status_msg = "Session loaded: " .. #cluster_configs .. " cluster(s)"
+    if not tab_restore_success then
+      status_msg = status_msg .. " (some tab restore errors)"
+      k8s_tui.set_status(status_msg)
+      return "Session loaded with some tab restore errors: " .. table.concat(tab_restore_errors, "; "), nil
+    elseif switch_result then
+      status_msg = status_msg .. ", active: " .. active_cluster_id
+      k8s_tui.set_status(status_msg)
       return "Session loaded successfully", nil
     else
       k8s_tui.set_status("Session loaded but failed to switch to active cluster")
@@ -402,46 +495,46 @@ end
 function parse_session_json(content)
   -- Simple JSON parser for our specific session format
   -- This is a basic implementation that handles the session file structure
-  
+
   local session_data = {}
-  
+
   k8s_tui.log("DEBUG: Parsing session JSON, content length: " .. #content)
-  
+
   -- Extract clusters array
   local clusters_start = content:find('"clusters"%s*:%s*%[')
   if not clusters_start then
     k8s_tui.log("ERROR: No clusters array found in session file")
     return nil
   end
-  
+
   k8s_tui.log("DEBUG: Found clusters at position: " .. clusters_start)
-  
+
   local bracket_start = content:find('%[', clusters_start)
   k8s_tui.log("DEBUG: Found bracket at position: " .. (bracket_start or "nil"))
-  
+
   if not bracket_start then
     k8s_tui.log("ERROR: Could not find opening bracket")
     return nil
   end
-  
+
   local clusters_end = find_matching_bracket(content, bracket_start)
   if not clusters_end then
     k8s_tui.log("ERROR: Invalid clusters array format")
     return nil
   end
-  
+
   k8s_tui.log("DEBUG: Clusters end at position: " .. clusters_end)
-  
+
   local clusters_end = find_matching_bracket(content, content:find('%[', clusters_start))
   if not clusters_end then
     k8s_tui.log("ERROR: Invalid clusters array format")
     return nil
   end
-  
+
   -- Extract content inside the brackets (excluding the brackets themselves)
   local clusters_content = content:sub(bracket_start + 1, clusters_end - 1)
   session_data.clusters = parse_clusters_array(clusters_content)
-  
+
   -- Extract current_cluster
   local current_start = content:find('"current_cluster"%s*:%s*{', clusters_end)
   if current_start then
@@ -452,14 +545,14 @@ function parse_session_json(content)
       session_data.current_cluster = parse_current_cluster(current_str)
     end
   end
-  
+
   return session_data
 end
 
 function find_matching_bracket(str, start_pos)
   local bracket = str:sub(start_pos, start_pos)
   local open_char, close_char
-  
+
   if bracket == '[' then
     open_char, close_char = '[', ']'
   elseif bracket == '{' then
@@ -467,10 +560,10 @@ function find_matching_bracket(str, start_pos)
   else
     return nil
   end
-  
+
   local depth = 1
   local pos = start_pos + 1
-  
+
   while pos <= #str and depth > 0 do
     local char = str:sub(pos, pos)
     if char == open_char then
@@ -480,7 +573,7 @@ function find_matching_bracket(str, start_pos)
     end
     pos = pos + 1
   end
-  
+
   if depth == 0 then
     return pos - 1
   else
@@ -490,95 +583,95 @@ end
 
 function parse_clusters_array(clusters_str)
   local clusters = {}
-  
+
   k8s_tui.log("DEBUG: Parsing clusters array, string length: " .. #clusters_str)
-  
+
   -- Extract individual cluster objects - clusters_str should start with { and end with }
-  local pos = 1  -- Start after opening {
-  
+  local pos = 1 -- Start after opening {
+
   while pos < #clusters_str do
     local cluster_start = clusters_str:find('{', pos)
-    if not cluster_start then 
+    if not cluster_start then
       k8s_tui.log("DEBUG: No more cluster objects found")
-      break 
+      break
     end
-    
+
     k8s_tui.log("DEBUG: Found cluster start at position: " .. cluster_start)
-    
+
     local cluster_end = find_matching_bracket(clusters_str, cluster_start)
-    if not cluster_end then 
+    if not cluster_end then
       k8s_tui.log("ERROR: Failed to find cluster end bracket")
-      break 
+      break
     end
-    
+
     k8s_tui.log("DEBUG: Found cluster end at position: " .. cluster_end)
-    
+
     local cluster_str = clusters_str:sub(cluster_start, cluster_end)
     local cluster = parse_cluster_object(cluster_str)
-    
+
     if cluster then
       table.insert(clusters, cluster)
       k8s_tui.log("DEBUG: Successfully parsed cluster " .. #clusters)
     else
       k8s_tui.log("ERROR: Failed to parse cluster object")
     end
-    
+
     pos = cluster_end + 1
   end
-  
+
   while pos < (content_end or #clusters_str) do
     local cluster_start = clusters_str:find('{', pos)
-    if not cluster_start then 
+    if not cluster_start then
       k8s_tui.log("DEBUG: No more cluster objects found")
-      break 
+      break
     end
-    
+
     k8s_tui.log("DEBUG: Found cluster start at position: " .. cluster_start)
-    
+
     local cluster_end = find_matching_bracket(clusters_str, cluster_start)
-    if not cluster_end then 
+    if not cluster_end then
       k8s_tui.log("ERROR: Failed to find cluster end bracket")
-      break 
+      break
     end
-    
+
     k8s_tui.log("DEBUG: Found cluster end at position: " .. cluster_end)
-    
+
     local cluster_str = clusters_str:sub(cluster_start, cluster_end)
     local cluster = parse_cluster_object(cluster_str)
-    
+
     if cluster then
       table.insert(clusters, cluster)
       k8s_tui.log("DEBUG: Successfully parsed cluster " .. #clusters)
     else
       k8s_tui.log("ERROR: Failed to parse cluster object")
     end
-    
+
     pos = cluster_end + 1
   end
-  
+
   k8s_tui.log("DEBUG: Parsed " .. #clusters .. " clusters total")
   return clusters
 end
 
 function parse_cluster_object(cluster_str)
   local cluster = {}
-  
+
   -- Extract Index
   cluster.Index = extract_number_field(cluster_str, "Index")
-  
+
   -- Extract Name
   cluster.Name = extract_string_field(cluster_str, "Name")
-  
+
   -- Extract Namespace
   cluster.Namespace = extract_string_field(cluster_str, "Namespace")
-  
+
   -- Extract Kubeconfig
   cluster.Kubeconfig = extract_string_field(cluster_str, "Kubeconfig")
-  
+
   -- Extract IsActive
   local is_active = extract_string_field(cluster_str, "IsActive")
   cluster.IsActive = (is_active == "true")
-  
+
   -- Extract session data if present
   local session_start = cluster_str:find('"session"%s*:%s*{')
   if session_start then
@@ -588,29 +681,29 @@ function parse_cluster_object(cluster_str)
       cluster.session = parse_session_data(cluster_str:sub(session_start, session_end))
     end
   end
-  
+
   return cluster
 end
 
 function parse_current_cluster(current_str)
   local current = {}
-  
+
   current.Index = extract_number_field(current_str, "Index")
   current.Name = extract_string_field(current_str, "Name")
   current.Namespace = extract_string_field(current_str, "Namespace")
   current.Kubeconfig = extract_string_field(current_str, "Kubeconfig")
-  
+
   local is_active = extract_string_field(current_str, "IsActive")
   current.IsActive = (is_active == "true")
-  
+
   return current
 end
 
 function parse_session_data(session_str)
   local session = {}
-  
+
   session.namespace = extract_string_field(session_str, "namespace") or "default"
-  
+
   -- Parse breadcrumb array
   local breadcrumb_start = session_str:find('"breadcrumb"%s*:%s*%[')
   if breadcrumb_start then
@@ -620,7 +713,7 @@ function parse_session_data(session_str)
       session.breadcrumb = parse_string_array(session_str:sub(breadcrumb_start, breadcrumb_end))
     end
   end
-  
+
   -- Parse tabs array
   local tabs_start = session_str:find('"tabs"%s*:%s*%[')
   if tabs_start then
@@ -630,7 +723,7 @@ function parse_session_data(session_str)
       session.tabs = parse_tabs_array(session_str:sub(tabs_start, tabs_end))
     end
   end
-  
+
   return session
 end
 
@@ -638,7 +731,7 @@ function parse_string_array(array_str)
   local items = {}
   local pos = array_str:find('%[') + 1
   local end_pos = array_str:find(']', pos) - 1
-  
+
   while pos < end_pos do
     local item_start, item_end = array_str:find('"([^"]*)"', pos)
     if item_start and item_start <= end_pos then
@@ -648,7 +741,7 @@ function parse_string_array(array_str)
       break
     end
   end
-  
+
   return items
 end
 
@@ -656,35 +749,42 @@ function parse_tabs_array(tabs_str)
   local tabs = {}
   local pos = tabs_str:find('%[') + 1
   local end_pos = tabs_str:find(']', pos) - 1
-  
+
   while pos < end_pos do
     local tab_start = tabs_str:find('{', pos)
     if not tab_start then break end
-    
+
     local tab_end = find_matching_bracket(tabs_str, tab_start)
     if not tab_end then break end
-    
+
     local tab_str = tabs_str:sub(tab_start, tab_end)
     local tab = parse_tab_object(tab_str)
-    
+
     if tab then
       table.insert(tabs, tab)
     end
-    
+
     pos = tab_end + 1
   end
-  
+
   return tabs
 end
 
 function parse_tab_object(tab_str)
   local tab = {}
   
-  tab.ID = extract_string_field(tab_str, "ID")
-  tab.Title = extract_string_field(tab_str, "Title")
-  tab.ResourceType = extract_string_field(tab_str, "ResourceType")
-  tab.CurrentIndex = extract_number_field(tab_str, "CurrentIndex") or 0
+  local id = extract_string_field(tab_str, "ID")
+  local title = extract_string_field(tab_str, "Title")
+  local resourceType = extract_string_field(tab_str, "ResourceType")
+  local currentIndex = extract_number_field(tab_str, "CurrentIndex") or 0
   
+
+  
+  tab.ID = id
+  tab.Title = title
+  tab.ResourceType = resourceType
+  tab.CurrentIndex = currentIndex
+
   -- Parse breadcrumb array
   local breadcrumb_start = tab_str:find('"Breadcrumb"%s*:%s*%[')
   if breadcrumb_start then
@@ -694,7 +794,7 @@ function parse_tab_object(tab_str)
       tab.Breadcrumb = parse_string_array(tab_str:sub(breadcrumb_start, breadcrumb_end))
     end
   end
-  
+
   -- Parse Metadata object
   local metadata_start = tab_str:find('"Metadata"%s*:%s*{')
   if metadata_start then
@@ -704,18 +804,18 @@ function parse_tab_object(tab_str)
       tab.Metadata = parse_metadata_object(tab_str:sub(metadata_start, metadata_end))
     end
   end
-  
+
   return tab
 end
 
 function parse_metadata_object(metadata_str)
   local metadata = {}
-  
+
   -- Simple key-value parsing for metadata
   for key, value in metadata_str:gmatch('"(.-)"%s*:%s*"([^"]*)"') do
     metadata[key] = value
   end
-  
+
   return metadata
 end
 

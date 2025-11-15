@@ -26,10 +26,12 @@ type ClusterContext struct {
 
 // GlobalPluginManager manages a single plugin instance across multiple clusters
 type GlobalPluginManager struct {
-	*PluginManager // Embed the existing plugin manager
-	mu             sync.RWMutex
-	clusters       map[string]*ClusterContext // cluster ID -> context
-	currentCluster string                     // current active cluster ID
+	*PluginManager                // Embed the existing plugin manager
+	mu                            sync.RWMutex
+	clusters                      map[string]*ClusterContext                   // cluster ID -> context
+	currentCluster                string                                       // current active cluster ID
+	restoreTabsForClusterCallback func(clusterID string) error                 // Callback for restoring tabs to specific clusters
+	setTabsForClusterCallback     func(clusterID string, tabs []TabInfo) error // Callback for setting tabs in UI for specific clusters
 }
 
 // NewGlobalPluginManager creates a new global plugin manager
@@ -793,6 +795,135 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 		return 1
 	}))
 
+	L.SetField(apiTable, "set_tabs_for_cluster", L.NewFunction(func(L *lua.LState) int {
+		clusterID := L.CheckString(1)
+		tabsTable := L.CheckTable(2)
+
+		// Validate cluster ID
+		if clusterID == "" {
+			L.Push(lua.LString("cluster ID cannot be empty"))
+			return 1
+		}
+
+		tabs := make([]TabInfo, 0, tabsTable.Len())
+
+		tabsTable.ForEach(func(key, value lua.LValue) {
+			if value.Type() != lua.LTTable {
+				return
+			}
+			tabTable := value.(*lua.LTable)
+
+			tab := TabInfo{
+				ID:           getStringField(tabTable, "ID"),
+				Title:        getStringField(tabTable, "Title"),
+				ResourceType: getStringField(tabTable, "ResourceType"),
+				CurrentIndex: int(getNumberField(tabTable, "CurrentIndex")),
+			}
+
+			// Handle breadcrumb array
+			if breadcrumbValue := tabTable.RawGetString("Breadcrumb"); breadcrumbValue.Type() == lua.LTTable {
+				breadcrumbTable := breadcrumbValue.(*lua.LTable)
+				var breadcrumb []string
+				breadcrumbTable.ForEach(func(_, crumb lua.LValue) {
+					if crumb.Type() == lua.LTString {
+						breadcrumb = append(breadcrumb, crumb.String())
+					}
+				})
+				tab.Breadcrumb = breadcrumb
+			}
+
+			// Handle metadata object
+			if metadataValue := tabTable.RawGetString("Metadata"); metadataValue.Type() == lua.LTTable {
+				metadataTable := metadataValue.(*lua.LTable)
+				metadata := make(map[string]interface{})
+				metadataTable.ForEach(func(key, val lua.LValue) {
+					if key.Type() == lua.LTString {
+						if val.Type() == lua.LTString {
+							metadata[key.String()] = val.String()
+						} else {
+							metadata[key.String()] = fmt.Sprintf("%v", val)
+						}
+					}
+				})
+				tab.Metadata = metadata
+			}
+
+			tabs = append(tabs, tab)
+		})
+
+		err := gpm.SetClusterTabs(clusterID, tabs)
+		if err != nil {
+			logger.Warn(fmt.Sprintf("Failed to set tabs for cluster %s: %v", clusterID, err))
+			L.Push(lua.LString(fmt.Sprintf("failed to set cluster tabs: %v", err)))
+			return 1
+		}
+		logger.Info(fmt.Sprintf("Successfully set %d tabs for cluster %s", len(tabs), clusterID))
+		L.Push(lua.LNil)
+		return 1
+	}))
+
+	L.SetField(apiTable, "set_breadcrumb_for_cluster", L.NewFunction(func(L *lua.LState) int {
+		clusterID := L.CheckString(1)
+		breadcrumbTable := L.CheckTable(2)
+
+		// Validate cluster ID
+		if clusterID == "" {
+			L.Push(lua.LString("cluster ID cannot be empty"))
+			return 1
+		}
+
+		breadcrumb := make([]string, 0, breadcrumbTable.Len())
+		breadcrumbTable.ForEach(func(_, crumb lua.LValue) {
+			if crumb.Type() == lua.LTString {
+				breadcrumb = append(breadcrumb, crumb.String())
+			}
+		})
+
+		err := gpm.SetClusterBreadcrumb(clusterID, breadcrumb)
+		if err != nil {
+			logger.Warn(fmt.Sprintf("Failed to set breadcrumb for cluster %s: %v", clusterID, err))
+			L.Push(lua.LString(fmt.Sprintf("failed to set cluster breadcrumb: %v", err)))
+			return 1
+		}
+		logger.Info(fmt.Sprintf("Successfully set breadcrumb for cluster %s: %v", clusterID, breadcrumb))
+		L.Push(lua.LNil)
+		return 1
+	}))
+
+	L.SetField(apiTable, "restore_tabs_for_cluster", L.NewFunction(func(L *lua.LState) int {
+		clusterID := L.CheckString(1)
+
+		// Validate cluster ID
+		if clusterID == "" {
+			L.Push(lua.LString("cluster ID cannot be empty"))
+			return 1
+		}
+
+		// Call the UI callback to restore tabs to the actual UI
+		if gpm.restoreTabsForClusterCallback != nil {
+			err := gpm.restoreTabsForClusterCallback(clusterID)
+			if err != nil {
+				logger.Warn(fmt.Sprintf("Failed to restore tabs for cluster %s via UI callback: %v", clusterID, err))
+				L.Push(lua.LString(fmt.Sprintf("failed to restore tabs: %v", err)))
+				return 1
+			}
+			logger.Info(fmt.Sprintf("Successfully triggered UI tab restoration for cluster %s", clusterID))
+			L.Push(lua.LNil)
+			return 1
+		}
+
+		// Fallback: try to get tabs from plugin manager state (where set_tabs_for_cluster just stored them)
+		tabs, err := gpm.GetTabsByCluster(clusterID)
+		if err != nil {
+			logger.Warn(fmt.Sprintf("Failed to get tabs from plugin manager for cluster %s: %v", clusterID, err))
+			L.Push(lua.LString(fmt.Sprintf("failed to restore tabs: %v", err)))
+			return 1
+		}
+		logger.Info(fmt.Sprintf("Successfully restored %d tabs for cluster %s from plugin manager", len(tabs), clusterID))
+		L.Push(lua.LNil)
+		return 1
+	}))
+
 	L.SetField(apiTable, "get_tabs_by_cluster", L.NewFunction(func(L *lua.LState) int {
 		clusterID := L.CheckString(1)
 
@@ -1035,6 +1166,19 @@ func (gpm *GlobalPluginManager) SetClusterTabs(clusterID string, tabs []TabInfo)
 	}
 
 	cluster.Tabs = tabs
+
+	// Trigger UI update callback if available
+	if gpm.setTabsForClusterCallback != nil {
+		// This will trigger the UI to update its tabs for this cluster
+		err := gpm.setTabsForClusterCallback(clusterID, tabs)
+		if err != nil {
+			logger.Warn(fmt.Sprintf("Failed to set tabs for cluster %s via UI callback: %v", clusterID, err))
+		}
+	} else if gpm.api.getTabsForClusterCallback != nil {
+		// Fallback to the old callback for compatibility
+		_, _ = gpm.api.getTabsForClusterCallback(clusterID)
+	}
+
 	return nil
 }
 
@@ -1093,7 +1237,13 @@ func (gpm *GlobalPluginManager) GetTabsByCluster(clusterID string) ([]TabInfo, e
 		return nil, fmt.Errorf("cluster %s not found", clusterID)
 	}
 
-	// Try to get tabs from the UI callback first
+	// Return tabs from plugin manager state first (just set by set_tabs_for_cluster)
+	if len(cluster.Tabs) > 0 {
+		logger.Info(fmt.Sprintf("Using plugin manager tabs for cluster %s: %d tabs", clusterID, len(cluster.Tabs)))
+		return cluster.Tabs, nil
+	}
+
+	// Try to get tabs from the UI callback as fallback
 	if gpm.api.getTabsForClusterCallback != nil {
 		tabs, err := gpm.api.getTabsForClusterCallback(clusterID)
 		if err == nil {
@@ -1620,4 +1770,14 @@ func (mc *MultiClusterPluginAPI) SetClusterTabsCallback(callback func(clusters [
 // SetGetTabsForClusterCallback sets the callback for getting tabs for a specific cluster
 func (mc *MultiClusterPluginAPI) SetGetTabsForClusterCallback(callback func(clusterID string) ([]TabInfo, error)) {
 	mc.api.SetGetTabsForClusterCallback(callback)
+}
+
+// SetRestoreTabsForClusterCallback sets the callback for restoring tabs to a specific cluster
+func (mc *MultiClusterPluginAPI) SetRestoreTabsForClusterCallback(callback func(clusterID string) error) {
+	mc.api.SetRestoreTabsForClusterCallback(callback)
+}
+
+// SetSetTabsForClusterCallback sets callback for setting tabs in UI for a specific cluster
+func (mc *MultiClusterPluginAPI) SetSetTabsForClusterCallback(callback func(clusterID string, tabs []TabInfo) error) {
+	mc.api.SetSetTabsForClusterCallback(callback)
 }

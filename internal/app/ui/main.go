@@ -343,6 +343,76 @@ func (m *MultiClusterModel) getTabsForCluster(clusterID string) ([]plugins.TabIn
 	return tabs, nil
 }
 
+// setTabsForClusterFromPlugin sets tabs for a specific cluster from plugin request
+func (m *MultiClusterModel) setTabsForClusterFromPlugin(clusterID string, tabs []plugins.TabInfo) error {
+	logger.Info(fmt.Sprintf("Setting tabs for cluster %s from plugin request: %d tabs", clusterID, len(tabs)))
+
+	// Convert clusterID to index
+	clusterIndex := -1
+	if id, err := strconv.Atoi(clusterID); err == nil {
+		clusterIndex = id
+	} else {
+		return fmt.Errorf("invalid cluster ID: %s", clusterID)
+	}
+
+	// Validate cluster index
+	if clusterIndex < 0 || clusterIndex >= len(m.clusters) {
+		return fmt.Errorf("cluster index %d out of range (0-%d)", clusterIndex, len(m.clusters)-1)
+	}
+
+	// Get cluster's tab manager
+	cluster := m.clusters[clusterIndex]
+	if cluster.tabManager == nil {
+		return fmt.Errorf("cluster %s has no tab manager", clusterID)
+	}
+
+	// Set tabs in the cluster's tab manager
+	if err := cluster.tabManager.RestoreTabs(tabs); err != nil {
+		return fmt.Errorf("failed to set tabs for cluster %s: %v", clusterID, err)
+	}
+
+	logger.Info(fmt.Sprintf("Successfully set %d tabs for cluster %s", len(tabs), clusterID))
+	return nil
+}
+
+// restoreTabsForCluster restores tabs to a specific cluster from plugin request
+func (m *MultiClusterModel) restoreTabsForCluster(clusterID string) error {
+	logger.Info(fmt.Sprintf("Restoring tabs for cluster %s from plugin request", clusterID))
+
+	// Convert clusterID to index
+	clusterIndex := -1
+	if id, err := strconv.Atoi(clusterID); err == nil {
+		clusterIndex = id
+	} else {
+		return fmt.Errorf("invalid cluster ID: %s", clusterID)
+	}
+
+	// Validate cluster index
+	if clusterIndex < 0 || clusterIndex >= len(m.clusters) {
+		return fmt.Errorf("cluster index %d out of range (0-%d)", clusterIndex, len(m.clusters)-1)
+	}
+
+	// Get tabs from plugin manager for this cluster
+	cluster := m.clusters[clusterIndex]
+	if cluster.tabManager == nil {
+		return fmt.Errorf("cluster %s has no tab manager", clusterID)
+	}
+
+	// Get tabs from plugin manager state
+	tabs, err := m.pluginManager.GetTabsByCluster(clusterID)
+	if err != nil {
+		return fmt.Errorf("failed to get tabs for cluster %s: %v", clusterID, err)
+	}
+
+	// Restore tabs to the cluster's tab manager
+	if err := cluster.tabManager.RestoreTabs(tabs); err != nil {
+		return fmt.Errorf("failed to restore tabs for cluster %s: %v", clusterID, err)
+	}
+
+	logger.Info(fmt.Sprintf("Successfully restored %d tabs to cluster %s", len(tabs), clusterID))
+	return nil
+}
+
 // switchToClusterFromPlugin switches to a specific cluster from a plugin request
 func (m *MultiClusterModel) switchToClusterFromPlugin(clusterID string) error {
 	logger.Info(fmt.Sprintf("Switching to cluster %s from plugin request", clusterID))
@@ -524,6 +594,10 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 	sharedPluginManager.GetAPI().SetGetClustersCallback(model.getClustersForPlugin)
 	sharedPluginManager.GetAPI().SetSwitchToClusterCallback(model.switchToClusterFromPlugin)
 	sharedPluginManager.GetAPI().SetGetTabsForClusterCallback(model.getTabsForCluster)
+	sharedPluginManager.GetAPI().SetSetTabsForClusterCallback(model.setTabsForClusterFromPlugin)
+
+	// Add callback for restoring tabs to individual clusters
+	sharedPluginManager.GetAPI().SetRestoreTabsForClusterCallback(model.restoreTabsForCluster)
 	logger.Info("DEBUG: Cluster management callbacks set")
 
 	return model

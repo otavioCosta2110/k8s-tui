@@ -225,11 +225,13 @@ type PluginAPIImpl struct {
 	globalManager *GlobalPluginManager // Reference to global manager for per-cluster namespace support
 
 	// Cluster management callbacks
-	addClusterTabCallback     func(kubeconfigPath, clusterName, namespace string) error
-	setClusterTabsCallback    func(clusters []ClusterTabConfig) error
-	getClustersCallback       func() []ClusterInfo
-	switchToClusterCallback   func(clusterID string) error
-	getTabsForClusterCallback func(clusterID string) ([]TabInfo, error)
+	addClusterTabCallback         func(kubeconfigPath, clusterName, namespace string) error
+	setClusterTabsCallback        func(clusters []ClusterTabConfig) error
+	getClustersCallback           func() []ClusterInfo
+	switchToClusterCallback       func(clusterID string) error
+	getTabsForClusterCallback     func(clusterID string) ([]TabInfo, error)
+	setTabsForClusterCallback     func(clusterID string, tabs []TabInfo) error
+	restoreTabsForClusterCallback func(clusterID string) error
 }
 
 // NewPluginAPI creates a new plugin API instance with all managers initialized
@@ -723,6 +725,20 @@ func (api *PluginAPIImpl) SetClusterTabsCallback(callback func(clusters []Cluste
 
 func (api *PluginAPIImpl) SetGetTabsForClusterCallback(callback func(clusterID string) ([]TabInfo, error)) {
 	api.getTabsForClusterCallback = callback
+}
+
+func (api *PluginAPIImpl) SetRestoreTabsForClusterCallback(callback func(clusterID string) error) {
+	// This callback will be set on the global manager if available
+	if api.globalManager != nil {
+		api.globalManager.restoreTabsForClusterCallback = callback
+	}
+}
+
+func (api *PluginAPIImpl) SetSetTabsForClusterCallback(callback func(clusterID string, tabs []TabInfo) error) {
+	// This callback will be set on the global manager if available
+	if api.globalManager != nil {
+		api.globalManager.setTabsForClusterCallback = callback
+	}
 }
 
 func (api *PluginAPIImpl) GetCurrentResourceType() string {
