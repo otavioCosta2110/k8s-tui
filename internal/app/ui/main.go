@@ -313,6 +313,36 @@ func (m *MultiClusterModel) getClustersForPlugin() []plugins.ClusterInfo {
 	return clusters
 }
 
+// getTabsForCluster returns tabs for a specific cluster
+func (m *MultiClusterModel) getTabsForCluster(clusterID string) ([]plugins.TabInfo, error) {
+	// Convert clusterID to index
+	clusterIndex := -1
+	if id, err := strconv.Atoi(clusterID); err == nil {
+		clusterIndex = id
+	} else {
+		return nil, fmt.Errorf("invalid cluster ID: %s", clusterID)
+	}
+
+	// Validate cluster index
+	if clusterIndex < 0 || clusterIndex >= len(m.clusters) {
+		return nil, fmt.Errorf("cluster index %d out of range (0-%d)", clusterIndex, len(m.clusters)-1)
+	}
+
+	// Get tabs from the specific cluster's tab manager
+	cluster := m.clusters[clusterIndex]
+	if cluster.tabManager == nil {
+		return nil, fmt.Errorf("cluster %s has no tab manager", clusterID)
+	}
+
+	tabs := cluster.tabManager.GetTabsInfo()
+	logger.Info(fmt.Sprintf("DEBUG: getTabsForCluster for cluster %s returned %d tabs", clusterID, len(tabs)))
+	for i, tab := range tabs {
+		logger.Info(fmt.Sprintf("DEBUG: Tab %d: %s (%s)", i, tab.Title, tab.ResourceType))
+	}
+
+	return tabs, nil
+}
+
 // switchToClusterFromPlugin switches to a specific cluster from a plugin request
 func (m *MultiClusterModel) switchToClusterFromPlugin(clusterID string) error {
 	logger.Info(fmt.Sprintf("Switching to cluster %s from plugin request", clusterID))
@@ -493,6 +523,7 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 	sharedPluginManager.GetAPI().SetClusterTabsCallback(model.setClusterTabsFromPlugin)
 	sharedPluginManager.GetAPI().SetGetClustersCallback(model.getClustersForPlugin)
 	sharedPluginManager.GetAPI().SetSwitchToClusterCallback(model.switchToClusterFromPlugin)
+	sharedPluginManager.GetAPI().SetGetTabsForClusterCallback(model.getTabsForCluster)
 	logger.Info("DEBUG: Cluster management callbacks set")
 
 	return model

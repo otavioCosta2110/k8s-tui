@@ -173,13 +173,13 @@ function save_session_to_file(filename)
     k8s_tui.set_status("DEBUG: Saving to: " .. path)
   end
 
-  -- Sync current cluster session data before getting all clusters
-  if k8s_tui.sync_current_cluster_session then
-    k8s_tui.log("DEBUG: Calling sync_current_cluster_session")
-    local sync_result = k8s_tui.sync_current_cluster_session()
-    k8s_tui.log("DEBUG: sync_current_cluster_session returned: " .. tostring(sync_result))
+  -- Sync all clusters session data before getting all clusters
+  if k8s_tui.sync_all_clusters_sessions then
+    k8s_tui.log("DEBUG: Calling sync_all_clusters_sessions")
+    local sync_result = k8s_tui.sync_all_clusters_sessions()
+    k8s_tui.log("DEBUG: sync_all_clusters_sessions returned: " .. tostring(sync_result))
   else
-    k8s_tui.log("ERROR: sync_current_cluster_session function not available!")
+    k8s_tui.log("ERROR: sync_all_clusters_sessions function not available!")
   end
 
   -- Get all clusters (now includes session data)
