@@ -485,8 +485,13 @@ function load_session_from_file(filename)
     k8s_tui.log("DEBUG: Switching to active cluster: " .. active_cluster_id .. " (index: " .. active_cluster_index .. ")")
     local switch_result = k8s_tui.switch_to_cluster(active_cluster_id)
     
-    -- Trigger UI update to refresh current tab data with new namespace
-    k8s_tui.trigger_event("ui_update")
+    -- Restore tabs for the active cluster to sync UI with restored session data
+    local restore_result = k8s_tui.restore_tabs_for_cluster(active_cluster_id)
+    if restore_result then
+      k8s_tui.log("ERROR: Failed to restore tabs for active cluster " .. active_cluster_id .. ": " .. tostring(restore_result))
+    else
+      k8s_tui.log("DEBUG: Successfully restored tabs for active cluster " .. active_cluster_id)
+    end
 
     local status_msg = "Session loaded: " .. #cluster_configs .. " cluster(s)"
     if not tab_restore_success then

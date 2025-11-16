@@ -409,7 +409,10 @@ func (m *MultiClusterModel) restoreTabsForCluster(clusterID string) error {
 		return fmt.Errorf("failed to restore tabs for cluster %s: %v", clusterID, err)
 	}
 
-	logger.Info(fmt.Sprintf("Successfully restored %d tabs to cluster %s", len(tabs), clusterID))
+	// Update the UI to show the restored tabs
+	cluster.updateHeaderTabs()
+
+	logger.Info(fmt.Sprintf("Successfully restored %d tabs to cluster %s and updated UI", len(tabs), clusterID))
 	return nil
 }
 
