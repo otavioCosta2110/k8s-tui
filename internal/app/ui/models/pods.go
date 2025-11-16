@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
@@ -8,6 +10,7 @@ import (
 	styles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
 	k8s "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -68,6 +71,7 @@ func (p *podsModel) Help() (string, string) {
 Key Bindings:
 • ↑/↓/j/k: Navigate pods
 • enter: View pod logs
+• e: Execute command in pod
 • v: View pod details
 • d: Delete selected pods
 • n: Create new pod
@@ -118,6 +122,7 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": p.createDeleteAction(tableModel),
+		"e": p.createExecAction(tableModel),
 		"n": p.createNewPodAction(),
 		"v": p.createViewDetailsAction(tableModel),
 	}
@@ -207,6 +212,76 @@ func (p *podsModel) createViewManifestAction(tableModel *ui.TableModel) func() t
 			return components.NavigateMsg{
 				NewScreen:  deploymentDetails,
 				Breadcrumb: p.parentDeployment,
+			}
+		}
+	}
+}
+
+func (p *podsModel) createExecAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(p.resourceData) {
+			return nil
+		}
+
+		podData := p.resourceData[selected].(PodData)
+		podName := podData.Name
+
+		return func() tea.Msg {
+			onSubmit := func(value string) tea.Msg {
+				logger.Info("Pods onSubmit called with value: " + value)
+				// Split command by spaces, simple parsing
+				command := strings.Fields(value)
+				if len(command) == 0 {
+					logger.Info("Pods onSubmit: empty command")
+					return components.NavigateMsg{
+						Error:   fmt.Errorf("empty command"),
+						Cluster: *p.k8sClient,
+					}
+				}
+
+				logger.Info("Pods onSubmit: executing command: " + fmt.Sprintf("%v", command))
+				pod := k8s.NewPodInfo(podName, p.pluginAPI.GetCurrentNamespace(), *p.k8sClient)
+				stdout, stderr, err := pod.Exec(command)
+				logger.Info("Pods onSubmit: exec returned, err: " + fmt.Sprintf("%v", err))
+				logger.Info("Pods onSubmit: stdout: " + stdout)
+				logger.Info("Pods onSubmit: stderr: " + stderr)
+				if err != nil {
+					logger.Info("Pods onSubmit: exec error: " + err.Error())
+					return components.NavigateMsg{
+						Error:   err,
+						Cluster: *p.k8sClient,
+					}
+				}
+
+				logger.Info("Pods onSubmit: exec successful, stdout len: " + fmt.Sprintf("%d", len(stdout)) + ", stderr len: " + fmt.Sprintf("%d", len(stderr)))
+				output := stdout
+				if stderr != "" {
+					if output != "" {
+						output += "\n--- STDERR ---\n" + stderr
+					} else {
+						output = stderr
+					}
+				}
+
+				logger.Info("Pods onSubmit: returning NavigateMsg with output")
+				return components.NavigateMsg{
+					NewScreen:  components.NewYAMLViewer("Command Output: "+podName, output),
+					Breadcrumb: podName + " exec",
+				}
+			}
+
+			onCancel := func() tea.Msg {
+				return nil // Stay on current screen
+			}
+
+			return components.NavigateMsg{
+				NewScreen:  components.NewTextInput("Execute command in "+podName, "", onSubmit, onCancel),
+				Breadcrumb: podName + " exec input",
 			}
 		}
 	}

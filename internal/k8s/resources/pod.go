@@ -260,7 +260,7 @@ func (p *Pod) Exec(command []string) (string, string, error) {
 		SubResource("exec").
 		VersionedParams(&corev1.PodExecOptions{
 			Command: command,
-			Stdin:   true,
+			Stdin:   false,
 			Stdout:  true,
 			Stderr:  true,
 			TTY:     false,
@@ -272,7 +272,9 @@ func (p *Pod) Exec(command []string) (string, string, error) {
 	}
 
 	var stdout, stderr bytes.Buffer
-	err = exec.StreamWithContext(context.Background(), remotecommand.StreamOptions{
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	err = exec.StreamWithContext(ctx, remotecommand.StreamOptions{
 		Stdout: &stdout,
 		Stderr: &stderr,
 		Tty:    false,

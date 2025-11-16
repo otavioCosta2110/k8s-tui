@@ -1,11 +1,14 @@
 package components
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles"
 	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
+	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 )
 
 type TextInputModel struct {
@@ -46,15 +49,23 @@ func (m *TextInputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		logger.Info("TextInput received key: " + msg.String())
 		switch msg.String() {
 		case "enter":
+			logger.Info("TextInput: Enter pressed, value: " + m.textInput.Value())
 			value := m.textInput.Value()
 			if m.onSubmit != nil {
+				logger.Info("TextInput: Calling onSubmit")
 				return m, func() tea.Msg {
-					return m.onSubmit(value)
+					result := m.onSubmit(value)
+					logger.Info("TextInput: onSubmit returned: " + fmt.Sprintf("%T", result))
+					return result
 				}
+			} else {
+				logger.Info("TextInput: onSubmit is nil")
 			}
 		case "esc":
+			logger.Info("TextInput: Esc pressed")
 			if m.onCancel != nil {
 				return m, func() tea.Msg {
 					return m.onCancel()
@@ -106,7 +117,7 @@ func (m *TextInputModel) View() string {
 
 	return lipgloss.NewStyle().
 		Width(W).
-		Height(H).
+		Height(H - styles.Margin).
 		Align(lipgloss.Center).
 		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Render(content)
