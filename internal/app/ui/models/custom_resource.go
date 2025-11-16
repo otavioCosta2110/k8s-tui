@@ -202,11 +202,17 @@ func (ct *CustomResourceTextModel) Refresh() (tea.Model, tea.Cmd) {
 }
 
 func (cr *customResourceModel) fetchData() error {
-	logger.Debug(fmt.Sprintf("Fetching data for resource type: %s, namespace: %s", cr.resourceType, cr.namespace))
+	var currentNamespace string
+	if pm := plugins.GetGlobalPluginManager(); pm != nil {
+		currentNamespace = pm.GetAPI().GetCurrentNamespace()
+	} else {
+		currentNamespace = cr.namespace // fallback to model's namespace
+	}
+	logger.Debug(fmt.Sprintf("Fetching data for resource type: %s, namespace: %s", cr.resourceType, currentNamespace))
 
 	if pm := plugins.GetGlobalPluginManager(); pm != nil {
 		logger.Debug("Plugin manager available, calling GetCustomResourceData")
-		data, err := pm.GetCustomResourceData(*cr.k8sClient, cr.resourceType, cr.namespace)
+		data, err := pm.GetCustomResourceData(*cr.k8sClient, cr.resourceType, currentNamespace)
 		if err != nil {
 			logger.Error(fmt.Sprintf("Error from GetCustomResourceData: %v", err))
 			return err

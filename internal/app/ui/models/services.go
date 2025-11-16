@@ -78,7 +78,7 @@ func (s *servicesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	s.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		serviceDetails, err := NewServiceDetails(*k, s.namespace, selected).InitComponent(k)
+		serviceDetails, err := NewServiceDetails(*k, s.pluginAPI.GetCurrentNamespace(), selected).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -120,7 +120,7 @@ func (s *servicesModel) fetchData() error {
 	var serviceInfo []k8s.ServiceInfo
 	var err error
 
-	serviceInfo, err = s.pluginAPI.GetServices(s.namespace)
+	serviceInfo, err = s.pluginAPI.GetServices(s.pluginAPI.GetCurrentNamespace())
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch services: %v", err)

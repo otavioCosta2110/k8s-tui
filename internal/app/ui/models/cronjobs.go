@@ -69,7 +69,7 @@ func (cj *cronjobsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	cj.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		cronjobDetails, err := NewCronJobDetails(*k, cj.namespace, selected).InitComponent(k)
+		cronjobDetails, err := NewCronJobDetails(*k, cj.pluginAPI.GetCurrentNamespace(), selected).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -102,7 +102,7 @@ func (cj *cronjobsModel) fetchData() error {
 	var cronjobInfo []k8s.CronJobInfo
 	var err error
 
-	cronjobInfo, err = cj.pluginAPI.GetCronJobs("")
+	cronjobInfo, err = cj.pluginAPI.GetCronJobs(cj.pluginAPI.GetCurrentNamespace())
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch cronjobs: %v", err)

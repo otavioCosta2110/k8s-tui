@@ -201,6 +201,7 @@ type TabInfo struct {
 	ID           string
 	Title        string
 	ResourceType string
+	Namespace    string
 	Breadcrumb   []string
 	CurrentIndex int
 	Metadata     map[string]interface{}
@@ -324,4 +325,7 @@ type PluginAPI interface {
 	SetClusterTabs(clusters []ClusterTabConfig) error
 	GetClusters() []ClusterInfo
 	SwitchToCluster(clusterID string) error
+
+	// Event management
+	TriggerEvent(event PluginEvent, data any)
 }

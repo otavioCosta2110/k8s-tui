@@ -508,6 +508,14 @@ func (m *AppModel) updateHeaderTabs() {
 		if activeIndex >= 0 {
 			logger.Info(fmt.Sprintf("DEBUG: Setting active tab to index %d", activeIndex))
 			m.header.SetActiveTab(activeIndex)
+
+			// Update header namespace from active tab
+			if m.tabManager != nil {
+				if activeTabData := m.tabManager.GetActiveTab(); activeTabData != nil {
+					m.header.SetNamespace(activeTabData.Namespace)
+					logger.Info(fmt.Sprintf("DEBUG: Updated header namespace to: %s", activeTabData.Namespace))
+				}
+			}
 		} else {
 			logger.Info("DEBUG: No active tab found")
 		}

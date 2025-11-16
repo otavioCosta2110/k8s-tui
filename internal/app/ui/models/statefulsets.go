@@ -66,7 +66,7 @@ func (ss *statefulsetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	ss.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		statefulsetDetails, err := NewStatefulSetDetails(*k, ss.namespace, selected).InitComponent(k)
+		statefulsetDetails, err := NewStatefulSetDetails(*k, ss.pluginAPI.GetCurrentNamespace(), selected).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -99,7 +99,7 @@ func (ss *statefulsetsModel) fetchData() error {
 	var statefulsetInfo []k8s.StatefulSetInfo
 	var err error
 
-	statefulsetInfo, err = ss.pluginAPI.GetStatefulSets("")
+	statefulsetInfo, err = ss.pluginAPI.GetStatefulSets(ss.pluginAPI.GetCurrentNamespace())
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch statefulsets: %v", err)

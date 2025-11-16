@@ -73,7 +73,7 @@ func (ds *daemonsetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	ds.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		daemonsetDetails, err := NewDaemonSetDetails(*k, ds.namespace, selected).InitComponent(k)
+		daemonsetDetails, err := NewDaemonSetDetails(*k, ds.pluginAPI.GetCurrentNamespace(), selected).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -106,7 +106,7 @@ func (ds *daemonsetsModel) fetchData() error {
 	var daemonsetInfo []k8s.DaemonSetInfo
 	var err error
 
-	daemonsetInfo, err = ds.pluginAPI.GetDaemonSets("")
+	daemonsetInfo, err = ds.pluginAPI.GetDaemonSets(ds.pluginAPI.GetCurrentNamespace())
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch daemonsets: %v", err)

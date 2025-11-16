@@ -68,7 +68,7 @@ func (j *jobsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	j.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		jobDetails, err := NewJobDetails(*k, j.namespace, selected).InitComponent(k)
+		jobDetails, err := NewJobDetails(*k, j.pluginAPI.GetCurrentNamespace(), selected).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -101,7 +101,7 @@ func (j *jobsModel) fetchData() error {
 	var jobInfo []k8s.JobInfo
 	var err error
 
-	jobInfo, err = j.pluginAPI.GetJobs("")
+	jobInfo, err = j.pluginAPI.GetJobs(j.pluginAPI.GetCurrentNamespace())
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch jobs: %v", err)

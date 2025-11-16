@@ -69,7 +69,7 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	r.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		replicaset := k8s.NewReplicaSetInfo(selected, r.namespace, *k)
+		replicaset := k8s.NewReplicaSetInfo(selected, r.pluginAPI.GetCurrentNamespace(), *k)
 		err := replicaset.Fetch()
 		if err != nil {
 			return components.NavigateMsg{
@@ -81,7 +81,7 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		if err != nil {
 			selector = fmt.Sprintf("app=%s", replicaset.Name)
 		}
-		pods, err := NewPodsWithParent(*k, r.namespace, selected, selector)
+		pods, err := NewPodsWithParent(*k, r.pluginAPI.GetCurrentNamespace(), selected, selector)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -124,7 +124,7 @@ func (r *replicasetsModel) fetchData() error {
 	var replicasetInfo []k8s.ReplicaSetInfo
 	var err error
 
-	replicasetInfo, err = r.pluginAPI.GetReplicaSets("")
+	replicasetInfo, err = r.pluginAPI.GetReplicaSets(r.pluginAPI.GetCurrentNamespace())
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch replicasets: %v", err)

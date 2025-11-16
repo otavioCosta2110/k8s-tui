@@ -67,7 +67,7 @@ func (i *ingressesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	i.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		ingressDetails, err := NewIngressDetails(*k, i.namespace, selected).InitComponent(k)
+		ingressDetails, err := NewIngressDetails(*k, i.pluginAPI.GetCurrentNamespace(), selected).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -109,7 +109,7 @@ func (i *ingressesModel) fetchData() error {
 	var ingressInfo []k8s.IngressInfo
 	var err error
 
-	ingressInfo, err = i.pluginAPI.GetIngresses("")
+	ingressInfo, err = i.pluginAPI.GetIngresses(i.pluginAPI.GetCurrentNamespace())
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch ingresses: %v", err)

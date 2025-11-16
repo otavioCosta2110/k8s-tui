@@ -391,6 +391,7 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 			L.SetField(tabTable, "ID", lua.LString(tab.ID))
 			L.SetField(tabTable, "Title", lua.LString(tab.Title))
 			L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+			L.SetField(tabTable, "Namespace", lua.LString(tab.Namespace))
 			L.SetField(tabTable, "CurrentIndex", lua.LNumber(tab.CurrentIndex))
 
 			breadcrumbTable := L.NewTable()
@@ -425,6 +426,7 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 				Title:        getStringField(tabTable, "Title"),
 				ResourceType: getStringField(tabTable, "ResourceType"),
 				CurrentIndex: int(getNumberField(tabTable, "CurrentIndex")),
+				Namespace:    getStringField(tabTable, "Namespace"),
 			}
 
 			// Handle breadcrumb array
@@ -523,6 +525,7 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 					tabTable := L.NewTable()
 					L.SetField(tabTable, "ID", lua.LString(tab.ID))
 					L.SetField(tabTable, "Title", lua.LString(tab.Title))
+					L.SetField(tabTable, "Namespace", lua.LString(tab.Namespace))
 					L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
 					L.SetField(tabTable, "CurrentIndex", lua.LNumber(tab.CurrentIndex))
 
@@ -578,6 +581,72 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 		L.SetField(clusterTable, "Kubeconfig", lua.LString(currentCluster.Kubeconfig))
 		L.SetField(clusterTable, "Index", lua.LNumber(0)) // Could be calculated if needed
 		L.SetField(clusterTable, "IsActive", lua.LBool(true))
+		L.Push(clusterTable)
+		return 1
+	}))
+
+	L.SetField(apiTable, "get_cluster_by_id", L.NewFunction(func(L *lua.LState) int {
+		clusterID := L.CheckString(1)
+		cluster := gpm.GetCluster(clusterID)
+		if cluster == nil {
+			L.Push(lua.LNil)
+			return 1
+		}
+
+		clusterTable := L.NewTable()
+		L.SetField(clusterTable, "ID", lua.LString(cluster.ID))
+		L.SetField(clusterTable, "Name", lua.LString(cluster.Name))
+		L.SetField(clusterTable, "Namespace", lua.LString(cluster.Namespace))
+		L.SetField(clusterTable, "Kubeconfig", lua.LString(cluster.Kubeconfig))
+
+		// Check if this is the current active cluster
+		currentCluster := gpm.GetCurrentCluster()
+		isActive := currentCluster != nil && currentCluster.ID == cluster.ID
+		L.SetField(clusterTable, "IsActive", lua.LBool(isActive))
+
+		// Add tabs if available
+		if cluster.Tabs != nil {
+			tabsTable := L.NewTable()
+			for j, tab := range cluster.Tabs {
+				tabTable := L.NewTable()
+				L.SetField(tabTable, "ID", lua.LString(tab.ID))
+				L.SetField(tabTable, "Title", lua.LString(tab.Title))
+				L.SetField(tabTable, "Namespace", lua.LString(tab.Namespace))
+				L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+				L.SetField(tabTable, "CurrentIndex", lua.LNumber(tab.CurrentIndex))
+
+				// Handle breadcrumb
+				if tab.Breadcrumb != nil {
+					breadcrumbTable := L.NewTable()
+					for k, crumb := range tab.Breadcrumb {
+						L.RawSetInt(breadcrumbTable, k+1, lua.LString(crumb))
+					}
+					L.SetField(tabTable, "Breadcrumb", breadcrumbTable)
+				}
+
+				// Handle metadata
+				if tab.Metadata != nil {
+					metadataTable := L.NewTable()
+					for k, v := range tab.Metadata {
+						L.SetField(metadataTable, k, lua.LString(fmt.Sprintf("%v", v)))
+					}
+					L.SetField(tabTable, "Metadata", metadataTable)
+				}
+
+				L.RawSetInt(tabsTable, j+1, tabTable)
+			}
+			L.SetField(clusterTable, "Tabs", tabsTable)
+		}
+
+		// Add breadcrumb if available
+		if cluster.Breadcrumb != nil {
+			breadcrumbTable := L.NewTable()
+			for j, crumb := range cluster.Breadcrumb {
+				L.RawSetInt(breadcrumbTable, j+1, lua.LString(crumb))
+			}
+			L.SetField(clusterTable, "Breadcrumb", breadcrumbTable)
+		}
+
 		L.Push(clusterTable)
 		return 1
 	}))
@@ -766,6 +835,7 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 		for i, tab := range tabs {
 			tabTable := L.NewTable()
 			L.SetField(tabTable, "ID", lua.LString(tab.ID))
+			L.SetField(tabTable, "Namespace", lua.LString(tab.Namespace))
 			L.SetField(tabTable, "Title", lua.LString(tab.Title))
 			L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
 			L.SetField(tabTable, "CurrentIndex", lua.LNumber(tab.CurrentIndex))
@@ -817,6 +887,7 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 				ID:           getStringField(tabTable, "ID"),
 				Title:        getStringField(tabTable, "Title"),
 				ResourceType: getStringField(tabTable, "ResourceType"),
+				Namespace:    getStringField(tabTable, "Namespace"),
 				CurrentIndex: int(getNumberField(tabTable, "CurrentIndex")),
 			}
 
@@ -936,6 +1007,7 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 		resultTable := L.NewTable()
 		for i, tab := range tabs {
 			tabTable := L.NewTable()
+			L.SetField(tabTable, "Namespace", lua.LString(tab.Namespace))
 			L.SetField(tabTable, "ID", lua.LString(tab.ID))
 			L.SetField(tabTable, "Title", lua.LString(tab.Title))
 			L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
@@ -1167,6 +1239,7 @@ func (gpm *GlobalPluginManager) SetClusterTabs(clusterID string, tabs []TabInfo)
 
 	cluster.Tabs = tabs
 
+	logger.Info(fmt.Sprintf("namespace fodinha %s tab name %s %s", cluster.Namespace, cluster.Tabs[0].Title, cluster.Tabs[0].Namespace))
 	// Trigger UI update callback if available
 	if gpm.setTabsForClusterCallback != nil {
 		// This will trigger the UI to update its tabs for this cluster
@@ -1402,6 +1475,11 @@ func (mc *MultiClusterPluginAPI) SetClusterNamespace(clusterID, namespace string
 // GetClusterNamespace gets the namespace for a specific cluster
 func (mc *MultiClusterPluginAPI) GetClusterNamespace(clusterID string) (string, error) {
 	return mc.globalManager.GetClusterNamespace(clusterID)
+}
+
+// GetClusterByID returns a specific cluster context by ID
+func (mc *MultiClusterPluginAPI) GetClusterByID(clusterID string) *ClusterContext {
+	return mc.globalManager.GetCluster(clusterID)
 }
 
 // ExecuteOnCluster executes a function in the context of a specific cluster

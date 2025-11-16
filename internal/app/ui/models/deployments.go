@@ -80,7 +80,7 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 	d.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		deployment := resources.NewDeploymentInfo(selected, d.namespace, *k)
+		deployment := resources.NewDeploymentInfo(selected, d.pluginAPI.GetCurrentNamespace(), *k)
 		if err := deployment.Fetch(); err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -96,7 +96,7 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 			}
 		}
 
-		podsModel, err := NewPodsWithParent(*k, d.namespace, selected, selector)
+		podsModel, err := NewPodsWithParent(*k, d.pluginAPI.GetCurrentNamespace(), selected, selector)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -164,7 +164,7 @@ func (d *deploymentsModel) createViewDetailsAction(tableModel *ui.TableModel) fu
 		deploymentName := d.deploymentsInfo[selected].Name
 
 		return func() tea.Msg {
-			deploymentDetails, err := NewDeploymentDetails(*d.k8sClient, d.namespace, deploymentName).InitComponent(d.k8sClient)
+			deploymentDetails, err := NewDeploymentDetails(*d.k8sClient, d.pluginAPI.GetCurrentNamespace(), deploymentName).InitComponent(d.k8sClient)
 			if err != nil {
 				return components.NavigateMsg{
 					Error:   err,
@@ -182,7 +182,7 @@ func (d *deploymentsModel) fetchData() error {
 	var deploymentInfo []resources.DeploymentInfo
 	var err error
 
-	deploymentInfo, err = d.pluginAPI.GetDeployments(d.namespace)
+	deploymentInfo, err = d.pluginAPI.GetDeployments(d.pluginAPI.GetCurrentNamespace())
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch deployments: %v", err)

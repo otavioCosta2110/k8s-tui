@@ -371,6 +371,7 @@ func (p *PluginmanagerStyleLuaPlugin) parseTabInfo(tbl *lua.LTable) TabInfo {
 		ID:           id,
 		Title:        title,
 		ResourceType: resourceType,
+		Namespace:    "",
 		Breadcrumb:   breadcrumb,
 		Metadata:     metadata,
 	}
@@ -436,6 +437,8 @@ func (p *PluginmanagerStyleLuaPlugin) SetupLuaAPI() {
 	p.L.SetField(apiTable, "delete_serviceaccount", p.L.NewFunction(p.luaDeleteServiceAccount))
 
 	p.L.SetField(apiTable, "get_endpoints", p.L.NewFunction(p.luaGetEndpoints))
+
+	p.L.SetField(apiTable, "trigger_event", p.L.NewFunction(p.luaTriggerEvent))
 
 	p.L.SetGlobal("k8s_tui", apiTable)
 	logger.PluginDebug(p.pluginName, "k8s_tui table set as global")
@@ -1247,5 +1250,37 @@ func (p *PluginmanagerStyleLuaPlugin) luaGetEndpoints(L *lua.LState) int {
 	}
 
 	L.Push(resultTable)
+	return 1
+}
+
+func (p *PluginmanagerStyleLuaPlugin) luaTriggerEvent(L *lua.LState) int {
+	eventName := L.CheckString(1)
+	var eventData interface{}
+
+	if L.GetTop() >= 2 {
+		eventData = L.CheckAny(2)
+	}
+
+	// Convert string to PluginEvent
+	var event PluginEvent
+	switch eventName {
+	case "app_started":
+		event = EventAppStarted
+	case "app_shutdown":
+		event = EventAppShutdown
+	case "namespace_changed":
+		event = EventNamespaceChanged
+	case "resource_selected":
+		event = EventResourceSelected
+	case "ui_update":
+		event = EventUIUpdate
+	default:
+		logger.PluginWarn(p.pluginName, fmt.Sprintf("Unknown event: %s", eventName))
+		L.Push(lua.LBool(false))
+		return 1
+	}
+
+	p.api.TriggerEvent(event, eventData)
+	L.Push(lua.LBool(true))
 	return 1
 }

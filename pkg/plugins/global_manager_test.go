@@ -37,7 +37,7 @@ func TestGlobalPluginManager_AddCluster(t *testing.T) {
 	gpm.AddCluster("cluster1", "Test Cluster 1", client)
 
 	// Verify cluster was added
-	clusters:=gpm.clusters
+	clusters := gpm.clusters
 	for c, _ := range clusters {
 		println(c)
 	}
@@ -360,6 +360,37 @@ func TestMultiClusterPluginAPI_SetClusterNamespace(t *testing.T) {
 	}
 }
 
+func TestMultiClusterPluginAPI_GetClusterByID(t *testing.T) {
+	gpm := NewGlobalPluginManager("/tmp/test-plugins")
+	client1 := MockClient()
+	client2 := MockClient()
+
+	gpm.AddCluster("cluster1", "Test Cluster 1", client1)
+	gpm.AddCluster("cluster2", "Test Cluster 2", client2)
+
+	mcAPI := gpm.GetAPI()
+
+	// Test getting existing cluster
+	cluster := mcAPI.GetClusterByID("cluster1")
+	if cluster == nil {
+		t.Error("Expected to find cluster1")
+	}
+
+	if cluster.ID != "cluster1" {
+		t.Errorf("Expected cluster ID to be 'cluster1', got: %s", cluster.ID)
+	}
+
+	if cluster.Name != "Test Cluster 1" {
+		t.Errorf("Expected cluster name to be 'Test Cluster 1', got: %s", cluster.Name)
+	}
+
+	// Test getting non-existent cluster
+	cluster = mcAPI.GetClusterByID("nonexistent")
+	if cluster != nil {
+		t.Error("Expected nil for non-existent cluster")
+	}
+}
+
 func TestMultiClusterPluginAPI_ExecuteOnCluster(t *testing.T) {
 	gpm := NewGlobalPluginManager("/tmp/test-plugins")
 	client1 := MockClient()
@@ -409,7 +440,7 @@ func TestMultiClusterPluginAPI_ResourceOperations(t *testing.T) {
 
 	// Test tab operations
 	tabs := []TabInfo{
-		{ID: "tab1", Title: "Test Tab"},
+		{ID: "tab1", Title: "Test Tab", Namespace: "default"},
 	}
 
 	_ = mcAPI.SetTabs(tabs)

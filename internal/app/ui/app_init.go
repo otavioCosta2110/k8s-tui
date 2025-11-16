@@ -41,6 +41,10 @@ func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pl
 		tabManager.SetResourceTypeCallback(func(resourceType string) {
 			pluginManager.GetAPI().SetCurrentResourceType(resourceType)
 		})
+		tabManager.SetNamespaceCallback(func(namespace string) {
+			header.SetNamespace(namespace)
+			header.UpdateContent()
+		})
 	}
 
 	uiInjector := NewUIInjector()

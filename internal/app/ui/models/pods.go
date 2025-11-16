@@ -91,7 +91,7 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	p.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		podDetails, err := NewPodDetails(*k, p.namespace, selected).InitComponent(k)
+		podDetails, err := NewPodDetails(*k, p.pluginAPI.GetCurrentNamespace(), selected).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -129,7 +129,7 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 func (p *podsModel) createViewManifestAction(tableModel *ui.TableModel) func() tea.Cmd {
 	return func() tea.Cmd {
-		deploymentDetails, err := NewDeploymentDetails(*p.k8sClient, p.namespace, p.parentDeployment).InitComponent(p.k8sClient)
+		deploymentDetails, err := NewDeploymentDetails(*p.k8sClient, p.pluginAPI.GetCurrentNamespace(), p.parentDeployment).InitComponent(p.k8sClient)
 		if err != nil {
 			return func() tea.Msg {
 				return components.NavigateMsg{
@@ -159,7 +159,7 @@ func (p *podsModel) fetchData(selector string) error {
 	var podsInfo []k8s.PodInfo
 	var err error
 
-	podsInfo, err = p.pluginAPI.GetPods(p.namespace, selector)
+	podsInfo, err = p.pluginAPI.GetPods(p.pluginAPI.GetCurrentNamespace(), selector)
 
 	if err != nil {
 		return err

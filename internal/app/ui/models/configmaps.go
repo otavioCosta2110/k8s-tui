@@ -70,7 +70,7 @@ func (c *configmapsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	c.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		cmDetails, err := NewConfigmapDetails(*k, c.namespace, selected).InitComponent(k)
+		cmDetails, err := NewConfigmapDetails(*k, c.pluginAPI.GetCurrentNamespace(), selected).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -112,7 +112,7 @@ func (c *configmapsModel) fetchData() error {
 	var cms []k8s.Configmap
 	var err error
 
-	cms, err = c.pluginAPI.GetConfigMaps(c.namespace)
+	cms, err = c.pluginAPI.GetConfigMaps(c.pluginAPI.GetCurrentNamespace())
 
 	if err != nil {
 		return err

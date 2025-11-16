@@ -224,8 +224,8 @@ func TestPluginAPIImpl_TabOperations(t *testing.T) {
 	}
 
 	testTabs := []TabInfo{
-		{ID: "tab1", Title: "Test Tab 1"},
-		{ID: "tab2", Title: "Test Tab 2"},
+		{ID: "tab1", Title: "Test Tab 1", Namespace: "default"},
+		{ID: "tab2", Title: "Test Tab 2", Namespace: "default"},
 	}
 
 	err = api.SetTabs(testTabs)

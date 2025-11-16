@@ -120,7 +120,11 @@ func (pm *PluginManager) setupBasicLuaAPI(L *lua.LState) {
 	// Multi-cluster API functions
 	L.SetField(apiTable, "get_all_clusters", L.NewFunction(plugin.luaGetAllClusters))
 	L.SetField(apiTable, "get_current_cluster", L.NewFunction(plugin.luaGetCurrentCluster))
+	L.SetField(apiTable, "get_cluster_by_id", L.NewFunction(plugin.luaGetClusterByID))
 	L.SetField(apiTable, "sync_current_cluster_session", L.NewFunction(plugin.luaSyncCurrentClusterSession))
+
+	// Event management
+	L.SetField(apiTable, "trigger_event", L.NewFunction(plugin.luaTriggerEvent))
 
 	L.SetGlobal("k8s_tui", apiTable)
 }
@@ -148,6 +152,7 @@ func (p *basicLuaPlugin) luaGetTabs(L *lua.LState) int {
 		L.SetField(tabTable, "ID", lua.LString(tab.ID))
 		L.SetField(tabTable, "Title", lua.LString(tab.Title))
 		L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+		L.SetField(tabTable, "Namespace", lua.LString(tab.Namespace))
 		L.SetField(tabTable, "CurrentIndex", lua.LNumber(tab.CurrentIndex))
 
 		breadcrumbTable := L.NewTable()
@@ -306,6 +311,7 @@ func (p *basicLuaPlugin) luaGetAllClusters(L *lua.LState) int {
 			tabTable := L.NewTable()
 			L.SetField(tabTable, "ID", lua.LString(tab.ID))
 			L.SetField(tabTable, "Title", lua.LString(tab.Title))
+			L.SetField(tabTable, "Namespace", lua.LString(tab.Namespace))
 			L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
 			L.SetField(tabTable, "CurrentIndex", lua.LNumber(tab.CurrentIndex))
 
@@ -371,6 +377,75 @@ func (p *basicLuaPlugin) luaGetCurrentCluster(L *lua.LState) int {
 	return 1
 }
 
+func (p *basicLuaPlugin) luaGetClusterByID(L *lua.LState) int {
+	if p.api.globalManager == nil {
+		L.Push(lua.LNil)
+		return 1
+	}
+
+	clusterID := L.CheckString(1)
+	cluster := p.api.globalManager.GetCluster(clusterID)
+	if cluster == nil {
+		L.Push(lua.LNil)
+		return 1
+	}
+
+	clusterTable := L.NewTable()
+	L.SetField(clusterTable, "ID", lua.LString(cluster.ID))
+	L.SetField(clusterTable, "Name", lua.LString(cluster.Name))
+	L.SetField(clusterTable, "Namespace", lua.LString(cluster.Namespace))
+
+	// Check if this is the current active cluster
+	currentCluster := p.api.globalManager.GetCurrentCluster()
+	isActive := currentCluster != nil && currentCluster.ID == cluster.ID
+	L.SetField(clusterTable, "IsActive", lua.LBool(isActive))
+
+	// Get kubeconfig path from the client
+	kubeconfigPath := cluster.Client.KubeconfigPath
+	if kubeconfigPath == "" && cluster.Client.Config != nil && cluster.Client.Config.Host != "" {
+		kubeconfigPath = cluster.Client.Config.Host
+	}
+	L.SetField(clusterTable, "Kubeconfig", lua.LString(kubeconfigPath))
+
+	// Add tabs
+	tabsTable := L.NewTable()
+	for i, tab := range cluster.Tabs {
+		tabTable := L.NewTable()
+		L.SetField(tabTable, "ID", lua.LString(tab.ID))
+		L.SetField(tabTable, "Title", lua.LString(tab.Title))
+		L.SetField(tabTable, "Namespace", lua.LString(tab.Namespace))
+		L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
+		L.SetField(tabTable, "CurrentIndex", lua.LNumber(tab.CurrentIndex))
+
+		breadcrumbTable := L.NewTable()
+		for j, crumb := range tab.Breadcrumb {
+			L.RawSetInt(breadcrumbTable, j+1, lua.LString(crumb))
+		}
+		L.SetField(tabTable, "Breadcrumb", breadcrumbTable)
+
+		metadataTable := L.NewTable()
+		if tab.Metadata != nil {
+			for k, v := range tab.Metadata {
+				L.SetField(metadataTable, k, lua.LString(fmt.Sprintf("%v", v)))
+			}
+		}
+		L.SetField(tabTable, "Metadata", metadataTable)
+
+		L.RawSetInt(tabsTable, i+1, tabTable)
+	}
+	L.SetField(clusterTable, "Tabs", tabsTable)
+
+	// Add breadcrumb
+	breadcrumbTable := L.NewTable()
+	for i, crumb := range cluster.Breadcrumb {
+		L.RawSetInt(breadcrumbTable, i+1, lua.LString(crumb))
+	}
+	L.SetField(clusterTable, "Breadcrumb", breadcrumbTable)
+
+	L.Push(clusterTable)
+	return 1
+}
+
 func (p *basicLuaPlugin) luaSyncCurrentClusterSession(L *lua.LState) int {
 	if p.api.globalManager == nil {
 		L.Push(lua.LBool(false))
@@ -397,6 +472,38 @@ func (p *basicLuaPlugin) luaSyncCurrentClusterSession(L *lua.LState) int {
 		logger.Warn(fmt.Sprintf("Failed to update cluster breadcrumb: %v", err))
 	}
 
+	L.Push(lua.LBool(true))
+	return 1
+}
+
+func (p *basicLuaPlugin) luaTriggerEvent(L *lua.LState) int {
+	eventName := L.CheckString(1)
+	var eventData interface{}
+
+	if L.GetTop() >= 2 {
+		eventData = L.CheckAny(2)
+	}
+
+	// Convert string to PluginEvent
+	var event PluginEvent
+	switch eventName {
+	case "app_started":
+		event = EventAppStarted
+	case "app_shutdown":
+		event = EventAppShutdown
+	case "namespace_changed":
+		event = EventNamespaceChanged
+	case "resource_selected":
+		event = EventResourceSelected
+	case "ui_update":
+		event = EventUIUpdate
+	default:
+		logger.Info(fmt.Sprintf("Unknown event: %s", eventName))
+		L.Push(lua.LBool(false))
+		return 1
+	}
+
+	p.api.TriggerEvent(event, eventData)
 	L.Push(lua.LBool(true))
 	return 1
 }
@@ -430,6 +537,7 @@ func parseTabInfo(tbl *lua.LTable) TabInfo {
 		ID:           id,
 		Title:        title,
 		ResourceType: resourceType,
+		Namespace:    "",
 		Breadcrumb:   breadcrumb,
 		CurrentIndex: int(currentIndex),
 		Metadata:     metadata,
@@ -535,6 +643,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			for i, tab := range tabs {
 				tabTable := L.NewTable()
 				L.SetField(tabTable, "ID", lua.LString(tab.ID))
+				L.SetField(tabTable, "Namespace", lua.LString(tab.Namespace))
 				L.SetField(tabTable, "Title", lua.LString(tab.Title))
 				L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
 				breadcrumbTable := L.NewTable()
@@ -569,6 +678,9 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 					}
 					if resourceType := tabTable.RawGetString("ResourceType"); resourceType.Type() == lua.LTString {
 						tabInfo.ResourceType = resourceType.String()
+					}
+					if namespace := tabTable.RawGetString("Namespace"); namespace.Type() == lua.LTString {
+						tabInfo.Namespace = namespace.String()
 					}
 					if breadcrumb := tabTable.RawGetString("Breadcrumb"); breadcrumb.Type() == lua.LTTable {
 						breadcrumbTable := breadcrumb.(*lua.LTable)
@@ -1073,6 +1185,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 			resultTable := L.NewTable()
 			for i, tab := range tabs {
 				tabTable := L.NewTable()
+				L.SetField(tabTable, "Namespace", lua.LString(tab.Namespace))
 				L.SetField(tabTable, "ID", lua.LString(tab.ID))
 				L.SetField(tabTable, "Title", lua.LString(tab.Title))
 				L.SetField(tabTable, "ResourceType", lua.LString(tab.ResourceType))
@@ -1412,6 +1525,7 @@ func (pm *PluginManager) loadLuaPlugin(path string) error {
 		plugin := &basicLuaPlugin{api: pm.api}
 		L.SetField(apiTable, "get_all_clusters", L.NewFunction(plugin.luaGetAllClusters))
 		L.SetField(apiTable, "get_current_cluster", L.NewFunction(plugin.luaGetCurrentCluster))
+		L.SetField(apiTable, "get_cluster_by_id", L.NewFunction(plugin.luaGetClusterByID))
 		L.SetField(apiTable, "sync_current_cluster_session", L.NewFunction(plugin.luaSyncCurrentClusterSession))
 
 		L.SetGlobal("k8s_tui", apiTable)

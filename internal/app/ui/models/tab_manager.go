@@ -16,6 +16,7 @@ type TabData struct {
 	ID            string
 	Title         string
 	ResourceType  string
+	Namespace     string
 	Model         tea.Model
 	ResourceModel interface{}
 	Breadcrumb    []string
@@ -31,6 +32,7 @@ type TabManager struct {
 	namespace            string
 	keyBindings          map[string]string
 	resourceTypeCallback func(resourceType string)
+	namespaceCallback    func(namespace string)
 }
 
 type TabManagerMsg struct {
@@ -85,6 +87,7 @@ func (tm *TabManager) createInitialTab() {
 		ID:            "initial",
 		Title:         "Resources",
 		ResourceType:  "ResourceList",
+		Namespace:     tm.namespace,
 		Model:         resourceComponent,
 		ResourceModel: resourceModel,
 		Breadcrumb:    []string{"Resource List"},
@@ -376,6 +379,7 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 			ID:            tabInfo.ID,
 			Title:         tabInfo.Title,
 			ResourceType:  tabInfo.ResourceType,
+			Namespace:     tabInfo.Namespace,
 			Model:         finalModel,
 			ResourceModel: finalResourceModel,
 			Breadcrumb:    tabInfo.Breadcrumb,
@@ -418,6 +422,10 @@ func (tm *TabManager) SetResourceTypeCallback(callback func(resourceType string)
 	tm.resourceTypeCallback = callback
 }
 
+func (tm *TabManager) SetNamespaceCallback(callback func(namespace string)) {
+	tm.namespaceCallback = callback
+}
+
 func (tm *TabManager) View() string {
 	if tm.activeIndex >= 0 && tm.activeIndex < len(tm.tabs) {
 		return tm.tabs[tm.activeIndex].Model.View()
@@ -437,6 +445,7 @@ func (tm *TabManager) CreateNewTab(model tea.Model, breadcrumb string) (tea.Mode
 		ID:            tabID,
 		Title:         breadcrumb,
 		ResourceType:  resourceType,
+		Namespace:     tm.namespace,
 		Model:         model,
 		ResourceModel: nil,
 		Breadcrumb:    []string{breadcrumb},
@@ -459,6 +468,7 @@ func (tm *TabManager) CreateNewResourceTab() (tea.Model, tea.Cmd) {
 		ID:            fmt.Sprintf("tab-%d", len(tm.tabs)+1),
 		Title:         "Resource List",
 		ResourceType:  "ResourceList",
+		Namespace:     tm.namespace,
 		Model:         resourceComponent,
 		ResourceModel: resourceModel,
 		Breadcrumb:    []string{"Resource List"},
@@ -562,6 +572,7 @@ func (tm *TabManager) GetTabsInfo() []plugins.TabInfo {
 			ID:           tab.ID,
 			Title:        tab.Title,
 			ResourceType: tab.ResourceType,
+			Namespace:    tab.Namespace,
 			Breadcrumb:   tab.Breadcrumb,
 			CurrentIndex: tab.CurrentIndex,
 			Metadata:     tab.Metadata,
@@ -573,6 +584,12 @@ func (tm *TabManager) GetTabsInfo() []plugins.TabInfo {
 func (tm *TabManager) SetActiveTab(index int) {
 	if index >= 0 && index < len(tm.tabs) {
 		tm.activeIndex = index
+		// Update namespace from the active tab if different
+		activeTab := tm.tabs[index]
+		if activeTab.Namespace != tm.namespace && tm.namespaceCallback != nil {
+			tm.namespace = activeTab.Namespace
+			tm.namespaceCallback(activeTab.Namespace)
+		}
 	}
 }
 

@@ -76,7 +76,7 @@ func (s *secretsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	s.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		secretDetails, err := NewSecretDetails(*k, s.namespace, selected).InitComponent(k)
+		secretDetails, err := NewSecretDetails(*k, s.pluginAPI.GetCurrentNamespace(), selected).InitComponent(k)
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -118,7 +118,7 @@ func (s *secretsModel) fetchData() error {
 	var secretInfo []k8s.SecretInfo
 	var err error
 
-	secretInfo, err = s.pluginAPI.GetSecrets(s.namespace)
+	secretInfo, err = s.pluginAPI.GetSecrets(s.pluginAPI.GetCurrentNamespace())
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch secrets: %v", err)
