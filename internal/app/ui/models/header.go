@@ -128,7 +128,7 @@ func (m HeaderModel) View() string {
 
 	headerView := lipgloss.JoinVertical(lipgloss.Left, allLines...)
 
-	if m.tabComponent != nil && m.tabComponent.GetTabCount() > 0 {
+	if m.tabComponent != nil {
 		tabView := m.tabComponent.View()
 		if tabView != "" {
 			return lipgloss.JoinVertical(lipgloss.Top, m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(headerView), tabView)

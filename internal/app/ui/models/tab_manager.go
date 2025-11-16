@@ -91,7 +91,7 @@ func (tm *TabManager) createInitialTab() {
 
 	initialTab := TabData{
 		ID:            "initial",
-		Title:         "Resources",
+		Title:         "Resource List",
 		ResourceType:  "ResourceList",
 		Namespace:     tm.namespace,
 		Model:         resourceComponent,

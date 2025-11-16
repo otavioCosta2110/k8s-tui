@@ -111,7 +111,8 @@ func (t *TabComponent) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (t *TabComponent) View() string {
-	if len(t.Tabs) == 0 || t.Width == 0 {
+	// Return empty string only if there are no tabs
+	if len(t.Tabs) == 0 {
 		return ""
 	}
 

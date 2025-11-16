@@ -62,6 +62,9 @@ func createAppModelWithKubeClient(cfg cli.Config, appConfig config.AppConfig, pl
 
 	setupPluginManagerForKubeClient(appModel, pluginManager, cfg, tabManager)
 
+	// Initial sync of tabs to header to ensure the tab bar is visible from the start
+	appModel.updateHeaderTabs()
+
 	return appModel
 }
 
