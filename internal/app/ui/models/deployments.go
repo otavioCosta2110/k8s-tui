@@ -58,6 +58,7 @@ Key Bindings:
 • ↑/↓/j/k: Navigate deployments
 • enter: View deployment pods
 • v: View deployment details
+• L: View deployment logs
 • d: Delete selected deployments
 • n: Create new deployment
 • r: Refresh
@@ -73,6 +74,7 @@ Common Actions:
 • Scale deployment: Enter to view details and scale
 • Update image: Use deployment details view
 • View pods: See associated pods in details
+• View logs: Press 'L' to see deployment logs
 • Create deployment: Press 'n' to open create form`
 }
 
@@ -135,6 +137,7 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 
 	actions := map[string]func() tea.Cmd{
 		"v": d.createViewDetailsAction(tableModel),
+		"L": d.createViewLogsAction(tableModel),
 		"n": d.createNewDeploymentAction(),
 	}
 	tableModel.SetUpdateActions(actions)
@@ -173,6 +176,62 @@ func (d *deploymentsModel) createViewDetailsAction(tableModel *ui.TableModel) fu
 			}
 			return components.NavigateMsg{
 				NewScreen: deploymentDetails,
+			}
+		}
+	}
+}
+
+func (d *deploymentsModel) createViewLogsAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(d.deploymentsInfo) {
+			return nil
+		}
+
+		deployment := d.deploymentsInfo[selected]
+
+		return func() tea.Msg {
+			// Get the label selector for this deployment
+			selector, err := deployment.GetLabelSelector()
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *d.k8sClient,
+				}
+			}
+
+			// Get pods for this deployment
+			podsInfo, err := d.pluginAPI.GetPods(d.pluginAPI.GetCurrentNamespace(), selector)
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *d.k8sClient,
+				}
+			}
+
+			// Collect logs from all pods
+			var allLogs string
+			if len(podsInfo) == 0 {
+				allLogs = "No pods found for deployment: " + deployment.Name
+			} else {
+				for _, podInfo := range podsInfo {
+					pod := resources.NewPodInfo(podInfo.Name, podInfo.Namespace, *d.k8sClient)
+					logs, err := pod.GetLogs()
+					if err != nil {
+						allLogs += fmt.Sprintf("Error getting logs for pod %s: %v\n\n", podInfo.Name, err)
+					} else {
+						allLogs += fmt.Sprintf("=== Logs for pod: %s ===\n%s\n\n", podInfo.Name, logs)
+					}
+				}
+			}
+
+			return components.NavigateMsg{
+				NewScreen:  components.NewYAMLViewer("Deployment Logs: "+deployment.Name, allLogs),
+				Breadcrumb: deployment.Name + " logs",
 			}
 		}
 	}

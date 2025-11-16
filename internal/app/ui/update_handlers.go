@@ -271,11 +271,20 @@ func (m *AppModel) handleNavigateMsg(msg components.NavigateMsg) (tea.Model, tea
 		popup.SetDimensions(styles.ScreenWidth, styles.ScreenHeight)
 
 		return &AppModel{
-			tabManager: m.tabManager,
-			header:     m.header,
-			kube:       msg.Cluster,
-			errorPopup: &popup,
-			quickNav:   nil,
+			tabManager:          m.tabManager,
+			header:              m.header,
+			kube:                msg.Cluster,
+			config:              m.config,
+			configSelected:      m.configSelected,
+			errorPopup:          &popup,
+			quickNav:            nil,
+			textInput:           m.textInput,
+			helpScreen:          m.helpScreen,
+			pendingInputDialog:  m.pendingInputDialog,
+			currentResourceType: m.currentResourceType,
+			breadcrumbTrail:     m.breadcrumbTrail,
+			pluginManager:       m.pluginManager,
+			uiInjector:          m.uiInjector,
 		}, nil
 	}
 

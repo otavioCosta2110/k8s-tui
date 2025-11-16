@@ -6,7 +6,7 @@ import (
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	ui "github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
 	styles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
-	"github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
+	k8s "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/internal/k8s/types"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -67,7 +67,8 @@ func (p *podsModel) Help() (string, string) {
 
 Key Bindings:
 • ↑/↓/j/k: Navigate pods
-• enter: View pod details
+• enter: View pod logs
+• v: View pod details
 • d: Delete selected pods
 • n: Create new pod
 • r: Refresh
@@ -81,7 +82,8 @@ Pod Status:
 • Succeeded: Pod completed successfully
 
 Common Actions:
-• View logs: Enter on a pod to see details
+• View logs: Enter on a pod to see logs
+• View details: Press 'v' to see pod details
 • Delete pod: Select with space, then press 'd'
 • Create pod: Press 'n' to open create form
 • Refresh: Press 'r' to update the list`
@@ -91,7 +93,8 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	p.k8sClient = k
 
 	onSelect := func(selected string) tea.Msg {
-		podDetails, err := NewPodDetails(*k, p.pluginAPI.GetCurrentNamespace(), selected).InitComponent(k)
+		pod := k8s.NewPodInfo(selected, p.pluginAPI.GetCurrentNamespace(), *k)
+		logs, err := pod.GetLogs()
 		if err != nil {
 			return components.NavigateMsg{
 				Error:   err,
@@ -99,8 +102,8 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 			}
 		}
 		return components.NavigateMsg{
-			NewScreen:  podDetails,
-			Breadcrumb: selected,
+			NewScreen:  components.NewYAMLViewer("Pod Logs: "+selected, logs),
+			Breadcrumb: selected + " logs",
 		}
 	}
 
@@ -116,15 +119,77 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	actions := map[string]func() tea.Cmd{
 		"d": p.createDeleteAction(tableModel),
 		"n": p.createNewPodAction(),
+		"v": p.createViewDetailsAction(tableModel),
 	}
 
 	if p.parentDeployment != "" {
-		actions["v"] = p.createViewManifestAction(tableModel)
+		actions["V"] = p.createViewManifestAction(tableModel)
 	}
 
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, p.refreshInterval, p.k8sClient, "Pods"), nil
+}
+
+func (p *podsModel) createViewDetailsAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(p.resourceData) {
+			return nil
+		}
+
+		podData := p.resourceData[selected].(PodData)
+		podName := podData.Name
+
+		return func() tea.Msg {
+			podDetails, err := NewPodDetails(*p.k8sClient, p.pluginAPI.GetCurrentNamespace(), podName).InitComponent(p.k8sClient)
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *p.k8sClient,
+				}
+			}
+			return components.NavigateMsg{
+				NewScreen:  podDetails,
+				Breadcrumb: podName,
+			}
+		}
+	}
+}
+
+func (p *podsModel) createViewLogsAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(p.resourceData) {
+			return nil
+		}
+
+		podData := p.resourceData[selected].(PodData)
+		podName := podData.Name
+
+		return func() tea.Msg {
+			pod := k8s.NewPodInfo(podName, p.pluginAPI.GetCurrentNamespace(), *p.k8sClient)
+			logs, err := pod.GetLogs()
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *p.k8sClient,
+				}
+			}
+			return components.NavigateMsg{
+				NewScreen:  components.NewYAMLViewer("Pod Logs: "+podName, logs),
+				Breadcrumb: podName + " logs",
+			}
+		}
+	}
 }
 
 func (p *podsModel) createViewManifestAction(tableModel *ui.TableModel) func() tea.Cmd {
