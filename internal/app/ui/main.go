@@ -162,6 +162,16 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ClearTextInputMsg:
 		m.textInput = nil
 		return m, nil
+	case models.CustomResourceErrorMsg:
+		// Show error popup for custom resource selection
+		popup := models.NewErrorScreen(
+			msg.Error,
+			"Not Implemented",
+			"Example resource selection is not implemented",
+		)
+		popup.SetDimensions(styles.ScreenWidth, styles.ScreenHeight+styles.HeaderSize)
+		m.errorPopup = &popup
+		return m, nil
 	default:
 		if m.tabManager != nil {
 			updatedManager, cmd := m.tabManager.Update(msg)
@@ -709,6 +719,16 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			popup.SetDimensions(m.width, m.height+styles.HeaderSize)
 			m.errorPopup = &popup
 			return m, nil
+		case models.CustomResourceErrorMsg:
+			// Show error popup for custom resource selection
+			popup := models.NewErrorScreen(
+				msg.Error,
+				"Not Implemented",
+				"Example resource selection is not implemented",
+			)
+			popup.SetDimensions(m.width, m.height+styles.HeaderSize)
+			m.errorPopup = &popup
+			return m, nil
 		case models.KubeconfigSelectedMsg:
 			// Store pending kubeconfig and open namespace selector
 			m.pendingKubeconfig = msg.Path
@@ -967,6 +987,16 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			msg.Error,
 			"Invalid Kubeconfig",
 			"The selected kubeconfig file is not valid",
+		)
+		popup.SetDimensions(m.width, m.height+styles.HeaderSize)
+		m.errorPopup = &popup
+		return m, nil
+	case models.CustomResourceErrorMsg:
+		// Show error popup for custom resource selection
+		popup := models.NewErrorScreen(
+			msg.Error,
+			"Not Implemented",
+			"Example resource selection is not implemented",
 		)
 		popup.SetDimensions(m.width, m.height+styles.HeaderSize)
 		m.errorPopup = &popup

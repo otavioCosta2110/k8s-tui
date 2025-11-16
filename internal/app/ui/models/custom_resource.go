@@ -17,6 +17,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type CustomResourceErrorMsg struct {
+	Error error
+}
+
 type customResourceModel struct {
 	resourceTypeName string
 	resourceData     []types.ResourceData
@@ -541,7 +545,11 @@ func NewCustomResourceTableModel(cr *customResourceModel, resourceName, icon, na
 		colWidths,
 		[]table.Row{},
 		title,
-		nil,
+		func(selected string) tea.Msg {
+			return CustomResourceErrorMsg{
+				Error: fmt.Errorf("not implemented"),
+			}
+		},
 		0,
 		func() ([]table.Row, error) {
 			logger.Debug("Refreshing table data")
