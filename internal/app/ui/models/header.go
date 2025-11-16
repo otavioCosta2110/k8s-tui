@@ -138,7 +138,7 @@ func (m HeaderModel) View() string {
 		}
 	}
 
-	leftWidth := m.width - rightWidth - 2 // Leave some spacing
+	leftWidth := m.width - rightWidth // Leave some spacing
 
 	line1Left := lipgloss.NewStyle().
 		Width(leftWidth).
@@ -149,7 +149,7 @@ func (m HeaderModel) View() string {
 		Background(lipgloss.Color(customstyles.BackgroundColor)).
 		Align(lipgloss.Right).
 		Render(right)
-	line1 := lipgloss.JoinHorizontal(lipgloss.Top, line1Left, line1Right)
+	line1 := lipgloss.JoinHorizontal(lipgloss.Left, line1Left, line1Right)
 
 	otherLines := leftLines[1:]
 
@@ -191,8 +191,8 @@ func (m HeaderModel) buildEnhancedHeader(metrics Metrics) string {
 	clusterSection := m.buildClusterSection(clusterInfo)
 	metricsSection := m.buildMetricsSection(metrics)
 
-	clusterLines := strings.Split(strings.TrimSuffix(clusterSection, "\n"), "\n")
-	metricsLines := strings.Split(strings.TrimSuffix(metricsSection, "\n"), "\n")
+	clusterLines := strings.Split(clusterSection, "\n")
+	metricsLines := strings.Split(metricsSection, "\n")
 
 	maxLines := max(len(metricsLines), len(clusterLines))
 
@@ -352,7 +352,7 @@ func (m HeaderModel) buildMetricsSection(metrics Metrics) string {
 	}
 
 	content := []string{
-		titleStyle.Render("Resources"),
+		titleStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render("Resources"),
 		formatMetric("Pods", metrics.PodsNumber, metrics.Loading),
 		formatMetric("Nodes", metrics.NodesNumber, metrics.Loading),
 		formatMetric("Namespaces", metrics.NamespacesNumber, metrics.Loading),
