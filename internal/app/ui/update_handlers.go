@@ -73,6 +73,19 @@ func (m *AppModel) handleWindowSizeMsg(msg tea.WindowSizeMsg) (tea.Model, tea.Cm
 	return m, tea.Batch(cmds...)
 }
 
+func (m *AppModel) isTextInputScreen() bool {
+	if m.tabManager != nil && m.tabManager.GetActiveTab() != nil {
+		activeTab := m.tabManager.GetActiveTab()
+		if activeTab.Model != nil {
+			switch activeTab.Model.(type) {
+			case *components.TextInputModel, *components.CreateForm:
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if m.textInput != nil {
 		switch msg.String() {
@@ -82,6 +95,19 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		default:
 			var cmd tea.Cmd
 			m.textInput, cmd = m.textInput.Update(msg)
+			return m, cmd
+		}
+	}
+
+	// Check if the current screen in the tab manager is a text input component
+	if m.isTextInputScreen() {
+		// Let the tab manager handle the key input for text input components
+		if m.tabManager != nil {
+			updatedManager, cmd := m.tabManager.Update(msg)
+			if manager, ok := updatedManager.(*models.TabManager); ok {
+				m.tabManager = manager
+				m.updateHeaderTabs()
+			}
 			return m, cmd
 		}
 	}
@@ -127,12 +153,35 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	switch msg.String() {
 	case "esc":
+		// When in text input screen, treat esc as back navigation (pop screen)
+		if m.isTextInputScreen() {
+			if m.tabManager != nil {
+				updatedManager, cmd := m.tabManager.Update(msg)
+				if manager, ok := updatedManager.(*models.TabManager); ok {
+					m.tabManager = manager
+					m.updateHeaderTabs()
+				}
+				return m, cmd
+			}
+		}
 		if m.errorPopup != nil {
 			m.errorPopup = nil
 			return m, nil
 		}
 		return m, tea.Quit
 	case m.getKeyBinding("quit"), m.getKeyBinding("back"), m.getKeyBinding("forward"):
+		// When in text input screen, let the component handle the key
+		// This allows typing "q" while blocking navigation keys
+		if m.isTextInputScreen() {
+			if m.tabManager != nil {
+				updatedManager, cmd := m.tabManager.Update(msg)
+				if manager, ok := updatedManager.(*models.TabManager); ok {
+					m.tabManager = manager
+					m.updateHeaderTabs()
+				}
+				return m, cmd
+			}
+		}
 		if m.tabManager != nil {
 			updatedManager, cmd := m.tabManager.Update(msg)
 			if manager, ok := updatedManager.(*models.TabManager); ok {
@@ -143,6 +192,10 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 	case "Q":
+		// Block Q completely when in a text input screen
+		if m.isTextInputScreen() {
+			return m, nil
+		}
 		if m.errorPopup != nil {
 			m.errorPopup = nil
 			return m, nil

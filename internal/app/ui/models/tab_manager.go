@@ -62,6 +62,19 @@ func NewTabManager(kubeClient *k8s.Client, namespace string, keyBindings map[str
 	return tm
 }
 
+func (tm *TabManager) isTextInputScreen() bool {
+	if tm.activeIndex >= 0 && tm.activeIndex < len(tm.tabs) {
+		activeTab := &tm.tabs[tm.activeIndex]
+		if activeTab.Model != nil {
+			switch activeTab.Model.(type) {
+			case *components.TextInputModel, *components.CreateForm:
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (tm *TabManager) getKeyBinding(action string) string {
 	// Create reverse lookup map from key->action to action->key
 	reverseBindings := make(map[string]string)
@@ -184,13 +197,45 @@ func (tm *TabManager) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "esc":
+			// When in text input screen, treat esc as back navigation (pop screen)
+			if tm.isTextInputScreen() {
+				return tm.navigateBack()
+			}
+			// Otherwise, let the component handle esc normally
+			if tm.activeIndex >= 0 && tm.activeIndex < len(tm.tabs) {
+				var cmd tea.Cmd
+				tm.tabs[tm.activeIndex].Model, cmd = tm.tabs[tm.activeIndex].Model.Update(msg)
+				return tm, cmd
+			}
 		case tm.getKeyBinding("new_tab"):
+			// Block new_tab when in text input screen
+			if tm.isTextInputScreen() {
+				return tm, nil
+			}
 			return tm.CreateNewResourceTab()
 		case tm.getKeyBinding("back"):
+			// Block back when in text input screen
+			if tm.isTextInputScreen() {
+				return tm, nil
+			}
 			return tm.navigateBack()
 		case tm.getKeyBinding("forward"):
+			// Block forward when in text input screen
+			if tm.isTextInputScreen() {
+				return tm, nil
+			}
 			return tm.navigateForward()
 		case tm.getKeyBinding("quit"):
+			// When in text input screen, let the component handle the key (for typing "q")
+			if tm.isTextInputScreen() {
+				if tm.activeIndex >= 0 && tm.activeIndex < len(tm.tabs) {
+					var cmd tea.Cmd
+					tm.tabs[tm.activeIndex].Model, cmd = tm.tabs[tm.activeIndex].Model.Update(msg)
+					return tm, cmd
+				}
+				return tm, nil
+			}
 			// Check if current tab is in search mode before handling quit
 			if tm.activeIndex >= 0 && tm.activeIndex < len(tm.tabs) {
 				activeTab := &tm.tabs[tm.activeIndex]
