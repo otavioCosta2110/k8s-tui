@@ -47,7 +47,7 @@ func TestStatefulSetsModelDataToRows(t *testing.T) {
 		t.Errorf("Expected 1 row, got %d", len(rows))
 	}
 
-	expectedRow := []string{"default", "test-statefulset", "3/3", "2h"}
+	expectedRow := []string{"default", "󰋊 test-statefulset", "3/3", "2h"}
 	for i, expected := range expectedRow {
 		if rows[0][i] != expected {
 			t.Errorf("Expected row[%d] to be '%s', got '%s'", i, expected, rows[0][i])
