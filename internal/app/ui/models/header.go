@@ -29,7 +29,7 @@ type HeaderModel struct {
 	metricsManager   *MetricsManager
 	tabComponent     *components.TabComponent
 	pluginComponents []string
-	pluginAPI        interface{} // Plugin API interface for getting current namespace
+	pluginAPI        any // Plugin API interface for getting current namespace
 }
 
 func NewHeader(headerText string, kubeconfig *k8s.Client, pluginAPI interface{}) HeaderModel {

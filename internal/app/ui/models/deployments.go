@@ -24,7 +24,7 @@ func NewDeployments(k resources.Client, namespace string) (*deploymentsModel, er
 	config := ResourceConfig{
 		ResourceType:    resources.ResourceTypeDeployment,
 		Title:           styles.ResourceIcons["Deployments"] + " Deployments in " + namespace,
-		ColumnWidths:    []float64{0.15, 0.25, 0.15, 0.15, 0.09, 0.15},
+		ColumnWidths:    []float64{0.15, 0.30, 0.12, 0.12, 0.12, 0.19},
 		RefreshInterval: 5 * time.Second,
 		Columns: []table.Column{
 			components.NewColumn("NAMESPACE", 0),

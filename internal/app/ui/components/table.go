@@ -248,16 +248,8 @@ func (m *TableModel) View() string {
 	}
 
 	tableHeight := styles.ScreenHeight - searchHeight
-	sumWidths := 0
-	for _, col := range m.Table.Columns() {
-		sumWidths += col.Width
-	}
 	m.Table.SetHeight(tableHeight)
-	tableWidth := styles.ScreenWidth
-	if sumWidths > styles.ScreenWidth {
-		tableWidth = sumWidths
-	}
-	m.Table.SetWidth(tableWidth)
+	m.Table.SetWidth(styles.ScreenWidth)
 
 	if len(m.Table.Rows()) == 0 {
 		// Create a single row with a "No data available" message
@@ -320,6 +312,14 @@ func (m *TableModel) updateColumnWidths(totalWidth int) {
 	columns := m.Table.Columns()
 	widths := make([]int, len(columns))
 
+	borderAndSeparatorWidth := len(columns)
+	availableWidth := totalWidth - (borderAndSeparatorWidth * 2)
+
+	// Ensure we don't go negative
+	if availableWidth < 0 {
+		availableWidth = 0
+	}
+
 	// Handle very small terminals
 	if totalWidth < 40 {
 		// For extremely small terminals, show minimal info
@@ -327,59 +327,75 @@ func (m *TableModel) updateColumnWidths(totalWidth int) {
 			if i == 0 {
 				widths[i] = 1 // checkbox
 			} else if i == 1 {
-				widths[i] = totalWidth - 2 // name column gets most space
+				widths[i] = max(1, availableWidth) // name column gets remaining space
 			} else {
 				widths[i] = 0 // hide other columns
 			}
 		}
-	} else if totalWidth < 60 {
+	} else if totalWidth < 80 {
 		// For small terminals, show essential columns
 		checkboxWidth := 2
 		widths[0] = checkboxWidth
-		remainingWidth := totalWidth - checkboxWidth
+		remainingWidth := max(0, availableWidth-checkboxWidth)
 
 		// Prioritize name and status columns
 		if len(columns) > 1 {
-			widths[1] = remainingWidth / 2 // name
+			widths[1] = int(float64(remainingWidth) * 0.6) // name gets 60%
 		}
 		if len(columns) > 2 {
-			widths[2] = remainingWidth / 2 // status
+			widths[2] = int(float64(remainingWidth) * 0.4) // status gets 40%
 		}
 		// Hide remaining columns
 		for i := 3; i < len(columns); i++ {
 			widths[i] = 0
 		}
 	} else {
-		// Normal sizing for larger terminals
-		checkboxWidth := 3
+		// Normal sizing for larger terminals - use full available width
+		checkboxWidth := 2
 		widths[0] = checkboxWidth
-		remainingWidth := totalWidth + checkboxWidth
-		totalAssigned := checkboxWidth + len(columns)*2
+		remainingWidth := max(0, availableWidth-checkboxWidth)
 
 		for i := 1; i < len(columns); i++ {
 			width := int(float64(remainingWidth) * m.colPercent[i])
 			widths[i] = width
-			totalAssigned += width
-		}
-
-		if len(widths) > 1 {
-			widths[len(widths)-1] += totalWidth - totalAssigned
 		}
 	}
 
-	// Apply minimum widths
+	// Apply minimum widths and ensure total fits within availableWidth
+	totalAssigned := 0
 	for i := range columns {
 		minWidth := 1
 		if i > 0 && widths[i] > 0 {
-			// Only enforce minimum width for visible columns
 			minWidth = max(3, len(columns[i].Title)+1)
 		}
 		if widths[i] > 0 && widths[i] < minWidth {
 			widths[i] = minWidth
 		}
+		totalAssigned += widths[i]
+	}
+
+	// If we exceed available width, scale down proportionally
+	if totalAssigned > availableWidth && availableWidth > 0 {
+		scale := float64(availableWidth) / float64(totalAssigned) 
+		for i := range columns {
+			if widths[i] > 1 { // Don't scale checkbox below minimum
+				widths[i] = int(0.5 + float64(widths[i]) * scale)
+			}
+		}
+	} else if totalAssigned < availableWidth && availableWidth > 0 {
+		// If we have extra space, distribute it to the last visible column
+		for i := len(widths) - 1; i >= 0; i-- {
+			if widths[i] > 0 {
+				widths[i] += availableWidth - totalAssigned
+				break
+			}
+		}
+	}
+
+	for i := range columns {
 		columns[i].Width = widths[i]
 	}
-	logger.Debug(fmt.Sprintf("final widths: %v", widths))
+	logger.Debug(fmt.Sprintf("final widths: %v, available: %d, total: %d, screen: %d", widths, availableWidth, totalAssigned, totalWidth))
 	m.Table.SetColumns(columns)
 }
 
