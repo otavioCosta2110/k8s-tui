@@ -16,7 +16,27 @@ func (m *AppModel) handleWindowSizeMsg(msg tea.WindowSizeMsg) (tea.Model, tea.Cm
 	styles.ScreenWidth = msg.Width - styles.Margin
 	styles.ScreenHeight = msg.Height - 2
 	if !styles.IsHeaderActive {
-		styles.HeaderSize = styles.ScreenHeight/4 - (styles.Margin * 2)
+		// Calculate header size more intelligently for different terminal sizes
+		minHeaderSize := 6  // Minimum header height for essential info
+		maxHeaderSize := 10 // Maximum header height to avoid taking too much space
+
+		// Calculate dynamic header size based on terminal height
+		proposedHeaderSize := styles.ScreenHeight/4 - (styles.Margin * 2)
+
+		// Ensure header size is within reasonable bounds
+		if proposedHeaderSize < minHeaderSize {
+			styles.HeaderSize = minHeaderSize
+		} else if proposedHeaderSize > maxHeaderSize {
+			styles.HeaderSize = maxHeaderSize
+		} else {
+			styles.HeaderSize = proposedHeaderSize
+		}
+
+		// For very small terminals, ensure we have enough space for content
+		if styles.ScreenHeight-styles.HeaderSize-styles.TabBarSize < 10 {
+			styles.HeaderSize = minHeaderSize
+		}
+
 		styles.IsHeaderActive = true
 	}
 	styles.ScreenHeight -= styles.HeaderSize

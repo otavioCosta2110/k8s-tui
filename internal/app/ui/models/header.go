@@ -110,26 +110,55 @@ func (m HeaderModel) View() string {
 
 	leftLines := strings.Split(left, "\n")
 
-	rightWidth := lipgloss.Width(right)
-	leftWidth := m.width - rightWidth
-
-	// Handle very small terminals
-	if m.width < 50 {
+	// Handle very small terminals with better responsiveness
+	if m.width < 60 {
 		// For very small terminals, show only essential info
-		essentialInfo := strings.Split(leftLines[0], " ")[0] // Show just cluster name
-		line1Left := lipgloss.NewStyle().Width(m.width).Background(lipgloss.Color(customstyles.BackgroundColor)).Render(essentialInfo)
-		line1 := line1Left
-		return m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(line1)
+		if len(leftLines) > 0 {
+			// Truncate the first line to fit
+			essentialInfo := leftLines[0]
+			if len(essentialInfo) > m.width-2 && m.width > 5 {
+				essentialInfo = essentialInfo[:m.width-5] + "..."
+			}
+			line1 := lipgloss.NewStyle().
+				Width(m.width).
+				Background(lipgloss.Color(customstyles.BackgroundColor)).
+				Render(essentialInfo)
+			return m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(line1)
+		}
 	}
 
-	line1Left := lipgloss.NewStyle().Width(leftWidth).Background(lipgloss.Color(customstyles.BackgroundColor)).Render(leftLines[0])
-	line1Right := lipgloss.NewStyle().Width(rightWidth).Background(lipgloss.Color(customstyles.BackgroundColor)).Align(lipgloss.Right).Render(right)
+	rightWidth := lipgloss.Width(right)
+
+	// Ensure we have enough space for both left and right content
+	if rightWidth > m.width/3 {
+		rightWidth = m.width / 3
+		// Truncate right content if needed
+		if len(right) > rightWidth-3 && rightWidth > 3 {
+			right = right[:rightWidth-3] + "..."
+		}
+	}
+
+	leftWidth := m.width - rightWidth - 2 // Leave some spacing
+
+	line1Left := lipgloss.NewStyle().
+		Width(leftWidth).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		Render(leftLines[0])
+	line1Right := lipgloss.NewStyle().
+		Width(rightWidth).
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		Align(lipgloss.Right).
+		Render(right)
 	line1 := lipgloss.JoinHorizontal(lipgloss.Top, line1Left, line1Right)
 
 	otherLines := leftLines[1:]
 
 	paddedOtherLines := make([]string, len(otherLines))
 	for i, line := range otherLines {
+		// Truncate lines that are too long
+		if lipgloss.Width(line) > m.width-2 && m.width > 5 {
+			line = line[:m.width-5] + "..."
+		}
 		paddedOtherLines[i] = lipgloss.PlaceHorizontal(m.width, lipgloss.Left, line, lipgloss.WithWhitespaceBackground(lipgloss.Color(customstyles.BackgroundColor)))
 	}
 
@@ -154,6 +183,11 @@ func (m *HeaderModel) AddPluginComponent(component string) {
 func (m HeaderModel) buildEnhancedHeader(metrics Metrics) string {
 	clusterInfo := m.getClusterInfo()
 
+	// For very narrow terminals, use a compact layout
+	if m.width < 80 {
+		return m.buildCompactHeader(clusterInfo, metrics)
+	}
+
 	clusterSection := m.buildClusterSection(clusterInfo)
 	metricsSection := m.buildMetricsSection(metrics)
 
@@ -169,10 +203,14 @@ func (m HeaderModel) buildEnhancedHeader(metrics Metrics) string {
 		metricsLines = append(metricsLines, "")
 	}
 
+	// Calculate dynamic widths based on available space
+	clusterWidth := min(40, m.width/3)
+	metricsWidth := min(60, m.width-clusterWidth-4)
+
 	resultLines := make([]string, maxLines)
 	for i := range maxLines {
 		clusterLine := lipgloss.NewStyle().
-			Width(40).
+			Width(clusterWidth).
 			Background(lipgloss.Color(customstyles.BackgroundColor)).
 			Render(clusterLines[i])
 
@@ -182,7 +220,7 @@ func (m HeaderModel) buildEnhancedHeader(metrics Metrics) string {
 			Render("    ")
 
 		metricsLine := lipgloss.NewStyle().
-			Width(60).
+			Width(metricsWidth).
 			Background(lipgloss.Color(customstyles.BackgroundColor)).
 			Render(metricsLines[i])
 
@@ -244,8 +282,13 @@ func (m HeaderModel) buildClusterSection(info map[string]string) string {
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	serverValue := info["server"]
-	if len(serverValue) > 25 {
-		serverValue = serverValue[:22] + "..."
+	// Adjust truncation based on available width
+	maxServerLength := 25
+	if m.width < 100 {
+		maxServerLength = 15
+	}
+	if len(serverValue) > maxServerLength {
+		serverValue = serverValue[:maxServerLength-3] + "..."
 	}
 
 	content := []string{
@@ -260,9 +303,11 @@ func (m HeaderModel) buildClusterSection(info map[string]string) string {
 			valueStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(serverValue)),
 	}
 
+	// Use dynamic width based on available space
+	sectionWidth := min(40, m.width/3)
 	filledContent := make([]string, len(content))
 	for i, line := range content {
-		filledContent[i] = lipgloss.PlaceHorizontal(40, lipgloss.Left, line, lipgloss.WithWhitespaceBackground(lipgloss.Color(customstyles.BackgroundColor)))
+		filledContent[i] = lipgloss.PlaceHorizontal(sectionWidth, lipgloss.Left, line, lipgloss.WithWhitespaceBackground(lipgloss.Color(customstyles.BackgroundColor)))
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Left, filledContent...)
@@ -315,12 +360,66 @@ func (m HeaderModel) buildMetricsSection(metrics Metrics) string {
 		formatMetric("Services", metrics.ServicesNumber, metrics.Loading),
 	}
 
+	// Use dynamic width based on available space
+	sectionWidth := min(60, m.width*2/3)
 	filledContent := make([]string, len(content))
 	for i, line := range content {
-		filledContent[i] = lipgloss.PlaceHorizontal(60, lipgloss.Left, line, lipgloss.WithWhitespaceBackground(lipgloss.Color(customstyles.BackgroundColor)))
+		filledContent[i] = lipgloss.PlaceHorizontal(sectionWidth, lipgloss.Left, line, lipgloss.WithWhitespaceBackground(lipgloss.Color(customstyles.BackgroundColor)))
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Left, filledContent...)
+}
+
+func (m HeaderModel) buildCompactHeader(clusterInfo map[string]string, metrics Metrics) string {
+	titleStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(customstyles.TextColor).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
+
+	valueStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(customstyles.HeaderValueColor)).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
+
+	loadingStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(customstyles.HeaderLoadingColor)).
+		Italic(true).
+		Background(lipgloss.Color(customstyles.BackgroundColor))
+
+	// Truncate server URL for compact display
+	serverValue := clusterInfo["server"]
+	if len(serverValue) > 15 {
+		serverValue = serverValue[:12] + "..."
+	}
+
+	// Build compact lines
+	lines := []string{
+		titleStyle.Render("Cluster: " + clusterInfo["namespace"] + "@" + serverValue),
+	}
+
+	// Add metrics in compact format
+	metricItems := []string{}
+	if metrics.Loading {
+		metricItems = append(metricItems, loadingStyle.Render("Loading..."))
+	} else {
+		if metrics.PodsNumber > 0 {
+			metricItems = append(metricItems, valueStyle.Render(fmt.Sprintf("P:%d", metrics.PodsNumber)))
+		}
+		if metrics.NodesNumber > 0 {
+			metricItems = append(metricItems, valueStyle.Render(fmt.Sprintf("N:%d", metrics.NodesNumber)))
+		}
+		if metrics.DeploymentsNumber > 0 {
+			metricItems = append(metricItems, valueStyle.Render(fmt.Sprintf("D:%d", metrics.DeploymentsNumber)))
+		}
+		if metrics.ServicesNumber > 0 {
+			metricItems = append(metricItems, valueStyle.Render(fmt.Sprintf("S:%d", metrics.ServicesNumber)))
+		}
+	}
+
+	if len(metricItems) > 0 {
+		lines = append(lines, strings.Join(metricItems, " "))
+	}
+
+	return strings.Join(lines, "\n")
 }
 
 func (m *HeaderModel) SetContent(content string) {
