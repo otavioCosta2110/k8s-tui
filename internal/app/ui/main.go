@@ -709,6 +709,15 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if msg.String() == "esc" {
 				return nil, tea.Quit
 			}
+			if msg.String() == "q" {
+				// If we have existing clusters, cancel selector and go back to main view
+				if len(m.clusters) > 0 {
+					m.kubeconfigSelector = nil
+					return m, nil
+				}
+				// If no clusters exist, quit the app
+				return nil, tea.Quit
+			}
 		case models.KubeconfigErrorMsg:
 			// Show error popup for invalid kubeconfig
 			popup := models.NewErrorScreen(
@@ -793,7 +802,7 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.namespaceSelector != nil {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
-			if msg.String() == "esc" {
+			if msg.String() == "esc" || msg.String() == "q" {
 				// Go back to kubeconfig selector
 				m.namespaceSelector = nil
 				m.kubeconfigSelector = models.NewKubeconfigSelectorModel()
