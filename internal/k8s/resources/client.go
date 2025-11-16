@@ -54,6 +54,12 @@ type Client struct {
 	KubeconfigPath string
 }
 
+// ValidateKubeconfig checks if a kubeconfig file is valid without requiring a namespace
+func ValidateKubeconfig(kubeconfigPath string) error {
+	_, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	return err
+}
+
 func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
 	var config *rest.Config
 	var err error

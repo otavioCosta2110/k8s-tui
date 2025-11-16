@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"github.com/otavioCosta2110/k8s-tui/internal/app/ui/components"
+	k8s "github.com/otavioCosta2110/k8s-tui/internal/k8s/resources"
 	"github.com/otavioCosta2110/k8s-tui/pkg/logger"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -14,6 +15,10 @@ import (
 
 type KubeconfigSelectedMsg struct {
 	Path string
+}
+
+type KubeconfigErrorMsg struct {
+	Error error
 }
 
 type KubeconfigSelectorModel struct {
@@ -29,7 +34,11 @@ func NewKubeconfigSelectorModel() *KubeconfigSelectorModel {
 	}
 
 	list := components.NewFullscreenList(files, "Select Kubeconfig", func(selected string) tea.Msg {
-		return KubeconfigSelectedMsg{Path: filepath.Join(kubeDir, selected)}
+		fullPath := filepath.Join(kubeDir, selected)
+		if err := k8s.ValidateKubeconfig(fullPath); err != nil {
+			return KubeconfigErrorMsg{Error: fmt.Errorf("invalid kubeconfig file: %v", err)}
+		}
+		return KubeconfigSelectedMsg{Path: fullPath}
 	})
 
 	return &KubeconfigSelectorModel{

@@ -35,7 +35,7 @@ func (m ErrorModel) Update(msg tea.Msg) (ErrorModel, tea.Cmd) {
 func (m ErrorModel) View() string {
 	errorStyle := lipgloss.NewStyle().
 		Width(styles.ScreenWidth).
-		Height(styles.ScreenHeight+styles.HeaderSize).
+		Height(styles.ScreenHeight+styles.HeaderSize + styles.Margin + 1).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("#FF0000")).
 		Padding(1, 2).

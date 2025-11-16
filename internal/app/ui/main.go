@@ -88,6 +88,7 @@ type MultiClusterModel struct {
 	pendingKubeconfig   string
 	pluginArgs          map[string]string
 	sizeCheck           *models.SizeCheckModel
+	errorPopup          *models.ErrorModel
 }
 
 func NewAppModel(cfg cli.Config, pluginManager *plugins.GlobalPluginManager) *AppModel {
@@ -677,6 +678,20 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	// Handle error popup
+	if m.errorPopup != nil {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			if msg.String() == "esc" || msg.String() == "enter" || msg.String() == "q" {
+				m.errorPopup = nil
+				return m, nil
+			}
+		}
+		updatedModel, cmd := m.errorPopup.Update(msg)
+		m.errorPopup = &updatedModel
+		return m, cmd
+	}
+
 	// Handle kubeconfig selector when no clusters exist
 	if m.kubeconfigSelector != nil {
 		switch msg := msg.(type) {
@@ -684,6 +699,16 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if msg.String() == "esc" {
 				return nil, tea.Quit
 			}
+		case models.KubeconfigErrorMsg:
+			// Show error popup for invalid kubeconfig
+			popup := models.NewErrorScreen(
+				msg.Error,
+				"Invalid Kubeconfig",
+				"The selected kubeconfig file is not valid",
+			)
+			popup.SetDimensions(m.width, m.height+styles.HeaderSize)
+			m.errorPopup = &popup
+			return m, nil
 		case models.KubeconfigSelectedMsg:
 			// Store pending kubeconfig and open namespace selector
 			m.pendingKubeconfig = msg.Path
@@ -936,6 +961,16 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 		}
+	case models.KubeconfigErrorMsg:
+		// Show error popup for invalid kubeconfig
+		popup := models.NewErrorScreen(
+			msg.Error,
+			"Invalid Kubeconfig",
+			"The selected kubeconfig file is not valid",
+		)
+		popup.SetDimensions(m.width, m.height+styles.HeaderSize)
+		m.errorPopup = &popup
+		return m, nil
 	case models.KubeconfigSelectedMsg:
 		// Store pending kubeconfig and open namespace selector
 		m.pendingKubeconfig = msg.Path
@@ -1039,6 +1074,11 @@ func (m *MultiClusterModel) View() string {
 	// Show size check if terminal is too small
 	if m.sizeCheck != nil && !m.sizeCheck.IsSizeValid() {
 		return m.sizeCheck.View()
+	}
+
+	// Show error popup if present
+	if m.errorPopup != nil {
+		return m.errorPopup.View()
 	}
 
 	if m.kubeconfigSelector != nil {

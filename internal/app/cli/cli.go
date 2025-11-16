@@ -28,7 +28,7 @@ func ParseFlags() Config {
 	var cfg Config
 
 	appConfig, err := config.LoadAppConfig()
-	defaultPluginDir := "./plugins"
+	defaultPluginDir := "~/.local/share/k8s-tui/plugins"
 	if err == nil {
 		defaultPluginDir = appConfig.PluginDir
 	}
