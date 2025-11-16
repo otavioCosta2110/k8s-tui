@@ -763,8 +763,10 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 			content: helpText("Pods are the smallest deployable units in Kubernetes.") + "\n\n" +
 				helpSection("Key Bindings:") +
 				helpItem("↑/↓/j/k:", "Navigate pods") +
-				helpItem("enter:", "View pod details") +
+				helpItem("enter:", "View pod logs") +
+				helpItem("v:", "View pod details") +
 				helpItem("d:", "Delete selected pods") +
+				helpItem("n:", "Create new pod") +
 				helpItem("r:", "Refresh") +
 				helpItem("/:", "Search pods") +
 				helpItem("esc:", "Go back") + "\n\n" +
@@ -776,8 +778,10 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpItem("Succeeded:", "Pod completed successfully") + "\n\n" +
 
 				helpSection("Common Actions:") +
-				helpItem("View logs:", "Enter on a pod to see details") +
+				helpItem("View logs:", "Enter on a pod to see logs") +
+				helpItem("View details:", "Press 'v' to see pod details") +
 				helpItem("Delete pod:", "Select with space, then press 'd'") +
+				helpItem("Create pod:", "Press 'n' to open create form") +
 				helpItem("Refresh:", "Press 'r' to update the list"),
 		},
 		"Deployments": {
@@ -787,7 +791,9 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpItem("↑/↓/j/k:", "Navigate deployments") +
 				helpItem("enter:", "View deployment pods") +
 				helpItem("v:", "View deployment details") +
+				helpItem("L:", "View deployment logs") +
 				helpItem("d:", "Delete selected deployments") +
+				helpItem("n:", "Create new deployment") +
 				helpItem("r:", "Refresh") +
 				helpItem("/:", "Search deployments") +
 				helpItem("esc:", "Go back") + "\n\n" +
@@ -800,7 +806,9 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpSection("Common Actions:") +
 				helpItem("Scale deployment:", "Enter to view details and scale") +
 				helpItem("Update image:", "Use deployment details view") +
-				helpItem("View pods:", "See associated pods in details"),
+				helpItem("View pods:", "See associated pods in details") +
+				helpItem("View logs:", "Press 'L' to see deployment logs") +
+				helpItem("Create deployment:", "Press 'n' to open create form"),
 		},
 		"Services": {
 			title: "Services Help",
