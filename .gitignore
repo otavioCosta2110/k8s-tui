@@ -1,5 +1,6 @@
 main
 *.log
+logs/
 *.so
 k8s-tui
 session.json

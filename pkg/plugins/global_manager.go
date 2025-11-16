@@ -302,6 +302,30 @@ func (gpm *GlobalPluginManager) loadLuaPluginWithMultiClusterAPI(path string) er
 		}
 
 		logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Successfully initialized pluginmanager-style plugin: %s", pluginName))
+
+		// Check if this plugin has resource functions and register it as a resource plugin
+		getResourceTypesType := L.GetGlobal("GetResourceTypes").Type()
+		getResourceDataType := L.GetGlobal("GetResourceData").Type()
+
+		logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Plugin %s resource function check - GetResourceTypes: %s, GetResourceData: %s",
+			pluginName, getResourceTypesType, getResourceDataType))
+
+		if getResourceTypesType == lua.LTFunction && getResourceDataType == lua.LTFunction {
+			logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: 🎯 Detected resource plugin: %s", pluginName))
+
+			// Create Lua plugin wrapper and register as resource plugin
+			luaPlugin := &LuaPlugin{
+				L:          L,
+				pluginName: pluginName,
+			}
+
+			// Register as resource plugin
+			gpm.registry.RegisterResourcePlugin(luaPlugin)
+			logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: ✅ Registered resource plugin: %s", pluginName))
+		} else {
+			logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Plugin %s does not have resource functions", pluginName))
+		}
+
 		return nil
 	}
 
