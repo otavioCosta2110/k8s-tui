@@ -376,10 +376,10 @@ func (m *TableModel) updateColumnWidths(totalWidth int) {
 
 	// If we exceed available width, scale down proportionally
 	if totalAssigned > availableWidth && availableWidth > 0 {
-		scale := float64(availableWidth) / float64(totalAssigned) 
+		scale := float64(availableWidth) / float64(totalAssigned)
 		for i := range columns {
 			if widths[i] > 1 { // Don't scale checkbox below minimum
-				widths[i] = int(0.5 + float64(widths[i]) * scale)
+				widths[i] = int((0.5 + float64(widths[i])) * scale)
 			}
 		}
 	} else if totalAssigned < availableWidth && availableWidth > 0 {
