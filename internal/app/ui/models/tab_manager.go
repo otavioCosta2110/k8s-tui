@@ -63,7 +63,13 @@ func NewTabManager(kubeClient *k8s.Client, namespace string, keyBindings map[str
 }
 
 func (tm *TabManager) getKeyBinding(action string) string {
-	if binding, exists := tm.keyBindings[action]; exists {
+	// Create reverse lookup map from key->action to action->key
+	reverseBindings := make(map[string]string)
+	for key, cmd := range tm.keyBindings {
+		reverseBindings[cmd] = key
+	}
+
+	if binding, exists := reverseBindings[action]; exists {
 		return binding
 	}
 	defaults := map[string]string{

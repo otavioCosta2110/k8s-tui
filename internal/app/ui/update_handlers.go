@@ -189,7 +189,15 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	default:
-		if command, exists := m.config.KeyBindings[msg.String()]; exists {
+		// Since KeyBindings is now action: key, we need to reverse lookup
+		var command string
+		for action, key := range m.config.KeyBindings {
+			if key == msg.String() {
+				command = action
+				break
+			}
+		}
+		if command != "" {
 			if m.pluginManager != nil {
 				result, err := m.pluginManager.GetAPI().ExecuteCommand(command, []string{})
 				if err != nil {

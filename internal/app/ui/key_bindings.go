@@ -1,9 +1,11 @@
 package ui
 
 func (m *AppModel) getKeyBinding(action string) string {
+	// KeyBindings is now action: key format
 	if binding, exists := m.config.KeyBindings[action]; exists {
 		return binding
 	}
+
 	defaults := map[string]string{
 		"quit":         "q",
 		"help":         "?",

@@ -32,14 +32,14 @@ The main configuration file allows you to customize various aspects of K8s TUI:
   "auto_refresh": true,
   "default_namespace": "default",
   "key_bindings": {
-    "quit": "q",
-    "help": "?",
-    "refresh": "r",
-    "back": "[",
-    "forward": "]",
-    "new_tab": "ctrl+t",
-    "close_tab": "ctrl+w",
-    "quick_nav": "g"
+    "q": "quit",
+    "?": "help",
+    "r": "refresh",
+    "[": "back",
+    "]": "forward",
+    "ctrl+t": "new_tab",
+    "ctrl+w": "close_tab",
+    "g": "quick_nav"
   },
   "colors": {
     "border_color": "#89b4fa",
