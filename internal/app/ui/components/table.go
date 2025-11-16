@@ -320,26 +320,61 @@ func (m *TableModel) updateColumnWidths(totalWidth int) {
 	columns := m.Table.Columns()
 	widths := make([]int, len(columns))
 
-	checkboxWidth := 3
-	widths[0] = checkboxWidth
-	remainingWidth := totalWidth + checkboxWidth
-	totalAssigned := checkboxWidth + len(columns)*2
-
-	for i := 1; i < len(columns); i++ {
-		width := int(float64(remainingWidth) * m.colPercent[i])
-		widths[i] = width
-		totalAssigned += width
-	}
-
-	if len(widths) > 1 {
-		widths[len(widths)-1] += totalWidth - totalAssigned
-	}
-	for i := range columns {
-		minWidth := 3
-		if i > 0 {
-			minWidth = len(columns[i].Title) + 2
+	// Handle very small terminals
+	if totalWidth < 40 {
+		// For extremely small terminals, show minimal info
+		for i := range columns {
+			if i == 0 {
+				widths[i] = 1 // checkbox
+			} else if i == 1 {
+				widths[i] = totalWidth - 2 // name column gets most space
+			} else {
+				widths[i] = 0 // hide other columns
+			}
 		}
-		if widths[i] < minWidth {
+	} else if totalWidth < 60 {
+		// For small terminals, show essential columns
+		checkboxWidth := 2
+		widths[0] = checkboxWidth
+		remainingWidth := totalWidth - checkboxWidth
+
+		// Prioritize name and status columns
+		if len(columns) > 1 {
+			widths[1] = remainingWidth / 2 // name
+		}
+		if len(columns) > 2 {
+			widths[2] = remainingWidth / 2 // status
+		}
+		// Hide remaining columns
+		for i := 3; i < len(columns); i++ {
+			widths[i] = 0
+		}
+	} else {
+		// Normal sizing for larger terminals
+		checkboxWidth := 3
+		widths[0] = checkboxWidth
+		remainingWidth := totalWidth + checkboxWidth
+		totalAssigned := checkboxWidth + len(columns)*2
+
+		for i := 1; i < len(columns); i++ {
+			width := int(float64(remainingWidth) * m.colPercent[i])
+			widths[i] = width
+			totalAssigned += width
+		}
+
+		if len(widths) > 1 {
+			widths[len(widths)-1] += totalWidth - totalAssigned
+		}
+	}
+
+	// Apply minimum widths
+	for i := range columns {
+		minWidth := 1
+		if i > 0 && widths[i] > 0 {
+			// Only enforce minimum width for visible columns
+			minWidth = max(3, len(columns[i].Title)+1)
+		}
+		if widths[i] > 0 && widths[i] < minWidth {
 			widths[i] = minWidth
 		}
 		columns[i].Width = widths[i]

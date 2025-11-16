@@ -113,6 +113,15 @@ func (m HeaderModel) View() string {
 	rightWidth := lipgloss.Width(right)
 	leftWidth := m.width - rightWidth
 
+	// Handle very small terminals
+	if m.width < 50 {
+		// For very small terminals, show only essential info
+		essentialInfo := strings.Split(leftLines[0], " ")[0] // Show just cluster name
+		line1Left := lipgloss.NewStyle().Width(m.width).Background(lipgloss.Color(customstyles.BackgroundColor)).Render(essentialInfo)
+		line1 := line1Left
+		return m.headerStyle.Background(lipgloss.Color(customstyles.BackgroundColor)).Render(line1)
+	}
+
 	line1Left := lipgloss.NewStyle().Width(leftWidth).Background(lipgloss.Color(customstyles.BackgroundColor)).Render(leftLines[0])
 	line1Right := lipgloss.NewStyle().Width(rightWidth).Background(lipgloss.Color(customstyles.BackgroundColor)).Align(lipgloss.Right).Render(right)
 	line1 := lipgloss.JoinHorizontal(lipgloss.Top, line1Left, line1Right)

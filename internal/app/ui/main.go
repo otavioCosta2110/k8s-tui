@@ -87,6 +87,7 @@ type MultiClusterModel struct {
 	namespaceSelector   *models.NamespaceSelectorModel
 	pendingKubeconfig   string
 	pluginArgs          map[string]string
+	sizeCheck           *models.SizeCheckModel
 }
 
 func NewAppModel(cfg cli.Config, pluginManager *plugins.GlobalPluginManager) *AppModel {
@@ -608,6 +609,7 @@ func NewMultiClusterModel(cfg cli.Config) *MultiClusterModel {
 		pluginManager:       sharedPluginManager,
 		config:              initializeAppConfigAndColors(),
 		pluginArgs:          cfg.PluginArgs,
+		sizeCheck:           models.NewSizeCheckModel(),
 	}
 
 	// Set up cluster management callbacks for plugins
@@ -641,21 +643,40 @@ func (m *MultiClusterModel) Init() tea.Cmd {
 		logger.Info("DEBUG: Plugin args processed and cleared")
 	}
 
-	if m.kubeconfigSelector != nil {
-		return m.kubeconfigSelector.Init()
+	var cmds []tea.Cmd
+
+	// Initialize size checker
+	if m.sizeCheck != nil {
+		cmds = append(cmds, m.sizeCheck.Init())
 	}
-	if len(m.clusters) > 0 && m.clusters[m.currentCluster] != nil {
+
+	if m.kubeconfigSelector != nil {
+		cmds = append(cmds, m.kubeconfigSelector.Init())
+	} else if len(m.clusters) > 0 && m.clusters[m.currentCluster] != nil {
 		// The shared plugin manager is already set in NewMultiClusterModel
 		// Just ensure it's set as global
 		if m.pluginManager != nil {
 			plugins.SetGlobalPluginManager(m.pluginManager)
 		}
-		return m.clusters[m.currentCluster].Init()
+		cmds = append(cmds, m.clusters[m.currentCluster].Init())
 	}
-	return nil
+
+	return tea.Batch(cmds...)
 }
 
 func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Handle size checking first
+	if m.sizeCheck != nil {
+		updated, cmd := m.sizeCheck.Update(msg)
+		if sizeCheck, ok := updated.(*models.SizeCheckModel); ok {
+			m.sizeCheck = sizeCheck
+		}
+		// If size is invalid, don't process other messages
+		if !m.sizeCheck.IsSizeValid() {
+			return m, cmd
+		}
+	}
+
 	// Handle kubeconfig selector when no clusters exist
 	if m.kubeconfigSelector != nil {
 		switch msg := msg.(type) {
@@ -795,6 +816,18 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.width = msg.Width
 		m.height = msg.Height
+
+		// Forward WindowSizeMsg to size checker
+		if m.sizeCheck != nil {
+			updated, cmd := m.sizeCheck.Update(msg)
+			if sizeCheck, ok := updated.(*models.SizeCheckModel); ok {
+				m.sizeCheck = sizeCheck
+			}
+			// If size is invalid, don't process further
+			if !m.sizeCheck.IsSizeValid() {
+				return m, cmd
+			}
+		}
 
 		// Forward WindowSizeMsg to selectors if they exist
 		if m.kubeconfigSelector != nil {
@@ -1003,6 +1036,11 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *MultiClusterModel) View() string {
+	// Show size check if terminal is too small
+	if m.sizeCheck != nil && !m.sizeCheck.IsSizeValid() {
+		return m.sizeCheck.View()
+	}
+
 	if m.kubeconfigSelector != nil {
 		return m.kubeconfigSelector.View()
 	}
