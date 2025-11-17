@@ -765,6 +765,7 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpItem("↑/↓/j/k:", "Navigate pods") +
 				helpItem("enter:", "View pod logs") +
 				helpItem("v:", "View pod details") +
+				helpItem("t:", "View resource usage") +
 				helpItem("d:", "Delete selected pods") +
 				helpItem("n:", "Create new pod") +
 				helpItem("r:", "Refresh") +
@@ -780,6 +781,7 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpSection("Common Actions:") +
 				helpItem("View logs:", "Enter on a pod to see logs") +
 				helpItem("View details:", "Press 'v' to see pod details") +
+				helpItem("View resource usage:", "Press 't' to see CPU/memory usage") +
 				helpItem("Delete pod:", "Select with space, then press 'd'") +
 				helpItem("Create pod:", "Press 'n' to open create form") +
 				helpItem("Refresh:", "Press 'r' to update the list"),

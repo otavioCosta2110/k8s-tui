@@ -14,6 +14,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
+	"gopkg.in/yaml.v3"
 )
 
 type podsModel struct {
@@ -73,6 +74,7 @@ Key Bindings:
 • enter: View pod logs
 • e: Execute command in pod
 • v: View pod details
+• t: View resource usage
 • d: Delete selected pods
 • n: Create new pod
 • r: Refresh
@@ -88,6 +90,7 @@ Pod Status:
 Common Actions:
 • View logs: Enter on a pod to see logs
 • View details: Press 'v' to see pod details
+• View resource usage: Press 't' to see CPU/memory usage
 • Delete pod: Select with space, then press 'd'
 • Create pod: Press 'n' to open create form
 • Refresh: Press 'r' to update the list`
@@ -124,6 +127,7 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		"d": p.createDeleteAction(tableModel),
 		"e": p.createExecAction(tableModel),
 		"n": p.createNewPodAction(),
+		"t": p.createViewResourceUsageAction(tableModel),
 		"v": p.createViewDetailsAction(tableModel),
 	}
 
@@ -195,6 +199,82 @@ func (p *podsModel) createViewLogsAction(tableModel *ui.TableModel) func() tea.C
 			}
 		}
 	}
+}
+
+func (p *podsModel) createViewResourceUsageAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(p.resourceData) {
+			return nil
+		}
+
+		podData := p.resourceData[selected].(PodData)
+		podName := podData.Name
+
+		return func() tea.Msg {
+			pod := k8s.NewPodInfo(podName, p.pluginAPI.GetCurrentNamespace(), *p.k8sClient)
+			metrics, err := pod.GetResourceUsage()
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *p.k8sClient,
+				}
+			}
+
+			// Format metrics as YAML for display
+			metricsYAML, err := p.formatMetricsAsYAML(metrics)
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *p.k8sClient,
+				}
+			}
+
+			return components.NavigateMsg{
+				NewScreen:  components.NewYAMLViewer("Resource Usage: "+podName, metricsYAML),
+				Breadcrumb: podName + " usage",
+			}
+		}
+	}
+}
+
+func (p *podsModel) formatMetricsAsYAML(metrics *k8s.PodMetrics) (string, error) {
+	type ContainerUsage struct {
+		Name   string `yaml:"name"`
+		CPU    string `yaml:"cpu"`
+		Memory string `yaml:"memory"`
+	}
+
+	type PodUsage struct {
+		Name       string           `yaml:"name"`
+		Namespace  string           `yaml:"namespace"`
+		Containers []ContainerUsage `yaml:"containers"`
+	}
+
+	usage := PodUsage{
+		Name:       metrics.Name,
+		Namespace:  metrics.Namespace,
+		Containers: make([]ContainerUsage, len(metrics.Containers)),
+	}
+
+	for i, container := range metrics.Containers {
+		usage.Containers[i] = ContainerUsage{
+			Name:   container.Name,
+			CPU:    container.CPU,
+			Memory: container.Memory,
+		}
+	}
+
+	yamlData, err := yaml.Marshal(usage)
+	if err != nil {
+		return "", err
+	}
+
+	return string(yamlData), nil
 }
 
 func (p *podsModel) createViewManifestAction(tableModel *ui.TableModel) func() tea.Cmd {

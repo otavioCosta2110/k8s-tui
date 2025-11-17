@@ -7,6 +7,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	metricsclientset "k8s.io/metrics/pkg/client/clientset/versioned"
 )
 
 type ResourceType string
@@ -49,6 +50,7 @@ type ResourceManager interface {
 
 type Client struct {
 	Clientset      kubernetes.Interface
+	MetricsClient  metricsclientset.Interface
 	Config         *rest.Config
 	Namespace      string
 	KubeconfigPath string
@@ -89,8 +91,15 @@ func NewClient(kubeconfigPath string, namespace string) (*Client, error) {
 		return nil, err
 	}
 
+	metricsClient, err := metricsclientset.NewForConfig(config)
+	if err != nil {
+		// Metrics client is optional, don't fail if metrics server is not available
+		metricsClient = nil
+	}
+
 	return &Client{
 		Clientset:      clientset,
+		MetricsClient:  metricsClient,
 		Config:         config,
 		Namespace:      namespace,
 		KubeconfigPath: kubeconfigPath,

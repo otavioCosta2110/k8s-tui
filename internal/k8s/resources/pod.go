@@ -10,6 +10,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	customstyles "github.com/otavioCosta2110/k8s-tui/internal/app/ui/styles/custom_styles"
+	"github.com/otavioCosta2110/k8s-tui/pkg/format"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,23 +18,27 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/remotecommand"
+	metricsv1beta1 "k8s.io/metrics/pkg/apis/metrics/v1beta1"
+	metricsclientset "k8s.io/metrics/pkg/client/clientset/versioned"
 )
 
 type Pod struct {
-	Name      string
-	Namespace string
-	YAML      string
-	Raw       *corev1.Pod
-	Client    kubernetes.Interface
-	Config    *rest.Config
+	Name          string
+	Namespace     string
+	YAML          string
+	Raw           *corev1.Pod
+	Client        kubernetes.Interface
+	MetricsClient metricsclientset.Interface
+	Config        *rest.Config
 }
 
 func NewPodInfo(name, namespace string, kubernetesClient Client) *Pod {
 	return &Pod{
-		Name:      name,
-		Namespace: namespace,
-		Client:    kubernetesClient.Clientset,
-		Config:    kubernetesClient.Config,
+		Name:          name,
+		Namespace:     namespace,
+		Client:        kubernetesClient.Clientset,
+		MetricsClient: kubernetesClient.MetricsClient,
+		Config:        kubernetesClient.Config,
 	}
 }
 
@@ -358,6 +363,95 @@ func (p *Pod) GetContainers() ([]string, error) {
 	}
 
 	return containers, nil
+}
+
+type PodMetrics struct {
+	Name       string
+	Namespace  string
+	Containers []ContainerMetrics
+}
+
+type ContainerMetrics struct {
+	Name   string
+	CPU    string
+	Memory string
+}
+
+func (p *Pod) GetResourceUsage() (*PodMetrics, error) {
+	// Try to get metrics from Metrics API first
+	if p.MetricsClient != nil {
+		podMetrics, err := p.MetricsClient.MetricsV1beta1().PodMetricses(p.Namespace).Get(context.Background(), p.Name, metav1.GetOptions{})
+		if err == nil {
+			return p.convertMetricsAPIResponse(podMetrics), nil
+		}
+		// If metrics API fails (e.g., metrics server not available), fall back to basic resource usage
+	}
+
+	// Fall back to basic resource info from pod spec
+	return p.getBasicResourceUsage()
+}
+
+func (p *Pod) convertMetricsAPIResponse(podMetrics *metricsv1beta1.PodMetrics) *PodMetrics {
+	containerMetrics := make([]ContainerMetrics, len(podMetrics.Containers))
+
+	for i, container := range podMetrics.Containers {
+		cpuUsage := format.FormatCPU(container.Usage.Cpu().String())
+		memoryUsage := format.FormatBytesBinary(container.Usage.Memory().String())
+
+		containerMetrics[i] = ContainerMetrics{
+			Name:   container.Name,
+			CPU:    cpuUsage,
+			Memory: memoryUsage,
+		}
+	}
+
+	return &PodMetrics{
+		Name:       podMetrics.Name,
+		Namespace:  podMetrics.Namespace,
+		Containers: containerMetrics,
+	}
+}
+
+func (p *Pod) getBasicResourceUsage() (*PodMetrics, error) {
+	if p.Raw == nil {
+		if err := p.Fetch(); err != nil {
+			return nil, err
+		}
+	}
+
+	containers, err := p.GetContainers()
+	if err != nil {
+		return nil, err
+	}
+
+	containerMetrics := make([]ContainerMetrics, len(containers))
+	for i, container := range containers {
+		// Get resource requests from pod spec
+		var cpuRequest, memoryRequest string
+		for _, c := range p.Raw.Spec.Containers {
+			if c.Name == container {
+				if cpu, ok := c.Resources.Requests[corev1.ResourceCPU]; ok {
+					cpuRequest = cpu.String()
+				}
+				if mem, ok := c.Resources.Requests[corev1.ResourceMemory]; ok {
+					memoryRequest = mem.String()
+				}
+				break
+			}
+		}
+
+		containerMetrics[i] = ContainerMetrics{
+			Name:   container,
+			CPU:    format.FormatCPU(cpuRequest),
+			Memory: format.FormatBytesBinary(memoryRequest),
+		}
+	}
+
+	return &PodMetrics{
+		Name:       p.Name,
+		Namespace:  p.Namespace,
+		Containers: containerMetrics,
+	}, nil
 }
 
 func formatTime(t metav1.Time) string {
