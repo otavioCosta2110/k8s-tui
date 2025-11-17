@@ -522,6 +522,28 @@ func (gpm *GlobalPluginManager) setupMultiClusterLuaAPI(L *lua.LState) {
 		return 0
 	}))
 
+	// Header component management
+	L.SetField(apiTable, "add_header_component", L.NewFunction(func(L *lua.LState) int {
+		text := L.CheckString(1)
+
+		// Create a UI injection point for header
+		component := UIInjectionPoint{
+			Location: "header",
+			Position: "right",
+			Priority: 0,
+			Component: DisplayComponent{
+				Type: "text",
+				Config: map[string]interface{}{
+					"content": text,
+				},
+			},
+		}
+
+		gpm.api.AddHeaderComponent(component)
+		logger.PluginDebug("api", fmt.Sprintf("Added header component: %s", text))
+		return 0
+	}))
+
 	// Multi-cluster API functions
 	L.SetField(apiTable, "get_all_clusters", L.NewFunction(func(L *lua.LState) int {
 		allClusters := gpm.GetAllClusters()
@@ -1453,7 +1475,7 @@ func (gpm *GlobalPluginManager) ExecuteOnCluster(clusterID string, fn func(*Clus
 	return err
 }
 
-// GetAPI returns the plugin API with multi-cluster support
+// GetAPI returns plugin API with multi-cluster support
 func (gpm *GlobalPluginManager) GetAPI() *MultiClusterPluginAPI {
 	return &MultiClusterPluginAPI{
 		api:           gpm.PluginManager.GetAPI(),

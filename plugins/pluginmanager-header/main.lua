@@ -1,9 +1,8 @@
--- Neovim-Style Header Plugin for k8s-tui
--- Demonstrates Neovim-style plugin architecture with setup, config, commands, and hooks
+-- Header Text Plugin
+-- This plugin demonstrates adding custom text to the k8s-tui header
 
--- Plugin metadata
 function Name()
-    return "neovim-header"
+    return "Header Text Plugin"
 end
 
 function Version()
@@ -11,116 +10,93 @@ function Version()
 end
 
 function Description()
-    return "Neovim-style plugin that adds dynamic content to the header"
+    return "Adds custom text to the k8s-tui header"
 end
 
--- Default configuration
-function Config()
-    return {
-        show_namespace = true,
-        show_time = true,
-        custom_message = "🚀 k8s-tui",
-        update_interval = 30
-    }
-end
-
-function CLIArguments()
-    return {}
-end
-
--- Setup function (called with user configuration)
-function Setup(opts)
-    k8s_tui.log("Setting up Neovim Header Plugin with options:")
-    for k, v in pairs(opts) do
-        k8s_tui.log("  " .. k .. " = " .. v)
-    end
-
-    -- Store configuration
-    config = opts
-
-    -- Add header component
-    if config.custom_message then
-        k8s_tui.add_header(config.custom_message)
-    end
-
-    return nil
-end
-
--- Initialize the plugin
 function Initialize()
-    k8s_tui.log("Neovim Header Plugin initialized")
-
-    -- Add a status message
-    k8s_tui.set_status("Neovim-style plugin loaded!")
-
-    return nil
-end
-
--- Shutdown the plugin
-function Shutdown()
-    k8s_tui.log("Neovim Header Plugin shutting down")
-    return nil
-end
-
--- Commands provided by this plugin
-function Commands()
-    return {
-        {
-            name = "header:status",
-            description = "Show header plugin status"
-        },
-        {
-            name = "header:config",
-            description = "Show current header configuration"
-        },
-        {
-            name = "header:update",
-            description = "Update header with current time"
-        }
+    -- Add a simple header component
+    local component = {
+        content = "🔌 Plugin Active",
+        position = "right"
     }
-end
-
--- Hooks that this plugin registers for
-function Hooks()
-    return {
-        {
-            event = "app_started",
-            handler = "on_app_started"
-        },
-        {
-            event = "namespace_changed",
-            handler = "on_namespace_changed"
-        }
-    }
-end
-
--- Hook handlers
-function on_app_started(data)
-    k8s_tui.log("Header plugin: App started event received")
-    k8s_tui.set_status("Header plugin ready!")
-end
-
-function on_namespace_changed(data)
-    k8s_tui.log("Header plugin: Namespace changed to " .. data)
-    local current_ns = k8s_tui.get_namespace()
-    k8s_tui.set_status("Switched to namespace: " .. current_ns)
-end
-
--- Command handlers (these would be called when commands are executed)
-function handle_header_status(args)
-    return "Header plugin is active with " .. #args .. " arguments", nil
-end
-
-function handle_header_config(args)
-    local config_str = ""
-    for k, v in pairs(config) do
-        config_str = config_str .. k .. "=" .. tostring(v) .. " "
+    
+    -- Use the add_header_component function if available
+    if k8s_tui and k8s_tui.add_header_component then
+        k8s_tui.add_header_component(component.content)
+        k8s_tui.log("Header Text Plugin: Added header component")
+    else
+        -- Fallback: try to use the existing add_header function
+        if k8s_tui and k8s_tui.add_header then
+            k8s_tui.add_header("🔌 Plugin Active")
+            k8s_tui.log("Header Text Plugin: Added header using fallback method")
+        else
+            k8s_tui.log("Header Text Plugin: No header function available")
+        end
     end
-    return "Header config: " .. config_str, nil
+    
+    return nil -- Success
 end
 
-function handle_header_update(args)
-    local time_str = os.date("%H:%M:%S")
-    k8s_tui.add_header("🕐 " .. time_str)
-    return "Header updated with current time: " .. time_str, nil
+function Setup()
+    -- Pluginmanager-style setup
+    k8s_tui.log("Header Text Plugin: Setting up...")
+    
+    -- Add header component with current time
+    local time_component = "⏰ " .. os.date("%H:%M")
+    if k8s_tui.add_header_component then
+        k8s_tui.add_header_component(time_component)
+    end
+    
+    return nil -- Success
+end
+
+function Config()
+    -- Configuration options
+    return {
+        show_time = true,
+        custom_text = "Header Text Plugin",
+        position = "right"
+    }
+end
+
+function Commands()
+    -- Register commands
+    return {
+        {
+            name = "header-text",
+            description = "Set custom header text",
+            handler = "handle_header_text_command"
+        },
+        {
+            name = "header-time", 
+            description = "Toggle time display in header",
+            handler = "handle_header_time_command"
+        }
+    }
+end
+
+function handle_header_text_command(args)
+    local text = args[1] or "Default Header Text"
+    
+    if k8s_tui.add_header_component then
+        k8s_tui.add_header_component(text)
+        return "Set header text to: " .. text
+    else
+        return "Error: Header component function not available"
+    end
+end
+
+function handle_header_time_command(args)
+    local time_text = "⏰ " .. os.date("%H:%M:%S")
+    
+    if k8s_tui.add_header_component then
+        k8s_tui.add_header_component(time_text)
+        return "Added time to header: " .. time_text
+    else
+        return "Error: Header component function not available"
+    end
+end
+
+function Shutdown()
+    k8s_tui.log("Header Text Plugin: Shutting down...")
 end
