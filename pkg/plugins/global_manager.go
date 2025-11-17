@@ -1133,13 +1133,14 @@ func (gpm *GlobalPluginManager) RemoveCluster(id string) {
 	defer gpm.mu.Unlock()
 
 	if cluster, exists := gpm.clusters[id]; exists {
-		delete(gpm.clusters, id)
-
 		// If this was the current cluster, switch to first available
 		if gpm.currentCluster == id {
 			if len(gpm.clusters) > 0 {
+				logger.Info(fmt.Sprintf("number of clusters %d", len(gpm.clusters)))
 				for newID := range gpm.clusters {
+					logger.Info("before switching cluster")
 					gpm.SwitchToCluster(newID)
+					logger.Info("after switching cluster")
 					break
 				}
 			} else {
@@ -1148,20 +1149,28 @@ func (gpm *GlobalPluginManager) RemoveCluster(id string) {
 			}
 		}
 
+		logger.Info("antes do delete")
+		delete(gpm.clusters, id)
+		logger.Info("depois do delete")
+
 		logger.Info(fmt.Sprintf("🔌 Global Plugin Manager: Removed cluster %s", cluster.Name))
 	}
 }
 
 // SwitchToCluster switches the active cluster context for plugins
 func (gpm *GlobalPluginManager) SwitchToCluster(id string) error {
-	gpm.mu.Lock()
-	defer gpm.mu.Unlock()
+	logger.Info("started switchtocluster")
+	// gpm.mu.Lock()
+	logger.Info("after lock")
+	// defer gpm.mu.Unlock()
 
 	cluster, exists := gpm.clusters[id]
+	logger.Info(fmt.Sprintf("cluster server while switching %s", cluster.Name))
 	if !exists {
 		return fmt.Errorf("cluster %s not found", id)
 	}
 
+	logger.Info("while switching cluster")
 	gpm.currentCluster = id
 	gpm.api.SetClient(cluster.Client)
 	gpm.api.SetCurrentNamespace(cluster.Namespace)

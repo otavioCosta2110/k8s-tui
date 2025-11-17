@@ -960,6 +960,51 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.kubeconfigSelector = models.NewKubeconfigSelectorModel()
 			return m, m.kubeconfigSelector.Init()
 		}
+		if msg.String() == m.clusters[m.currentCluster].GetKeyBinding("remove_cluster") {
+			// Only allow removing clusters if there's more than one
+			if len(m.clusters) > 1 {
+				// Remove cluster from plugin manager first
+				clusterID := fmt.Sprintf("%d", m.currentCluster)
+				m.pluginManager.RemoveCluster(clusterID)
+
+				// Remove cluster tab (convert index to string for tab ID)
+				m.clusterTabComponent.RemoveTab(clusterID)
+
+				// Remove cluster from slice
+				m.clusters = append(m.clusters[:m.currentCluster], m.clusters[m.currentCluster+1:]...)
+
+				// Adjust current cluster index if needed
+				if m.currentCluster >= len(m.clusters) {
+					m.currentCluster = len(m.clusters) - 1
+				}
+
+				// Set active tab to current cluster
+				if len(m.clusters) > 0 {
+					m.clusterTabComponent.SetActiveTab(m.currentCluster)
+
+					// Switch to the new current cluster in plugin manager
+					newClusterID := fmt.Sprintf("%d", m.currentCluster)
+					if err := m.pluginManager.SwitchToCluster(newClusterID); err != nil {
+						logger.Warn(fmt.Sprintf("Failed to switch to cluster %s: %v", newClusterID, err))
+					}
+
+					// Update header namespace to match current cluster's namespace
+					currentClusterModel := m.clusters[m.currentCluster]
+					if currentClusterModel.kube.Clientset != nil {
+						currentClusterModel.header.SetNamespace(currentClusterModel.kube.Namespace)
+						currentClusterModel.header.UpdateContent()
+					}
+
+					if m.width > 0 {
+						updated, _ := m.clusters[m.currentCluster].Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+						if appModel, ok := updated.(*AppModel); ok {
+							m.clusters[m.currentCluster] = appModel
+						}
+					}
+				}
+			}
+			return m, nil
+		}
 		// Add more as needed
 	case components.TabMsg:
 		// Handle cluster tab switching

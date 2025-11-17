@@ -7,19 +7,20 @@ func (m *AppModel) GetKeyBinding(action string) string {
 	}
 
 	defaults := map[string]string{
-		"quit":         "q",
-		"help":         "?",
-		"refresh":      "r",
-		"back":         "[",
-		"forward":      "]",
-		"new_tab":      "ctrl+t",
-		"close_tab":    "ctrl+w",
-		"tab_next":     "right",
-		"tab_prev":     "left",
-		"quick_nav":    "g",
-		"cluster_prev": "ctrl+left",
-		"cluster_next": "ctrl+right",
-		"add_cluster":  "ctrl+n",
+		"quit":           "q",
+		"help":           "?",
+		"refresh":        "r",
+		"back":           "[",
+		"forward":        "]",
+		"new_tab":        "ctrl+t",
+		"close_tab":      "ctrl+w",
+		"tab_next":       "right",
+		"tab_prev":       "left",
+		"quick_nav":      "g",
+		"cluster_prev":   "ctrl+left",
+		"cluster_next":   "ctrl+right",
+		"add_cluster":    "ctrl+n",
+		"remove_cluster": "ctrl+x",
 	}
 	return defaults[action]
 }
