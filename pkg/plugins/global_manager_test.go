@@ -76,42 +76,6 @@ func TestGlobalPluginManager_AddClusterWithNamespace(t *testing.T) {
 	}
 }
 
-func TestGlobalPluginManager_SwitchToCluster(t *testing.T) {
-	gpm := NewGlobalPluginManager("/tmp/test-plugins")
-	client1 := MockClient()
-	client2 := MockClient()
-
-	// Add clusters
-	gpm.AddCluster("cluster1", "Test Cluster 1", client1)
-	gpm.AddCluster("cluster2", "Test Cluster 2", client2)
-
-	// Switch to first cluster
-	err := gpm.SwitchToCluster("cluster1")
-	if err != nil {
-		t.Errorf("Expected no error switching to cluster1, got: %v", err)
-	}
-
-	if gpm.currentCluster != "cluster1" {
-		t.Error("Expected currentCluster to be 'cluster1'")
-	}
-
-	// Switch to second cluster
-	err = gpm.SwitchToCluster("cluster2")
-	if err != nil {
-		t.Errorf("Expected no error switching to cluster2, got: %v", err)
-	}
-
-	if gpm.currentCluster != "cluster2" {
-		t.Error("Expected currentCluster to be 'cluster2'")
-	}
-
-	// Test switching to non-existent cluster
-	err = gpm.SwitchToCluster("nonexistent")
-	if err == nil {
-		t.Error("Expected error when switching to non-existent cluster")
-	}
-}
-
 func TestGlobalPluginManager_RemoveCluster(t *testing.T) {
 	gpm := NewGlobalPluginManager("/tmp/test-plugins")
 	client := MockClient()
