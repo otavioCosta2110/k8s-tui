@@ -900,7 +900,7 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.KeyMsg:
 		// Handle cluster switching with Ctrl+Left/Ctrl+Right
-		if msg.String() == "ctrl+left" {
+		if msg.String() == m.clusters[m.currentCluster].GetKeyBinding("cluster_prev") {
 			if len(m.clusters) > 0 {
 				newCluster := (m.currentCluster - 1 + len(m.clusters)) % len(m.clusters)
 				m.currentCluster = newCluster
@@ -928,7 +928,7 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 		}
-		if msg.String() == "ctrl+right" {
+		if msg.String() == m.clusters[m.currentCluster].GetKeyBinding("cluster_next") {
 			if len(m.clusters) > 0 {
 				newCluster := (m.currentCluster + 1) % len(m.clusters)
 				m.currentCluster = newCluster
@@ -956,7 +956,7 @@ func (m *MultiClusterModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 		}
-		if msg.String() == "ctrl+n" {
+		if msg.String() == m.clusters[m.currentCluster].GetKeyBinding("add_cluster") {
 			m.kubeconfigSelector = models.NewKubeconfigSelectorModel()
 			return m, m.kubeconfigSelector.Init()
 		}

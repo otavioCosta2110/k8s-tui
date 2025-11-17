@@ -1,6 +1,6 @@
 package ui
 
-func (m *AppModel) getKeyBinding(action string) string {
+func (m *AppModel) GetKeyBinding(action string) string {
 	// KeyBindings is now action: key format
 	if binding, exists := m.config.KeyBindings[action]; exists {
 		return binding

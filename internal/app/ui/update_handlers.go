@@ -114,7 +114,7 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	if m.quickNav != nil {
 		switch msg.String() {
-		case "esc", m.getKeyBinding("quick_nav"):
+		case "esc", m.GetKeyBinding("quick_nav"):
 			m.quickNav = nil
 			return m, nil
 		default:
@@ -169,7 +169,7 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		return m, tea.Quit
-	case m.getKeyBinding("quit"), m.getKeyBinding("back"), m.getKeyBinding("forward"):
+	case m.GetKeyBinding("quit"), m.GetKeyBinding("back"), m.GetKeyBinding("forward"):
 		// When in text input screen, let the component handle the key
 		// This allows typing "q" while blocking navigation keys
 		if m.isTextInputScreen() {
@@ -201,21 +201,21 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		return m, tea.Quit
-	case m.getKeyBinding("quick_nav"):
+	case m.GetKeyBinding("quick_nav"):
 		if m.quickNav != nil {
 			m.quickNav = nil
 			return m, nil
 		}
 		m.quickNav = models.NewQuickNavModel(m.kube, m.kube.Namespace)
 		return m, m.quickNav.Init()
-	case m.getKeyBinding("help"):
+	case m.GetKeyBinding("help"):
 		if m.helpScreen != nil && m.pluginManager != nil {
 			resourceType := m.pluginManager.GetAPI().GetCurrentResourceType()
 			title, content := m.pluginManager.GetAPI().GetHelp(resourceType)
 			m.helpScreen.SetContent(title, content)
 		}
 		return m, nil
-	case m.getKeyBinding("new_tab"):
+	case m.GetKeyBinding("new_tab"):
 		if m.tabManager != nil {
 			updatedManager, cmd := m.tabManager.Update(msg)
 			if manager, ok := updatedManager.(*models.TabManager); ok {
@@ -250,7 +250,7 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 		}
 		return m, nil
-	case m.getKeyBinding("close_tab"):
+	case m.GetKeyBinding("close_tab"):
 		if m.header.GetTabCount() > 1 {
 			newHeader, headerCmd := m.header.Update(msg)
 			if header, ok := newHeader.(models.HeaderModel); ok {
