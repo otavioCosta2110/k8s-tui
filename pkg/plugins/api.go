@@ -765,6 +765,8 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpItem("↑/↓/j/k:", "Navigate pods") +
 				helpItem("enter:", "View pod logs") +
 				helpItem("v:", "View pod details") +
+				helpItem("e:", "Execute a command in the pod") +
+				helpItem("E:", "View pod events") +
 				helpItem("t:", "View resource usage") +
 				helpItem("d:", "Delete selected pods") +
 				helpItem("n:", "Create new pod") +
@@ -781,10 +783,15 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpSection("Common Actions:") +
 				helpItem("View logs:", "Enter on a pod to see logs") +
 				helpItem("View details:", "Press 'v' to see pod details") +
+				helpItem("View events:", "Press 'E' to see pod events") +
 				helpItem("View resource usage:", "Press 't' to see CPU/memory usage") +
 				helpItem("Delete pod:", "Select with space, then press 'd'") +
 				helpItem("Create pod:", "Press 'n' to open create form") +
-				helpItem("Refresh:", "Press 'r' to update the list"),
+				helpItem("Refresh:", "Press 'r' to update the list") + "\n\n" +
+
+				helpSection("Events View Key Bindings:") +
+				helpItem("r:", "Refresh events") +
+				helpItem("esc:", "Go back"),
 		},
 		"Deployments": {
 			title: "Deployments Help",
@@ -794,6 +801,7 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpItem("enter:", "View deployment pods") +
 				helpItem("v:", "View deployment details") +
 				helpItem("L:", "View deployment logs") +
+				helpItem("E:", "View deployment events") +
 				helpItem("d:", "Delete selected deployments") +
 				helpItem("n:", "Create new deployment") +
 				helpItem("r:", "Refresh") +
@@ -810,7 +818,14 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpItem("Update image:", "Use deployment details view") +
 				helpItem("View pods:", "See associated pods in details") +
 				helpItem("View logs:", "Press 'L' to see deployment logs") +
-				helpItem("Create deployment:", "Press 'n' to open create form"),
+				helpItem("View events:", "Press 'E' to see deployment events") +
+				helpItem("Create deployment:", "Press 'n' to open create form") + "\n\n" +
+
+				helpSection("Events View Key Bindings:") +
+				helpItem("g:", "Go to top") +
+				helpItem("G:", "Go to bottom") +
+				helpItem("r:", "Refresh events") +
+				helpItem("esc:", "Go back"),
 		},
 		"Services": {
 			title: "Services Help",
@@ -818,6 +833,7 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpSection("Key Bindings:") +
 				helpItem("↑/↓/j/k:", "Navigate services") +
 				helpItem("enter:", "View service details") +
+				helpItem("E:", "View service events") +
 				helpItem("d:", "Delete selected services") +
 				helpItem("r:", "Refresh") +
 				helpItem("/:", "Search services") +
@@ -831,7 +847,13 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 
 				helpSection("Common Actions:") +
 				helpItem("View endpoints:", "See pods backing the service") +
-				helpItem("Check connectivity:", "Use service details"),
+				helpItem("Check connectivity:", "Use service details") + "\n\n" +
+
+				helpSection("Events View Key Bindings:") +
+				helpItem("g:", "Go to top") +
+				helpItem("G:", "Go to bottom") +
+				helpItem("r:", "Refresh events") +
+				helpItem("esc:", "Go back"),
 		},
 		"Ingresses": {
 			title: "Ingresses Help",
