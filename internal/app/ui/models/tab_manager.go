@@ -421,6 +421,16 @@ func (tm *TabManager) RestoreTabs(tabInfos []plugins.TabInfo) error {
 			continue
 		}
 
+		// Ensure finalModel and finalResourceModel are never nil when screenStack is not empty
+		if finalModel == nil {
+			finalModel = screenStack[len(screenStack)-1]
+			logger.Info("Using fallback model from screenStack for tab " + tabInfo.ID)
+		}
+		if finalResourceModel == nil {
+			finalResourceModel = screenStack[len(screenStack)-1]
+			logger.Info("Using fallback resource model from screenStack for tab " + tabInfo.ID)
+		}
+
 		currentIndex := 0
 		if len(tabInfo.Breadcrumb) > 0 {
 			currentIndex = len(tabInfo.Breadcrumb) - 1

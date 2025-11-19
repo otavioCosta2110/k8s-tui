@@ -296,13 +296,8 @@ func (m *AppModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 						return ClearTextInputMsg{}
 					}
 
-					textInput := components.NewTextInput(request.Title, "", onSubmit, onCancel)
-					return m, func() tea.Msg {
-						return components.NavigateMsg{
-							NewScreen:  textInput,
-							Breadcrumb: request.Title,
-						}
-					}
+					m.textInput = components.NewTextInput(request.Title, "", onSubmit, onCancel)
+					return m, m.textInput.Init()
 				}
 				return m, nil
 			}

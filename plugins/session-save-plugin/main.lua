@@ -155,6 +155,22 @@ function session_load_cancel()
   return "Session load cancelled", nil
 end
 
+function table_to_string(tbl)
+  if type(tbl) ~= 'table' then
+    return tostring(tbl)
+  end
+  local result = "{"
+  for k, v in pairs(tbl) do
+    if type(v) == 'table' then
+      result = result .. tostring(k) .. "=[table], "
+    else
+      result = result .. tostring(k) .. "=" .. tostring(v) .. ", "
+    end
+  end
+  result = result .. "}"
+  return result
+end
+
 function save_session_to_file(filename)
   if not k8s_tui then
     return
@@ -191,10 +207,51 @@ function save_session_to_file(filename)
   local all_clusters = k8s_tui.get_all_clusters and k8s_tui.get_all_clusters() or {}
   k8s_tui.log("DEBUG: get_all_clusters returned, type: " .. type(all_clusters))
 
+
   if all_clusters then
     k8s_tui.log("DEBUG: Number of clusters: " .. #all_clusters)
     for i, cluster in ipairs(all_clusters) do
       k8s_tui.log("DEBUG: Cluster " .. i .. ": " .. tostring(cluster.Name) .. " (ID: " .. tostring(cluster.ID) .. ")")
+
+      -- Log all tabs for this cluster in detail
+      if cluster.Tabs then
+        k8s_tui.log("DEBUG: Cluster " .. i .. " has " .. #cluster.Tabs .. " tabs:")
+        for j, tab in ipairs(cluster.Tabs) do
+          k8s_tui.log("DEBUG:   Tab " .. j .. ": ID=" .. tostring(tab.ID) ..
+            ", Title=" .. tostring(tab.Title) ..
+            ", ResourceType=" .. tostring(tab.ResourceType) ..
+            ", Namespace=" .. tostring(tab.Namespace) ..
+            ", CurrentIndex=" .. tostring(tab.CurrentIndex))
+
+          -- Log breadcrumb if it exists
+          if tab.Breadcrumb then
+            local breadcrumb_str = ""
+            for k, crumb in ipairs(tab.Breadcrumb) do
+              if k > 1 then breadcrumb_str = breadcrumb_str .. " -> " end
+              breadcrumb_str = breadcrumb_str .. tostring(crumb)
+            end
+            k8s_tui.log("DEBUG:     Breadcrumb: " .. breadcrumb_str)
+          else
+            k8s_tui.log("DEBUG:     Breadcrumb: (none)")
+          end
+
+          -- Log metadata if it exists
+          if tab.Metadata then
+            local metadata_str = ""
+            local first = true
+            for key, value in pairs(tab.Metadata) do
+              if not first then metadata_str = metadata_str .. ", " end
+              metadata_str = metadata_str .. key .. "=" .. tostring(value)
+              first = false
+            end
+            k8s_tui.log("DEBUG:     Metadata: " .. metadata_str)
+          else
+            k8s_tui.log("DEBUG:     Metadata: (none)")
+          end
+        end
+      else
+        k8s_tui.log("DEBUG: Cluster " .. i .. " has no tabs")
+      end
     end
   else
     k8s_tui.log("ERROR: all_clusters is nil!")
@@ -232,32 +289,65 @@ function save_session_to_file(filename)
     end
     json = json .. '],"tabs":['
     if cluster.Tabs then
+      local first_tab = true
       for j, tab in ipairs(cluster.Tabs) do
-        if j > 1 then json = json .. ',' end
-        json = json .. '{'
-        json = json .. '"ID":"' .. (tab.ID or "") .. '",'
-        json = json .. '"Title":"' .. (tab.Title or "") .. '",'
-        json = json .. '"ResourceType":"' .. (tab.ResourceType or "") .. '",'
-        json = json .. '"Namespace":"' .. (tab.Namespace or "default") .. '",'
-        json = json .. '"CurrentIndex":' .. (tab.CurrentIndex or 0) .. ','
-        json = json .. '"Breadcrumb":['
+        -- Skip tabs that have input dialog breadcrumbs
+        local is_input_dialog = false
         if tab.Breadcrumb then
           for k, crumb in ipairs(tab.Breadcrumb) do
-            if k > 1 then json = json .. ',' end
-            json = json .. '"' .. crumb .. '"'
+            -- Check for input dialog patterns
+            if string.find(crumb, "Enter") and string.find(crumb, "name:") then
+              is_input_dialog = true
+              break
+            end
           end
         end
-        json = json .. '],"Metadata":{'
-        if tab.Metadata then
-          local first = true
-          for k, v in pairs(tab.Metadata) do
-            if not first then json = json .. ',' end
-            json = json .. '"' .. k .. '":"' .. tostring(v) .. '"'
-            first = false
+
+        -- Also skip if title looks like an input dialog
+        if not is_input_dialog and tab.Title then
+          if string.find(tab.Title, "Enter") and string.find(tab.Title, "name:") then
+            is_input_dialog = true
           end
         end
-        json = json .. '}'
-        json = json .. '}'
+
+        if is_input_dialog then
+          k8s_tui.log("DEBUG: Filtering out input dialog tab: " .. (tab.Title or "unknown"))
+        end
+
+        if not is_input_dialog then
+          if not first_tab then
+            json = json .. ','
+          end
+          first_tab = false
+          json = json .. '{'
+          json = json .. '"ID":"' .. (tab.ID or "") .. '",'
+          json = json .. '"Title":"' .. (tab.Title or "") .. '",'
+          json = json .. '"ResourceType":"' .. (tab.ResourceType or "") .. '",'
+          json = json .. '"Namespace":"' .. (tab.Namespace or "default") .. '",'
+          json = json .. '"CurrentIndex":' .. (tab.CurrentIndex or 0) .. ','
+          json = json .. '"Breadcrumb":['
+          if tab.Breadcrumb then
+            for k, crumb in ipairs(tab.Breadcrumb) do
+              if k > 1 then
+                json = json .. ','
+              end
+              json = json .. '"' .. crumb .. '"'
+            end
+          end
+          json = json .. '],"Metadata":{'
+          if tab.Metadata then
+            local first = true
+            for k, v in pairs(tab.Metadata) do
+              if not first then
+                json = json .. ','
+              end
+              json = json .. '"' .. k .. '":"' .. tostring(v) .. '"'
+              first = false
+            end
+          end
+          json = json .. '}'
+          json = json .. '}'
+        end
       end
     end
     json = json .. ']}'
@@ -373,7 +463,11 @@ function load_session_from_file(filename)
 
     -- Determine active cluster index
     local cluster_index = cluster_data.Index or (i - 1)
-    k8s_tui.log("DEBUG: Cluster " .. i .. " - IsActive: " .. tostring(cluster_data.IsActive) .. ", Index: " .. cluster_index .. ", current_cluster: " .. tostring(session_data.current_cluster))
+    k8s_tui.log("DEBUG: Cluster " ..
+      i ..
+      " - IsActive: " ..
+      tostring(cluster_data.IsActive) ..
+      ", Index: " .. cluster_index .. ", current_cluster: " .. tostring(session_data.current_cluster))
     if cluster_data.IsActive or (session_data.current_cluster and session_data.current_cluster == cluster_index) then
       active_cluster_index = i - 1 -- Convert to 0-based index
       k8s_tui.log("DEBUG: Setting active_cluster_index to: " .. active_cluster_index)
@@ -484,11 +578,12 @@ function load_session_from_file(filename)
 
     k8s_tui.log("DEBUG: Switching to active cluster: " .. active_cluster_id .. " (index: " .. active_cluster_index .. ")")
     local switch_result = k8s_tui.switch_to_cluster(active_cluster_id)
-    
+
     -- Restore tabs for the active cluster to sync UI with restored session data
     local restore_result = k8s_tui.restore_tabs_for_cluster(active_cluster_id)
     if restore_result then
-      k8s_tui.log("ERROR: Failed to restore tabs for active cluster " .. active_cluster_id .. ": " .. tostring(restore_result))
+      k8s_tui.log("ERROR: Failed to restore tabs for active cluster " ..
+        active_cluster_id .. ": " .. tostring(restore_result))
     else
       k8s_tui.log("DEBUG: Successfully restored tabs for active cluster " .. active_cluster_id)
     end
@@ -679,13 +774,13 @@ function parse_cluster_object(cluster_str)
     local bracket_start = cluster_str:find('{', session_start)
     local session_end = find_matching_bracket(cluster_str, bracket_start)
     k8s_tui.log("DEBUG: parse_cluster_object - bracket_start: " ..
-    (bracket_start or "nil") .. ", session_end: " .. (session_end or "nil"))
+      (bracket_start or "nil") .. ", session_end: " .. (session_end or "nil"))
     if session_end then
       local session_content = cluster_str:sub(session_start, session_end)
       k8s_tui.log("DEBUG: parse_cluster_object - session_content length: " .. #session_content)
       cluster.session = parse_session_data(session_content)
       k8s_tui.log("DEBUG: parse_cluster_object - parsed session, tabs count: " ..
-      #(cluster.session and cluster.session.tabs or {}))
+        #(cluster.session and cluster.session.tabs or {}))
     else
       k8s_tui.log("ERROR: parse_cluster_object - failed to find session end bracket")
     end
@@ -734,7 +829,7 @@ function parse_session_data(session_str)
     local bracket_start = session_str:find('%[', tabs_start)
     local tabs_end = find_matching_bracket(session_str, bracket_start)
     k8s_tui.log("DEBUG: parse_session_data - bracket_start: " ..
-    (bracket_start or "nil") .. ", tabs_end: " .. (tabs_end or "nil"))
+      (bracket_start or "nil") .. ", tabs_end: " .. (tabs_end or "nil"))
     if tabs_end then
       local tabs_content = session_str:sub(bracket_start, tabs_end)
       k8s_tui.log("DEBUG: parse_session_data - tabs_content length: " .. #tabs_content)
@@ -800,7 +895,7 @@ function parse_tabs_array(tabs_str)
     if tab then
       table.insert(tabs, tab)
       k8s_tui.log("DEBUG: parse_tabs_array - successfully parsed tab " ..
-      #tabs .. " with title: " .. (tab.Title or "nil"))
+        #tabs .. " with title: " .. (tab.Title or "nil"))
     else
       k8s_tui.log("DEBUG: parse_tabs_array - failed to parse tab object")
     end
@@ -828,7 +923,9 @@ function parse_tab_object(tab_str)
   k8s_tui.log("DEBUG: parse_tab_object - manual namespace extraction: " .. (manual_namespace or "nil"))
 
   k8s_tui.log("DEBUG: parse_tab_object - extracted - ID: " ..
-  (id or "nil") .. ", Title: " .. (title or "nil") .. ", ResourceType: " .. (resourceType or "nil") .. ", Namespace: " .. (namespace or "nil"))
+    (id or "nil") ..
+    ", Title: " ..
+    (title or "nil") .. ", ResourceType: " .. (resourceType or "nil") .. ", Namespace: " .. (namespace or "nil"))
 
   tab.ID = id
   tab.Title = title
