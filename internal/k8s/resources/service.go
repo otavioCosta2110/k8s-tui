@@ -280,6 +280,44 @@ func (s *ServiceInfo) DescribeService(events *corev1.EventList) (map[string]any,
 	return desc, nil
 }
 
+func (s *ServiceInfo) PortForward(localPort, remotePort int) (*PortForwardSession, error) {
+	if s.Raw == nil {
+		if err := s.Fetch(); err != nil {
+			return nil, fmt.Errorf("failed to fetch service: %v", err)
+		}
+	}
+
+	// Get pods that are backing this service
+	labelSelector := ""
+	for key, value := range s.Raw.Spec.Selector {
+		if labelSelector != "" {
+			labelSelector += ","
+		}
+		labelSelector += fmt.Sprintf("%s=%s", key, value)
+	}
+
+	pods, err := s.Client.Clientset.CoreV1().Pods(s.Namespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: labelSelector,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get pods for service: %v", err)
+	}
+
+	if len(pods.Items) == 0 {
+		return nil, fmt.Errorf("no pods found backing service %s", s.Name)
+	}
+
+	// Use first available pod that is running
+	for _, pod := range pods.Items {
+		if pod.Status.Phase == corev1.PodRunning {
+			podInfo := NewPodInfo(pod.Name, s.Namespace, s.Client)
+			return podInfo.PortForward(localPort, remotePort)
+		}
+	}
+
+	return nil, fmt.Errorf("no running pods found backing service %s", s.Name)
+}
+
 func DeleteService(client Client, namespace string, serviceName string) error {
 	err := client.Clientset.CoreV1().Services(namespace).Delete(context.Background(), serviceName, metav1.DeleteOptions{})
 	if err != nil {

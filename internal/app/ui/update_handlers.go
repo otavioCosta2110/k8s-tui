@@ -533,3 +533,72 @@ func (m *AppModel) handleOpenCreateFormMsg(msg components.OpenCreateFormMsg) (te
 	m.textInput = components.NewCreateForm(title, msg.ResourceType, fields)
 	return m, m.textInput.Init()
 }
+
+func (m *AppModel) handlePortForwardSubmitMsg(msg components.PortForwardSubmitMsg) (tea.Model, tea.Cmd) {
+	logger.Info(fmt.Sprintf("Port forward request: %s/%s, local:%s -> remote:%s",
+		msg.Namespace, msg.ResourceName, msg.LocalPort, msg.RemotePort))
+
+	// Parse ports
+	localPort, err := resources.ParsePort(msg.LocalPort)
+	if err != nil {
+		logger.Error(fmt.Sprintf("Invalid local port: %v", err))
+		m.textInput = nil
+		return m, nil
+	}
+
+	remotePort, err := resources.ParsePort(msg.RemotePort)
+	if err != nil {
+		logger.Error(fmt.Sprintf("Invalid remote port: %v", err))
+		m.textInput = nil
+		return m, nil
+	}
+
+	// Check if local port is available
+	if !resources.IsPortAvailable(localPort) {
+		logger.Error(fmt.Sprintf("Local port %d is already in use", localPort))
+		m.textInput = nil
+		return m, nil
+	}
+
+	// Start port forwarding in a goroutine
+	go func() {
+		var session *resources.PortForwardSession
+		var err error
+
+		if msg.ResourceType == "pod" {
+			pod := resources.NewPodInfo(msg.ResourceName, msg.Namespace, m.kube)
+			session, err = pod.PortForward(localPort, remotePort)
+		} else if msg.ResourceType == "service" {
+			// For services, we need to get the pods backing the service
+			service := resources.NewServiceInfo(msg.ResourceName, msg.Namespace, m.kube)
+			session, err = service.PortForward(localPort, remotePort)
+		}
+
+		if err != nil {
+			logger.Error(fmt.Sprintf("Failed to start port forwarding: %v", err))
+			return
+		}
+
+		logger.Info(fmt.Sprintf("Port forwarding started: %s/%s (localhost:%d -> %d)",
+			msg.Namespace, msg.ResourceName, localPort, remotePort))
+
+		// Keep the session alive
+		<-session.StopChan
+		logger.Info(fmt.Sprintf("Port forwarding stopped: %s/%s", msg.Namespace, msg.ResourceName))
+	}()
+
+	// Clear the form and show success message
+	m.textInput = nil
+	return m, nil
+}
+
+func (m *AppModel) handlePortForwardCancelMsg() (tea.Model, tea.Cmd) {
+	// Simply clear form and return to previous screen
+	m.textInput = nil
+	return m, nil
+}
+
+func (m *AppModel) handleOpenPortForwardFormMsg(msg components.OpenPortForwardFormMsg) (tea.Model, tea.Cmd) {
+	m.textInput = msg.Form
+	return m, m.textInput.Init()
+}

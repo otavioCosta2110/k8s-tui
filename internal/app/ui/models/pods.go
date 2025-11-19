@@ -73,6 +73,7 @@ Key Bindings:
 • ↑/↓/j/k: Navigate pods
 • enter: View pod logs
 • e: Execute command in pod
+• f: Port forward pod
 • v: View pod details
 • E: View pod events
 • t: View resource usage
@@ -135,6 +136,7 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	actions := map[string]func() tea.Cmd{
 		"d": p.createDeleteAction(tableModel),
 		"e": p.createExecAction(tableModel),
+		"f": p.createPortForwardAction(tableModel),
 		"n": p.createNewPodAction(),
 		"t": p.createViewResourceUsageAction(tableModel),
 		"v": p.createViewDetailsAction(tableModel),
@@ -439,6 +441,29 @@ func (p *podsModel) createRestartAction(tableModel *ui.TableModel) func() tea.Cm
 					fmt.Sprintf("Pod %s has been restarted successfully.\n\nIf this pod is managed by a controller (Deployment, ReplicaSet, etc.),\nit will be automatically recreated with a new instance.", podName),
 				),
 				Breadcrumb: podName + " restarted",
+			}
+		}
+	}
+}
+
+func (p *podsModel) createPortForwardAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(p.resourceData) {
+			return nil
+		}
+
+		podData := p.resourceData[selected].(PodData)
+		podName := podData.Name
+
+		return func() tea.Msg {
+			return components.OpenPortForwardFormMsg{
+				Form:       components.NewPortForwardForm("Port Forward", "pod", podName, p.pluginAPI.GetCurrentNamespace()),
+				Breadcrumb: podName + " port-forward",
 			}
 		}
 	}

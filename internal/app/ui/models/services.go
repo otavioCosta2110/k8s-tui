@@ -57,6 +57,7 @@ Key Bindings:
 • ↑/↓/j/k: Navigate services
 • enter: View service details
 • E: View service events
+• f: Port forward service
 • d: Delete selected services
 • n: Create new service
 • r: Refresh
@@ -108,12 +109,36 @@ func (s *servicesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": s.createDeleteAction(tableModel),
+		"f": s.createPortForwardAction(tableModel),
 		"n": s.createNewServiceAction(),
 		"E": s.createViewEventsAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, s.refreshInterval, s.k8sClient, "Services"), nil
+}
+
+func (s *servicesModel) createPortForwardAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(s.servicesInfo) {
+			return nil
+		}
+
+		service := s.servicesInfo[selected]
+		serviceName := service.Name
+
+		return func() tea.Msg {
+			return components.OpenPortForwardFormMsg{
+				Form:       components.NewPortForwardForm("Port Forward", "service", serviceName, s.pluginAPI.GetCurrentNamespace()),
+				Breadcrumb: serviceName + " port-forward",
+			}
+		}
+	}
 }
 
 func (s *servicesModel) createNewServiceAction() func() tea.Cmd {

@@ -159,6 +159,12 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleCreateSubmitMsg(msg)
 	case components.OpenCreateFormMsg:
 		return m.handleOpenCreateFormMsg(msg)
+	case components.PortForwardSubmitMsg:
+		return m.handlePortForwardSubmitMsg(msg)
+	case components.PortForwardCancelMsg:
+		return m.handlePortForwardCancelMsg()
+	case components.OpenPortForwardFormMsg:
+		return m.handleOpenPortForwardFormMsg(msg)
 	case ClearTextInputMsg:
 		m.textInput = nil
 		return m, nil
