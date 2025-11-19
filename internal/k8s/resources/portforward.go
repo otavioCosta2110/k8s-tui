@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -61,7 +62,9 @@ func (pf *PortForwardSession) Start() error {
 
 	ports := []string{fmt.Sprintf("%d:%d", pf.LocalPort, pf.RemotePort)}
 
-	pfForwarder, err := portforward.New(dialer, ports, pf.StopChan, pf.ReadyChan, os.Stdout, os.Stderr)
+	// Use a discard writer to prevent printing "Forwarding from..." messages
+	discardWriter := io.Discard
+	pfForwarder, err := portforward.New(dialer, ports, pf.StopChan, pf.ReadyChan, discardWriter, discardWriter)
 	if err != nil {
 		return fmt.Errorf("failed to create port forwarder: %v", err)
 	}

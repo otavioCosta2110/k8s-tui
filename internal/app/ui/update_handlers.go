@@ -560,36 +560,32 @@ func (m *AppModel) handlePortForwardSubmitMsg(msg components.PortForwardSubmitMs
 		return m, nil
 	}
 
-	// Start port forwarding in a goroutine
-	go func() {
-		var session *resources.PortForwardSession
-		var err error
+	// Create port forward model and navigate to it
+	pluginAPI := m.pluginManager.GetAPI()
+	portForwardModel := models.NewPortForwardModel(msg.ResourceName, msg.Namespace, localPort, remotePort, pluginAPI)
 
-		if msg.ResourceType == "pod" {
-			pod := resources.NewPodInfo(msg.ResourceName, msg.Namespace, m.kube)
-			session, err = pod.PortForward(localPort, remotePort)
-		} else if msg.ResourceType == "service" {
-			// For services, we need to get the pods backing the service
-			service := resources.NewServiceInfo(msg.ResourceName, msg.Namespace, m.kube)
-			session, err = service.PortForward(localPort, remotePort)
-		}
-
-		if err != nil {
-			logger.Error(fmt.Sprintf("Failed to start port forwarding: %v", err))
-			return
-		}
-
-		logger.Info(fmt.Sprintf("Port forwarding started: %s/%s (localhost:%d -> %d)",
-			msg.Namespace, msg.ResourceName, localPort, remotePort))
-
-		// Keep the session alive
-		<-session.StopChan
-		logger.Info(fmt.Sprintf("Port forwarding stopped: %s/%s", msg.Namespace, msg.ResourceName))
-	}()
-
-	// Clear the form and show success message
+	// Clear the form
 	m.textInput = nil
-	return m, nil
+
+	// Navigate to port forward view in current tab
+	breadcrumb := fmt.Sprintf("%s port-forward", msg.ResourceName)
+	if m.tabManager != nil {
+		navigateMsg := components.NavigateMsg{
+			NewScreen:  portForwardModel,
+			Breadcrumb: breadcrumb,
+		}
+		return m.tabManager.Update(navigateMsg)
+	}
+
+	// Fallback: set as current model if no tab manager
+	return m, func() tea.Msg {
+		return nil
+	}
+
+	// Fallback: set as current model if no tab manager
+	return m, func() tea.Msg {
+		return nil
+	}
 }
 
 func (m *AppModel) handlePortForwardCancelMsg() (tea.Model, tea.Cmd) {
