@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -64,7 +65,18 @@ func (pf *PortForwardSession) Start() error {
 
 	// Use a discard writer to prevent printing "Forwarding from..." messages
 	discardWriter := io.Discard
+
+	// Temporarily redirect stderr to suppress k8s client-go error messages
+	originalStderr := os.Stderr
+	devNull, _ := os.OpenFile(os.DevNull, os.O_WRONLY, 0)
+	os.Stderr = devNull
+	defer func() {
+		os.Stderr = originalStderr
+		devNull.Close()
+	}()
+
 	pfForwarder, err := portforward.New(dialer, ports, pf.StopChan, pf.ReadyChan, discardWriter, discardWriter)
+
 	if err != nil {
 		return fmt.Errorf("failed to create port forwarder: %v", err)
 	}
@@ -84,6 +96,14 @@ func (pf *PortForwardSession) Start() error {
 	go func() {
 		err := pfForwarder.ForwardPorts()
 		if err != nil {
+			// Check if this is a connection error that we can ignore
+			errStr := err.Error()
+			if strings.Contains(errStr, "broken pipe") ||
+				strings.Contains(errStr, "connection reset") ||
+				strings.Contains(errStr, "readfrom tcp") {
+				// This is expected when user stops port forwarding, don't log as error
+				return
+			}
 			pf.ErrorChan <- fmt.Errorf("port forwarding failed: %v", err)
 		}
 	}()

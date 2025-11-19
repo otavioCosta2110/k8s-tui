@@ -29,6 +29,15 @@ type PortForwardModel struct {
 func NewPortForwardModel(podName, namespace string, localPort, remotePort int, pluginAPI plugins.PluginAPI) *PortForwardModel {
 	vp := viewport.New(80, 20)
 
+	// Add initial content to show immediately
+	initialLogLines := []string{
+		"Initializing port forwarding...",
+		fmt.Sprintf("Pod: %s/%s", namespace, podName),
+		fmt.Sprintf("Forwarding: localhost:%d -> %d", localPort, remotePort),
+		"",
+		"Starting port forwarding...",
+	}
+
 	model := &PortForwardModel{
 		viewport:      vp,
 		podName:       podName,
@@ -38,8 +47,11 @@ func NewPortForwardModel(podName, namespace string, localPort, remotePort int, p
 		pluginAPI:     pluginAPI,
 		isActive:      false,
 		statusMessage: "Initializing port forwarding...",
-		logLines:      []string{},
+		logLines:      initialLogLines,
 	}
+
+	// Set initial content
+	vp.SetContent(model.renderContent())
 
 	return model
 }
@@ -121,9 +133,8 @@ func (m *PortForwardModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *PortForwardModel) View() string {
-	if m.viewport.Height == 0 {
-		m.viewport.SetContent(m.renderContent())
-	}
+	// Always update content to ensure latest state is shown
+	m.viewport.SetContent(m.renderContent())
 	return m.viewport.View()
 }
 
@@ -131,6 +142,7 @@ func (m *PortForwardModel) renderContent() string {
 	style := lipgloss.NewStyle().
 		Padding(1, 2).
 		Foreground(lipgloss.Color(customstyles.TextColor)).
+		Width(styles.ScreenWidth).
 		Background(lipgloss.Color(customstyles.BackgroundColor))
 
 	content := strings.Join(m.logLines, "\n")
