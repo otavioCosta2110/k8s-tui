@@ -47,6 +47,7 @@ func (ss *statefulsetsModel) Help() (string, string) {
 Key Bindings:
 • ↑/↓/j/k: Navigate statefulsets
 • enter: View statefulset details
+• R: Restart statefulset
 • d: Delete selected statefulsets
 • r: Refresh
 • /: Search statefulsets
@@ -59,7 +60,8 @@ StatefulSet Status:
 Common Actions:
 • Scale statefulset: Change replica count
 • View persistent volumes: See attached storage
-• Check pod ordering: StatefulSets maintain pod identity`
+• Check pod ordering: StatefulSets maintain pod identity
+• Restart statefulset: Press 'R' to trigger a rollout restart`
 }
 
 func (ss *statefulsetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
@@ -89,10 +91,45 @@ func (ss *statefulsetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": ss.createDeleteAction(tableModel),
+		"R": ss.createRestartAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, ss.refreshInterval, ss.k8sClient, "StatefulSets"), nil
+}
+
+func (ss *statefulsetsModel) createRestartAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(ss.statefulsetsInfo) {
+			return nil
+		}
+
+		statefulset := ss.statefulsetsInfo[selected]
+
+		return func() tea.Msg {
+			statefulsetInfo := k8s.NewStatefulSetInfo(statefulset.Name, statefulset.Namespace, *ss.k8sClient)
+			err := statefulsetInfo.Restart()
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *ss.k8sClient,
+				}
+			}
+
+			return components.NavigateMsg{
+				NewScreen: components.NewYAMLViewer(
+					"StatefulSet Restarted",
+					fmt.Sprintf("StatefulSet %s/%s has been restarted successfully.\n\nA rollout restart has been triggered, which will recreate all pods\nmanaged by this StatefulSet with new instances.", statefulset.Namespace, statefulset.Name),
+				),
+				Breadcrumb: statefulset.Name + " restarted",
+			}
+		}
+	}
 }
 
 func (ss *statefulsetsModel) fetchData() error {

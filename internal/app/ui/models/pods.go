@@ -76,6 +76,7 @@ Key Bindings:
 • v: View pod details
 • E: View pod events
 • t: View resource usage
+• R: Restart pod
 • d: Delete selected pods
 • n: Create new pod
 • r: Refresh
@@ -98,6 +99,7 @@ Common Actions:
 • View logs: Enter on a pod to see logs
 • View details: Press 'v' to see pod details
 • View resource usage: Press 't' to see CPU/memory usage
+• Restart pod: Press 'R' to restart the pod (only works for managed pods)
 • Delete pod: Select with space, then press 'd'
 • Create pod: Press 'n' to open create form
 • Refresh: Press 'r' to update the list`
@@ -137,6 +139,7 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		"t": p.createViewResourceUsageAction(tableModel),
 		"v": p.createViewDetailsAction(tableModel),
 		"E": p.createViewEventsAction(tableModel),
+		"R": p.createRestartAction(tableModel),
 	}
 
 	if p.parentDeployment != "" {
@@ -401,6 +404,41 @@ func (p *podsModel) createExecAction(tableModel *ui.TableModel) func() tea.Cmd {
 			return components.NavigateMsg{
 				NewScreen:  components.NewTextInput("Execute command in "+podName, "", onSubmit, onCancel),
 				Breadcrumb: podName + " exec input",
+			}
+		}
+	}
+}
+
+func (p *podsModel) createRestartAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(p.resourceData) {
+			return nil
+		}
+
+		podData := p.resourceData[selected].(PodData)
+		podName := podData.Name
+
+		return func() tea.Msg {
+			pod := k8s.NewPodInfo(podName, p.pluginAPI.GetCurrentNamespace(), *p.k8sClient)
+			err := pod.Restart()
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *p.k8sClient,
+				}
+			}
+
+			return components.NavigateMsg{
+				NewScreen: components.NewYAMLViewer(
+					"Pod Restarted",
+					fmt.Sprintf("Pod %s has been restarted successfully.\n\nIf this pod is managed by a controller (Deployment, ReplicaSet, etc.),\nit will be automatically recreated with a new instance.", podName),
+				),
+				Breadcrumb: podName + " restarted",
 			}
 		}
 	}

@@ -302,6 +302,13 @@ type PluginAPI interface {
 	DeleteReplicaSet(namespace, name string) error
 	DeleteServiceAccount(namespace, name string) error
 
+	// Restart methods for supported resources
+	RestartPod(namespace, name string) error
+	RestartDeployment(namespace, name string) error
+	RestartReplicaSet(namespace, name string) error
+	RestartStatefulSet(namespace, name string) error
+	RestartDaemonSet(namespace, name string) error
+
 	GetTabs() ([]TabInfo, error)
 
 	SetTabs(tabs []TabInfo) error

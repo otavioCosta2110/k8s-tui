@@ -350,6 +350,24 @@ func (p *Pod) Delete() error {
 	return p.Client.CoreV1().Pods(p.Namespace).Delete(context.Background(), p.Name, metav1.DeleteOptions{})
 }
 
+func (p *Pod) Restart() error {
+	if p.Raw == nil {
+		if err := p.Fetch(); err != nil {
+			return fmt.Errorf("failed to fetch pod: %v", err)
+		}
+	}
+
+	// Check if pod is owned by a controller (Deployment, ReplicaSet, StatefulSet, etc.)
+	if len(p.Raw.OwnerReferences) > 0 {
+		// If pod is managed by a controller, delete it and it will be recreated
+		return p.Delete()
+	}
+
+	// For standalone pods, we can't restart them in the traditional sense
+	// We'll delete and recreate them with the same spec
+	return fmt.Errorf("standalone pods cannot be restarted automatically")
+}
+
 func (p *Pod) GetContainers() ([]string, error) {
 	if p.Raw == nil {
 		if err := p.Fetch(); err != nil {

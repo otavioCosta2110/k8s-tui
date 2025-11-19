@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/otavioCosta2110/k8s-tui/pkg/format"
+	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -134,5 +135,38 @@ func DeleteReplicaSet(client Client, namespace string, replicaSetName string) er
 	if err != nil {
 		return fmt.Errorf("failed to delete replicaset %s: %v", replicaSetName, err)
 	}
+	return nil
+}
+
+func (r *ReplicaSetInfo) Restart() error {
+	if r.Client.Clientset == nil {
+		return fmt.Errorf("kubernetes client not available")
+	}
+
+	// Trigger a rollout restart by adding the restart annotation
+	if r.Raw == nil {
+		if err := r.Fetch(); err != nil {
+			return fmt.Errorf("failed to fetch replicaset: %v", err)
+		}
+	}
+
+	// Create a copy of the replicaset with the restart annotation
+	replicaSetCopy := r.Raw.DeepCopy()
+	if replicaSetCopy.Spec.Template.Annotations == nil {
+		replicaSetCopy.Spec.Template.Annotations = make(map[string]string)
+	}
+
+	// Add the restart annotation with current timestamp
+	replicaSetCopy.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+
+	_, err := r.Client.Clientset.AppsV1().ReplicaSets(r.Namespace).Update(
+		context.Background(),
+		replicaSetCopy,
+		metav1.UpdateOptions{},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to restart replicaset %s/%s: %v", r.Namespace, r.Name, err)
+	}
+
 	return nil
 }

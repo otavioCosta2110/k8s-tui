@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/otavioCosta2110/k8s-tui/pkg/format"
 	"gopkg.in/yaml.v3"
@@ -621,5 +622,38 @@ func DeleteDeployment(client Client, namespace string, deploymentName string) er
 	if err != nil {
 		return fmt.Errorf("failed to delete deployment %s: %v", deploymentName, err)
 	}
+	return nil
+}
+
+func (d *DeploymentInfo) Restart() error {
+	if d.Client.Clientset == nil {
+		return fmt.Errorf("kubernetes client not available")
+	}
+
+	// Trigger a rollout restart by adding the restart annotation
+	if d.Raw == nil {
+		if err := d.Fetch(); err != nil {
+			return fmt.Errorf("failed to fetch deployment: %v", err)
+		}
+	}
+
+	// Create a copy of the deployment with the restart annotation
+	deploymentCopy := d.Raw.DeepCopy()
+	if deploymentCopy.Spec.Template.Annotations == nil {
+		deploymentCopy.Spec.Template.Annotations = make(map[string]string)
+	}
+
+	// Add the restart annotation with current timestamp
+	deploymentCopy.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+
+	_, err := d.Client.Clientset.AppsV1().Deployments(d.Namespace).Update(
+		context.Background(),
+		deploymentCopy,
+		metav1.UpdateOptions{},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to restart deployment %s/%s: %v", d.Namespace, d.Name, err)
+	}
+
 	return nil
 }

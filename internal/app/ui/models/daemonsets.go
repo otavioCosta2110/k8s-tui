@@ -52,6 +52,7 @@ func (ds *daemonsetsModel) Help() (string, string) {
 Key Bindings:
 • ↑/↓/j/k: Navigate daemonsets
 • enter: View daemonset details
+• R: Restart daemonset
 • d: Delete selected daemonsets
 • r: Refresh
 • /: Search daemonsets
@@ -65,7 +66,8 @@ DaemonSet Status:
 
 Common Actions:
 • View pods: See pods running on each node
-• Check node selectors: See which nodes run the pods
+• Check node selectors: See which nodes run pods
+• Restart daemonset: Press 'R' to trigger a rollout restart
 • Update daemonset: Modify pod template`
 }
 
@@ -96,10 +98,45 @@ func (ds *daemonsetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": ds.createDeleteAction(tableModel),
+		"R": ds.createRestartAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, ds.refreshInterval, ds.k8sClient, "DaemonSets"), nil
+}
+
+func (ds *daemonsetsModel) createRestartAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(ds.daemonsetsInfo) {
+			return nil
+		}
+
+		daemonset := ds.daemonsetsInfo[selected]
+
+		return func() tea.Msg {
+			daemonsetInfo := k8s.NewDaemonSetInfo(daemonset.Name, daemonset.Namespace, *ds.k8sClient)
+			err := daemonsetInfo.Restart()
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *ds.k8sClient,
+				}
+			}
+
+			return components.NavigateMsg{
+				NewScreen: components.NewYAMLViewer(
+					"DaemonSet Restarted",
+					fmt.Sprintf("DaemonSet %s/%s has been restarted successfully.\n\nA rollout restart has been triggered, which will recreate all pods\nmanaged by this DaemonSet with new instances on each node.", daemonset.Namespace, daemonset.Name),
+				),
+				Breadcrumb: daemonset.Name + " restarted",
+			}
+		}
+	}
 }
 
 func (ds *daemonsetsModel) fetchData() error {

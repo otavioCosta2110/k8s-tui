@@ -49,6 +49,7 @@ func (r *replicasetsModel) Help() (string, string) {
 Key Bindings:
 • ↑/↓/j/k: Navigate replicasets
 • enter: View replicaset details
+• R: Restart replicaset
 • d: Delete selected replicasets
 • r: Refresh
 • /: Search replicasets
@@ -62,6 +63,7 @@ ReplicaSet Status:
 Common Actions:
 • View pods: See pods managed by this replicaset
 • Check owner: See which deployment owns this replicaset
+• Restart replicaset: Press 'R' to trigger a rollout restart
 • Manual scaling: Adjust replica count`
 }
 
@@ -114,10 +116,45 @@ func (r *replicasetsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 
 	actions := map[string]func() tea.Cmd{
 		"d": r.createDeleteAction(tableModel),
+		"R": r.createRestartAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
 	return NewAutoRefreshModel(tableModel, r.refreshInterval, r.k8sClient, "ReplicaSets"), nil
+}
+
+func (r *replicasetsModel) createRestartAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(r.replicasetsInfo) {
+			return nil
+		}
+
+		replicaset := r.replicasetsInfo[selected]
+
+		return func() tea.Msg {
+			replicasetInfo := k8s.NewReplicaSetInfo(replicaset.Name, replicaset.Namespace, *r.k8sClient)
+			err := replicasetInfo.Restart()
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *r.k8sClient,
+				}
+			}
+
+			return components.NavigateMsg{
+				NewScreen: components.NewYAMLViewer(
+					"ReplicaSet Restarted",
+					fmt.Sprintf("ReplicaSet %s/%s has been restarted successfully.\n\nA rollout restart has been triggered, which will recreate all pods\nmanaged by this ReplicaSet with new instances.", replicaset.Namespace, replicaset.Name),
+				),
+				Breadcrumb: replicaset.Name + " restarted",
+			}
+		}
+	}
 }
 
 func (r *replicasetsModel) fetchData() error {

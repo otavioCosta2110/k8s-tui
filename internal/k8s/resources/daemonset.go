@@ -251,3 +251,36 @@ func DeleteDaemonSet(client Client, namespace string, daemonsetName string) erro
 	}
 	return nil
 }
+
+func (d *DaemonSetInfo) Restart() error {
+	if d.Client.Clientset == nil {
+		return fmt.Errorf("kubernetes client not available")
+	}
+
+	// Trigger a rollout restart by adding the restart annotation
+	if d.Raw == nil {
+		if err := d.Fetch(); err != nil {
+			return fmt.Errorf("failed to fetch daemonset: %v", err)
+		}
+	}
+
+	// Create a copy of the daemonset with the restart annotation
+	daemonSetCopy := d.Raw.DeepCopy()
+	if daemonSetCopy.Spec.Template.Annotations == nil {
+		daemonSetCopy.Spec.Template.Annotations = make(map[string]string)
+	}
+
+	// Add the restart annotation with current timestamp
+	daemonSetCopy.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+
+	_, err := d.Client.Clientset.AppsV1().DaemonSets(d.Namespace).Update(
+		context.Background(),
+		daemonSetCopy,
+		metav1.UpdateOptions{},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to restart daemonset %s/%s: %v", d.Namespace, d.Name, err)
+	}
+
+	return nil
+}

@@ -1914,3 +1914,24 @@ func (mc *MultiClusterPluginAPI) SetRestoreTabsForClusterCallback(callback func(
 func (mc *MultiClusterPluginAPI) SetSetTabsForClusterCallback(callback func(clusterID string, tabs []TabInfo) error) {
 	mc.api.SetSetTabsForClusterCallback(callback)
 }
+
+// Restart methods for supported resources
+func (mc *MultiClusterPluginAPI) RestartPod(namespace, name string) error {
+	return mc.api.RestartPod(namespace, name)
+}
+
+func (mc *MultiClusterPluginAPI) RestartDeployment(namespace, name string) error {
+	return mc.api.RestartDeployment(namespace, name)
+}
+
+func (mc *MultiClusterPluginAPI) RestartReplicaSet(namespace, name string) error {
+	return mc.api.RestartReplicaSet(namespace, name)
+}
+
+func (mc *MultiClusterPluginAPI) RestartStatefulSet(namespace, name string) error {
+	return mc.api.RestartStatefulSet(namespace, name)
+}
+
+func (mc *MultiClusterPluginAPI) RestartDaemonSet(namespace, name string) error {
+	return mc.api.RestartDaemonSet(namespace, name)
+}

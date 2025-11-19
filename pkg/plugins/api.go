@@ -566,6 +566,48 @@ func (api *PluginAPIImpl) DeleteServiceAccount(namespace, name string) error {
 	return api.resourceRegistry.DeleteResource(api.client, k8s.ResourceTypeServiceAccount, namespace, name)
 }
 
+// Restart methods for supported resources
+
+func (api *PluginAPIImpl) RestartPod(namespace, name string) error {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
+	pod := k8s.NewPodInfo(name, namespace, api.client)
+	return pod.Restart()
+}
+
+func (api *PluginAPIImpl) RestartDeployment(namespace, name string) error {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
+	deployment := k8s.NewDeploymentInfo(name, namespace, api.client)
+	return deployment.Restart()
+}
+
+func (api *PluginAPIImpl) RestartReplicaSet(namespace, name string) error {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
+	replicaset := k8s.NewReplicaSetInfo(name, namespace, api.client)
+	return replicaset.Restart()
+}
+
+func (api *PluginAPIImpl) RestartStatefulSet(namespace, name string) error {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
+	statefulset := k8s.NewStatefulSetInfo(name, namespace, api.client)
+	return statefulset.Restart()
+}
+
+func (api *PluginAPIImpl) RestartDaemonSet(namespace, name string) error {
+	if namespace == "" {
+		namespace = api.currentNamespace
+	}
+	daemonset := k8s.NewDaemonSetInfo(name, namespace, api.client)
+	return daemonset.Restart()
+}
+
 func (api *PluginAPIImpl) DescribePod(namespace, name string) (string, error) {
 	return api.resourceRegistry.DescribeResource(api.client, k8s.ResourceTypePod, namespace, name)
 }
@@ -768,6 +810,7 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpItem("e:", "Execute a command in the pod") +
 				helpItem("E:", "View pod events") +
 				helpItem("t:", "View resource usage") +
+				helpItem("R:", "Restart pod") +
 				helpItem("d:", "Delete selected pods") +
 				helpItem("n:", "Create new pod") +
 				helpItem("r:", "Refresh") +
@@ -785,6 +828,7 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpItem("View details:", "Press 'v' to see pod details") +
 				helpItem("View events:", "Press 'E' to see pod events") +
 				helpItem("View resource usage:", "Press 't' to see CPU/memory usage") +
+				helpItem("Restart pod:", "Press 'R' to restart the pod (only works for managed pods)") +
 				helpItem("Delete pod:", "Select with space, then press 'd'") +
 				helpItem("Create pod:", "Press 'n' to open create form") +
 				helpItem("Refresh:", "Press 'r' to update the list") + "\n\n" +
@@ -802,6 +846,7 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpItem("v:", "View deployment details") +
 				helpItem("L:", "View deployment logs") +
 				helpItem("E:", "View deployment events") +
+				helpItem("R:", "Restart deployment") +
 				helpItem("d:", "Delete selected deployments") +
 				helpItem("n:", "Create new deployment") +
 				helpItem("r:", "Refresh") +
@@ -819,6 +864,7 @@ func (api *PluginAPIImpl) GetHelp(resourceType string) (title, content string) {
 				helpItem("View pods:", "See associated pods in details") +
 				helpItem("View logs:", "Press 'L' to see deployment logs") +
 				helpItem("View events:", "Press 'E' to see deployment events") +
+				helpItem("Restart deployment:", "Press 'R' to trigger a rollout restart") +
 				helpItem("Create deployment:", "Press 'n' to open create form") + "\n\n" +
 
 				helpSection("Events View Key Bindings:") +
@@ -974,6 +1020,75 @@ Common Actions:
 View capacity: See CPU/memory resources
 Check conditions: View node health status
 View pods: See pods running on node`),
+		},
+		"ReplicaSets": {
+			title: "ReplicaSets Help",
+			content: helpText("ReplicaSets ensure a specified number of pod replicas are running.") + "\n\n" +
+				helpSection("Key Bindings:") +
+				helpItem("↑/↓/j/k:", "Navigate replicasets") +
+				helpItem("enter:", "View replicaset details") +
+				helpItem("R:", "Restart replicaset") +
+				helpItem("d:", "Delete selected replicasets") +
+				helpItem("r:", "Refresh") +
+				helpItem("/:", "Search replicasets") +
+				helpItem("esc:", "Go back") + "\n\n" +
+
+				helpSection("ReplicaSet Status:") +
+				helpItem("Desired:", "Number of desired pods") +
+				helpItem("Current:", "Number of current pods") +
+				helpItem("Ready:", "Number of ready pods") + "\n\n" +
+
+				helpSection("Common Actions:") +
+				helpItem("View pods:", "See pods managed by this replicaset") +
+				helpItem("Check owner:", "See which deployment owns this replicaset") +
+				helpItem("Restart replicaset:", "Press 'R' to trigger a rollout restart") +
+				helpItem("Manual scaling:", "Adjust replica count"),
+		},
+		"StatefulSets": {
+			title: "StatefulSets Help",
+			content: helpText("StatefulSets manage stateful applications with persistent storage.") + "\n\n" +
+				helpSection("Key Bindings:") +
+				helpItem("↑/↓/j/k:", "Navigate statefulsets") +
+				helpItem("enter:", "View statefulset details") +
+				helpItem("R:", "Restart statefulset") +
+				helpItem("d:", "Delete selected statefulsets") +
+				helpItem("r:", "Refresh") +
+				helpItem("/:", "Search statefulsets") +
+				helpItem("esc:", "Go back") + "\n\n" +
+
+				helpSection("StatefulSet Status:") +
+				helpItem("Ready:", "Shows ready/desired replicas") +
+				helpItem("Stable identity:", "Each pod has a stable identity and storage") + "\n\n" +
+
+				helpSection("Common Actions:") +
+				helpItem("Scale statefulset:", "Change replica count") +
+				helpItem("View persistent volumes:", "See attached storage") +
+				helpItem("Check pod ordering:", "StatefulSets maintain pod identity") +
+				helpItem("Restart statefulset:", "Press 'R' to trigger a rollout restart"),
+		},
+		"DaemonSets": {
+			title: "DaemonSets Help",
+			content: helpText("DaemonSets ensure that all (or some) nodes run a copy of a pod.") + "\n\n" +
+				helpSection("Key Bindings:") +
+				helpItem("↑/↓/j/k:", "Navigate daemonsets") +
+				helpItem("enter:", "View daemonset details") +
+				helpItem("R:", "Restart daemonset") +
+				helpItem("d:", "Delete selected daemonsets") +
+				helpItem("r:", "Refresh") +
+				helpItem("/:", "Search daemonsets") +
+				helpItem("esc:", "Go back") + "\n\n" +
+
+				helpSection("DaemonSet Status:") +
+				helpItem("Desired:", "Number of desired pods") +
+				helpItem("Current:", "Number of current pods") +
+				helpItem("Ready:", "Number of ready pods") +
+				helpItem("Available:", "Number of available pods") + "\n\n" +
+
+				helpSection("Common Actions:") +
+				helpItem("View pods:", "See pods running on each node") +
+				helpItem("Check node selectors:", "See which nodes run pods") +
+				helpItem("Restart daemonset:", "Press 'R' to trigger a rollout restart") +
+				helpItem("Update daemonset:", "Modify pod template"),
 		},
 		"ResourceList": {
 			title: "Resource List Help",

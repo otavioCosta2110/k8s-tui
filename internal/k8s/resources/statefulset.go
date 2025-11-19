@@ -256,3 +256,36 @@ func DeleteStatefulSet(client Client, namespace string, statefulsetName string) 
 	}
 	return nil
 }
+
+func (s *StatefulSetInfo) Restart() error {
+	if s.Client.Clientset == nil {
+		return fmt.Errorf("kubernetes client not available")
+	}
+
+	// Trigger a rollout restart by adding the restart annotation
+	if s.Raw == nil {
+		if err := s.Fetch(); err != nil {
+			return fmt.Errorf("failed to fetch statefulset: %v", err)
+		}
+	}
+
+	// Create a copy of the statefulset with the restart annotation
+	statefulSetCopy := s.Raw.DeepCopy()
+	if statefulSetCopy.Spec.Template.Annotations == nil {
+		statefulSetCopy.Spec.Template.Annotations = make(map[string]string)
+	}
+
+	// Add the restart annotation with current timestamp
+	statefulSetCopy.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+
+	_, err := s.Client.Clientset.AppsV1().StatefulSets(s.Namespace).Update(
+		context.Background(),
+		statefulSetCopy,
+		metav1.UpdateOptions{},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to restart statefulset %s/%s: %v", s.Namespace, s.Name, err)
+	}
+
+	return nil
+}

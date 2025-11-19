@@ -109,8 +109,8 @@ func (m *SizeCheckModel) View() string {
 	)
 
 	contentStyled := lipgloss.NewStyle().
-	Background(lipgloss.Color(customstyles.BackgroundColor)).
-	Render(content)
+		Background(lipgloss.Color(customstyles.BackgroundColor)).
+		Render(content)
 
 	// Center content in terminal without filling entire height
 	return lipgloss.Place(

@@ -60,6 +60,7 @@ Key Bindings:
 • v: View deployment details
 • L: View deployment logs
 • E: View deployment events
+• R: Restart deployment
 • d: Delete selected deployments
 • n: Create new deployment
 • r: Refresh
@@ -82,6 +83,7 @@ Common Actions:
 • Update image: Use deployment details view
 • View pods: See associated pods in details
 • View logs: Press 'L' to see deployment logs
+• Restart deployment: Press 'R' to trigger a rollout restart
 • Create deployment: Press 'n' to open create form`
 }
 
@@ -147,6 +149,7 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 		"L": d.createViewLogsAction(tableModel),
 		"n": d.createNewDeploymentAction(),
 		"E": d.createViewEventsAction(tableModel),
+		"R": d.createRestartAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
@@ -293,6 +296,40 @@ func (d *deploymentsModel) fetchData() error {
 	}
 
 	return nil
+}
+
+func (d *deploymentsModel) createRestartAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(d.deploymentsInfo) {
+			return nil
+		}
+
+		deployment := d.deploymentsInfo[selected]
+
+		return func() tea.Msg {
+			deploymentInfo := resources.NewDeploymentInfo(deployment.Name, deployment.Namespace, *d.k8sClient)
+			err := deploymentInfo.Restart()
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *d.k8sClient,
+				}
+			}
+
+			return components.NavigateMsg{
+				NewScreen: components.NewYAMLViewer(
+					"Deployment Restarted",
+					fmt.Sprintf("Deployment %s/%s has been restarted successfully.\n\nA rollout restart has been triggered, which will recreate all pods\nmanaged by this deployment with new instances.", deployment.Namespace, deployment.Name),
+				),
+				Breadcrumb: deployment.Name + " restarted",
+			}
+		}
+	}
 }
 
 func (d *deploymentsModel) createRolloutAction(tableModel *ui.TableModel) func() tea.Cmd {
