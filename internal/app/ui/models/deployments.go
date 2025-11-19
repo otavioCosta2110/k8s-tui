@@ -59,10 +59,17 @@ Key Bindings:
 • enter: View deployment pods
 • v: View deployment details
 • L: View deployment logs
+• E: View deployment events
 • d: Delete selected deployments
 • n: Create new deployment
 • r: Refresh
 • /: Search deployments
+• esc: Go back
+
+Events View Key Bindings:
+• g: Go to top
+• G: Go to bottom
+• r: Refresh events
 • esc: Go back
 
 Deployment Status:
@@ -139,6 +146,7 @@ func (d *deploymentsModel) InitComponent(k *resources.Client) (tea.Model, error)
 		"v": d.createViewDetailsAction(tableModel),
 		"L": d.createViewLogsAction(tableModel),
 		"n": d.createNewDeploymentAction(),
+		"E": d.createViewEventsAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
@@ -232,6 +240,37 @@ func (d *deploymentsModel) createViewLogsAction(tableModel *ui.TableModel) func(
 			return components.NavigateMsg{
 				NewScreen:  components.NewYAMLViewer("Deployment Logs: "+deployment.Name, allLogs),
 				Breadcrumb: deployment.Name + " logs",
+			}
+		}
+	}
+}
+
+func (d *deploymentsModel) createViewEventsAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(d.deploymentsInfo) {
+			return nil
+		}
+
+		deployment := d.deploymentsInfo[selected]
+		deploymentName := deployment.Name
+
+		return func() tea.Msg {
+			eventsModel := NewEventsModel(d.k8sClient, d.pluginAPI.GetCurrentNamespace(), deploymentName, "Deployment")
+			eventsScreen, err := eventsModel.InitComponent(d.k8sClient)
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *d.k8sClient,
+				}
+			}
+			return components.NavigateMsg{
+				NewScreen:  eventsScreen,
+				Breadcrumb: deploymentName + " events",
 			}
 		}
 	}

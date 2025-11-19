@@ -74,11 +74,18 @@ Key Bindings:
 • enter: View pod logs
 • e: Execute command in pod
 • v: View pod details
+• E: View pod events
 • t: View resource usage
 • d: Delete selected pods
 • n: Create new pod
 • r: Refresh
 • /: Search pods
+• esc: Go back
+
+Events View Key Bindings:
+• g: Go to top
+• G: Go to bottom
+• r: Refresh events
 • esc: Go back
 
 Pod Status:
@@ -129,6 +136,7 @@ func (p *podsModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 		"n": p.createNewPodAction(),
 		"t": p.createViewResourceUsageAction(tableModel),
 		"v": p.createViewDetailsAction(tableModel),
+		"E": p.createViewEventsAction(tableModel),
 	}
 
 	if p.parentDeployment != "" {
@@ -165,6 +173,37 @@ func (p *podsModel) createViewDetailsAction(tableModel *ui.TableModel) func() te
 			return components.NavigateMsg{
 				NewScreen:  podDetails,
 				Breadcrumb: podName,
+			}
+		}
+	}
+}
+
+func (p *podsModel) createViewEventsAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(p.resourceData) {
+			return nil
+		}
+
+		podData := p.resourceData[selected].(PodData)
+		podName := podData.Name
+
+		return func() tea.Msg {
+			eventsModel := NewEventsModel(p.k8sClient, p.pluginAPI.GetCurrentNamespace(), podName, "Pod")
+			eventsScreen, err := eventsModel.InitComponent(p.k8sClient)
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *p.k8sClient,
+				}
+			}
+			return components.NavigateMsg{
+				NewScreen:  eventsScreen,
+				Breadcrumb: podName + " events",
 			}
 		}
 	}

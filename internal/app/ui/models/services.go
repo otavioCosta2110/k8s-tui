@@ -56,10 +56,17 @@ func (s *servicesModel) Help() (string, string) {
 Key Bindings:
 • ↑/↓/j/k: Navigate services
 • enter: View service details
+• E: View service events
 • d: Delete selected services
 • n: Create new service
 • r: Refresh
 • /: Search services
+• esc: Go back
+
+Events View Key Bindings:
+• g: Go to top
+• G: Go to bottom
+• r: Refresh events
 • esc: Go back
 
 Service Types:
@@ -102,6 +109,7 @@ func (s *servicesModel) InitComponent(k *k8s.Client) (tea.Model, error) {
 	actions := map[string]func() tea.Cmd{
 		"d": s.createDeleteAction(tableModel),
 		"n": s.createNewServiceAction(),
+		"E": s.createViewEventsAction(tableModel),
 	}
 	tableModel.SetUpdateActions(actions)
 
@@ -112,6 +120,37 @@ func (s *servicesModel) createNewServiceAction() func() tea.Cmd {
 	return func() tea.Cmd {
 		return func() tea.Msg {
 			return components.OpenCreateFormMsg{ResourceType: "service"}
+		}
+	}
+}
+
+func (s *servicesModel) createViewEventsAction(tableModel *ui.TableModel) func() tea.Cmd {
+	return func() tea.Cmd {
+		if tableModel == nil {
+			return nil
+		}
+
+		selected := tableModel.Table.Cursor()
+		if selected < 0 || selected >= len(s.servicesInfo) {
+			return nil
+		}
+
+		service := s.servicesInfo[selected]
+		serviceName := service.Name
+
+		return func() tea.Msg {
+			eventsModel := NewEventsModel(s.k8sClient, s.pluginAPI.GetCurrentNamespace(), serviceName, "Service")
+			eventsScreen, err := eventsModel.InitComponent(s.k8sClient)
+			if err != nil {
+				return components.NavigateMsg{
+					Error:   err,
+					Cluster: *s.k8sClient,
+				}
+			}
+			return components.NavigateMsg{
+				NewScreen:  eventsScreen,
+				Breadcrumb: serviceName + " events",
+			}
 		}
 	}
 }
